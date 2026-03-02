@@ -16,6 +16,10 @@ import countriesData from '../../../assets/countries.json';
 })
 export class ProcessCreateComponent {
     @ViewChild('processForm') processForm!: NgForm;
+    loading: boolean = false;
+    formSubmitted: boolean = false;
+    savedDraft: any = null;
+    draftSaveTime: string = '';
 
     process: any = {
         companyName: '',
@@ -131,12 +135,31 @@ export class ProcessCreateComponent {
         }
     }
 
+    isFieldInvalid(fieldName: string): boolean {
+        const field = this.processForm?.form?.get(fieldName);
+        return !!(field && field.invalid && (field.dirty || field.touched || this.formSubmitted));
+    }
+
+    onFieldBlur(fieldName: string) {
+        const field = this.processForm?.form?.get(fieldName);
+        if (field) {
+            field.markAsTouched();
+        }
+    }
+
     onSubmit() {
+        this.formSubmitted = true;
         if (!this.processForm.valid) {
             this.toastService.show('Please fill in all required fields.', 'warning');
+            // Focus first invalid field
+            const firstInvalidControl = document.querySelector('.input-field.ng-invalid');
+            if (firstInvalidControl) {
+                (firstInvalidControl as HTMLElement).focus();
+            }
             return;
         }
 
+        this.loading = true;
         const payload = { ...this.process };
 
         // Ensure dates are ISO or null
@@ -163,11 +186,13 @@ export class ProcessCreateComponent {
             next: () => {
                 console.log('Success');
                 this.toastService.show('Process created successfully', 'success');
+                this.loading = false;
                 this.router.navigate(['/']);
             },
             error: (err) => {
                 console.error('Submission Failed:', err);
                 this.toastService.show('Error creating process: ' + (err.error?.message || err.message), 'error');
+                this.loading = false;
             }
         });
     }

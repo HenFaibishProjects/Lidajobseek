@@ -201,7 +201,7 @@
                     </p>
                 </div>
                 <div class="file-item-actions">
-                    <a *ngIf="isFilePath(res.content)" [href]="res.content" target="_blank" class="btn-action"
+                    <a *ngIf="isFilePath(res.content)" [href]="getFileUrl(res.content)" target="_blank" class="btn-action"
                         title="Open file">
                         👁️
                     </a>

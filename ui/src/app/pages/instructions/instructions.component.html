@@ -1,0 +1,73 @@
+<section class="instructions-page">
+  <header class="hero">
+    <div class="hero-badge">Platform Guide</div>
+    <h1>How to Use Lida Like a Pro</h1>
+    <p class="hero-subtitle">
+      A complete walkthrough of the platform so you always know what to do next,
+      which page to use, and how to turn your job search into a measurable system.
+    </p>
+    <div class="hero-actions">
+      <a routerLink="/" class="btn btn-primary btn-lg">Start With Processes</a>
+      <a routerLink="/analytics" class="btn btn-secondary btn-lg">View Performance</a>
+    </div>
+  </header>
+
+  <section class="panel quick-start">
+    <div class="panel-title-row">
+      <h2>Quick Start Checklist</h2>
+      <span class="panel-chip">5 Essential Steps</span>
+    </div>
+    <ol>
+      <li *ngFor="let item of quickStartChecklist">{{ item }}</li>
+    </ol>
+  </section>
+
+  <section class="panel workflow">
+    <div class="panel-title-row">
+      <h2>Recommended Workflow</h2>
+      <span class="panel-chip">Capture → Optimize</span>
+    </div>
+    <div class="workflow-grid">
+      <article class="workflow-step" *ngFor="let step of workflowSteps">
+        <span class="step-dot" [style.background]="step.color"></span>
+        <h3>{{ step.title }}</h3>
+        <p>{{ step.description }}</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="panel modules">
+    <div class="panel-title-row">
+      <h2>What Each Area Does</h2>
+      <span class="panel-chip">Core Modules</span>
+    </div>
+
+    <div class="modules-grid">
+      <article class="module-card" *ngFor="let module of moduleGuides">
+        <div class="module-top">
+          <span class="module-icon">{{ module.icon }}</span>
+          <div>
+            <h3>{{ module.title }}</h3>
+            <p>{{ module.description }}</p>
+          </div>
+        </div>
+
+        <ul>
+          <li *ngFor="let bullet of module.bullets">{{ bullet }}</li>
+        </ul>
+
+        <a [routerLink]="module.route" class="module-link">Open {{ module.title }}</a>
+      </article>
+    </div>
+  </section>
+
+  <section class="panel tips">
+    <div class="panel-title-row">
+      <h2>Best Practices</h2>
+      <span class="panel-chip">Execution Quality</span>
+    </div>
+    <ul class="tips-list">
+      <li *ngFor="let tip of proTips">{{ tip }}</li>
+    </ul>
+  </section>
+</section>

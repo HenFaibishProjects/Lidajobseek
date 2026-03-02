@@ -33,6 +33,10 @@ export const routes: Routes = [
             { path: 'schedule-interview', component: ScheduleInterviewComponent },
             { path: 'profile', component: ProfileComponent },
             { path: 'profile/cv', component: ProfileCvComponent },
+            {
+                path: 'instructions',
+                loadComponent: () => import('./pages/instructions/instructions.component').then(m => m.InstructionsComponent)
+            },
             { path: 'new', component: ProcessCreateComponent },
             { path: 'process/:id', component: ProcessDetailsComponent },
             { path: 'process/:id/edit', component: ProcessEditComponent },

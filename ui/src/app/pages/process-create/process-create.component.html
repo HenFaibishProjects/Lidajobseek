@@ -17,20 +17,26 @@
                 <div class="form-group">
                     <label>Company Name <span class="required">*</span></label>
                     <input type="text" name="companyName" [(ngModel)]="process.companyName" required
-                        placeholder="e.g. Google" class="input-field">
+                        placeholder="e.g. Google" class="input-field" (blur)="onFieldBlur('companyName')"
+                        [class.error]="isFieldInvalid('companyName')">
+                    <p *ngIf="isFieldInvalid('companyName')" class="error-message">Company name is required</p>
                     <p class="field-hint">Use the official company name for easy reporting later.</p>
                 </div>
 
                 <div class="form-group">
                     <label>Role Title <span class="required">*</span></label>
                     <input type="text" name="roleTitle" [(ngModel)]="process.roleTitle" required
-                        placeholder="e.g. Senior Software Engineer" class="input-field">
+                        placeholder="e.g. Senior Software Engineer" class="input-field" (blur)="onFieldBlur('roleTitle')"
+                        [class.error]="isFieldInvalid('roleTitle')">
+                    <p *ngIf="isFieldInvalid('roleTitle')" class="error-message">Role title is required</p>
                 </div>
 
                 <div class="form-group">
                     <label>Tech Stack <span class="required">*</span></label>
                     <input type="text" name="techStack" [(ngModel)]="process.techStack" required
-                        placeholder="e.g. Angular, NestJS, Postgres" class="input-field">
+                        placeholder="e.g. Angular, NestJS, Postgres" class="input-field" (blur)="onFieldBlur('techStack')"
+                        [class.error]="isFieldInvalid('techStack')">
+                    <p *ngIf="isFieldInvalid('techStack')" class="error-message">Tech stack is required</p>
                 </div>
 
                 <div class="form-row">
@@ -42,9 +48,11 @@
 
                     <div class="form-group">
                         <label>Current Stage <span class="required">*</span></label>
-                        <select name="currentStage" [(ngModel)]="process.currentStage" required class="input-field">
+                        <select name="currentStage" [(ngModel)]="process.currentStage" required class="input-field"
+                            (blur)="onFieldBlur('currentStage')" [class.error]="isFieldInvalid('currentStage')">
                             <option *ngFor="let stage of stages" [value]="stage">{{stage}}</option>
                         </select>
+                        <p *ngIf="isFieldInvalid('currentStage')" class="error-message">Current stage is required</p>
                     </div>
                 </div>
             </section>
@@ -68,7 +76,10 @@
                                 [(ngModel)]="locationSearch"
                                 (input)="onLocationSearchChange()"
                                 (focus)="onLocationSearchChange()"
-                                [placeholder]="selectedCountry ? 'Select town' : 'Select a country in settings'">
+                                (blur)="onFieldBlur('locationSearch')"
+                                [placeholder]="selectedCountry ? 'Select town' : 'Select a country in settings'"
+                                [class.error]="isFieldInvalid('locationSearch')">
+                            <p *ngIf="isFieldInvalid('locationSearch')" class="error-message">Location is required</p>
                             <button
                                 type="button"
                                 class="location-toggle country-toggle"
@@ -217,8 +228,11 @@
             </section>
 
             <div class="form-actions">
-                <button type="button" class="btn-secondary" routerLink="/">Cancel</button>
-                <button type="submit" class="btn-primary">Create Process</button>
+                <button type="button" class="btn-secondary" routerLink="/" [disabled]="loading">Cancel</button>
+                <button type="submit" class="btn-primary" [disabled]="loading">
+                    <span *ngIf="loading" class="spinner-small"></span>
+                    {{ loading ? 'Creating...' : 'Create Process' }}
+                </button>
             </div>
         </form>
     </div>

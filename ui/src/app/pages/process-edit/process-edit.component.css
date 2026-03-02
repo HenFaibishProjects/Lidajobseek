@@ -307,7 +307,7 @@ select.input-field {
 
 /* ===== FORM ROWS (GRID) ===== */
 .form-row {
-  display: grid;
+  display: block;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: var(--space-lg);
 }
@@ -438,6 +438,26 @@ select.input-field {
 .form-actions .btn-primary:hover:not(:disabled) {
   transform: translateY(-1px);
   box-shadow: var(--shadow-lg);
+}
+
+.form-actions .btn-primary:disabled {
+  opacity: 0.8;
+}
+
+.spinner-small {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 /* ===== RESPONSIVE DESIGN ===== */
@@ -609,6 +629,34 @@ body.dark-theme select.input-field {
 
 .input-field:valid:not(:placeholder-shown):not(:focus) {
   border-color: var(--success);
+}
+
+/* ===== ERROR STATE STYLING ===== */
+.input-field.error {
+  border-color: #ef4444;
+  background-color: rgba(239, 68, 68, 0.05);
+}
+
+.input-field.error:focus {
+  outline: none;
+  border-color: #ef4444;
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.15);
+}
+
+.error-message {
+  color: #ef4444;
+  font-size: var(--font-size-sm);
+  margin: 4px 0 0 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  line-height: 1.4;
+}
+
+.error-message::before {
+  content: '⚠';
+  font-size: 14px;
+  font-weight: 700;
 }
 
 /* ===== IMPROVED FORM GROUP SPACING ===== */

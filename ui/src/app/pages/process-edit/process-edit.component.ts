@@ -19,6 +19,8 @@ export class ProcessEditComponent implements OnInit {
     process: any;
     locationSearch = '';
     showLocationDropdown = false;
+    formSubmitted = false;
+    isSubmitting = false;
     stages = [
         'Initial Call Scheduled',
         'Awaiting Next Interview (after Initial Call)',
@@ -129,11 +131,28 @@ export class ProcessEditComponent implements OnInit {
         }
     }
 
+    isFieldInvalid(fieldName: string): boolean {
+        const field = this.processForm?.form?.get(fieldName);
+        return !!(field && field.invalid && (field.dirty || field.touched || this.formSubmitted));
+    }
+
+    onFieldBlur(fieldName: string) {
+        const field = this.processForm?.form?.get(fieldName);
+        if (field) field.markAsTouched();
+    }
+
     onSubmit() {
+        this.formSubmitted = true;
         if (this.processForm && !this.processForm.valid) {
             this.toastService.show('Please fill in all required fields.', 'warning');
+            // Focus first invalid field
+            const firstInvalidControl = document.querySelector('.ng-invalid');
+            if (firstInvalidControl) {
+                (firstInvalidControl as HTMLInputElement).focus();
+            }
             return;
         }
+        this.isSubmitting = true;
 
         const payload = { ...this.process };
 
@@ -164,11 +183,13 @@ export class ProcessEditComponent implements OnInit {
         this.processesService.update(this.process.id, payload).subscribe({
             next: () => {
                 console.log('Process updated successfully');
+                this.isSubmitting = false;
                 this.toastService.show('Process updated successfully', 'success');
                 this.router.navigate(['/process', this.process.id]);
             },
             error: (err) => {
                 console.error('Error updating process:', err);
+                this.isSubmitting = false;
                 this.toastService.show('Error updating process: ' + (err.error?.message || err.message), 'error');
             }
         });

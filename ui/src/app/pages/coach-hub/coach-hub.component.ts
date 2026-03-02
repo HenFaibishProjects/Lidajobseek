@@ -5,6 +5,7 @@ import { ResourcesService } from '../../services/resources.service';
 import { ConfirmService } from '../../services/confirm.service';
 import { ToastService } from '../../services/toast.service';
 import { FilterPipe } from '../../pipes/filter.pipe';
+import { environment } from '../../../environments/environment';
 
 interface Category {
     id: string;
@@ -151,6 +152,14 @@ export class CoachHubComponent implements OnInit {
 
     isFilePath(content: string): boolean {
         return !!(content && content.startsWith('/uploads/'));
+    }
+
+    getFileUrl(content: string): string {
+        if (!this.isFilePath(content)) {
+            return content;
+        }
+
+        return `${environment.apiUrl}${content}`;
     }
 
     toggleCategory(category: Category) {

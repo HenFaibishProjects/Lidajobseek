@@ -1,4 +1,9 @@
-import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  ConflictException,
+  BadRequestException,
+} from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
@@ -34,20 +39,33 @@ export class AuthService {
   }
 
   async register(registerDto: any) {
+    const email =
+      typeof registerDto?.email === 'string'
+        ? registerDto.email.trim().toLowerCase()
+        : '';
+    const password =
+      typeof registerDto?.password === 'string' ? registerDto.password : '';
+    const name = typeof registerDto?.name === 'string' ? registerDto.name.trim() : '';
+    const code = typeof registerDto?.code === 'string' ? registerDto.code.trim() : '';
+
+    if (!email || !password || !name) {
+      throw new BadRequestException('Email, password and name are required');
+    }
+
     const validCode = process.env.REGISTER;
-    if (validCode && registerDto.code !== validCode) {
+    if (validCode && code !== validCode) {
       throw new UnauthorizedException('Invalid verification code. Please contact Lida Software.');
     }
 
-    const existingUser = await this.usersService.findOne(registerDto.email);
+    const existingUser = await this.usersService.findOne(email);
     if (existingUser) {
       throw new ConflictException('Email already exists');
     }
-    const hashedPassword = await bcrypt.hash(registerDto.password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
     return this.usersService.create({
-      email: registerDto.email,
+      email,
       password: hashedPassword,
-      name: registerDto.name
+      name,
     });
   }
 

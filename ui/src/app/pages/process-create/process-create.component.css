@@ -180,7 +180,46 @@
   font-style: normal;
 }
 
+/* ===== VALIDATION & ERROR STATES ===== */
+.input-field.error,
+.input-field.error:focus,
+.input-field.error:hover {
+  border-color: var(--error);
+  background: rgba(209, 52, 56, 0.05);
+}
 
+.input-field.error:focus {
+  box-shadow: 0 0 0 4px rgba(209, 52, 56, 0.15);
+}
+
+.error-message {
+  color: var(--error);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  margin: 4px 0 0 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.error-message::before {
+  content: '⚠';
+  font-size: 14px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  position: relative;
+}
+
+/* Improve spacing for error messages */
+.form-group .error-message + .field-hint,
+.form-group .error-message + .muted-hint {
+  margin-top: 2px;
+  color: var(--text-tertiary);
+}
 
 /* ===== LOCATION DROPDOWN (SEARCHABLE COMBOBOX) ===== */
 .location-combobox,
@@ -309,7 +348,7 @@ select.input-field {
 
 /* ===== FORM ROWS (GRID) ===== */
 .form-row {
-  display: grid;
+  display: block;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: var(--space-lg);
 }

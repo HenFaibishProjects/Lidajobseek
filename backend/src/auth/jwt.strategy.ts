@@ -14,10 +14,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     }
 
   async validate(payload: any) {
-    return { 
-      id: payload.sub, 
+    return {
+      // Keep both keys for compatibility across controllers/services
+      userId: payload.sub,
+      id: payload.sub,
       email: payload.email,
-      pricingPlan: payload.pricingPlan || 'free'
+      pricingPlan: payload.pricingPlan || 'free',
     };
   }
 }
