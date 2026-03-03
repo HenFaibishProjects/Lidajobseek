@@ -117,7 +117,7 @@ body:not(.dark-theme) .logo-tagline {
   overflow-x: auto;
   overflow-y: hidden;
   scrollbar-width: thin;
-  padding: 2px;
+  padding: 2px 1px 1px 122px;
 }
 
 .nav-section {

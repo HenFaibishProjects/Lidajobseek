@@ -43,7 +43,7 @@
 }
 
 .gradient-text {
-    background: linear-gradient(to right, #ffffff, #f0f0f0);
+    background: linear-gradient(to right, #9e22c1, #9e22c1);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -355,11 +355,11 @@
 }
 
 .search-input {
-    width: 100%;
-    padding: 14px 20px 14px 48px;
+    width: 70%;
+    padding: 4px 20px 4px 48px;
     border: 2px solid var(--border-color);
     border-radius: var(--radius-lg);
-    font-size: 15px;
+    font-size: 11px;
     background: var(--bg-card);
     color: var(--text-primary);
     transition: all 0.2s ease;
