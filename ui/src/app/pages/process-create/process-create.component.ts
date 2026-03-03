@@ -60,6 +60,27 @@ export class ProcessCreateComponent {
     locationOptions: string[] = [];
     selectedCountry = '';
 
+    get completionPercent(): number {
+        const requiredFields: Array<keyof typeof this.process> = [
+            'companyName',
+            'roleTitle',
+            'techStack',
+            'currentStage',
+        ];
+
+        const baseFilled = requiredFields.filter((key) => {
+            const value = this.process?.[key];
+            return typeof value === 'string' ? value.trim().length > 0 : value !== null && value !== undefined;
+        }).length;
+
+        const locationRequired = this.process.workMode !== 'remote';
+        const total = requiredFields.length + (locationRequired ? 1 : 0);
+        const locationFilled = locationRequired ? (this.process.location?.trim?.().length ? 1 : 0) : 0;
+
+        if (total === 0) return 0;
+        return Math.round(((baseFilled + locationFilled) / total) * 100);
+    }
+
     constructor(
         private processesService: ProcessesService,
         private router: Router,

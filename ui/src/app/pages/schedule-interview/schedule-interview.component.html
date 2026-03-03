@@ -1,126 +1,203 @@
 <div class="form-view">
     <div class="form-card">
+        <nav class="breadcrumb form-breadcrumb" aria-label="Breadcrumb">
+            <span class="breadcrumb-item">
+                <a class="breadcrumb-link" routerLink="/">Dashboard</a>
+            </span>
+            <span class="breadcrumb-item">
+                <a class="breadcrumb-link" routerLink="/calendar">Calendar</a>
+            </span>
+            <span class="breadcrumb-item breadcrumb-current">Schedule interview</span>
+        </nav>
+
         <header class="form-hero">
             <span class="form-badge">New Interview</span>
             <h1>Schedule Interview</h1>
             <p class="subtitle">Keep your calendar aligned with every hiring step.</p>
             <div class="form-meta">Required fields are marked with <span class="required">*</span></div>
+            <div class="hero-progress" aria-label="Completion progress">
+                <div class="progress" role="progressbar" [attr.aria-valuenow]="completionPercent" aria-valuemin="0" aria-valuemax="100">
+                    <div class="progress-bar" [style.width.%]="completionPercent"></div>
+                </div>
+                <div class="progress-meta">{{ completionPercent }}% ready</div>
+            </div>
         </header>
 
         <form #interviewForm="ngForm" (ngSubmit)="onSubmit()" class="data-form">
-            <section class="form-section">
-                <div class="section-title">
-                    <h2>Interview basics</h2>
-                    <p>Choose the process and set the date, type, and focus.</p>
-                </div>
-
-                <div class="form-group required-section">
-                    <label>Select Process <span class="required">*</span></label>
-                    <p class="field-description">You must select an existing ongoing process to schedule an interview.</p>
-                    <select name="processId" [(ngModel)]="interaction.processId" required class="input-field"
-                        [class.error]="!interaction.processId && interviewForm.submitted">
-                        <option value="">Choose a process...</option>
-                        <option *ngFor="let process of processes" [value]="process.id">
-                            {{process.companyName}} - {{process.roleTitle}} ({{process.currentStage}})
-                        </option>
-                    </select>
-                    <p *ngIf="!interaction.processId && interviewForm.submitted" class="error-message">Please select a process</p>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Date <span class="required">*</span></label>
-                        <div class="input-icon-wrapper">
-                            <input type="text" [value]="datePart | dateFormat:'date'" (click)="datePicker.showPicker()"
-                                class="input-field date-display" placeholder="Select date" readonly>
-
-                            <input #datePicker type="date" name="datePart" [(ngModel)]="datePart"
-                                (change)="updateDateTime()" class="input-field date-input hidden-picker" required>
-                            <span class="field-icon" (click)="datePicker.showPicker()">📅</span>
+            <div class="form-layout">
+                <div class="form-main">
+                    <section class="form-section">
+                        <div class="section-title">
+                            <h2>Interview basics</h2>
+                            <p>Choose the process and set the date, type, and focus.</p>
                         </div>
-                    </div>
 
-                    <div class="form-group">
-                        <label>Time <span class="required">*</span></label>
-                        <div class="input-icon-wrapper">
-                            <input #timePicker type="time" name="timePart" [(ngModel)]="timePart"
-                                (change)="updateDateTime()" class="input-field date-input" required>
-                            <span class="field-icon" (click)="timePicker.showPicker()">⏰</span>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Interview Type <span class="required">*</span></label>
-                        <select name="interviewType" [(ngModel)]="interaction.interviewType" class="input-field" required>
-                            <option *ngFor="let type of interviewTypes" [value]="type">{{type}}</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Summary <span class="required">*</span></label>
-                    <textarea name="summary" [(ngModel)]="interaction.summary" rows="3" required
-                        placeholder="What is this interview about? Main topics, agenda, etc." class="input-field"></textarea>
-                    <p class="muted-hint">Capture the main focus so you know how to prep for this step.</p>
-                </div>
-            </section>
-
-            <section class="form-section">
-                <div class="section-title">
-                    <h2>Interviewers & attendees</h2>
-                    <p>Track the people you will meet with and their roles.</p>
-                </div>
-
-                <div class="interviewers-block">
-                    <div class="section-label-row">
-                        <label>Interviewers (Participants)</label>
-                        <button type="button" class="btn-text" (click)="addParticipant()">+ Add Person</button>
-                    </div>
-
-                    <div class="participants-list">
-                        <div *ngFor="let p of interaction.participants; let i = index" class="participant-row">
-                            <select [name]="'role' + i" [(ngModel)]="p.role" class="input-field small-select">
-                                <option *ngFor="let role of availableRoles" [value]="role">{{role}}</option>
+                        <div class="form-group required-section">
+                            <label>Select Process <span class="required">*</span></label>
+                            <p class="field-description">Pick the application you’re scheduling this interview for.</p>
+                            <input
+                                type="text"
+                                name="processSearch"
+                                [(ngModel)]="processSearch"
+                                placeholder="Search by company, role, stage..."
+                                class="input-field process-search"
+                                autocomplete="off">
+                            <select name="processId" [(ngModel)]="interaction.processId" required class="input-field"
+                                [class.error]="!interaction.processId && interviewForm.submitted">
+                                <option value="">Choose a process...</option>
+                                <option *ngFor="let process of filteredProcesses" [value]="process.id">
+                                    {{process.companyName}} - {{process.roleTitle}} ({{process.currentStage}})
+                                </option>
                             </select>
-                            <input type="text" [name]="'name' + i" [(ngModel)]="p.name" placeholder="Name" class="input-field">
-                            <button type="button" class="btn-remove" (click)="removeParticipant(i)" aria-label="Remove interviewer">&times;</button>
+                            <p *ngIf="filteredProcesses.length === 0" class="muted-hint">No matches — try a different search.</p>
+                            <p *ngIf="!interaction.processId && interviewForm.submitted" class="error-message">Please select a process</p>
                         </div>
-                        <p class="muted-hint" *ngIf="interaction.participants.length === 0">No interviewers added yet.</p>
+
+                        <div class="selected-process" *ngIf="selectedProcess">
+                            <div class="selected-title">Selected</div>
+                            <div class="selected-row">
+                                <div class="selected-avatar">{{ selectedProcess.companyName?.charAt(0)?.toUpperCase() }}</div>
+                                <div class="selected-meta">
+                                    <div class="selected-company">{{ selectedProcess.companyName }}</div>
+                                    <div class="selected-role">{{ selectedProcess.roleTitle }}</div>
+                                </div>
+                                <div class="selected-stage">{{ selectedProcess.currentStage }}</div>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Date <span class="required">*</span></label>
+                                <div class="input-icon-wrapper">
+                                    <input type="text" [value]="datePart | dateFormat:'date'" (click)="datePicker.showPicker()"
+                                        class="input-field date-display" placeholder="Select date" readonly
+                                        [class.error]="!datePart && interviewForm.submitted">
+
+                                    <input #datePicker type="date" name="datePart" [(ngModel)]="datePart"
+                                        (change)="updateDateTime()" class="input-field date-input hidden-picker" required>
+                                    <span class="field-icon" (click)="datePicker.showPicker()">📅</span>
+                                </div>
+                                <p *ngIf="!datePart && interviewForm.submitted" class="error-message">Date is required</p>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Time <span class="required">*</span></label>
+                                <div class="input-icon-wrapper">
+                                    <input #timePicker type="time" name="timePart" [(ngModel)]="timePart"
+                                        (change)="updateDateTime()" class="input-field date-input" required
+                                        [class.error]="!timePart && interviewForm.submitted">
+                                    <span class="field-icon" (click)="timePicker.showPicker()">⏰</span>
+                                </div>
+                                <p *ngIf="!timePart && interviewForm.submitted" class="error-message">Time is required</p>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Interview Type <span class="required">*</span></label>
+                                <select name="interviewType" [(ngModel)]="interaction.interviewType" class="input-field" required
+                                    [class.error]="!interaction.interviewType && interviewForm.submitted">
+                                    <option *ngFor="let type of interviewTypes" [value]="type">{{type}}</option>
+                                </select>
+                                <p *ngIf="!interaction.interviewType && interviewForm.submitted" class="error-message">Type is required</p>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Summary <span class="required">*</span></label>
+                            <textarea name="summary" [(ngModel)]="interaction.summary" rows="3" required
+                                placeholder="What is this interview about? Main topics, agenda, etc." class="input-field"
+                                [class.error]="(!interaction.summary || !interaction.summary.trim()) && interviewForm.submitted"></textarea>
+                            <p class="muted-hint">Capture the main focus so you know how to prep for this step.</p>
+                            <p *ngIf="(!interaction.summary || !interaction.summary.trim()) && interviewForm.submitted" class="error-message">Summary is required</p>
+                        </div>
+                    </section>
+
+                    <section class="form-section">
+                        <div class="section-title">
+                            <h2>Interviewers & attendees</h2>
+                            <p>Track the people you will meet with and their roles.</p>
+                        </div>
+
+                        <div class="interviewers-block">
+                            <div class="section-label-row">
+                                <label>Interviewers (Participants)</label>
+                                <button type="button" class="btn-text" (click)="addParticipant()">+ Add Person</button>
+                            </div>
+
+                            <div class="participants-list">
+                                <div *ngFor="let p of interaction.participants; let i = index" class="participant-row">
+                                    <div class="participant-badge" aria-hidden="true">{{ (p.name || 'P').charAt(0).toUpperCase() }}</div>
+                                    <select [name]="'role' + i" [(ngModel)]="p.role" class="input-field small-select">
+                                        <option *ngFor="let role of availableRoles" [value]="role">{{role}}</option>
+                                    </select>
+                                    <input type="text" [name]="'name' + i" [(ngModel)]="p.name" placeholder="Name" class="input-field">
+                                    <button type="button" class="btn-remove" (click)="removeParticipant(i)" aria-label="Remove interviewer">&times;</button>
+                                </div>
+                                <p class="muted-hint" *ngIf="interaction.participants.length === 0">No interviewers added yet.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="form-section">
+                        <div class="section-title">
+                            <h2>Notes & preparation</h2>
+                            <p>Add any helpful context so you show up prepared.</p>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Heads-up (Optional)</label>
+                            <textarea name="headsup" [(ngModel)]="interaction.headsup" rows="2"
+                                placeholder="Any important heads-up information for this interview..." class="input-field"></textarea>
+                            <p class="muted-hint">Important information to remember before the interview (e.g., topics to avoid, prep needed).</p>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Comments / Notes (Optional)</label>
+                            <textarea name="notes" [(ngModel)]="interaction.notes" rows="2"
+                                placeholder="Additional notes or comments..." class="input-field"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Tests / Technical Assessment (Optional)</label>
+                            <textarea name="testsAssessment" [(ngModel)]="interaction.testsAssessment" rows="2"
+                                placeholder="What tests or technical assessments are expected?" class="input-field"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Role Insights (Optional)</label>
+                            <textarea name="roleInsights" [(ngModel)]="interaction.roleInsights" rows="2"
+                                placeholder="What do you know about this role that might be relevant?" class="input-field"></textarea>
+                        </div>
+                    </section>
+                </div>
+
+                <aside class="form-aside" aria-label="Summary">
+                    <div class="aside-card">
+                        <div class="aside-title">At a glance</div>
+                        <div class="aside-kpis">
+                            <div class="kpi">
+                                <div class="kpi-label">Process</div>
+                                <div class="kpi-value">{{ selectedProcess ? (selectedProcess.companyName + ' — ' + selectedProcess.roleTitle) : '—' }}</div>
+                            </div>
+                            <div class="kpi">
+                                <div class="kpi-label">When</div>
+                                <div class="kpi-value">{{ datePart && timePart ? ((datePart | dateFormat:'date') + ' • ' + timePart) : '—' }}</div>
+                            </div>
+                            <div class="kpi">
+                                <div class="kpi-label">Type</div>
+                                <div class="kpi-value">{{ interaction.interviewType || '—' }}</div>
+                            </div>
+                            <div class="kpi">
+                                <div class="kpi-label">Participants</div>
+                                <div class="kpi-value">{{ interaction.participants?.length || 0 }}</div>
+                            </div>
+                        </div>
+                        <div class="aside-tip">
+                            <div class="tip-badge">Tip</div>
+                            <div class="tip-text">Add participants now — later it’s hard to remember who you met.</div>
+                        </div>
                     </div>
-                </div>
-            </section>
-
-            <section class="form-section">
-                <div class="section-title">
-                    <h2>Notes & preparation</h2>
-                    <p>Add any helpful context so you show up prepared.</p>
-                </div>
-
-                <div class="form-group">
-                    <label>Heads-up (Optional)</label>
-                    <textarea name="headsup" [(ngModel)]="interaction.headsup" rows="2"
-                        placeholder="Any important heads-up information for this interview..." class="input-field"></textarea>
-                    <p class="muted-hint">Important information to remember before the interview (e.g., topics to avoid, prep needed).</p>
-                </div>
-
-                <div class="form-group">
-                    <label>Comments / Notes (Optional)</label>
-                    <textarea name="notes" [(ngModel)]="interaction.notes" rows="2"
-                        placeholder="Additional notes or comments..." class="input-field"></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label>Tests / Technical Assessment (Optional)</label>
-                    <textarea name="testsAssessment" [(ngModel)]="interaction.testsAssessment" rows="2"
-                        placeholder="What tests or technical assessments are expected?" class="input-field"></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label>Role Insights (Optional)</label>
-                    <textarea name="roleInsights" [(ngModel)]="interaction.roleInsights" rows="2"
-                        placeholder="What do you know about this role that might be relevant?" class="input-field"></textarea>
-                </div>
-            </section>
+                </aside>
+            </div>
 
             <div class="form-actions">
                 <button type="button" class="btn-secondary" (click)="onCancel()">Cancel</button>

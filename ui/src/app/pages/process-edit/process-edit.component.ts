@@ -6,11 +6,12 @@ import { ProcessesService } from '../../services/processes.service';
 import { ToastService } from '../../services/toast.service';
 import { SettingsService } from '../../services/settings.service';
 import countriesData from '../../../assets/countries.json';
+import { DateFormatPipe } from '../../pipes/date-format.pipe';
 
 @Component({
     selector: 'app-process-edit',
     standalone: true,
-    imports: [CommonModule, FormsModule, RouterModule],
+    imports: [CommonModule, FormsModule, RouterModule, DateFormatPipe],
     templateUrl: './process-edit.component.html',
     styleUrls: ['./process-edit.component.css']
 })
@@ -37,6 +38,28 @@ export class ProcessEditComponent implements OnInit {
 
     locationOptions: string[] = [];
     selectedCountry = '';
+
+    get completionPercent(): number {
+        if (!this.process) return 0;
+        const requiredFields: Array<keyof typeof this.process> = [
+            'companyName',
+            'roleTitle',
+            'techStack',
+            'currentStage',
+        ];
+
+        const baseFilled = requiredFields.filter((key) => {
+            const value = this.process?.[key];
+            return typeof value === 'string' ? value.trim().length > 0 : value !== null && value !== undefined;
+        }).length;
+
+        const locationRequired = this.process.workMode !== 'remote';
+        const total = requiredFields.length + (locationRequired ? 1 : 0);
+        const locationFilled = locationRequired ? (this.process.location?.trim?.().length ? 1 : 0) : 0;
+
+        if (total === 0) return 0;
+        return Math.round(((baseFilled + locationFilled) / total) * 100);
+    }
 
     constructor(
         private route: ActivatedRoute,

@@ -17,6 +17,7 @@ import { DateFormatPipe } from '../../pipes/date-format.pipe';
 export class ScheduleInterviewComponent implements OnInit {
   processes: any[] = [];
   loading = false;
+  processSearch = '';
 
   interaction: any = {
     processId: null,
@@ -34,6 +35,31 @@ export class ScheduleInterviewComponent implements OnInit {
   interviewTypes = ['call', 'zoom', 'frontal', 'home assigment', 'technical', 'hr', 'managerial'];
   datePart: string = '';
   timePart: string = '';
+
+  get filteredProcesses(): any[] {
+    const term = this.processSearch.trim().toLowerCase();
+    if (!term) return this.processes;
+    return this.processes.filter((p) => {
+      const haystack = `${p.companyName ?? ''} ${p.roleTitle ?? ''} ${p.currentStage ?? ''} ${p.location ?? ''}`.toLowerCase();
+      return haystack.includes(term);
+    });
+  }
+
+  get selectedProcess(): any | null {
+    const id = Number(this.interaction.processId);
+    if (!id) return null;
+    return this.processes.find((p) => Number(p.id) === id) ?? null;
+  }
+
+  get completionPercent(): number {
+    const requiredCount = 4; // processId, date, interviewType, summary
+    let filled = 0;
+    if (this.interaction.processId) filled += 1;
+    if (this.interaction.date) filled += 1;
+    if (this.interaction.interviewType) filled += 1;
+    if (this.interaction.summary?.trim?.().length) filled += 1;
+    return Math.round((filled / requiredCount) * 100);
+  }
 
   constructor(
     private processesService: ProcessesService,
