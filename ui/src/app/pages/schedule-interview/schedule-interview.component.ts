@@ -5,11 +5,12 @@ import { Router, RouterModule } from '@angular/router';
 import { InteractionsService } from '../../services/interactions.service';
 import { ProcessesService } from '../../services/processes.service';
 import { ToastService } from '../../services/toast.service';
+import { DateFormatPipe } from '../../pipes/date-format.pipe';
 
 @Component({
   selector: 'app-schedule-interview',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, DateFormatPipe],
   templateUrl: './schedule-interview.component.html',
   styleUrls: ['./schedule-interview.component.css']
 })
@@ -31,6 +32,8 @@ export class ScheduleInterviewComponent implements OnInit {
 
   availableRoles = ['HR', 'Tech Lead', 'Team Member', 'Team Lead', 'Manager', 'CTO', 'Director', 'Group Leader', 'Architect'];
   interviewTypes = ['call', 'zoom', 'frontal', 'home assigment', 'technical', 'hr', 'managerial'];
+  datePart: string = '';
+  timePart: string = '';
 
   constructor(
     private processesService: ProcessesService,
@@ -45,7 +48,16 @@ export class ScheduleInterviewComponent implements OnInit {
     // Set default date to now
     const now = new Date();
     const tzOffset = now.getTimezoneOffset() * 60000;
-    this.interaction.date = new Date(now.getTime() - tzOffset).toISOString().slice(0, 16);
+    const localIso = new Date(now.getTime() - tzOffset).toISOString();
+    this.datePart = localIso.slice(0, 10);
+    this.timePart = localIso.slice(11, 16);
+    this.interaction.date = `${this.datePart}T${this.timePart}`;
+  }
+
+  updateDateTime() {
+    if (this.datePart && this.timePart) {
+      this.interaction.date = `${this.datePart}T${this.timePart}`;
+    }
   }
 
   loadProcesses() {

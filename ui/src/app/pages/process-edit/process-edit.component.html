@@ -14,21 +14,23 @@
                     <p>Tell us about the company, position, and stack.</p>
                 </div>
 
-                <div class="form-group">
-                    <label>Company Name <span class="required">*</span></label>
-                    <input type="text" name="companyName" [(ngModel)]="process.companyName" required
-                        placeholder="e.g. Google" class="input-field" [class.error]="isFieldInvalid('companyName')"
-                        (blur)="onFieldBlur('companyName')">
-                    <p *ngIf="isFieldInvalid('companyName')" class="error-message">Company name is required</p>
-                    <p class="field-hint">Use the official company name for easy reporting later.</p>
-                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Company Name <span class="required">*</span></label>
+                        <input type="text" name="companyName" [(ngModel)]="process.companyName" required
+                            placeholder="e.g. Google" class="input-field" [class.error]="isFieldInvalid('companyName')"
+                            (blur)="onFieldBlur('companyName')">
+                        <p *ngIf="isFieldInvalid('companyName')" class="error-message">Company name is required</p>
+                        <p class="field-hint">Use the official company name for easy reporting later.</p>
+                    </div>
 
-                <div class="form-group">
-                    <label>Role Title <span class="required">*</span></label>
-                    <input type="text" name="roleTitle" [(ngModel)]="process.roleTitle" required
-                        placeholder="e.g. Senior Software Engineer" class="input-field" [class.error]="isFieldInvalid('roleTitle')"
-                        (blur)="onFieldBlur('roleTitle')">
-                    <p *ngIf="isFieldInvalid('roleTitle')" class="error-message">Role title is required</p>
+                    <div class="form-group">
+                        <label>Role Title <span class="required">*</span></label>
+                        <input type="text" name="roleTitle" [(ngModel)]="process.roleTitle" required
+                            placeholder="e.g. Senior Software Engineer" class="input-field" [class.error]="isFieldInvalid('roleTitle')"
+                            (blur)="onFieldBlur('roleTitle')">
+                        <p *ngIf="isFieldInvalid('roleTitle')" class="error-message">Role title is required</p>
+                    </div>
                 </div>
 
                 <div class="form-group">
@@ -63,8 +65,8 @@
                     <p>Set expectations around location and in-office time.</p>
                 </div>
 
-                <div class="form-row">
-                    <div class="form-group">
+                <div class="form-row location-work-row">
+                    <div class="form-group location-group">
                         <label>Location <span class="required">*</span></label>
                         <div class="location-combobox country-combobox" [class.open]="showLocationDropdown">
                             <input
@@ -102,7 +104,7 @@
                         <p *ngIf="isFieldInvalid('locationSearch')" class="error-message">Location is required</p>
                     </div>
 
-                    <div class="form-group">
+                    <div class="form-group workmode-group">
                         <label>Work Mode</label>
                         <select name="workMode" [(ngModel)]="process.workMode" class="input-field"
                             (change)="onWorkModeChange($event)">
@@ -185,7 +187,7 @@
                     <p>Details about how you were initially contacted for this role.</p>
                 </div>
 
-                <div class="form-row">
+                <div class="form-row invitation-row">
                     <div class="form-group">
                         <label class="label-with-icon">
                             <button type="button" class="label-icon" (click)="datePicker.showPicker()"

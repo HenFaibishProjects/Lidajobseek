@@ -4,11 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { InteractionsService } from '../../services/interactions.service';
 import { ProcessesService } from '../../services/processes.service';
+import { DateFormatPipe } from '../../pipes/date-format.pipe';
 
 @Component({
     selector: 'app-interaction-create',
     standalone: true,
-    imports: [CommonModule, FormsModule, RouterModule],
+    imports: [CommonModule, FormsModule, RouterModule, DateFormatPipe],
     templateUrl: './interaction-create.component.html' // Fixed path
 })
 export class InteractionCreateComponent implements OnInit {

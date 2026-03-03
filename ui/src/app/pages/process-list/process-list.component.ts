@@ -5,11 +5,12 @@ import { FormsModule } from '@angular/forms';
 import { ProcessesService } from '../../services/processes.service';
 import { ToastService } from '../../services/toast.service';
 import { ConfirmService } from '../../services/confirm.service';
+import { DateFormatPipe } from '../../pipes/date-format.pipe';
 
 @Component({
     selector: 'app-process-list',
     standalone: true,
-    imports: [CommonModule, FormsModule, RouterModule],
+    imports: [CommonModule, FormsModule, RouterModule, DateFormatPipe],
     templateUrl: './process-list.component.html',
     styleUrls: ['./process-list.component.css']
 })

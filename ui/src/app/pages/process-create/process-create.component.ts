@@ -15,6 +15,7 @@ import countriesData from '../../../assets/countries.json';
     styleUrls: ['./process-create.component.css']
 })
 export class ProcessCreateComponent {
+    private readonly DEFAULT_COUNTRY = 'United States';
     @ViewChild('processForm') processForm!: NgForm;
     loading: boolean = false;
     formSubmitted: boolean = false;
@@ -66,18 +67,23 @@ export class ProcessCreateComponent {
         private settingsService: SettingsService
     ) {
         const settings = this.settingsService.getSettings();
-        this.selectedCountry = settings.country;
-        this.locationOptions = this.getLocationsForCountry(settings.country);
+        this.selectedCountry = this.getEffectiveCountry(settings.country);
+        this.locationOptions = this.getLocationsForCountry(this.selectedCountry);
 
         this.settingsService.settings$.subscribe(updatedSettings => {
-            if (updatedSettings.country !== this.selectedCountry) {
-                this.selectedCountry = updatedSettings.country;
-                this.locationOptions = this.getLocationsForCountry(updatedSettings.country);
+            const effectiveCountry = this.getEffectiveCountry(updatedSettings.country);
+            if (effectiveCountry !== this.selectedCountry) {
+                this.selectedCountry = effectiveCountry;
+                this.locationOptions = this.getLocationsForCountry(effectiveCountry);
                 this.process.location = '';
                 this.locationSearch = '';
                 this.showLocationDropdown = false;
             }
         });
+    }
+
+    private getEffectiveCountry(country: string | null | undefined): string {
+        return country?.trim() ? country : this.DEFAULT_COUNTRY;
     }
 
     private getLocationsForCountry(country: string): string[] {
@@ -95,7 +101,19 @@ export class ProcessCreateComponent {
         );
     }
 
+    get showOtherCityOption(): boolean {
+        const term = this.locationSearch.trim();
+        if (!term) {
+            return false;
+        }
+
+        return !this.locationOptions.some(
+            location => location.toLowerCase() === term.toLowerCase(),
+        );
+    }
+
     onLocationSearchChange() {
+        this.process.location = this.locationSearch.trim();
         this.showLocationDropdown = true;
     }
 
@@ -107,6 +125,17 @@ export class ProcessCreateComponent {
         this.locationSearch = location;
         this.showLocationDropdown = false;
         this.process.location = location;
+    }
+
+    selectCustomLocation() {
+        const customLocation = this.locationSearch.trim();
+        if (!customLocation) {
+            return;
+        }
+
+        this.process.location = customLocation;
+        this.locationSearch = customLocation;
+        this.showLocationDropdown = false;
     }
 
     @HostListener('document:keydown', ['$event'])

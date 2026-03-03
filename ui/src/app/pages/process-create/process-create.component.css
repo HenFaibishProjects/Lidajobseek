@@ -1,6 +1,6 @@
 /* ===== MAIN CONTAINER ===== */
 .form-view {
-  max-width: 980px;
+  max-width: 1040px;
   margin: 0 auto;
   padding: var(--space-2xl) var(--space-lg);
 }
@@ -59,7 +59,7 @@
 .data-form {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2xl);
+  gap: var(--space-xl);
   padding: var(--space-2xl);
   background: var(--bg-secondary);
 }
@@ -72,7 +72,7 @@
   box-shadow: 0 16px 32px rgba(15, 23, 42, 0.06);
   display: flex;
   flex-direction: column;
-  gap: var(--space-lg);
+  gap: var(--space-md);
 }
 
 .section-title {
@@ -100,6 +100,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-sm);
+  min-width: 0;
 }
 
 .form-group label {
@@ -163,6 +164,9 @@
   transition: all 0.2s ease;
   min-height: 44px;
   font-family: var(--font-family);
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .input-field:hover {
@@ -281,6 +285,7 @@
   top: calc(100% + 8px);
   left: 0;
   right: 0;
+  max-height: 240px;
   overflow-y: auto;
   background: var(--bg-primary);
   border: 1px solid rgba(148, 163, 184, 0.3);
@@ -348,9 +353,31 @@ select.input-field {
 
 /* ===== FORM ROWS (GRID) ===== */
 .form-row {
-  display: block;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-lg);
+  align-items: start;
+}
+
+.form-row .form-group {
+  margin-bottom: 0;
+}
+
+.location-work-row {
+  grid-template-columns: 1fr;
+}
+
+.location-work-row .workmode-group {
+  align-self: start;
+}
+
+.invitation-row {
+  grid-template-columns: 1fr;
+}
+
+.location-group {
+  position: relative;
+  z-index: 3;
 }
 
 /* ===== HINTS & HELPERS ===== */
@@ -402,7 +429,7 @@ select.input-field {
 
 .salary-inputs {
   display: grid;
-  grid-template-columns: 2fr 1fr 1.2fr;
+  grid-template-columns: minmax(0, 2fr) minmax(140px, 1fr) minmax(150px, 1.2fr);
   gap: var(--space-sm);
   align-items: stretch;
 }
@@ -451,6 +478,15 @@ select.input-field {
   color: var(--success);
   font-weight: 700;
   background: var(--success-light);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.option-subtext {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
 }
 
 /* ===== FORM ACTIONS ===== */
@@ -500,6 +536,11 @@ select.input-field {
   }
 
   .form-row {
+    grid-template-columns: 1fr;
+    gap: var(--space-md);
+  }
+
+  .location-work-row {
     grid-template-columns: 1fr;
   }
 
@@ -590,6 +631,10 @@ body.dark-theme .abroad-option {
 body.dark-theme .other-option {
   color: #6ee7b7;
   background: rgba(110, 231, 183, 0.15);
+}
+
+body.dark-theme .option-subtext {
+  color: var(--text-tertiary);
 }
 
 body.dark-theme .location-dropdown,

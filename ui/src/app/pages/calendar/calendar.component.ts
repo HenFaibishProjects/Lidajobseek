@@ -7,6 +7,7 @@ import { ProcessesService } from '../../services/processes.service';
 import { OrderByDatePipe } from '../../pipes/order-by-date.pipe';
 import { ToastService } from '../../services/toast.service';
 import { ConfirmService } from '../../services/confirm.service';
+import { SettingsService } from '../../services/settings.service';
 
 @Component({
   selector: 'app-calendar',
@@ -31,7 +32,8 @@ export class CalendarComponent implements OnInit {
     private interactionsService: InteractionsService,
     private processesService: ProcessesService,
     private toastService: ToastService,
-    private confirmService: ConfirmService
+    private confirmService: ConfirmService,
+    private settingsService: SettingsService,
   ) {}
 
   ngOnInit() {
@@ -119,18 +121,13 @@ export class CalendarComponent implements OnInit {
 
   formatDateTime(dateString: string): string {
     const date = new Date(dateString);
-    // Format: dd/mm/yyyy, 24-hour clock
-    const day = date.getDate().toString().padStart(2, '0');
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const year = date.getFullYear();
-    const hours = date.getHours().toString().padStart(2, '0');
-    const minutes = date.getMinutes().toString().padStart(2, '0');
+    if (Number.isNaN(date.getTime())) {
+      return '';
+    }
 
-    // Get weekday name
     const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const weekday = weekdays[date.getDay()];
-
-    return `${weekday}, ${day}/${month}/${year} ${hours}:${minutes}`;
+    return `${weekday}, ${this.settingsService.formatDate(date)} ${this.settingsService.formatTime(date)}`;
   }
 
   formatParticipants(participants: any[]): string {

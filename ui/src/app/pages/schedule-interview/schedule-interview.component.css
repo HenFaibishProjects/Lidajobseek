@@ -162,6 +162,33 @@
   color: var(--text-tertiary);
 }
 
+.input-icon-wrapper {
+  position: relative;
+}
+
+.date-display {
+  cursor: pointer;
+  background: var(--bg-primary);
+}
+
+.hidden-picker {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  width: 0;
+  height: 0;
+  padding: 0;
+  border: 0;
+}
+
+.field-icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+
 .input-field.error {
   border-color: var(--error);
 }

@@ -1,4 +1,14 @@
-import { Controller, Post, Body, HttpCode, HttpStatus, UnauthorizedException } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  HttpCode,
+  HttpStatus,
+  UnauthorizedException,
+  Get,
+  Patch,
+  Req,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Public } from './public.decorator';
 
@@ -27,5 +37,15 @@ export class AuthController {
   @Post('verify-code')
   async verifyCode(@Body('code') code: string) {
     return this.authService.verifyInvitationCode(code);
+  }
+
+  @Get('preferences')
+  async getPreferences(@Req() req: any) {
+    return this.authService.getPreferences(req.user.userId);
+  }
+
+  @Patch('preferences')
+  async updatePreferences(@Req() req: any, @Body() body: any) {
+    return this.authService.updatePreferences(req.user.userId, body);
   }
 }

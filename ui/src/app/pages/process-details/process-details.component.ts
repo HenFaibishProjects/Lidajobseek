@@ -8,11 +8,12 @@ import { ContactsService } from '../../services/contacts.service';
 import { FormsModule } from '@angular/forms';
 import { ConfirmService } from '../../services/confirm.service';
 import { ToastService } from '../../services/toast.service';
+import { DateFormatPipe } from '../../pipes/date-format.pipe';
 
 @Component({
     selector: 'app-process-details',
     standalone: true,
-    imports: [CommonModule, RouterModule, FormsModule],
+    imports: [CommonModule, RouterModule, FormsModule, DateFormatPipe],
     templateUrl: './process-details.component.html'
 })
 export class ProcessDetailsComponent implements OnInit {

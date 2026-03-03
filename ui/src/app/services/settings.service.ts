@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
+import { AuthService, DateFormatPreference, TimeFormatPreference, ThemePreference } from './auth.service';
 
 export interface UserSettings {
-  theme: 'light' | 'dark' | 'auto';
-  clockFormat: '12' | '24';
-  dateFormat: 'MM/DD/YYYY' | 'DD/MM/YYYY' | 'YYYY-MM-DD';
+  theme: ThemePreference;
+  clockFormat: TimeFormatPreference;
+  dateFormat: DateFormatPreference;
   country: string;
   notifications: {
     email: boolean;
@@ -46,9 +47,36 @@ export class SettingsService {
 
   settings$ = this.settingsSubject.asObservable();
 
-  constructor() {
+  constructor(private authService: AuthService) {
     // Apply theme on initialization
     this.applyTheme(this.settingsSubject.value.theme);
+    this.hydrateFromStoredUser();
+    this.syncWithServer();
+  }
+
+  syncWithServer() {
+    if (!this.authService.isAuthenticated()) {
+      return;
+    }
+
+    this.authService.getPreferences().subscribe({
+      next: (prefs) => {
+        const merged = {
+          ...this.settingsSubject.value,
+          theme: prefs.theme,
+          country: prefs.country,
+          dateFormat: prefs.dateFormat,
+          clockFormat: prefs.timeFormat,
+        } as UserSettings;
+
+        this.settingsSubject.next(merged);
+        this.saveSettings(merged);
+        this.applyTheme(merged.theme);
+      },
+      error: () => {
+        // keep local settings fallback
+      },
+    });
   }
 
   getSettings(): UserSettings {
@@ -66,6 +94,19 @@ export class SettingsService {
 
     this.settingsSubject.next(newSettings);
     this.saveSettings(newSettings);
+
+    if (this.authService.isAuthenticated()) {
+      this.authService.updatePreferences({
+        theme: newSettings.theme,
+        country: newSettings.country,
+        dateFormat: newSettings.dateFormat,
+        timeFormat: newSettings.clockFormat,
+      }).subscribe({
+        error: () => {
+          // local settings are already saved, avoid breaking UX
+        }
+      });
+    }
   }
 
   updateNotificationSetting(key: keyof UserSettings['notifications'], value: boolean) {
@@ -88,22 +129,54 @@ export class SettingsService {
     });
   }
 
-  setTheme(theme: 'light' | 'dark' | 'auto') {
+  setTheme(theme: ThemePreference) {
     this.updateSettings({ theme });
   }
 
-  setClockFormat(format: '12' | '24') {
+  setClockFormat(format: TimeFormatPreference) {
     this.updateSettings({ clockFormat: format });
   }
 
-  setDateFormat(format: 'MM/DD/YYYY' | 'DD/MM/YYYY' | 'YYYY-MM-DD') {
+  setDateFormat(format: DateFormatPreference) {
     this.updateSettings({ dateFormat: format });
   }
 
   resetSettings() {
-    this.settingsSubject.next(DEFAULT_SETTINGS);
-    this.saveSettings(DEFAULT_SETTINGS);
-    this.applyTheme(DEFAULT_SETTINGS.theme);
+    this.updateSettings(DEFAULT_SETTINGS);
+  }
+
+  hydrateFromStoredUser() {
+    const user = this.authService.getUser();
+    if (!user) {
+      return;
+    }
+
+    const patch: Partial<UserSettings> = {};
+
+    if (user.themePreference) {
+      patch.theme = user.themePreference as ThemePreference;
+    }
+
+    if (typeof user.countryPreference === 'string') {
+      patch.country = user.countryPreference;
+    }
+
+    if (user.dateFormatPreference) {
+      patch.dateFormat = user.dateFormatPreference as DateFormatPreference;
+    }
+
+    if (user.timeFormatPreference) {
+      patch.clockFormat = user.timeFormatPreference as TimeFormatPreference;
+    }
+
+    if (Object.keys(patch).length === 0) {
+      return;
+    }
+
+    const merged = { ...this.settingsSubject.value, ...patch };
+    this.settingsSubject.next(merged);
+    this.saveSettings(merged);
+    this.applyTheme(merged.theme);
   }
 
   private loadSettings(): UserSettings {
@@ -123,7 +196,7 @@ export class SettingsService {
     localStorage.setItem(this.STORAGE_KEY, JSON.stringify(settings));
   }
 
-  private applyTheme(theme: 'light' | 'dark' | 'auto') {
+  private applyTheme(theme: ThemePreference) {
     const body = document.body;
 
     if (theme === 'auto') {

@@ -24,4 +24,18 @@ export class UsersService {
     await this.em.persistAndFlush(user);
     return user;
   }
+
+  async updatePreferences(
+    id: number,
+    data: Partial<Pick<User, 'themePreference' | 'countryPreference' | 'dateFormatPreference' | 'timeFormatPreference'>>,
+  ): Promise<User | null> {
+    const user = await this.userRepository.findOne({ id });
+    if (!user) {
+      return null;
+    }
+
+    Object.assign(user, data);
+    await this.em.flush();
+    return user;
+  }
 }

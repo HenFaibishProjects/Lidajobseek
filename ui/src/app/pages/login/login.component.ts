@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { ToastService } from '../../services/toast.service';
+import { SettingsService } from '../../services/settings.service';
 
 @Component({
   selector: 'app-login',
@@ -40,7 +41,8 @@ export class LoginComponent {
   constructor(
     private authService: AuthService,
     private router: Router,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private settingsService: SettingsService,
   ) { }
 
   toggleMode() {
@@ -122,6 +124,8 @@ export class LoginComponent {
       }
       this.authService.login(this.email, this.password).subscribe({
         next: () => {
+          this.settingsService.hydrateFromStoredUser();
+          this.settingsService.syncWithServer();
           this.router.navigate(['/']);
         },
         error: () => {

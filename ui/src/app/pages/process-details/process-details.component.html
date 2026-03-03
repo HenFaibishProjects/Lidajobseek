@@ -68,7 +68,7 @@
             <div class="timeline" *ngIf="process.interactions?.length > 0; else noInteractions">
                 <div class="timeline-item" *ngFor="let inter of process.interactions">
                     <div class="timeline-meta">
-                        <span class="timeline-date">{{ inter.date | date:'dd/MM/yyyy, HH:mm' }}</span>
+                        <span class="timeline-date">{{ inter.date | dateFormat:'datetime' }}</span>
                         <span class="timeline-type">{{ inter.interviewType | uppercase }}</span>
                     </div>
                     <div class="timeline-content">
@@ -93,7 +93,7 @@
                             <div class="next-invite-details" *ngIf="inter.nextInviteStatus === 'Scheduled'">
                                 <div class="invite-row" *ngIf="inter.nextInviteDate">
                                     <span class="label">Date:</span>
-                                    <span class="value">{{ inter.nextInviteDate | date:'dd/MM/yyyy, HH:mm' }}</span>
+                                    <span class="value">{{ inter.nextInviteDate | dateFormat:'datetime' }}</span>
                                 </div>
                                 <div class="invite-row" *ngIf="inter.nextInviteLink">
                                     <span class="label">Link:</span>
@@ -126,7 +126,7 @@
             <div class="timeline" *ngIf="process.reviews?.length > 0; else noReviews">
                 <div class="timeline-item" *ngFor="let rev of process.reviews">
                     <div class="timeline-meta">
-                        <span class="timeline-date">{{ rev.createdAt | date:'dd/MM/yyyy' }}</span>
+                        <span class="timeline-date">{{ rev.createdAt | dateFormat:'date' }}</span>
                         <span class="timeline-type">STAGE: {{ rev.stage }}</span>
                     </div>
                     <div class="timeline-content">

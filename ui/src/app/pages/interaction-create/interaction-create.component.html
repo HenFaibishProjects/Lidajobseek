@@ -10,8 +10,8 @@
                 <div class="form-group">
                     <label>Date</label>
                     <div class="input-icon-wrapper">
-                        <input type="text" [value]="datePart | date:'dd/MM/yyyy'" (click)="datePicker.showPicker()"
-                            class="input-field date-display" placeholder="dd/mm/yyyy" readonly>
+                        <input type="text" [value]="datePart | dateFormat:'date'" (click)="datePicker.showPicker()"
+                            class="input-field date-display" placeholder="Select date" readonly>
 
                         <input #datePicker type="date" name="datePart" [(ngModel)]="datePart"
                             (change)="updateDateTime()" class="input-field date-input hidden-picker" required>

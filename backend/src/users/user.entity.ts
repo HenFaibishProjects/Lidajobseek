@@ -17,6 +17,18 @@ export class User {
   @Property({ nullable: true })
   name?: string;
 
+  @Property({ nullable: true, default: 'light' })
+  themePreference?: 'light' | 'dark' | 'auto';
+
+  @Property({ nullable: true, default: '' })
+  countryPreference?: string;
+
+  @Property({ nullable: true, default: 'DD/MM/YYYY' })
+  dateFormatPreference?: 'MM/DD/YYYY' | 'DD/MM/YYYY' | 'YYYY-MM-DD';
+
+  @Property({ nullable: true, default: '24' })
+  timeFormatPreference?: '12' | '24';
+
   @Property({ onCreate: () => new Date() })
   createdAt: Date = new Date();
 

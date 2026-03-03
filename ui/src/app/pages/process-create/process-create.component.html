@@ -14,21 +14,23 @@
                     <p>Tell us about the company, position, and stack.</p>
                 </div>
 
-                <div class="form-group">
-                    <label>Company Name <span class="required">*</span></label>
-                    <input type="text" name="companyName" [(ngModel)]="process.companyName" required
-                        placeholder="e.g. Google" class="input-field" (blur)="onFieldBlur('companyName')"
-                        [class.error]="isFieldInvalid('companyName')">
-                    <p *ngIf="isFieldInvalid('companyName')" class="error-message">Company name is required</p>
-                    <p class="field-hint">Use the official company name for easy reporting later.</p>
-                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Company Name <span class="required">*</span></label>
+                        <input type="text" name="companyName" [(ngModel)]="process.companyName" required
+                            placeholder="e.g. Google" class="input-field" (blur)="onFieldBlur('companyName')"
+                            [class.error]="isFieldInvalid('companyName')">
+                        <p *ngIf="isFieldInvalid('companyName')" class="error-message">Company name is required</p>
+                        <p class="field-hint">Use the official company name for easy reporting later.</p>
+                    </div>
 
-                <div class="form-group">
-                    <label>Role Title <span class="required">*</span></label>
-                    <input type="text" name="roleTitle" [(ngModel)]="process.roleTitle" required
-                        placeholder="e.g. Senior Software Engineer" class="input-field" (blur)="onFieldBlur('roleTitle')"
-                        [class.error]="isFieldInvalid('roleTitle')">
-                    <p *ngIf="isFieldInvalid('roleTitle')" class="error-message">Role title is required</p>
+                    <div class="form-group">
+                        <label>Role Title <span class="required">*</span></label>
+                        <input type="text" name="roleTitle" [(ngModel)]="process.roleTitle" required
+                            placeholder="e.g. Senior Software Engineer" class="input-field" (blur)="onFieldBlur('roleTitle')"
+                            [class.error]="isFieldInvalid('roleTitle')">
+                        <p *ngIf="isFieldInvalid('roleTitle')" class="error-message">Role title is required</p>
+                    </div>
                 </div>
 
                 <div class="form-group">
@@ -63,28 +65,29 @@
                     <p>Set expectations around location and in-office time.</p>
                 </div>
 
-                <div class="form-row">
-                    <div class="form-group">
+                <div class="form-row location-work-row">
+                    <div class="form-group location-group">
                         <label>Location <span class="required">*</span></label>
+                        <p class="field-hint">Can’t find your city? You can type free text and choose the <strong>Other</strong> option.</p>
                         <div class="location-combobox country-combobox" [class.open]="showLocationDropdown">
                             <input
                                 class="input-field"
                                 type="text"
                                 name="locationSearch"
                                 autocomplete="off"
-                                [disabled]="!selectedCountry"
+                                [disabled]="process.workMode === 'remote'"
                                 [(ngModel)]="locationSearch"
                                 (input)="onLocationSearchChange()"
                                 (focus)="onLocationSearchChange()"
                                 (blur)="onFieldBlur('locationSearch')"
-                                [placeholder]="selectedCountry ? 'Select town' : 'Select a country in settings'"
+                                [placeholder]="process.workMode === 'remote' ? 'Location is optional for remote mode' : (selectedCountry ? 'Select town from your country list' : 'Type location or set country in settings')"
                                 [class.error]="isFieldInvalid('locationSearch')">
                             <p *ngIf="isFieldInvalid('locationSearch')" class="error-message">Location is required</p>
                             <button
                                 type="button"
                                 class="location-toggle country-toggle"
                                 aria-label="Toggle location list"
-                                [disabled]="!selectedCountry"
+                                [disabled]="process.workMode === 'remote'"
                                 (click)="toggleLocationDropdown()">
                                 <span aria-hidden="true">▾</span>
                             </button>
@@ -96,14 +99,22 @@
                                     (click)="selectLocation(loc)">
                                     {{ loc }}
                                 </button>
-                                <div class="location-empty country-empty" *ngIf="filteredLocationOptions.length === 0">
-                                    No matches found
+                                <button
+                                    type="button"
+                                    class="location-option other-option"
+                                    *ngIf="showOtherCityOption"
+                                    (click)="selectCustomLocation()">
+                                    <span>Other: "{{ locationSearch.trim() }}"</span>
+                                    <small class="option-subtext">Use typed city</small>
+                                </button>
+                                <div class="location-empty country-empty" *ngIf="filteredLocationOptions.length === 0 && !showOtherCityOption">
+                                    {{ selectedCountry ? 'No matches found' : 'Set country in settings to get city suggestions' }}
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="form-group">
+                    <div class="form-group workmode-group">
                         <label>Work Mode</label>
                         <select name="workMode" [(ngModel)]="process.workMode" class="input-field"
                             (change)="onWorkModeChange($event)">
@@ -113,6 +124,8 @@
                         </select>
                     </div>
                 </div>
+
+                
 
                 <div class="form-group" *ngIf="process.workMode === 'hybrid'">
                     <label>Days from Office per Week</label>
@@ -187,7 +200,7 @@
                     <p>Details about how you were initially contacted for this role.</p>
                 </div>
 
-                <div class="form-row">
+                <div class="form-row invitation-row">
                     <div class="form-group">
                         <label class="label-with-icon">
                              <button type="button" class="label-icon" (click)="datePicker.showPicker()"
