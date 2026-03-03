@@ -35,8 +35,36 @@
         <div class="stat-card">
             <div class="stat-icon icon-orange">⏱️</div>
             <div class="stat-content">
-                <span class="stat-label">Avg Days to Hire/Reject</span>
+                <span class="stat-label">Avg Days to Decision</span>
                 <span class="stat-value">{{ stats.avgDaysInProcess }}d</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon icon-green">🏆</div>
+            <div class="stat-content">
+                <span class="stat-label">Offers / Signed</span>
+                <span class="stat-value">{{ stats.offers }}</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon icon-purple">📈</div>
+            <div class="stat-content">
+                <span class="stat-label">Win Rate</span>
+                <span class="stat-value">{{ stats.winRate }}%</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon icon-blue">🆕</div>
+            <div class="stat-content">
+                <span class="stat-label">Last 30 Days</span>
+                <span class="stat-value">{{ stats.appliedLast30 }}</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon icon-orange">❌</div>
+            <div class="stat-content">
+                <span class="stat-label">Rejection Rate</span>
+                <span class="stat-value">{{ stats.rejectionRate }}%</span>
             </div>
         </div>
     </div>
@@ -86,6 +114,36 @@
             </div>
             <div class="chart-canvas-container">
                 <canvas #sourceChart></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Insights & Funnel -->
+    <div class="insights-grid">
+        <div class="insights-card">
+            <h3>Strategy Insights</h3>
+            <ul class="insights-list">
+                <li *ngFor="let insight of insights">
+                    <span class="bullet-dot"></span>
+                    <span class="insight-text">{{ insight }}</span>
+                </li>
+            </ul>
+        </div>
+        <div class="insights-card">
+            <h3>Pipeline Snapshot</h3>
+            <div class="funnel-list">
+                <div
+                    class="funnel-row"
+                    *ngFor="let s of stageBreakdown">
+                    <div class="funnel-label">{{ s.stage }}</div>
+                    <div class="funnel-bar-wrapper">
+                        <div
+                            class="funnel-bar"
+                            [style.width.%]="stats.total ? (s.count / stats.total) * 100 : 0">
+                        </div>
+                    </div>
+                    <div class="funnel-count">{{ s.count }}</div>
+                </div>
             </div>
         </div>
     </div>

@@ -2,7 +2,7 @@
     <header class="hub-header">
         <div class="header-left">
             <h1>🧠 Interview Coach Hub</h1>
-            <p class="subtitle">Your professional career assets library</p>
+            <p class="subtitle">A structured workspace for your CVs, interview prep, and job search docs.</p>
         </div>
         <div class="header-actions">
             <button class="btn-secondary btn-icon-text" (click)="showConfig = !showConfig">
@@ -139,10 +139,17 @@
                 </span>
                 {{ selectedCategoryData?.name }}
             </h2>
-            <button class="btn-primary" (click)="showForm = !showForm">
+            <div class="file-view-header-actions">
+                <div class="file-quota" *ngIf="!isPremium">
+                    <span class="quota-label">Free tier:</span>
+                    <span class="quota-value">{{ totalResourcesCount }}/{{ maxFreeFiles }} items</span>
+                    <a class="quota-link" routerLink="/pricing">Go premium</a>
+                </div>
+                <button class="btn-primary" (click)="showForm = !showForm" [disabled]="!canAddMore && !showForm">
                 <span class="btn-icon">{{ showForm ? '×' : '+' }}</span>
                 {{ showForm ? 'Cancel' : 'Add Item' }}
             </button>
+            </div>
         </div>
 
         <!-- Add Resource Form -->
@@ -175,12 +182,22 @@
             </div>
 
             <div class="form-actions">
-                <button class="btn-primary" (click)="addResource()">Save Resource</button>
+                <button class="btn-primary" (click)="addResource()" [disabled]="!canAddMore">Save Resource</button>
+                <div class="quota-hint" *ngIf="!canAddMore">
+                    You’ve reached the free limit of {{ maxFreeFiles }} items. <a routerLink="/pricing">Upgrade to premium</a> to store more documents.
+                </div>
             </div>
         </div>
 
         <!-- File List -->
         <div class="file-list">
+            <div class="file-list-header" *ngIf="filteredResources.length">
+                <div class="col-icon"></div>
+                <div class="col-name">Name</div>
+                <div class="col-type">Type</div>
+                <div class="col-modified">Modified</div>
+                <div class="col-actions">Actions</div>
+            </div>
             <div *ngFor="let res of filteredResources" class="file-item">
                 <div class="file-item-icon">
                     <span *ngIf="isFilePath(res.content)">📄</span>
@@ -189,7 +206,7 @@
                 <div class="file-item-content">
                     <h4 class="file-title">{{ res.title }}</h4>
                     <div class="file-meta">
-                        <span class="file-date">{{ res.updatedAt | date:'dd/MM/yyyy' }}</span>
+                        <span class="file-date">{{ res.updatedAt | date:'dd/MM/yyyy HH:mm' }}</span>
                         <span *ngIf="res.tags" class="file-tags">
                             <span *ngFor="let tag of res.tags.split(',').slice(0, 3)" class="tag-badge">
                                 {{ tag.trim() }}
@@ -205,6 +222,9 @@
                         title="Open file">
                         👁️
                     </a>
+                    <button class="btn-action" *ngIf="isFilePath(res.content)" (click)="navigator.clipboard?.writeText(getFileUrl(res.content))" title="Copy link">
+                        📋
+                    </button>
                     <button class="btn-action btn-delete" (click)="deleteResource(res.id)" title="Delete">
                         🗑️
                     </button>

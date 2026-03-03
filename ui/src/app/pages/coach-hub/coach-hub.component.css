@@ -481,6 +481,24 @@
     gap: 12px;
 }
 
+.file-list-header {
+    display: grid;
+    grid-template-columns: 40px 2fr 1fr 1.5fr auto;
+    gap: 12px;
+    padding: 0 8px 4px 8px;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-tertiary);
+}
+
+.col-name,
+.col-type,
+.col-modified,
+.col-actions {
+    white-space: nowrap;
+}
+
 .file-item {
     background: var(--bg-card);
     border: 1px solid var(--border-color);
@@ -629,5 +647,9 @@
 
     .content-input-group {
         flex-direction: column;
+    }
+
+    .file-list-header {
+        display: none;
     }
 }

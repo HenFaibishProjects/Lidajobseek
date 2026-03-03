@@ -23,12 +23,16 @@ export class AnalyticsComponent implements OnInit, AfterViewInit {
         offers: 0,
         interviewRate: 0,
         rejectionRate: 0,
-        avgDaysInProcess: 0
+        avgDaysInProcess: 0,
+        appliedLast30: 0,
+        winRate: 0
     };
 
     daysRange = 30; // Default to 30 days for trend
     private charts: { [key: string]: any } = {};
     private rawProcesses: any[] = [];
+    stageBreakdown: { stage: string; count: number }[] = [];
+    insights: string[] = [];
 
     constructor(private processesService: ProcessesService) { }
 
@@ -64,7 +68,23 @@ export class AnalyticsComponent implements OnInit, AfterViewInit {
         const interviewed = p.filter(x => x.currentStage !== 'Applied' && x.currentStage !== 'No Response (14+ Days)').length;
         this.stats.interviewRate = Math.round((interviewed / total) * 100);
 
-        this.stats.rejectionRate = Math.round((p.filter(x => x.currentStage === 'Rejected').length / total) * 100);
+        const rejectedCount = p.filter(x => x.currentStage === 'Rejected').length;
+        this.stats.rejectionRate = Math.round((rejectedCount / total) * 100);
+
+        this.stats.winRate = this.stats.offers > 0 ? Math.round((this.stats.offers / total) * 100) : 0;
+
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        this.stats.appliedLast30 = p.filter(x => new Date(x.createdAt) >= thirtyDaysAgo).length;
+
+        const stageCounts: { [key: string]: number } = {};
+        p.forEach(proc => {
+            const stage = proc.currentStage || 'Unknown';
+            stageCounts[stage] = (stageCounts[stage] || 0) + 1;
+        });
+        this.stageBreakdown = Object.entries(stageCounts)
+            .map(([stage, count]) => ({ stage, count }))
+            .sort((a, b) => b.count - a.count);
 
         // Avg days active (simple approx for now)
         const completed = p.filter(x => ['Rejected', 'Offer', 'Signed', 'Withdrawn'].includes(x.currentStage));
@@ -78,6 +98,8 @@ export class AnalyticsComponent implements OnInit, AfterViewInit {
             }, 0);
             this.stats.avgDaysInProcess = Math.round(totalDays / completed.length);
         }
+
+        this.insights = this.buildInsights();
     }
 
     initCharts() {
@@ -90,13 +112,8 @@ export class AnalyticsComponent implements OnInit, AfterViewInit {
     }
 
     createStatusChart() {
-        const counts: { [key: string]: number } = {};
-        this.rawProcesses.forEach(p => {
-            counts[p.currentStage] = (counts[p.currentStage] || 0) + 1;
-        });
-
-        const labels = Object.keys(counts);
-        const data = Object.values(counts);
+        const labels = this.stageBreakdown.map(s => s.stage);
+        const data = this.stageBreakdown.map(s => s.count);
 
         this.charts['status'] = new Chart(this.statusChartRef.nativeElement, {
             type: 'doughnut',
@@ -151,6 +168,39 @@ export class AnalyticsComponent implements OnInit, AfterViewInit {
                 }
             }
         });
+    }
+
+    private buildInsights(): string[] {
+        const insights: string[] = [];
+
+        if (this.stats.interviewRate >= 50) {
+            insights.push(`Strong screen → interview conversion (${this.stats.interviewRate}%). Keep your outreach quality high.`);
+        } else {
+            insights.push(`Only ${this.stats.interviewRate}% of applications move past initial stages. Consider tightening your targeting and tailoring your CV.`);
+        }
+
+        if (this.stats.winRate > 0) {
+            insights.push(`Win rate is ${this.stats.winRate}% (offers / total applications). Aim for 10–20% by focusing on best-fit roles.`);
+        }
+
+        if (this.stats.avgDaysInProcess > 0) {
+            insights.push(`Average decision time is ~${this.stats.avgDaysInProcess} days. Use this to set realistic follow‑up expectations.`);
+        }
+
+        if (this.stageBreakdown.length) {
+            const bottleneck = this.stageBreakdown.find(s => s.stage.toLowerCase().includes('waiting') || s.stage.toLowerCase().includes('no response'));
+            if (bottleneck) {
+                insights.push(`You have ${bottleneck.count} processes stuck at “${bottleneck.stage}”. Schedule follow‑ups or decide to close them.`);
+            }
+        }
+
+        if (this.stats.appliedLast30 === 0) {
+            insights.push('No new applications in the last 30 days. Consider setting a weekly application target to keep momentum.');
+        } else {
+            insights.push(`You created ${this.stats.appliedLast30} new applications in the last 30 days. Keep a consistent weekly rhythm.`);
+        }
+
+        return insights.slice(0, 4);
     }
 
     createTimelineChart() {

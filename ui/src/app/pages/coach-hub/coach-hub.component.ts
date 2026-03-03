@@ -6,6 +6,7 @@ import { ConfirmService } from '../../services/confirm.service';
 import { ToastService } from '../../services/toast.service';
 import { FilterPipe } from '../../pipes/filter.pipe';
 import { environment } from '../../../environments/environment';
+import { AuthService } from '../../services/auth.service';
 
 interface Category {
     id: string;
@@ -31,6 +32,9 @@ export class CoachHubComponent implements OnInit {
     selectedFileName: string = '';
     selectedFile: File | null = null;
     showAddCategory: boolean = false;
+
+    maxFreeFiles = 5;
+    isPremium = false;
 
     newResource: any = {
         title: '',
@@ -61,10 +65,13 @@ export class CoachHubComponent implements OnInit {
     constructor(
         private resourcesService: ResourcesService,
         private confirmService: ConfirmService,
-        private toastService: ToastService
+        private toastService: ToastService,
+        private authService: AuthService,
     ) { }
 
     ngOnInit() {
+        const user = this.authService.getUser();
+        this.isPremium = !!user && (user.pricingPlan === 'premium' || user.pricingPlan === 'enterprise');
         this.loadCategories();
         this.loadResources();
     }
@@ -94,6 +101,14 @@ export class CoachHubComponent implements OnInit {
         return this.resources.filter(r => r.type === this.selectedCategory);
     }
 
+    get totalResourcesCount(): number {
+        return this.resources.length;
+    }
+
+    get canAddMore(): boolean {
+        return this.isPremium || this.totalResourcesCount < this.maxFreeFiles;
+    }
+
     loadResources() {
         this.resourcesService.getAll().subscribe(data => {
             this.resources = data;
@@ -116,6 +131,11 @@ export class CoachHubComponent implements OnInit {
 
     addResource() {
         if (!this.newResource.title || !this.selectedCategory) return;
+
+        if (!this.canAddMore) {
+            this.toastService.show(`Free accounts can store up to ${this.maxFreeFiles} items in Coach Hub. Upgrade to add more.`, 'warning');
+            return;
+        }
 
         this.newResource.type = this.selectedCategory;
 
