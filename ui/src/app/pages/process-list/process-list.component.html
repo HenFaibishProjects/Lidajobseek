@@ -8,6 +8,9 @@
                     <span class="wave-emoji">👋</span>
                 </h1>
                 <p class="hero-subtitle">Track, manage, and succeed in your career journey</p>
+                <p class="hero-subtitle-secondary">
+                    You currently track <strong>{{ filteredProcesses.length }}</strong> applications. Keep them flowing through the pipeline, one step at a time.
+                </p>
             </div>
             <div class="hero-actions">
                 <button class="btn-glass" (click)="exportData()" title="Export Data">
@@ -112,8 +115,21 @@
 
         <section class="process-content">
 
-    <!-- Loading Skeleton -->
-    <div class="processes-grid" *ngIf="isLoading">
+        <div class="results-summary" *ngIf="!isLoading">
+            <div class="results-main">
+                <div class="results-pill">
+                    <span class="results-dot"></span>
+                    <span class="results-count">{{ filteredProcesses.length }}</span>
+                    <span class="results-label">applications in view</span>
+                </div>
+                <p class="results-hint">
+                    Use the filters on the left to focus on active conversations, upcoming interviews, or offers.
+                </p>
+            </div>
+        </div>
+
+        <!-- Loading Skeleton -->
+        <div class="processes-grid" *ngIf="isLoading">
         <div *ngFor="let i of [1,2,3,4,5,6]" class="process-card skeleton-card">
             <div class="card-header">
                 <div class="skeleton skeleton-avatar"></div>
@@ -135,7 +151,7 @@
     </div>
 
     <!-- Process Cards Grid -->
-    <div class="processes-grid" *ngIf="!isLoading && filteredProcesses.length > 0">
+        <div class="processes-grid" *ngIf="!isLoading && filteredProcesses.length > 0; else noData">
         <div *ngFor="let p of filteredProcesses" class="process-card"
             [class.card-closed]="p.currentStage === 'Rejected' || p.currentStage === 'Withdrawn'"
             [routerLink]="['/process', p.id]">
@@ -203,15 +219,18 @@
                             <line x1="9" y1="15" x2="15" y2="15"></line>
                         </svg>
                     </div>
-                    <h3>No Applications Yet</h3>
-                    <p>Start your job search journey by creating your first application</p>
-                    <button class="btn-primary-gradient" routerLink="/new">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                            <line x1="12" y1="5" x2="12" y2="19"></line>
-                            <line x1="5" y1="12" x2="19" y2="12"></line>
-                        </svg>
-                        <span>Create Your First Application</span>
-                    </button>
+                    <h3>No applications match these filters</h3>
+                    <p>Try clearing filters or create a new application to start filling your board.</p>
+                    <div class="empty-actions">
+                        <button class="btn-secondary" (click)="clearFilters()">Clear filters</button>
+                        <button class="btn-primary-gradient" routerLink="/new">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            <span>New Application</span>
+                        </button>
+                    </div>
                 </div>
             </ng-template>
         </section>
