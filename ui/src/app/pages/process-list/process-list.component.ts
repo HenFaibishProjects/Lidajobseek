@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ProcessesService } from '../../services/processes.service';
-import { ToastService } from '../../services.toast.service';
+import { ToastService } from '../../services/toast.service';
 import { ConfirmService } from '../../services/confirm.service';
 import { SettingsService, UserSettings } from '../../services/settings.service';
 import { AuthService } from '../../services/auth.service';
