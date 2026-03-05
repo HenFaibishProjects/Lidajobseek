@@ -50,8 +50,8 @@ import { ProfilesModule } from './profiles/profiles.module';
         rootPath: (() => {
           const uiBrowserRoot = join(process.cwd(), 'ui', 'dist', 'ui', 'browser');
           const uiBrowserParent = join(process.cwd(), '..', 'ui', 'dist', 'ui', 'browser');
-          const distPublicRoot = join(process.cwd(), 'dist', 'public');
-          const distPublicParent = join(process.cwd(), '..', 'dist', 'public');
+          const distPublicRoot = join(process.cwd(), 'dist', 'public', 'browser');
+          const distPublicParent = join(process.cwd(), '..', 'dist', 'public', 'browser');
 
           if (existsSync(uiBrowserRoot)) {
             return uiBrowserRoot;
@@ -61,11 +61,11 @@ import { ProfilesModule } from './profiles/profiles.module';
           }
           if (existsSync(distPublicRoot)) {
             return distPublicRoot;
-}
-return distPublicParent;
-        })(),
-         exclude: ['/api']
-      },
+            }
+            return distPublicParent;
+                    })(),
+                    exclude: ['/api']
+                  },
     ),
     ProcessesModule,
     InteractionsModule,
