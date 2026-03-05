@@ -64,7 +64,7 @@ import { ProfilesModule } from './profiles/profiles.module';
 }
 return distPublicParent;
         })(),
-        exclude: ['/api*'],
+        exclude: ['/api/(.*)'],
       },
     ),
     ProcessesModule,
