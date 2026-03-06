@@ -8,6 +8,7 @@ import { ConfirmService } from '../../services/confirm.service';
 import { SettingsService, UserSettings } from '../../services/settings.service';
 import { AuthService } from '../../services/auth.service';
 import { DateFormatPipe } from '../../pipes/date-format.pipe';
+import { PROCESS_STAGES } from '../../shared/process-stages';
 
 @Component({
     selector: 'app-process-list',
@@ -34,19 +35,7 @@ export class ProcessListComponent implements OnInit {
     showAllProcesses: boolean = false;
 
     // Available options for filters
-    availableStages: string[] = [
-        'Initial Call Scheduled',
-        'Awaiting Next Interview (after Initial Call)',
-        'Interview Scheduled',
-        'Waiting for Interview Feedback',
-        'Home Task Assigned',
-        'References Requested',
-        'Final HR Interview Scheduled',
-        'Offer Received',
-        'Withdrawn',
-        'Rejected',
-        'No Response (14+ Days)'
-    ];
+    availableStages: string[] = PROCESS_STAGES;
 
     availableWorkModes: string[] = ['remote', 'hybrid', 'onsite'];
 
@@ -60,6 +49,15 @@ export class ProcessListComponent implements OnInit {
         private authService: AuthService,
     ) { }
 
+    private isClosedProcess(process: any): boolean {
+        if (typeof process?.isClosed === 'boolean') {
+            return process.isClosed;
+        }
+
+        const stage = (process?.currentStage ?? '').toString().trim().toLowerCase();
+        return stage === 'rejected' || stage === 'reject' || stage === 'withdrawn';
+    }
+
     ngOnInit() {
         const initialSettings = this.settingsService.getSettings();
         this.userDisplayName = this.getDisplayName(initialSettings);
@@ -71,7 +69,7 @@ export class ProcessListComponent implements OnInit {
         this.processesService.getAll().subscribe({
             next: (data) => {
                 this.processes = data;
-                this.processesOnActioin = data.filter((p: any) => p.currentStage !== 'Rejected' && p.currentStage !== 'Withdrawn');
+                this.processesOnActioin = data.filter((p: any) => !this.isClosedProcess(p));
                 this.applyFilters(); // Apply filters on initial load
                 this.findTasks();
                 this.isLoading = false;
@@ -196,7 +194,7 @@ export class ProcessListComponent implements OnInit {
             }
 
             // Show all processes filter
-            const isClosed = process.currentStage === 'Rejected' || process.currentStage === 'Withdrawn';
+            const isClosed = this.isClosedProcess(process);
             if (!this.showAllProcesses && isClosed) {
                 return false;
             }
@@ -322,7 +320,7 @@ export class ProcessListComponent implements OnInit {
     // Stats helper methods
     getActiveCount(): number {
         return this.filteredProcesses.filter(p =>
-            !['Rejected', 'Withdrawn', 'Offer', 'Signed'].includes(p.currentStage)
+            !this.isClosedProcess(p) && !['Offer', 'Signed'].includes(p.currentStage)
         ).length;
     }
 

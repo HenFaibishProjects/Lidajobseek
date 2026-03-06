@@ -69,7 +69,7 @@
                 <div class="timeline-item" *ngFor="let inter of process.interactions">
                     <div class="timeline-meta">
                         <span class="timeline-date">{{ inter.date | dateFormat:'datetime' }}</span>
-                        <span class="timeline-type">{{ inter.interviewType | uppercase }}</span>
+                        <span class="timeline-type">{{ getInterviewTypeLabel(inter.interviewType) }}</span>
                     </div>
                     <div class="timeline-content">
                         <div class="participants-row" *ngIf="inter.participants?.length > 0">

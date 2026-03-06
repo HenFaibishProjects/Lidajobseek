@@ -101,7 +101,7 @@
                 <div class="card-header">
                     <div class="interview-meta">
                         <span class="interview-type" [style.color]="getInterviewColor(interview.interviewType)">
-                            {{interview.interviewType}}
+                            {{ getInterviewTypeLabel(interview.interviewType) }}
                         </span>
                         <span class="interview-date">
                             {{formatDateTime(interview.date)}}

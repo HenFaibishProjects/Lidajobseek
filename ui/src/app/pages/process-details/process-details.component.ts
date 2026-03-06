@@ -9,6 +9,7 @@ import { FormsModule } from '@angular/forms';
 import { ConfirmService } from '../../services/confirm.service';
 import { ToastService } from '../../services/toast.service';
 import { DateFormatPipe } from '../../pipes/date-format.pipe';
+import { getInterviewTypeLabel as resolveInterviewTypeLabel } from '../../shared/interview-types';
 
 @Component({
     selector: 'app-process-details',
@@ -105,5 +106,9 @@ export class ProcessDetailsComponent implements OnInit {
     getStatusClass(stage: string): string {
         if (!stage) return '';
         return 'status-' + stage.toLowerCase().replace(' ', '-');
+    }
+
+    getInterviewTypeLabel(interviewType: string): string {
+        return resolveInterviewTypeLabel(interviewType);
     }
 }

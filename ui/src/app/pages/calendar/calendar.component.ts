@@ -8,6 +8,10 @@ import { OrderByDatePipe } from '../../pipes/order-by-date.pipe';
 import { ToastService } from '../../services/toast.service';
 import { ConfirmService } from '../../services/confirm.service';
 import { SettingsService } from '../../services/settings.service';
+import {
+  getInterviewTypeColor as resolveInterviewTypeColor,
+  getInterviewTypeLabel as resolveInterviewTypeLabel
+} from '../../shared/interview-types';
 
 @Component({
   selector: 'app-calendar',
@@ -107,16 +111,11 @@ export class CalendarComponent implements OnInit {
   }
 
   getInterviewColor(interviewType: string): string {
-    const colors: Record<string, string> = {
-      'call': '#3b82f6',
-      'zoom': '#8b5cf6',
-      'frontal': '#10b981',
-      'home assigment': '#f59e0b',
-      'technical': '#ef4444',
-      'hr': '#06b6d4',
-      'managerial': '#8b5cf6'
-    };
-    return colors[interviewType] || '#6b7280';
+    return resolveInterviewTypeColor(interviewType);
+  }
+
+  getInterviewTypeLabel(interviewType: string): string {
+    return resolveInterviewTypeLabel(interviewType);
   }
 
   formatDateTime(dateString: string): string {

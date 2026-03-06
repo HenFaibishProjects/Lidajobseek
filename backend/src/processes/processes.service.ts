@@ -10,11 +10,18 @@ import { CreateProcessDto } from './dto/create-process.dto';
 
 @Injectable()
 export class ProcessesService {
+  private readonly CLOSED_STAGE_LABELS = ['Rejected', 'Reject', 'Withdrawn','Offer Declined'];
+
   constructor(
     @InjectRepository(Process)
     private readonly processRepository: EntityRepository<Process>,
     private readonly em: EntityManager,
   ) { }
+
+  private isClosedStage(stage?: string | null): boolean {
+    const normalizedStage = stage?.trim().toLowerCase();
+    return normalizedStage === 'rejected' || normalizedStage === 'reject' || normalizedStage === 'withdrawn' || normalizedStage === 'offer declined';
+  }
 
   async create(dto: CreateProcessDto, userId: number): Promise<Process> {
     const data: any = { ...dto, user: this.em.getReference(User, userId) };
@@ -67,6 +74,7 @@ export class ProcessesService {
     // Add interaction count manually
     return processes.map(process => ({
       ...process,
+      isClosed: this.isClosedStage(process.currentStage),
       _count: {
         interactions: process.interactions.length,
       },
@@ -88,6 +96,7 @@ export class ProcessesService {
       // Sort interactions and reviews
       process.interactions.getItems().sort((a, b) => b.date.getTime() - a.date.getTime());
       process.reviews.getItems().sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+      (process as any).isClosed = this.isClosedStage(process.currentStage);
     }
 
     return process;
@@ -213,7 +222,7 @@ export class ProcessesService {
   /**
    * Automatically update processes to "No Response (14+ Days)" if:
    * - Last update was 14+ days ago
-   * - Current stage is NOT "Rejected" or "Withdrawn"
+   * - Current stage is NOT "Rejected" / "Reject" / "Withdrawn"
    * - Current stage is NOT already "No Response (14+ Days)"
    */
   private async updateStaleProcesses(): Promise<void> {
@@ -223,7 +232,7 @@ export class ProcessesService {
     try {
       const staleProcesses = await this.processRepository.find({
         updatedAt: { $lte: fourteenDaysAgo },
-        currentStage: { $nin: ['Rejected', 'Withdrawn', 'No Response (14+ Days)'] },
+        currentStage: { $nin: [...this.CLOSED_STAGE_LABELS, 'No Response (14+ Days)'] },
       });
 
       if (staleProcesses.length > 0) {

@@ -7,6 +7,7 @@ import { ToastService } from '../../services/toast.service';
 import { SettingsService } from '../../services/settings.service';
 import countriesData from '../../../assets/countries.json';
 import { DateFormatPipe } from '../../pipes/date-format.pipe';
+import { PROCESS_STAGES } from '../../shared/process-stages';
 
 @Component({
     selector: 'app-process-edit',
@@ -22,19 +23,7 @@ export class ProcessEditComponent implements OnInit {
     showLocationDropdown = false;
     formSubmitted = false;
     isSubmitting = false;
-    stages = [
-        'Initial Call Scheduled',
-        'Awaiting Next Interview (after Initial Call)',
-        'Interview Scheduled',
-        'Waiting for Interview Feedback',
-        'Home Task Assigned',
-        'References Requested',
-        'Final HR Interview Scheduled',
-        'Offer Received',
-        'Withdrawn',
-        'Rejected',
-        'No Response (14+ Days)'
-    ];
+    stages = PROCESS_STAGES;
 
     locationOptions: string[] = [];
     selectedCountry = '';

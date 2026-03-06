@@ -6,6 +6,7 @@ import { ProcessesService } from '../../services/processes.service';
 import { ToastService } from '../../services/toast.service';
 import { SettingsService } from '../../services/settings.service';
 import countriesData from '../../../assets/countries.json';
+import { DEFAULT_PROCESS_STAGE, PROCESS_STAGES } from '../../shared/process-stages';
 
 @Component({
     selector: 'app-process-create',
@@ -33,7 +34,7 @@ export class ProcessCreateComponent {
         salaryExpectation: '',
         salaryCurrency: '',
         salaryPeriod: 'Month',
-        currentStage: 'Initial Call Scheduled',
+        currentStage: DEFAULT_PROCESS_STAGE,
         dataFromThePhoneCall: '',
         initialInviteDate: '',
         initialInviteMethod: '',
@@ -43,19 +44,7 @@ export class ProcessCreateComponent {
     locationSearch = '';
     showLocationDropdown = false;
 
-    stages = [
-        'Initial Call Scheduled',
-        'Awaiting Next Interview (after Initial Call)',
-        'Interview Scheduled',
-        'Waiting for Interview Feedback',
-        'Home Task Assigned',
-        'References Requested',
-        'Final HR Interview Scheduled',
-        'Offer Received',
-        'Withdrawn',
-        'Rejected',
-        'No Response (14+ Days)'
-    ];
+    stages = PROCESS_STAGES;
 
     locationOptions: string[] = [];
     selectedCountry = '';

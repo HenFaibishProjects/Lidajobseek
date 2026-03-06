@@ -31,10 +31,7 @@
                 <div class="form-group">
                     <label>Interview Type</label>
                     <select name="interviewType" [(ngModel)]="interaction.interviewType" class="input-field" required>
-                        <option value="call">Call</option>
-                        <option value="zoom">Zoom</option>
-                        <option value="frontal">Frontal</option>
-                        <option value="home assigment">Home Assignment</option>
+                        <option *ngFor="let type of interviewTypes" [value]="type.id">{{ type.label }}</option>
                     </select>
                 </div>
             </div>

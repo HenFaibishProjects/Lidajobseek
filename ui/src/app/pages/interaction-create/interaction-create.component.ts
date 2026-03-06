@@ -5,6 +5,7 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { InteractionsService } from '../../services/interactions.service';
 import { ProcessesService } from '../../services/processes.service';
 import { DateFormatPipe } from '../../pipes/date-format.pipe';
+import { DEFAULT_INTERVIEW_TYPE_ID, INTERVIEW_TYPES, normalizeInterviewType } from '../../shared/interview-types';
 
 @Component({
     selector: 'app-interaction-create',
@@ -18,7 +19,7 @@ export class InteractionCreateComponent implements OnInit {
 
     interaction: any = {
         date: '',
-        interviewType: 'zoom',
+        interviewType: DEFAULT_INTERVIEW_TYPE_ID,
         participants: [], // array of { role: string, name: string }
         summary: '',
         testsAssessment: '', // Tests or technical assessments during interview
@@ -26,6 +27,8 @@ export class InteractionCreateComponent implements OnInit {
         notes: '',
         invitationExtended: null // 'yes', 'later', or 'no'
     };
+
+    interviewTypes = INTERVIEW_TYPES;
 
     availableRoles = ['HR', 'Tech Lead', 'Team Member', 'Team Lead', 'Manager', 'CTO', 'Director', 'Group Leader', 'Architect', 'Recruiter', 'Hiring Manager', 'VP', 'Peer'];
 
@@ -56,6 +59,7 @@ export class InteractionCreateComponent implements OnInit {
 
     ngOnInit() {
         this.processId = Number(this.route.snapshot.paramMap.get('id'));
+        this.interaction.interviewType = normalizeInterviewType(this.interaction.interviewType);
 
         // Fetch process to get contacts
         this.processesService.getById(this.processId).subscribe(process => {

@@ -5,6 +5,7 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { InteractionsService } from '../../services/interactions.service';
 import { ProcessesService } from '../../services/processes.service';
 import { DateFormatPipe } from '../../pipes/date-format.pipe';
+import { INTERVIEW_TYPES, normalizeInterviewType } from '../../shared/interview-types';
 
 @Component({
     selector: 'app-interaction-edit',
@@ -16,6 +17,7 @@ import { DateFormatPipe } from '../../pipes/date-format.pipe';
 export class InteractionEditComponent implements OnInit {
     interaction: any;
     processId!: number;
+    interviewTypes = INTERVIEW_TYPES;
     availableRoles = ['HR', 'Tech Lead', 'Team Member', 'Team Lead', 'Manager', 'CTO', 'Director', 'Group Leader', 'Architect'];
     datePart: string = '';
     timePart: string = '';
@@ -39,6 +41,8 @@ export class InteractionEditComponent implements OnInit {
             const inter = data.interactions.find((i: any) => i.id === id);
             if (inter) {
                 this.interaction = { ...inter };
+                this.interaction.interviewType = normalizeInterviewType(this.interaction.interviewType);
+
                 // Prepare local date/time controls
                 const d = new Date(this.interaction.date);
                 const tzOffset = d.getTimezoneOffset() * 60000;

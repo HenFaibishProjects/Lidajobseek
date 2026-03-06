@@ -171,6 +171,7 @@ select.input-field {
   margin: 0;
   line-height: 1.4;
   font-style: italic;
+  padding: 3px;
 }
 
 /* ===== INTERVIEWERS/PARTICIPANTS SECTION ===== */
