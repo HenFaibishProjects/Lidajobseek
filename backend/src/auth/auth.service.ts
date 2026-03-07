@@ -34,6 +34,7 @@ export class AuthService {
         id: user.id,
         email: user.email,
         name: user.name,
+        pricingPlan: user.pricingPlan || 'free',
         themePreference: user.themePreference,
         countryPreference: user.countryPreference,
         dateFormatPreference: user.dateFormatPreference,
@@ -46,13 +47,18 @@ export class AuthService {
   }
 
   async login(user: any) {
-    const payload = { email: user.email, sub: user.id };
+    const payload = {
+      email: user.email,
+      sub: user.id,
+      pricingPlan: user.pricingPlan || 'free',
+    };
     return {
       access_token: this.jwtService.sign(payload),
       user: {
         id: user.id,
         email: user.email,
         name: user.name,
+        pricingPlan: user.pricingPlan || 'free',
         themePreference: user.themePreference || 'light',
         countryPreference: user.countryPreference || '',
         dateFormatPreference: user.dateFormatPreference || 'DD/MM/YYYY',

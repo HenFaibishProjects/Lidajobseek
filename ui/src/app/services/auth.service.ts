@@ -71,6 +71,16 @@ export class AuthService {
     localStorage.setItem('app_user', JSON.stringify(user));
   }
 
+  getPricingPlan(): 'free' | 'premium' | 'enterprise' {
+    const user = this.getUser();
+    return user?.pricingPlan || 'free';
+  }
+
+  isPremiumUser(): boolean {
+    const plan = this.getPricingPlan();
+    return plan === 'premium' || plan === 'enterprise';
+  }
+
   getPreferences() {
     return this.http.get<PreferencesResponse>(`${this.apiUrl}/preferences`);
   }

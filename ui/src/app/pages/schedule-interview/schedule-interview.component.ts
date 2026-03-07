@@ -5,6 +5,7 @@ import { Router, RouterModule } from '@angular/router';
 import { InteractionsService } from '../../services/interactions.service';
 import { ProcessesService } from '../../services/processes.service';
 import { ToastService } from '../../services/toast.service';
+import { AuthService } from '../../services/auth.service';
 import { DateFormatPipe } from '../../pipes/date-format.pipe';
 import {
   DEFAULT_INTERVIEW_TYPE_ID,
@@ -34,11 +35,29 @@ export class ScheduleInterviewComponent implements OnInit {
     headsup: '',
     notes: '',
     testsAssessment: '',
-    roleInsights: ''
+    roleInsights: '',
+     reminder: {
+      enabled: false,
+      beforeMinutes: 60,
+      channels: {
+        email: true,
+        sms: false,
+      }
+    }
   };
 
   availableRoles = ['HR', 'Tech Lead', 'Team Member', 'Team Lead', 'Manager', 'CTO', 'Director', 'Group Leader', 'Architect'];
   interviewTypes = INTERVIEW_TYPES;
+    reminderOptions = [
+    { value: 15, label: '15 minutes before' },
+    { value: 30, label: '30 minutes before' },
+    { value: 60, label: '1 hour before' },
+    { value: 120, label: '2 hours before' },
+    { value: 1440, label: '1 day before' },
+    { value: 2880, label: '2 days before' },
+  ];
+
+  isPremiumUser = false;
   datePart: string = '';
   timePart: string = '';
 
@@ -87,6 +106,11 @@ export class ScheduleInterviewComponent implements OnInit {
     return Math.round((filled / requiredCount) * 100);
   }
 
+   get reminderTimingLabel(): string {
+    const option = this.reminderOptions.find((o) => o.value === Number(this.interaction?.reminder?.beforeMinutes));
+    return option?.label ?? 'Custom';
+  }
+
   get canSubmit(): boolean {
     return !!(
       this.selectedProcess &&
@@ -101,12 +125,14 @@ export class ScheduleInterviewComponent implements OnInit {
     private processesService: ProcessesService,
     private interactionsService: InteractionsService,
     private router: Router,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private authService: AuthService
   ) {}
 
   ngOnInit() {
     this.loadProcesses();
     this.interaction.interviewType = normalizeInterviewType(this.interaction.interviewType);
+    this.isPremiumUser = this.authService.isPremiumUser();
 
     // Set default date to now
     const now = new Date();
@@ -115,6 +141,24 @@ export class ScheduleInterviewComponent implements OnInit {
     this.datePart = localIso.slice(0, 10);
     this.timePart = localIso.slice(11, 16);
     this.interaction.date = `${this.datePart}T${this.timePart}`;
+  }
+
+  
+  onReminderEnabledChange() {
+    if (!this.interaction.reminder.enabled) {
+      this.interaction.reminder.channels.sms = false;
+      return;
+    }
+
+    if (!this.isPremiumUser) {
+      this.interaction.reminder.channels.sms = false;
+    }
+  }
+
+  onSmsReminderChange() {
+    if (!this.isPremiumUser) {
+      this.interaction.reminder.channels.sms = false;
+    }
   }
 
   updateDateTime() {
@@ -172,6 +216,21 @@ export class ScheduleInterviewComponent implements OnInit {
     if (this.interaction.notes) payload.notes = this.interaction.notes;
     if (this.interaction.testsAssessment) payload.testsAssessment = this.interaction.testsAssessment;
     if (this.interaction.roleInsights) payload.roleInsights = this.interaction.roleInsights;
+     if (this.interaction?.reminder?.enabled) {
+      const channels = {
+        email: !!this.interaction.reminder.channels.email,
+        sms: this.isPremiumUser && !!this.interaction.reminder.channels.sms,
+      };
+
+      // Reminders are optional. If no channel is selected, continue without reminder payload.
+      if (channels.email || channels.sms) {
+        payload.reminder = {
+          enabled: true,
+          beforeMinutes: Number(this.interaction.reminder.beforeMinutes) || 60,
+          channels,
+        };
+      }
+    }
 
     this.interactionsService.create(payload).subscribe({
       next: () => {

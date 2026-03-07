@@ -8,6 +8,7 @@ import {
   Patch,
   Delete,
   Query,
+  Req,
 } from '@nestjs/common';
 import { InteractionsService } from './interactions.service';
 import { CreateInteractionDto } from './dto/create-interaction.dto';
@@ -17,8 +18,8 @@ export class InteractionsController {
   constructor(private readonly interactionsService: InteractionsService) {}
 
   @Post()
-  create(@Body() dto: CreateInteractionDto) {
-    return this.interactionsService.create(dto);
+  create(@Body() dto: CreateInteractionDto, @Req() req: any) {
+    return this.interactionsService.create(dto, req.user);
   }
 
   @Get()
@@ -52,8 +53,8 @@ export class InteractionsController {
   }
 
   @Patch(':id')
-  update(@Param('id', ParseIntPipe) id: number, @Body() dto: any) {
-    return this.interactionsService.update(id, dto);
+  update(@Param('id', ParseIntPipe) id: number, @Body() dto: any, @Req() req: any) {
+    return this.interactionsService.update(id, dto, req.user);
   }
 
   @Delete(':id')

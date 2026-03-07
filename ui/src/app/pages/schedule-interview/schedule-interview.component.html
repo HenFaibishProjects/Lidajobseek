@@ -132,6 +132,57 @@
                         <div class="panel-header">
                             <span class="panel-step">02</span>
                             <div>
+                                <h2>Reminder setup</h2>
+                                <p>Get reminded before the interview by email, and SMS if you are premium.</p>
+                            </div>
+                        </div>
+
+                        <div class="reminder-toggle-row">
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="reminderEnabled" [(ngModel)]="interaction.reminder.enabled"
+                                    (change)="onReminderEnabledChange()">
+                                Enable reminder
+                            </label>
+                            <span class="reminder-chip" *ngIf="interaction.reminder.enabled">{{ reminderTimingLabel }}</span>
+                        </div>
+
+                        <div class="reminder-panel" *ngIf="interaction.reminder.enabled">
+                            <div class="form-group">
+                                <label>When should we remind you?</label>
+                                <select name="reminderBefore" [(ngModel)]="interaction.reminder.beforeMinutes" class="input-field">
+                                    <option *ngFor="let option of reminderOptions" [ngValue]="option.value">{{ option.label }}</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Reminder channels</label>
+                                <div class="channels-grid">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="reminderEmail"
+                                            [(ngModel)]="interaction.reminder.channels.email">
+                                        Email
+                                    </label>
+
+                                    <label class="checkbox-label sms-channel-label" [class.disabled]="!isPremiumUser">
+                                        <input type="checkbox" name="reminderSms"
+                                            [(ngModel)]="interaction.reminder.channels.sms" [disabled]="!isPremiumUser"
+                                            (change)="onSmsReminderChange()">
+                                        <span class="sms-channel-text">Phone message / SMS</span>
+                                        <span class="premium-badge" *ngIf="!isPremiumUser">Premium</span>
+                                    </label>
+                                </div>
+
+                                <p class="muted-hint" *ngIf="!isPremiumUser">
+                                    Upgrade to premium to unlock phone message reminders.
+                                </p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="lux-panel">
+                        <div class="panel-header">
+                            <span class="panel-step">03</span>
+                            <div>
                                 <h2>Participants</h2>
                                 <p>Capture who you will meet. This will make post-interview notes much easier.</p>
                             </div>
@@ -159,7 +210,7 @@
 
                     <section class="lux-panel">
                         <div class="panel-header">
-                            <span class="panel-step">03</span>
+                            <span class="panel-step">04</span>
                             <div>
                                 <h2>Prep notes & strategy</h2>
                                 <p>Optional but powerful: save all useful context in advance.</p>

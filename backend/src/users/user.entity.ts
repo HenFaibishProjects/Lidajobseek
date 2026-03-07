@@ -17,6 +17,9 @@ export class User {
   @Property({ nullable: true })
   name?: string;
 
+  @Property({ nullable: true, default: 'free' })
+  pricingPlan?: 'free' | 'premium' | 'enterprise';
+
   @Property({ nullable: true, default: 'light' })
   themePreference?: 'light' | 'dark' | 'auto';
 

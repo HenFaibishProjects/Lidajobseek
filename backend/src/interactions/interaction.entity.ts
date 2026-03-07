@@ -30,6 +30,18 @@ export class Interaction {
   @Property({ nullable: true })
   headsup?: string;
 
+  @Property({ type: 'json', nullable: true })
+  reminder?: {
+    enabled: boolean;
+    beforeMinutes: number;
+    channels: {
+      email: boolean;
+      sms: boolean;
+    };
+    emailSentAt?: string;
+    smsSentAt?: string;
+  };
+
   // Next Interview Invitation Tracking
   @Property({ nullable: true })
   nextInviteStatus?: string;

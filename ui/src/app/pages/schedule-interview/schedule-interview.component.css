@@ -4,6 +4,37 @@
   padding: var(--space-xl) var(--space-lg) var(--space-2xl);
 }
 
+.reminder-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding: var(--space-sm) var(--space-md);
+}
+
+.reminder-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  color: #1e3a8a;
+  background: rgba(59, 130, 246, 0.16);
+  font-weight: 700;
+}
+
+.reminder-panel {
+  border: 1px solid rgba(0, 120, 212, 0.24);
+  border-radius: 14px;
+  padding: var(--space-md);
+  background: rgba(0, 120, 212, 0.06);
+  display: grid;
+  gap: var(--space-md);
+}
+
+
+
+
 .schedule-shell {
   border-radius: 30px;
   overflow: hidden;
@@ -18,6 +49,55 @@
 .schedule-breadcrumb {
   margin: 0;
   padding: var(--space-lg) var(--space-2xl) var(--space-sm);
+}
+
+.checkbox-label {
+  display: block;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  color: var(--text-primary);
+  font-size: var(--font-size-base);
+  font-weight: 500;
+}
+
+.checkbox-label input[type='checkbox'] {
+  width: 17px;
+  height: 17px;
+  accent-color: var(--primary-blue);
+}
+
+.checkbox-label.disabled {
+  color: var(--text-tertiary);
+}
+
+.sms-channel-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.premium-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: #111827;
+  background: #facc15;
+  border: 1px solid #eab308;
+}
+
+.sms-channel-label.disabled .sms-channel-text {
+  color: #9ca3af;
+}
+
+.channels-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .hero-zone {
