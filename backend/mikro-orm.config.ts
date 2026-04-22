@@ -22,11 +22,27 @@ const config: MikroOrmModuleOptions = {
   driver: PostgreSqlDriver,
   clientUrl: process.env.DATABASE_URL,
 
+  ensureDatabase: false,
+
+  pool: {
+    // min:0 — don't keep idle connections; Neon's pgBouncer resets them
+    // and that causes ECONNRESET when the app tries to reuse a dead socket.
+    min: 0,
+    // Neon free tier allows ~20 pooler connections; cap at 5 to stay safe.
+    max: 5,
+    // Acquire timeout: fail fast instead of hanging forever.
+    acquireTimeoutMillis: 10000,
+    // Discard a connection after 60 s idle so we don't hold Neon slots.
+    idleTimeoutMillis: 60000,
+    // Validate the connection is alive before handing it to the app.
+    afterCreate: (conn: any, done: (err: Error | null, conn: any) => void) => {
+      conn.query('SELECT 1', (err: Error | null) => done(err, conn));
+    },
+  },
+
   driverOptions: {
     connection: {
-      ssl: {
-        rejectUnauthorized: false,
-      },
+      ssl: { rejectUnauthorized: false },
     },
   },
 

@@ -134,22 +134,29 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
 
     this.isProcessingReminders = true;
 
+    // Fork a dedicated EM for this background job so connections are
+    // properly released back to the pool when we are done (MikroORM
+    // requires a separate context for every non-request operation).
+    const em = this.em.fork({ clear: true, useContext: false });
+
     try {
       const now = new Date();
       const horizon = new Date(now.getTime() + 1000 * 60 * 60 * 24 * 7);
 
-      const upcomingInteractions = await this.interactionRepository.find(
-        {
-          date: {
-            $gte: now,
-            $lte: horizon,
+      const upcomingInteractions = await em
+        .getRepository(Interaction)
+        .find(
+          {
+            date: {
+              $gte: now,
+              $lte: horizon,
+            },
           },
-        },
-        {
-          populate: ['process'],
-          orderBy: { date: QueryOrder.ASC },
-        },
-      );
+          {
+            populate: ['process'],
+            orderBy: { date: QueryOrder.ASC },
+          },
+        );
 
       let hasChanges = false;
 
@@ -169,12 +176,15 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
           continue;
         }
 
-        // Load user explicitly to bypass populate join error
         const processStr = interaction.process as any;
         if (!processStr || !processStr.user) {
           continue;
         }
-        const user = await this.em.findOne('User', { id: processStr.user.id || processStr.user }) as any;
+
+        const user = await em.findOne('User' as any, {
+          id: processStr.user.id ?? processStr.user,
+        }) as any;
+
         const recipientEmail = user?.email;
         if (!recipientEmail) {
           continue;
@@ -200,11 +210,13 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
       }
 
       if (hasChanges) {
-        await this.em.flush();
+        await em.flush();
       }
     } catch (error) {
       this.logger.error('Failed to process reminder emails', error as any);
     } finally {
+      // Always release connections back to the pool
+      em.clear();
       this.isProcessingReminders = false;
     }
   }
