@@ -3,6 +3,7 @@ import {
   Logger,
   OnModuleDestroy,
   OnModuleInit,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityRepository, EntityManager, QueryOrder } from '@mikro-orm/postgresql';
@@ -145,7 +146,7 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
           },
         },
         {
-          populate: ['process', 'process.user'],
+          populate: ['process'],
           orderBy: { date: QueryOrder.ASC },
         },
       );
@@ -168,7 +169,13 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
           continue;
         }
 
-        const recipientEmail = interaction.process?.user?.email;
+        // Load user explicitly to bypass populate join error
+        const processStr = interaction.process as any;
+        if (!processStr || !processStr.user) {
+          continue;
+        }
+        const user = await this.em.findOne('User', { id: processStr.user.id || processStr.user }) as any;
+        const recipientEmail = user?.email;
         if (!recipientEmail) {
           continue;
         }
@@ -203,9 +210,9 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
   }
 
   async create(dto: CreateInteractionDto, user?: any): Promise<Interaction> {
-    const process = await this.processRepository.findOne({ id: dto.processId });
+    const process = await this.processRepository.findOne({ id: dto.processId, user: user?.userId });
     if (!process) {
-      throw new Error('Process not found');
+      throw new NotFoundException(`Process with ID ${dto.processId} not found`);
     }
 
     const interaction = this.interactionRepository.create({
@@ -254,11 +261,16 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
     return interaction;
   }
 
-  async findAll(startDate?: string, endDate?: string, processId?: number): Promise<any[]> {
+  async findAll(startDate?: string, endDate?: string, processId?: number, userId?: number): Promise<any[]> {
     const where: any = {};
 
+    where.process = {};
+    if (userId) {
+      where.process.user = userId;
+    }
+
     if (processId) {
-      where.process = processId;
+      where.process.id = processId;
     }
 
     if (startDate && endDate) {
@@ -291,17 +303,17 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
     }));
   }
 
-  async findByProcess(processId: number): Promise<Interaction[]> {
+  async findByProcess(processId: number, userId: number): Promise<Interaction[]> {
     return this.interactionRepository.find(
-      { process: processId },
+      { process: { id: processId, user: userId } },
       { orderBy: { date: QueryOrder.DESC } },
     );
   }
 
-  async update(id: number, dto: any, user?: any): Promise<Interaction | null> {
-    const interaction = await this.interactionRepository.findOne({ id });
+  async update(id: number, dto: any, user?: any): Promise<Interaction> {
+    const interaction = await this.interactionRepository.findOne({ id, process: { user: user?.userId } });
     if (!interaction) {
-      return null;
+      throw new NotFoundException(`Interaction with ID ${id} not found`);
     }
 
     const data: any = { ...dto };
@@ -330,16 +342,19 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
     return interaction;
   }
 
-  async remove(id: number): Promise<Interaction | null> {
-    const interaction = await this.interactionRepository.findOne({ id });
-    if (interaction) {
-      await this.em.removeAndFlush(interaction);
+  async remove(id: number, userId: number): Promise<Interaction> {
+    const interaction = await this.interactionRepository.findOne({ id, process: { user: userId } });
+    if (!interaction) {
+      throw new NotFoundException(`Interaction with ID ${id} not found`);
     }
+    await this.em.removeAndFlush(interaction);
     return interaction;
   }
 
-  async exportData(): Promise<any[]> {
-    const interactions = await this.interactionRepository.findAll({
+  async exportData(userId: number): Promise<any[]> {
+    const interactions = await this.interactionRepository.find({
+      process: { user: userId }
+    }, {
       populate: ['process'],
     });
 
@@ -352,9 +367,9 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
     }));
   }
 
-  async importData(interactions: any[], mode: 'overwrite' | 'append'): Promise<{ count: number }> {
+  async importData(interactions: any[], mode: 'overwrite' | 'append', userId: number): Promise<{ count: number }> {
     if (mode === 'overwrite') {
-      const allInteractions = await this.interactionRepository.findAll();
+      const allInteractions = await this.interactionRepository.find({ process: { user: userId } });
       await this.em.removeAndFlush(allInteractions);
     }
 
@@ -367,8 +382,8 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
       if (interactionData.nextInviteDate) interactionData.nextInviteDate = new Date(interactionData.nextInviteDate);
       if (interactionData.createdAt) interactionData.createdAt = new Date(interactionData.createdAt);
 
-      // Check if process exists
-      const processExists = await this.processRepository.findOne({ id: interactionData.processId });
+      // Check if process exists and belongs to user
+      const processExists = await this.processRepository.findOne({ id: interactionData.processId, user: userId });
 
       if (processExists) {
         const { processId, ...data } = interactionData;

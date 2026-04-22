@@ -1,7 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityRepository, EntityManager } from '@mikro-orm/postgresql';
 import { Contact } from './contact.entity';
+import { Process } from '../processes/process.entity';
 
 @Injectable()
 export class ContactsService {
@@ -11,31 +12,36 @@ export class ContactsService {
     private readonly em: EntityManager,
   ) {}
 
-  async create(data: any): Promise<Contact> {
+  async create(data: any, userId: number): Promise<Contact> {
+    const processExists = await this.em.findOne(Process, { id: data.process, user: userId });
+    if (!processExists) {
+      throw new NotFoundException(`Process with ID ${data.process} not found or unauthorized`);
+    }
     const contact = this.contactRepository.create(data);
     await this.em.persistAndFlush(contact);
     return contact;
   }
 
-  async findAllByProcess(processId: number): Promise<Contact[]> {
-    return this.contactRepository.find({ process: processId });
+  async findAllByProcess(processId: number, userId: number): Promise<Contact[]> {
+    return this.contactRepository.find({ process: { id: processId, user: userId } });
   }
 
-  async update(id: number, data: any): Promise<Contact | null> {
-    const contact = await this.contactRepository.findOne({ id });
+  async update(id: number, data: any, userId: number): Promise<Contact> {
+    const contact = await this.contactRepository.findOne({ id, process: { user: userId } });
     if (!contact) {
-      return null;
+      throw new NotFoundException(`Contact with ID ${id} not found`);
     }
     Object.assign(contact, data);
     await this.em.flush();
     return contact;
   }
 
-  async remove(id: number): Promise<Contact | null> {
-    const contact = await this.contactRepository.findOne({ id });
-    if (contact) {
-      await this.em.removeAndFlush(contact);
+  async remove(id: number, userId: number): Promise<Contact> {
+    const contact = await this.contactRepository.findOne({ id, process: { user: userId } });
+    if (!contact) {
+      throw new NotFoundException(`Contact with ID ${id} not found`);
     }
+    await this.em.removeAndFlush(contact);
     return contact;
   }
 }

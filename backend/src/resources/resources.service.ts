@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityRepository, EntityManager, QueryOrder } from '@mikro-orm/postgresql';
 import { Resource } from './resource.entity';
@@ -24,25 +24,30 @@ export class ResourcesService {
     );
   }
 
-  async findOne(id: number, userId: number): Promise<Resource | null> {
-    return this.resourceRepository.findOne({ id, user: userId } as any);
-  }
-
-  async update(id: number, data: any, userId: number): Promise<Resource | null> {
+  async findOne(id: number, userId: number): Promise<Resource> {
     const resource = await this.resourceRepository.findOne({ id, user: userId } as any);
     if (!resource) {
-      return null;
+      throw new NotFoundException(`Resource with ID ${id} not found`);
+    }
+    return resource;
+  }
+
+  async update(id: number, data: any, userId: number): Promise<Resource> {
+    const resource = await this.resourceRepository.findOne({ id, user: userId } as any);
+    if (!resource) {
+      throw new NotFoundException(`Resource with ID ${id} not found`);
     }
     Object.assign(resource, data);
     await this.em.flush();
     return resource;
   }
 
-  async remove(id: number, userId: number): Promise<Resource | null> {
+  async remove(id: number, userId: number): Promise<Resource> {
     const resource = await this.resourceRepository.findOne({ id, user: userId } as any);
-    if (resource) {
-      await this.em.removeAndFlush(resource);
+    if (!resource) {
+      throw new NotFoundException(`Resource with ID ${id} not found`);
     }
+    await this.em.removeAndFlush(resource);
     return resource;
   }
 }

@@ -1,4 +1,4 @@
-import { Component, ViewChild, HostListener } from '@angular/core';
+import { Component, ViewChild, HostListener, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
@@ -7,6 +7,7 @@ import { ToastService } from '../../services/toast.service';
 import { SettingsService } from '../../services/settings.service';
 import countriesData from '../../../assets/countries.json';
 import { DEFAULT_PROCESS_STAGE, PROCESS_STAGES } from '../../shared/process-stages';
+import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-process-create',
@@ -15,13 +16,14 @@ import { DEFAULT_PROCESS_STAGE, PROCESS_STAGES } from '../../shared/process-stag
     templateUrl: './process-create.component.html',
     styleUrls: ['./process-create.component.css']
 })
-export class ProcessCreateComponent {
+export class ProcessCreateComponent implements OnDestroy {
     private readonly DEFAULT_COUNTRY = 'United States';
     @ViewChild('processForm') processForm!: NgForm;
     loading: boolean = false;
     formSubmitted: boolean = false;
     savedDraft: any = null;
     draftSaveTime: string = '';
+    private settingsSub!: Subscription;
 
     process: any = {
         companyName: '',
@@ -50,24 +52,38 @@ export class ProcessCreateComponent {
     selectedCountry = '';
 
     get completionPercent(): number {
-        const requiredFields: Array<keyof typeof this.process> = [
+        const fieldsToCheck: Array<keyof typeof this.process> = [
             'companyName',
             'roleTitle',
             'techStack',
-            'currentStage',
+            'source',
+            'salaryExpectation',
+            'dataFromThePhoneCall',
+            'initialInviteDate',
+            'initialInviteMethod',
+            'initialInviteContent'
         ];
 
-        const baseFilled = requiredFields.filter((key) => {
-            const value = this.process?.[key];
-            return typeof value === 'string' ? value.trim().length > 0 : value !== null && value !== undefined;
+        let filled = fieldsToCheck.filter(key => {
+            const value = this.process[key];
+            if (typeof value === 'string') return value.trim().length > 0;
+            return value !== null && value !== undefined && value !== '';
         }).length;
 
-        const locationRequired = this.process.workMode !== 'remote';
-        const total = requiredFields.length + (locationRequired ? 1 : 0);
-        const locationFilled = locationRequired ? (this.process.location?.trim?.().length ? 1 : 0) : 0;
+        let totalFields = fieldsToCheck.length;
 
-        if (total === 0) return 0;
-        return Math.round(((baseFilled + locationFilled) / total) * 100);
+        if (this.process.workMode !== 'remote') {
+            totalFields++;
+            if (this.process.location?.trim()) filled++;
+        }
+
+        if (this.process.workMode === 'hybrid') {
+            totalFields++;
+            if (this.process.daysFromOffice !== null && this.process.daysFromOffice > 0) filled++;
+        }
+
+        if (totalFields === 0) return 0;
+        return Math.round((filled / totalFields) * 100);
     }
 
     constructor(
@@ -80,7 +96,7 @@ export class ProcessCreateComponent {
         this.selectedCountry = this.getEffectiveCountry(settings.country);
         this.locationOptions = this.getLocationsForCountry(this.selectedCountry);
 
-        this.settingsService.settings$.subscribe(updatedSettings => {
+        this.settingsSub = this.settingsService.settings$.subscribe(updatedSettings => {
             const effectiveCountry = this.getEffectiveCountry(updatedSettings.country);
             if (effectiveCountry !== this.selectedCountry) {
                 this.selectedCountry = effectiveCountry;
@@ -90,6 +106,12 @@ export class ProcessCreateComponent {
                 this.showLocationDropdown = false;
             }
         });
+    }
+
+    ngOnDestroy() {
+        if (this.settingsSub) {
+            this.settingsSub.unsubscribe();
+        }
     }
 
     private getEffectiveCountry(country: string | null | undefined): string {

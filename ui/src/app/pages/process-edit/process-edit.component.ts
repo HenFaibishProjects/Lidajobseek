@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
+import { Component, HostListener, OnInit, ViewChild, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
@@ -8,6 +8,7 @@ import { SettingsService } from '../../services/settings.service';
 import countriesData from '../../../assets/countries.json';
 import { DateFormatPipe } from '../../pipes/date-format.pipe';
 import { PROCESS_STAGES } from '../../shared/process-stages';
+import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-process-edit',
@@ -16,7 +17,7 @@ import { PROCESS_STAGES } from '../../shared/process-stages';
     templateUrl: './process-edit.component.html',
     styleUrls: ['./process-edit.component.css']
 })
-export class ProcessEditComponent implements OnInit {
+export class ProcessEditComponent implements OnInit, OnDestroy {
     @ViewChild('processForm') processForm!: NgForm;
     process: any;
     locationSearch = '';
@@ -24,6 +25,7 @@ export class ProcessEditComponent implements OnInit {
     formSubmitted = false;
     isSubmitting = false;
     stages = PROCESS_STAGES;
+    private settingsSub!: Subscription;
 
     locationOptions: string[] = [];
     selectedCountry = '';
@@ -61,7 +63,7 @@ export class ProcessEditComponent implements OnInit {
         this.selectedCountry = settings.country;
         this.locationOptions = this.getLocationsForCountry(settings.country);
 
-        this.settingsService.settings$.subscribe(updatedSettings => {
+        this.settingsSub = this.settingsService.settings$.subscribe(updatedSettings => {
             if (updatedSettings.country !== this.selectedCountry) {
                 this.selectedCountry = updatedSettings.country;
                 this.locationOptions = this.getLocationsForCountry(updatedSettings.country);
@@ -72,6 +74,12 @@ export class ProcessEditComponent implements OnInit {
                 this.showLocationDropdown = false;
             }
         });
+    }
+
+    ngOnDestroy() {
+        if (this.settingsSub) {
+            this.settingsSub.unsubscribe();
+        }
     }
 
     ngOnInit() {

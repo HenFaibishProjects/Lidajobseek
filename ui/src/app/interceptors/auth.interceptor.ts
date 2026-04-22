@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpRequest, HttpHandler, HttpEvent, HttpInterceptor, HttpErrorResponse } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
+import { Observable, throwError, EMPTY } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { AuthService } from '../services/auth.service';
 
@@ -23,6 +23,7 @@ export class AuthInterceptor implements HttpInterceptor {
         if (error.status === 401) {
           // Token is invalid or expired, logout and redirect to login
           this.authService.logout();
+          return EMPTY;
         }
         return throwError(() => error);
       })

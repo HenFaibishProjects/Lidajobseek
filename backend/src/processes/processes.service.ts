@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityRepository, EntityManager, QueryOrder } from '@mikro-orm/postgresql';
 import { Process } from './process.entity';
@@ -10,6 +10,7 @@ import { CreateProcessDto } from './dto/create-process.dto';
 
 @Injectable()
 export class ProcessesService {
+  private readonly logger = new Logger(ProcessesService.name);
   private readonly CLOSED_STAGE_LABELS = ['Rejected', 'Reject', 'Withdrawn','Offer Declined'];
 
   constructor(
@@ -61,7 +62,7 @@ export class ProcessesService {
 
   async findAll(userId: number): Promise<any[]> {
     // First, check and update any processes that need automatic stage update
-    await this.updateStaleProcesses();
+    await this.updateStaleProcesses(userId);
 
     const processes = await this.processRepository.find(
       { user: userId },
@@ -81,9 +82,9 @@ export class ProcessesService {
     }));
   }
 
-  async findOne(id: number, userId: number): Promise<Process | null> {
+  async findOne(id: number, userId: number): Promise<Process> {
     // First, check and update any processes that need automatic stage update
-    await this.updateStaleProcesses();
+    await this.updateStaleProcesses(userId);
 
     const process = await this.processRepository.findOne(
       { id, user: userId },
@@ -92,20 +93,22 @@ export class ProcessesService {
       },
     );
 
-    if (process) {
-      // Sort interactions and reviews
-      process.interactions.getItems().sort((a, b) => b.date.getTime() - a.date.getTime());
-      process.reviews.getItems().sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-      (process as any).isClosed = this.isClosedStage(process.currentStage);
+    if (!process) {
+      throw new NotFoundException(`Process with ID ${id} not found`);
     }
+
+    // Sort interactions and reviews
+    process.interactions.getItems().sort((a, b) => b.date.getTime() - a.date.getTime());
+    process.reviews.getItems().sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    (process as any).isClosed = this.isClosedStage(process.currentStage);
 
     return process;
   }
 
-  async update(id: number, dto: any, userId: number): Promise<Process | null> {
+  async update(id: number, dto: any, userId: number): Promise<Process> {
     const process = await this.processRepository.findOne({ id, user: userId });
     if (!process) {
-      return null;
+      throw new NotFoundException(`Process with ID ${id} not found`);
     }
 
     const data: any = { ...dto };
@@ -140,11 +143,12 @@ export class ProcessesService {
     return process;
   }
 
-  async remove(id: number, userId: number): Promise<Process | null> {
+  async remove(id: number, userId: number): Promise<Process> {
     const process = await this.processRepository.findOne({ id, user: userId });
-    if (process) {
-      await this.em.removeAndFlush(process);
+    if (!process) {
+      throw new NotFoundException(`Process with ID ${id} not found`);
     }
+    await this.em.removeAndFlush(process);
     return process;
   }
 
@@ -225,12 +229,13 @@ export class ProcessesService {
    * - Current stage is NOT "Rejected" / "Reject" / "Withdrawn"
    * - Current stage is NOT already "No Response (14+ Days)"
    */
-  private async updateStaleProcesses(): Promise<void> {
+  private async updateStaleProcesses(userId: number): Promise<void> {
     const fourteenDaysAgo = new Date();
     fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
 
     try {
       const staleProcesses = await this.processRepository.find({
+        user: userId,
         updatedAt: { $lte: fourteenDaysAgo },
         currentStage: { $nin: [...this.CLOSED_STAGE_LABELS, 'No Response (14+ Days)'] },
       });
@@ -240,12 +245,12 @@ export class ProcessesService {
           process.currentStage = 'No Response (14+ Days)';
         }
         await this.em.flush();
-        console.log(
+        this.logger.log(
           `Automatically updated ${staleProcesses.length} process(es) to "No Response (14+ Days)"`,
         );
       }
     } catch (error) {
-      console.error('Error updating stale processes:', error);
+      this.logger.error('Error updating stale processes:', error instanceof Error ? error.stack : error);
       // Don't throw error to avoid breaking the main query
     }
   }

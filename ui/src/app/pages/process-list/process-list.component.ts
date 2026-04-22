@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -9,6 +9,7 @@ import { SettingsService, UserSettings } from '../../services/settings.service';
 import { AuthService } from '../../services/auth.service';
 import { DateFormatPipe } from '../../pipes/date-format.pipe';
 import { PROCESS_STAGES } from '../../shared/process-stages';
+import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-process-list',
@@ -17,7 +18,7 @@ import { PROCESS_STAGES } from '../../shared/process-stages';
     templateUrl: './process-list.component.html',
     styleUrls: ['./process-list.component.css']
 })
-export class ProcessListComponent implements OnInit {
+export class ProcessListComponent implements OnInit, OnDestroy {
     processes: any[] = [];
     processesOnActioin: any[] = [];
     filteredProcesses: any[] = [];
@@ -40,6 +41,7 @@ export class ProcessListComponent implements OnInit {
     availableWorkModes: string[] = ['remote', 'hybrid', 'onsite'];
 
     userDisplayName: string = 'Your Job Search';
+    private settingsSub!: Subscription;
 
     constructor(
         private processesService: ProcessesService,
@@ -61,7 +63,7 @@ export class ProcessListComponent implements OnInit {
     ngOnInit() {
         const initialSettings = this.settingsService.getSettings();
         this.userDisplayName = this.getDisplayName(initialSettings);
-        this.settingsService.settings$.subscribe((s) => {
+        this.settingsSub = this.settingsService.settings$.subscribe((s) => {
             this.userDisplayName = this.getDisplayName(s);
         });
 
@@ -80,6 +82,12 @@ export class ProcessListComponent implements OnInit {
                 this.isLoading = false;
             }
         });
+    }
+
+    ngOnDestroy() {
+        if (this.settingsSub) {
+            this.settingsSub.unsubscribe();
+        }
     }
 
     private getDisplayName(settings: UserSettings): string {

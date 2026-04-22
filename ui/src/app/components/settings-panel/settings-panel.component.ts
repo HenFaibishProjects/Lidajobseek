@@ -31,13 +31,7 @@ export class SettingsPanelComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.settings = this.settingsService.getSettings();
-    this.settingsService.settings$.subscribe(settings => {
-      this.settings = settings;
-      if (settings.country !== this.countrySearch) {
-        this.countrySearch = settings.country;
-      }
-    });
+    this.settings = JSON.parse(JSON.stringify(this.settingsService.getSettings()));
 
     this.countryOptions = Object.keys(countriesData).sort();
     this.countrySearch = this.settings.country;
@@ -53,30 +47,37 @@ export class SettingsPanelComponent implements OnInit {
     }
 
     if (!this.settings.profile) {
-      this.settingsService.updateSettings({
-        profile: {
-          displayName: this.currentUser?.name || '',
-          contactEmail: this.currentUser?.email || '',
-          phoneNumber: '',
-        }
-      } as Partial<UserSettings>);
+      this.settings.profile = {
+        displayName: this.currentUser?.name || '',
+        contactEmail: this.currentUser?.email || '',
+        phoneNumber: '',
+      };
     }
   }
 
+  saveSettings() {
+    this.settingsService.updateSettings(this.settings);
+    this.closePanel();
+  }
+
+  cancelSettings() {
+    this.closePanel();
+  }
+
   onThemeChange(theme: 'light' | 'dark' | 'auto') {
-    this.settingsService.setTheme(theme);
+    this.settings.theme = theme as any;
   }
 
   onClockFormatChange(format: '12' | '24') {
-    this.settingsService.setClockFormat(format);
+    this.settings.clockFormat = format as any;
   }
 
   onDateFormatChange(format: 'MM/DD/YYYY' | 'DD/MM/YYYY' | 'YYYY-MM-DD') {
-    this.settingsService.setDateFormat(format);
+    this.settings.dateFormat = format as any;
   }
 
   onCountryChange(country: string) {
-    this.settingsService.updateSettings({ country });
+    this.settings.country = country;
   }
 
   get filteredCountryOptions(): string[] {
@@ -123,22 +124,18 @@ export class SettingsPanelComponent implements OnInit {
   }
 
   onNotificationChange(key: keyof UserSettings['notifications'], value: boolean) {
-    this.settingsService.updateNotificationSetting(key, value);
+    (this.settings.notifications as any)[key] = value;
   }
 
   onDashboardChange(key: keyof UserSettings['dashboard'], value: any) {
-    this.settingsService.updateDashboardSetting(key, value);
+    (this.settings.dashboard as any)[key] = value;
   }
 
   onProfileChange(key: keyof NonNullable<UserSettings['profile']>, value: string) {
-    const current = this.settingsService.getSettings();
-    const profile = current.profile ?? { displayName: '', contactEmail: '', phoneNumber: '' };
-    this.settingsService.updateSettings({
-      profile: {
-        ...profile,
-        [key]: value,
-      },
-    } as Partial<UserSettings>);
+    if (!this.settings.profile) {
+      this.settings.profile = { displayName: '', contactEmail: '', phoneNumber: '' };
+    }
+    this.settings.profile[key] = value;
   }
 
   async resetSettings() {
