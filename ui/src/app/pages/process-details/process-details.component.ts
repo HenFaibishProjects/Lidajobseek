@@ -28,6 +28,42 @@ export class ProcessDetailsComponent implements OnInit {
         socialHooks: ''
     };
 
+    get completionPercent(): number {
+        if (!this.process) return 0;
+        const fieldsToCheck: Array<keyof typeof this.process> = [
+            'companyName',
+            'roleTitle',
+            'techStack',
+            'source',
+            'salaryExpectation',
+            'dataFromThePhoneCall',
+            'initialInviteDate',
+            'initialInviteMethod',
+            'initialInviteContent'
+        ];
+
+        let filled = fieldsToCheck.filter(key => {
+            const value = this.process[key];
+            if (typeof value === 'string') return value.trim().length > 0;
+            return value !== null && value !== undefined && value !== '';
+        }).length;
+
+        let totalFields = fieldsToCheck.length;
+
+        if (this.process.workMode !== 'remote') {
+            totalFields++;
+            if (this.process.location?.trim()) filled++;
+        }
+
+        if (this.process.workMode === 'hybrid') {
+            totalFields++;
+            if (this.process.daysFromOffice !== null && this.process.daysFromOffice > 0) filled++;
+        }
+
+        if (totalFields === 0) return 0;
+        return Math.round((filled / totalFields) * 100);
+    }
+
     constructor(
         private route: ActivatedRoute,
         private router: Router,

@@ -3,6 +3,12 @@
         <div class="title-block">
             <h1>{{ process.companyName }}</h1>
             <p class="subtitle">{{ process.roleTitle }}</p>
+            <div class="header-progress" style="margin-top: 16px; width: 300px;">
+                <div class="progress" style="height: 8px; background: var(--bg-subtle); border-radius: 4px; overflow: hidden; margin-bottom: 6px; border: 1px solid var(--border-color);">
+                    <div class="progress-bar" [style.width.%]="completionPercent" style="height: 100%; background: linear-gradient(90deg, var(--primary-blue), #7c3aed); border-radius: 4px; transition: width 0.3s ease;"></div>
+                </div>
+                <div class="progress-meta" style="font-size: 13px; color: var(--text-secondary);">{{ completionPercent }}% process profile complete</div>
+            </div>
         </div>
         <div class="header-actions">
             <div class="label-subtle" [ngClass]="getStatusClass(process.currentStage)">{{ process.currentStage }}</div>

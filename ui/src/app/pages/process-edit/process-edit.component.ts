@@ -32,24 +32,38 @@ export class ProcessEditComponent implements OnInit, OnDestroy {
 
     get completionPercent(): number {
         if (!this.process) return 0;
-        const requiredFields: Array<keyof typeof this.process> = [
+        const fieldsToCheck: Array<keyof typeof this.process> = [
             'companyName',
             'roleTitle',
             'techStack',
-            'currentStage',
+            'source',
+            'salaryExpectation',
+            'dataFromThePhoneCall',
+            'initialInviteDate',
+            'initialInviteMethod',
+            'initialInviteContent'
         ];
 
-        const baseFilled = requiredFields.filter((key) => {
-            const value = this.process?.[key];
-            return typeof value === 'string' ? value.trim().length > 0 : value !== null && value !== undefined;
+        let filled = fieldsToCheck.filter(key => {
+            const value = this.process[key];
+            if (typeof value === 'string') return value.trim().length > 0;
+            return value !== null && value !== undefined && value !== '';
         }).length;
 
-        const locationRequired = this.process.workMode !== 'remote';
-        const total = requiredFields.length + (locationRequired ? 1 : 0);
-        const locationFilled = locationRequired ? (this.process.location?.trim?.().length ? 1 : 0) : 0;
+        let totalFields = fieldsToCheck.length;
 
-        if (total === 0) return 0;
-        return Math.round(((baseFilled + locationFilled) / total) * 100);
+        if (this.process.workMode !== 'remote') {
+            totalFields++;
+            if (this.process.location?.trim()) filled++;
+        }
+
+        if (this.process.workMode === 'hybrid') {
+            totalFields++;
+            if (this.process.daysFromOffice !== null && this.process.daysFromOffice > 0) filled++;
+        }
+
+        if (totalFields === 0) return 0;
+        return Math.round((filled / totalFields) * 100);
     }
 
     constructor(

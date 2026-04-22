@@ -43,8 +43,8 @@ import { ConfirmService, ConfirmOptions } from '../../services/confirm.service';
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(17, 24, 39, 0.55);
-      backdrop-filter: blur(3px);
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -53,34 +53,74 @@ import { ConfirmService, ConfirmOptions } from '../../services/confirm.service';
       animation: fadeIn 0.2s ease-out;
     }
     .dialog {
-      background: var(--bg-card);
-      padding: 28px 28px 24px;
+      background: var(--bg-primary);
+      padding: 24px;
       border-radius: var(--radius-xl);
       width: min(92vw, 440px);
       box-shadow: var(--shadow-xl);
       border: 1px solid var(--border-color);
       animation: scaleIn 0.2s ease-out;
+      color: var(--text-primary);
+    }
+    .dialog-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
     }
     .dialog-title {
-      margin-top: 0;
-      margin-bottom: 8px;
+      margin: 0;
       font-size: 20px;
-      font-weight: 700;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .dialog-close {
+      background: transparent;
+      border: none;
+      color: var(--text-tertiary);
+      cursor: pointer;
+      padding: 4px;
+      min-height: auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-sm);
+      transition: all 0.2s;
+    }
+    .dialog-close:hover {
+      background: var(--bg-hover);
       color: var(--text-primary);
     }
     .dialog-message {
-      margin-bottom: 20px;
+      margin-bottom: 24px;
       color: var(--text-secondary);
-      line-height: 1.6;
-      font-size: 14.5px;
+      line-height: 1.5;
+      font-size: 15px;
     }
     .dialog-actions {
       display: flex;
       justify-content: flex-end;
       gap: 12px;
+      margin-bottom: 16px;
     }
     .dialog-actions button {
-      min-width: 110px;
+      min-width: 100px;
+    }
+    .keyboard-hint {
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-tertiary);
+      border-top: 1px solid var(--border-color);
+      padding-top: 16px;
+    }
+    .keyboard-hint kbd {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-family: inherit;
+      font-size: 11px;
+      box-shadow: 0 1px 1px rgba(0,0,0,0.1);
     }
     @keyframes fadeIn {
       from { opacity: 0; }

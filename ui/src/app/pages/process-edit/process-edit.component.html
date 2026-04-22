@@ -11,10 +11,18 @@
         </nav>
 
         <header class="form-hero">
-            <span class="form-badge">Edit Process</span>
-            <h1>Edit Process</h1>
-            <p class="subtitle">Modify details for {{ process.companyName }}.</p>
-            <div class="form-meta">Required fields are marked with <span class="required">*</span></div>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px;">
+                <div>
+                    <span class="form-badge">Edit Process</span>
+                    <h1>Edit Process</h1>
+                    <p class="subtitle">Modify details for {{ process.companyName }}.</p>
+                </div>
+                <div class="hero-actions" style="display: flex; gap: 12px;">
+                    <button type="button" class="btn-secondary" [routerLink]="['/process', process.id]">Cancel Edit</button>
+                </div>
+            </div>
+            
+            <div class="form-meta" style="margin-top: 12px;">Required fields are marked with <span class="required">*</span></div>
             <div class="hero-progress" aria-label="Completion progress">
                 <div class="progress" role="progressbar" [attr.aria-valuenow]="completionPercent" aria-valuemin="0" aria-valuemax="100">
                     <div class="progress-bar" [style.width.%]="completionPercent"></div>
