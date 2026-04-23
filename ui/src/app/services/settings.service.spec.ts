@@ -5,8 +5,7 @@ import { of, EMPTY } from 'rxjs';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 describe('SettingsService', () => {
-  let service: SettingsService;
-  let authService: jasmine.SpyObj<AuthService>;
+  let authServiceSpy: jasmine.SpyObj<AuthService>;
 
   const mockLocalStorage = (() => {
     let store: { [key: string]: string } = {};
@@ -25,10 +24,11 @@ describe('SettingsService', () => {
       'getUser'
     ]);
 
-    // Setup default mock returns to avoid constructor crashes
     authSpy.isAuthenticated.and.returnValue(false);
     authSpy.getPreferences.and.returnValue(EMPTY);
     authSpy.getUser.and.returnValue(null);
+
+    authServiceSpy = authSpy;
 
     Object.defineProperty(window, 'localStorage', { value: mockLocalStorage, writable: true });
     
@@ -46,17 +46,6 @@ describe('SettingsService', () => {
           dispatchEvent: () => true,
         }),
       });
-    } else {
-      spyOn(window, 'matchMedia').and.returnValue({
-        matches: false,
-        media: '',
-        onchange: null,
-        addListener: () => {},
-        removeListener: () => {},
-        addEventListener: () => {},
-        removeEventListener: () => {},
-        dispatchEvent: () => true,
-      } as any);
     }
 
     mockLocalStorage.clear();
@@ -68,32 +57,36 @@ describe('SettingsService', () => {
         { provide: AuthService, useValue: authSpy }
       ]
     });
-
-    authService = TestBed.get(AuthService);
-    service = TestBed.get(SettingsService);
   });
 
+  // Helper to get a fresh service after localStorage setup
+  function getService(): SettingsService {
+    return TestBed.inject(SettingsService);
+  }
+
   it('should be created and load default settings if storage is empty', () => {
+    const service = getService();
     expect(service).toBeTruthy();
     expect(service.getSettings().theme).toBe('light');
   });
 
   it('should load settings from localStorage', () => {
     mockLocalStorage.setItem('jobseek_user_settings', JSON.stringify({ theme: 'dark' }));
-    const newService = TestBed.inject(SettingsService);
-    expect(newService.getSettings().theme).toBe('dark');
+    const service = getService();
+    expect(service.getSettings().theme).toBe('dark');
   });
 
   it('should handle corrupted local storage JSON', () => {
     mockLocalStorage.setItem('jobseek_user_settings', '{ invalid }');
-    const newService = TestBed.inject(SettingsService);
-    expect(newService.getSettings().theme).toBe('light'); 
+    const service = getService();
+    expect(service.getSettings().theme).toBe('light'); 
   });
 
   it('should sync with server if authenticated', () => {
-    authService.isAuthenticated.and.returnValue(true);
+    const service = getService();
+    authServiceSpy.isAuthenticated.and.returnValue(true);
     const mockPrefs = { theme: 'dark', country: 'US', dateFormat: 'YYYY-MM-DD', timeFormat: '12' };
-    authService.getPreferences.and.returnValue(of(mockPrefs as any));
+    authServiceSpy.getPreferences.and.returnValue(of(mockPrefs as any));
 
     service.syncWithServer();
 
@@ -105,6 +98,7 @@ describe('SettingsService', () => {
   });
 
   it('should format date correctly according to preference', () => {
+    const service = getService();
     const testDate = new Date(2026, 3, 23); 
     
     service.updateSettings({ dateFormat: 'MM/DD/YYYY' });
@@ -118,6 +112,7 @@ describe('SettingsService', () => {
   });
 
   it('should toggle dark-theme class on body', () => {
+    const service = getService();
     service.setTheme('dark');
     expect(document.body.classList.contains('dark-theme')).toBeTrue();
 
