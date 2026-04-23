@@ -76,12 +76,9 @@ jobs:
           docker run -d \
             --name app-check \
             --network test-net \
-            -e DB_HOST=db-test \
-            -e DB_PORT=5432 \
-            -e DB_NAME=jobtracker \
-            -e DB_USER=jobtracker \
-            -e DB_PASS=jobtracker \
-            -e JWT_SECRET=test_secret \
+            -e DATABASE_URL="postgresql://jobtracker:jobtracker@db-test:5432/jobtracker" \
+            -e JWT_SECRET=${{ secrets.JWT_SECRET || 'test_secret' }} \
+            -e REGISTER=${{ secrets.REGISTER || 'LIDA2026' }} \
             -p 3000:3000 \
             lidajobseek:test
 
