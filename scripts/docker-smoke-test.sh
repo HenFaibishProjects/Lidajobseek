@@ -116,12 +116,20 @@ fi
 
 # 6. Authenticated request
 echo "Testing authenticated request to /api/profiles/me..."
-AUTH_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X GET "$BASE_URL/api/profiles/me" -H "Authorization: Bearer $TOKEN")
+curl -s -o /tmp/me.json -w "%{http_code}" -X GET "$BASE_URL/api/profiles/me" \
+  -H "Authorization: Bearer $TOKEN" > /tmp/me_status
+
+AUTH_STATUS=$(cat /tmp/me_status)
 
 if [ "$AUTH_STATUS" -eq 200 ]; then
   success "Authenticated request to /api/profiles/me (got 200)"
+  # Optional: verify content
+  # cat /tmp/me.json
 else
   fail "Authenticated request to /api/profiles/me (got $AUTH_STATUS)"
+  echo "Response Body:"
+  cat /tmp/me.json
+  echo "" # newline
   EXIT_CODE=1
 fi
 
