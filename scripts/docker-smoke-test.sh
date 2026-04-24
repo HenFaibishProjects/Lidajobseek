@@ -85,12 +85,19 @@ fi
 # 5. Login
 echo "Logging in..."
 LOGIN_RESPONSE=$(post_json "/api/auth/login" "{\"email\":\"$EMAIL\",\"password\":\"$PASSWORD\"}")
-TOKEN=$(echo "$LOGIN_RESPONSE" | jq -r '.access_token')
 
-if [ "$TOKEN" != "null" ] && [ -n "$TOKEN" ]; then
-  success "User login (token received)"
+# Validate JSON and extract token
+if echo "$LOGIN_RESPONSE" | jq -e . >/dev/null 2>&1; then
+  TOKEN=$(echo "$LOGIN_RESPONSE" | jq -r '.access_token // empty')
+  
+  if [ -n "$TOKEN" ] && [ "$TOKEN" != "null" ]; then
+    success "User login (token received)"
+  else
+    fail "User login failed: Token not found in response. Raw response: $LOGIN_RESPONSE"
+    exit 1
+  fi
 else
-  fail "User login failed: $LOGIN_RESPONSE"
+  fail "User login failed: Invalid JSON response. Raw response: $LOGIN_RESPONSE"
   exit 1
 fi
 
