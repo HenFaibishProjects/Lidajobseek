@@ -16,6 +16,9 @@ import { MikroOrmModule } from '@mikro-orm/nestjs';
 import config from '../mikro-orm.config';
 import { Contact } from './contacts/contact.entity';
 import { ProfilesModule } from './profiles/profiles.module';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { AuthGuard } from './auth/auth.guard';
+import { APP_GUARD } from '@nestjs/core';
 
 @Module({
   imports: [
@@ -69,8 +72,24 @@ import { ProfilesModule } from './profiles/profiles.module';
     ReviewsModule,
     ResourcesModule,
     ProfilesModule,
+    ThrottlerModule.forRoot([{
+      name: 'default',
+      ttl: 60000,
+      limit: 20,
+    }]),
   ],
   controllers: [AppController, ContactsController],
-  providers: [AppService, ContactsService],
+  providers: [
+    AppService,
+    ContactsService,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: AuthGuard,
+    },
+  ],
 })
 export class AppModule {}

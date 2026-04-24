@@ -11,12 +11,16 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Public } from './public.decorator';
+import { ThrottlerGuard, Throttle } from '@nestjs/throttler';
+import { UseGuards } from '@nestjs/common';
 
 @Controller('auth')
+@UseGuards(ThrottlerGuard)
 export class AuthController {
   constructor(private authService: AuthService) { }
 
   @Public()
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   @Post('login')
   @HttpCode(HttpStatus.OK)
   async login(@Body() body: any) {
@@ -28,12 +32,14 @@ export class AuthController {
   }
 
   @Public()
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
   @Post('register')
   async register(@Body() body: any) {
     return this.authService.register(body);
   }
 
   @Public()
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   @Post('verify-code')
   async verifyCode(@Body('code') code: string) {
     return this.authService.verifyInvitationCode(code);
