@@ -48,22 +48,19 @@ import { ProfilesModule } from './profiles/profiles.module';
       },
       {
         rootPath: (() => {
-          const uiBrowserRoot = join(process.cwd(), 'ui', 'dist', 'ui', 'browser');
-          const uiBrowserParent = join(process.cwd(), '..', 'ui', 'dist', 'ui', 'browser');
-          const distPublicRoot = join(process.cwd(), 'dist', 'public', 'browser');
-          const distPublicParent = join(process.cwd(), '..', 'dist', 'public', 'browser');
-
-          if (existsSync(uiBrowserRoot)) {
-            return uiBrowserRoot;
+          const paths = [
+            join(process.cwd(), 'ui', 'dist', 'ui', 'browser'),
+            join(process.cwd(), '..', 'ui', 'dist', 'ui', 'browser'),
+            join(process.cwd(), 'dist', 'public', 'browser'),
+            join(process.cwd(), '..', 'dist', 'public', 'browser'),
+            join(process.cwd(), 'dist', 'public'),
+            join(process.cwd(), '..', 'dist', 'public'),
+          ];
+          for (const path of paths) {
+            if (existsSync(path)) return path;
           }
-          if (existsSync(uiBrowserParent)) {
-            return uiBrowserParent;
-          }
-          if (existsSync(distPublicRoot)) {
-            return distPublicRoot;
-            }
-            return distPublicParent;
-                    })(),
+          return paths[0];
+        })(),
                     exclude: ['/api']
                   },
     ),

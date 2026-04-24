@@ -1,9 +1,18 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { MikroORM } from '@mikro-orm/core';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.setGlobalPrefix('api');
+
+  // Ensure database schema exists (only in CI or when explicitly requested)
+  if (process.env.DB_SYNC === 'true' || process.env.CI === 'true') {
+    const orm = app.get(MikroORM);
+    const generator = orm.getSchemaGenerator();
+    await generator.ensureDatabase();
+    await generator.updateSchema();
+  }
 
   const corsOrigins = (process.env.CORS_ORIGINS ?? 'http://localhost:4200,http://127.0.0.1:4200')
     .split(',')

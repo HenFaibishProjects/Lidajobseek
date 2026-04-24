@@ -42,7 +42,7 @@ const config: MikroOrmModuleOptions = {
 
   driverOptions: {
     connection: {
-      ssl: { rejectUnauthorized: false },
+      ssl: process.env.CI === 'true' ? false : { rejectUnauthorized: false },
     },
   },
 
