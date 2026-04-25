@@ -77,6 +77,18 @@
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true
+            },
+            "production-local": {
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.prod-local.ts"
+                }
+              ],
+              "optimization": true,
+              "sourceMap": true,
+              "extractLicenses": false,
+              "outputHashing": "none"
             }
           },
           "defaultConfiguration": "production"
@@ -95,6 +107,9 @@
             },
             "local": {
               "buildTarget": "ui:build:local"
+            },
+            "production-local": {
+              "buildTarget": "ui:build:production-local"
             }
           },
           "defaultConfiguration": "development"

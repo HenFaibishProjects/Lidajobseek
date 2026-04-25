@@ -2,353 +2,278 @@
   <div class="settings-panel" (click)="$event.stopPropagation()">
     <!-- Header -->
     <div class="panel-header">
-      <h2>⚙️ Settings</h2>
+      <h2>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2-2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+        <span>Settings</span>
+      </h2>
       <button class="btn-close" (click)="closePanel()" aria-label="Close settings">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <line x1="18" y1="6" x2="6" y2="18"></line>
           <line x1="6" y1="6" x2="18" y2="18"></line>
         </svg>
       </button>
     </div>
 
-    <!-- User Profile Section -->
-    <div class="settings-section" *ngIf="currentUser">
-      <div class="profile-card">
-        <div class="profile-avatar">
-          {{ (settings.profile?.displayName || currentUser.name || currentUser.email || 'U').charAt(0).toUpperCase() }}
-        </div>
-        <div class="profile-info">
-          <div class="profile-name">
-            {{ settings.profile?.displayName || currentUser.name || 'Your job search' }}
+    <!-- Scrollable Content -->
+    <div class="settings-content">
+      
+      <!-- User Profile Section -->
+      <div class="settings-section" *ngIf="currentUser">
+        <h3 class="section-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          Profile
+        </h3>
+        <div class="profile-card">
+          <div class="profile-avatar">
+            {{ (settings.profile?.displayName || currentUser.name || currentUser.email || 'U').charAt(0).toUpperCase() }}
           </div>
-          <div class="profile-role">
-            {{ settings.profile?.contactEmail || currentUser.email }}
+          <div class="profile-info">
+            <div class="profile-name">
+              {{ settings.profile?.displayName || currentUser.name || 'User' }}
+            </div>
+            <div class="profile-role">
+              {{ settings.profile?.contactEmail || currentUser.email }}
+            </div>
+          </div>
+        </div>
+        
+        <div class="profile-fields">
+          <div class="setting-item">
+            <label class="setting-label">Display Name</label>
+            <input
+              class="input-field"
+              type="text"
+              [(ngModel)]="settings.profile!.displayName"
+              (ngModelChange)="onProfileChange('displayName', $event)"
+              placeholder="Your name" />
+          </div>
+          <div class="setting-item">
+            <label class="setting-label">Contact Email</label>
+            <input
+              class="input-field"
+              type="email"
+              [(ngModel)]="settings.profile!.contactEmail"
+              (ngModelChange)="onProfileChange('contactEmail', $event)"
+              placeholder="email@example.com" />
+          </div>
+          <div class="setting-item">
+            <label class="setting-label">Phone Number</label>
+            <input
+              class="input-field"
+              type="tel"
+              [(ngModel)]="settings.profile!.phoneNumber"
+              (ngModelChange)="onProfileChange('phoneNumber', $event)"
+              placeholder="+1..." />
           </div>
         </div>
       </div>
-      <div class="profile-fields">
-        <div class="profile-field">
-          <label class="setting-label">Name</label>
-          <input
-            class="input-field"
-            type="text"
-            [(ngModel)]="settings.profile!.displayName"
-            (ngModelChange)="onProfileChange('displayName', $event)"
-            placeholder="How should we call you?" />
-        </div>
-        <div class="profile-field">
-          <label class="setting-label">Email</label>
-          <input
-            class="input-field"
-            type="email"
-            [(ngModel)]="settings.profile!.contactEmail"
-            (ngModelChange)="onProfileChange('contactEmail', $event)"
-            placeholder="Contact email" />
-        </div>
-        <div class="profile-field">
-          <label class="setting-label">Phone (optional)</label>
-          <input
-            class="input-field"
-            type="tel"
-            [(ngModel)]="settings.profile!.phoneNumber"
-            (ngModelChange)="onProfileChange('phoneNumber', $event)"
-            placeholder="+1 555 123 4567" />
-        </div>
-      </div>
-    </div>
 
-  
-
-    <!-- Appearance Settings -->
-    <div class="settings-section">
-      <h3 class="section-title">🎨 Appearance</h3>
-
-      <div class="setting-item">
-        <label class="setting-label">Theme</label>
-        <div class="theme-options">
-          <button
-            class="theme-btn"
-            [class.active]="settings.theme === 'light'"
-            (click)="onThemeChange('light')">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="5"></circle>
-              <line x1="12" y1="1" x2="12" y2="3"></line>
-              <line x1="12" y1="21" x2="12" y2="23"></line>
-              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-              <line x1="1" y1="12" x2="3" y2="12"></line>
-              <line x1="21" y1="12" x2="23" y2="12"></line>
-              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-            </svg>
-            <span>Light</span>
-          </button>
-          <button
-            class="theme-btn"
-            [class.active]="settings.theme === 'dark'"
-            (click)="onThemeChange('dark')">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-            </svg>
-            <span>Dark</span>
-          </button>
-          <button
-            class="theme-btn"
-            [class.active]="settings.theme === 'auto'"
-            (click)="onThemeChange('auto')">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
-              <line x1="8" y1="21" x2="16" y2="21"></line>
-              <line x1="12" y1="17" x2="12" y2="21"></line>
-            </svg>
-            <span>Auto</span>
-          </button>
-        </div>
-      </div>
-    </div>
-
-
-
-    <!-- Date & Time Settings -->
-    <div class="settings-section">
-      <h3 class="section-title">🕐 Date & Time</h3>
-
-      <div class="setting-item">
-        <label class="setting-label">Clock Format</label>
-        <div class="radio-group">
-          <label class="radio-option">
-            <input
-              type="radio"
-              name="clockFormat"
-              value="12"
-              [checked]="settings.clockFormat === '12'"
-              (change)="onClockFormatChange('12')">
-            <span>12-hour (2:30 PM)</span>
-          </label>
-          <label class="radio-option">
-            <input
-              type="radio"
-              name="clockFormat"
-              value="24"
-              [checked]="settings.clockFormat === '24'"
-              (change)="onClockFormatChange('24')">
-            <span>24-hour (14:30)</span>
-          </label>
-        </div>
-      </div>
-
-      <div class="setting-item">
-        <label class="setting-label">Date Format</label>
-        <div class="radio-group">
-          <label class="radio-option">
-            <input
-              type="radio"
-              name="dateFormat"
-              value="DD/MM/YYYY"
-              [checked]="settings.dateFormat === 'DD/MM/YYYY'"
-              (change)="onDateFormatChange('DD/MM/YYYY')">
-            <span>DD/MM/YYYY (31/12/2024)</span>
-          </label>
-          <label class="radio-option">
-            <input
-              type="radio"
-              name="dateFormat"
-              value="MM/DD/YYYY"
-              [checked]="settings.dateFormat === 'MM/DD/YYYY'"
-              (change)="onDateFormatChange('MM/DD/YYYY')">
-            <span>MM/DD/YYYY (12/31/2024)</span>
-          </label>
-          <label class="radio-option">
-            <input
-              type="radio"
-              name="dateFormat"
-              value="YYYY-MM-DD"
-              [checked]="settings.dateFormat === 'YYYY-MM-DD'"
-              (change)="onDateFormatChange('YYYY-MM-DD')">
-            <span>YYYY-MM-DD (2024-12-31)</span>
-          </label>
-        </div>
-      </div>
-    </div>
-
-    <div class="settings-section">
-      <h3 class="section-title">🌍 Location</h3>
-
-      <div class="setting-item">
-        <label class="setting-label">Country</label>
-        <div class="country-combobox" [class.open]="showCountryDropdown">
-          <input
-            class="input-field"
-            type="text"
-            name="country"
-            autocomplete="off"
-            [(ngModel)]="countrySearch"
-            (input)="onCountrySearchChange()"
-            (focus)="onCountrySearchChange()"
-            placeholder="Start typing to search...">
-          <button
-            type="button"
-            class="country-toggle"
-            aria-label="Toggle country list"
-            (click)="toggleCountryDropdown()">
-            <span aria-hidden="true">▾</span>
-          </button>
-          <div class="country-dropdown" *ngIf="showCountryDropdown">
-            <button
-              type="button"
-              class="country-option"
-              *ngFor="let country of filteredCountryOptions"
-              (click)="selectCountry(country)">
-              {{ country }}
+      <!-- Appearance Settings -->
+      <div class="settings-section">
+        <h3 class="section-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
+          </svg>
+          Appearance
+        </h3>
+        <div class="setting-item">
+          <label class="setting-label">Theme Mode</label>
+          <div class="theme-options">
+            <button class="theme-btn" [class.active]="settings.theme === 'light'" (click)="onThemeChange('light')">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="5"></circle>
+                <line x1="12" y1="1" x2="12" y2="3"></line>
+                <line x1="12" y1="21" x2="12" y2="23"></line>
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                <line x1="1" y1="12" x2="3" y2="12"></line>
+                <line x1="21" y1="12" x2="23" y2="12"></line>
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+              </svg>
+              <span>Light</span>
             </button>
-            <div class="country-empty" *ngIf="filteredCountryOptions.length === 0">
-              No matches found
+            <button class="theme-btn" [class.active]="settings.theme === 'dark'" (click)="onThemeChange('dark')">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+              </svg>
+              <span>Dark</span>
+            </button>
+            <button class="theme-btn" [class.active]="settings.theme === 'auto'" (click)="onThemeChange('auto')">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                <line x1="12" y1="17" x2="12" y2="21"></line>
+              </svg>
+              <span>Auto</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Date & Time Settings -->
+      <div class="settings-section">
+        <h3 class="section-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          Regional
+        </h3>
+        <div class="setting-item">
+          <label class="setting-label">Clock Format</label>
+          <div class="radio-group">
+            <label class="radio-option">
+              <input type="radio" name="clockFormat" value="12" [checked]="settings.clockFormat === '12'" (change)="onClockFormatChange('12')">
+              <span>12-hour (2:30 PM)</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="clockFormat" value="24" [checked]="settings.clockFormat === '24'" (change)="onClockFormatChange('24')">
+              <span>24-hour (14:30)</span>
+            </label>
+          </div>
+        </div>
+        <div class="setting-item">
+          <label class="setting-label">Date Format</label>
+          <div class="radio-group">
+            <label class="radio-option">
+              <input type="radio" name="dateFormat" value="DD/MM/YYYY" [checked]="settings.dateFormat === 'DD/MM/YYYY'" (change)="onDateFormatChange('DD/MM/YYYY')">
+              <span>DD/MM/YYYY</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="dateFormat" value="MM/DD/YYYY" [checked]="settings.dateFormat === 'MM/DD/YYYY'" (change)="onDateFormatChange('MM/DD/YYYY')">
+              <span>MM/DD/YYYY</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="dateFormat" value="YYYY-MM-DD" [checked]="settings.dateFormat === 'YYYY-MM-DD'" (change)="onDateFormatChange('YYYY-MM-DD')">
+              <span>YYYY-MM-DD</span>
+            </label>
+          </div>
+        </div>
+        <div class="setting-item">
+          <label class="setting-label">Country</label>
+          <div class="country-combobox" [class.open]="showCountryDropdown">
+            <input class="input-field" type="text" name="country" autocomplete="off" [(ngModel)]="countrySearch" (input)="onCountrySearchChange()" (focus)="onCountrySearchChange()" placeholder="Search country...">
+            <button type="button" class="country-toggle" (click)="toggleCountryDropdown()">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </button>
+            <div class="country-dropdown" *ngIf="showCountryDropdown">
+              <button type="button" class="country-option" *ngFor="let country of filteredCountryOptions" (click)="selectCountry(country)">{{ country }}</button>
+              <div class="country-empty" *ngIf="filteredCountryOptions.length === 0">No matches</div>
             </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Notifications Settings -->
-    <div class="settings-section">
-      <h3 class="section-title">🔔 Notifications</h3>
-
-      <div class="setting-item">
-        <label class="toggle-setting">
-          <input
-            type="checkbox"
-            [(ngModel)]="settings.notifications.email"
-            (change)="onNotificationChange('email', settings.notifications.email)">
-          <span class="toggle-label">Email Notifications</span>
-        </label>
-      </div>
-
-      <div class="setting-item">
-        <label class="toggle-setting">
-          <input
-            type="checkbox"
-            [(ngModel)]="settings.notifications.desktop"
-            (change)="onNotificationChange('desktop', settings.notifications.desktop)">
-          <span class="toggle-label">Desktop Notifications</span>
-        </label>
-      </div>
-
-      <div class="setting-item">
-        <label class="toggle-setting">
-          <input
-            type="checkbox"
-            [(ngModel)]="settings.notifications.followUps"
-            (change)="onNotificationChange('followUps', settings.notifications.followUps)">
-          <span class="toggle-label">Follow-up Reminders</span>
-        </label>
-      </div>
-
-      <div class="setting-item">
-        <label class="toggle-setting">
-          <input
-            type="checkbox"
-            [(ngModel)]="settings.notifications.interviews"
-            (change)="onNotificationChange('interviews', settings.notifications.interviews)">
-          <span class="toggle-label">Interview Reminders</span>
-        </label>
-      </div>
-    </div>
-
-
-    <!-- Dashboard Settings -->
-    <div class="settings-section">
-      <h3 class="section-title">📊 Dashboard</h3>
-
-      <div class="setting-item">
-        <label class="toggle-setting">
-          <input
-            type="checkbox"
-            [(ngModel)]="settings.dashboard.showStats"
-            (change)="onDashboardChange('showStats', settings.dashboard.showStats)">
-          <span class="toggle-label">Show Statistics</span>
-        </label>
-      </div>
-
-      <div class="setting-item">
-        <label class="toggle-setting">
-          <input
-            type="checkbox"
-            [(ngModel)]="settings.dashboard.showTasks"
-            (change)="onDashboardChange('showTasks', settings.dashboard.showTasks)">
-          <span class="toggle-label">Show Tasks</span>
-        </label>
-      </div>
-
-      <div class="setting-item">
-        <label class="setting-label">Default View</label>
-        <div class="radio-group">
-          <label class="radio-option">
-            <input
-              type="radio"
-              name="defaultView"
-              value="grid"
-              [checked]="settings.dashboard.defaultView === 'grid'"
-              (change)="onDashboardChange('defaultView', 'grid')">
-            <span>Grid View</span>
+      <!-- Notifications Settings -->
+      <div class="settings-section">
+        <h3 class="section-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+          </svg>
+          Notifications
+        </h3>
+        <div class="setting-item">
+          <label class="toggle-setting">
+            <span class="toggle-label">Email Notifications</span>
+            <input type="checkbox" [(ngModel)]="settings.notifications.email" (change)="onNotificationChange('email', settings.notifications.email)">
+            <div class="switch"></div>
           </label>
-          <label class="radio-option">
-            <input
-              type="radio"
-              name="defaultView"
-              value="list"
-              [checked]="settings.dashboard.defaultView === 'list'"
-              (change)="onDashboardChange('defaultView', 'list')">
-            <span>List View</span>
+        </div>
+        <div class="setting-item">
+          <label class="toggle-setting">
+            <span class="toggle-label">Desktop Alerts</span>
+            <input type="checkbox" [(ngModel)]="settings.notifications.desktop" (change)="onNotificationChange('desktop', settings.notifications.desktop)">
+            <div class="switch"></div>
           </label>
+        </div>
+        <div class="setting-item">
+          <label class="toggle-setting">
+            <span class="toggle-label">Follow-up Reminders</span>
+            <input type="checkbox" [(ngModel)]="settings.notifications.followUps" (change)="onNotificationChange('followUps', settings.notifications.followUps)">
+            <div class="switch"></div>
+          </label>
+        </div>
+      </div>
+
+      <!-- Dashboard Settings -->
+      <div class="settings-section">
+        <h3 class="section-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="3" y1="9" x2="21" y2="9"></line>
+            <line x1="9" y1="21" x2="9" y2="9"></line>
+          </svg>
+          Preferences
+        </h3>
+        <div class="setting-item">
+          <label class="toggle-setting">
+            <span class="toggle-label">Show Statistics Widget</span>
+            <input type="checkbox" [(ngModel)]="settings.dashboard.showStats" (change)="onDashboardChange('showStats', settings.dashboard.showStats)">
+            <div class="switch"></div>
+          </label>
+        </div>
+        <div class="setting-item">
+          <label class="toggle-setting">
+            <span class="toggle-label">Show Task List</span>
+            <input type="checkbox" [(ngModel)]="settings.dashboard.showTasks" (change)="onDashboardChange('showTasks', settings.dashboard.showTasks)">
+            <div class="switch"></div>
+          </label>
+        </div>
+        <div class="setting-item">
+          <label class="setting-label">Default Dashboard View</label>
+          <div class="radio-group">
+            <label class="radio-option">
+              <input type="radio" name="defaultView" value="grid" [checked]="settings.dashboard.defaultView === 'grid'" (change)="onDashboardChange('defaultView', 'grid')">
+              <span>Grid Layout</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="defaultView" value="list" [checked]="settings.dashboard.defaultView === 'list'" (change)="onDashboardChange('defaultView', 'list')">
+              <span>List Layout</span>
+            </label>
+          </div>
         </div>
       </div>
     </div>
 
-
-
-    <!-- Actions -->
-    <div class="settings-section">
-      <h3 class="section-title">⚡ Actions</h3>
-
-      <div class="panel-actions" style="display: flex; gap: 10px; margin-bottom: 20px;">
-        <button class="action-btn save-btn" (click)="saveSettings()" style="background-color: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-color); flex: 1;">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
-            <polyline points="17 21 17 13 7 13 7 21"></polyline>
-            <polyline points="7 3 7 8 15 8"></polyline>
-          </svg>
-          <span>Save Changes</span>
+    <!-- Actions Footer -->
+    <div class="panel-footer">
+      <div class="primary-actions">
+        <button class="action-btn cancel-btn" (click)="cancelSettings()">
+          Cancel
         </button>
-        <button class="action-btn cancel-btn" (click)="cancelSettings()" style="background-color: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-color); flex: 1;">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
-          <span>Cancel</span>
+        <button class="action-btn save-btn" (click)="saveSettings()">
+          Save Changes
         </button>
       </div>
-
-      <button class="action-btn reset-btn" (click)="resetSettings()">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="23 4 23 10 17 10"></polyline>
-          <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
-        </svg>
-        <span>Reset to Defaults</span>
-      </button>
-
-      <button class="action-btn logout-btn" (click)="logout()">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-          <polyline points="16 17 21 12 16 7"></polyline>
-          <line x1="21" y1="12" x2="9" y2="12"></line>
-        </svg>
-        <span>Logout</span>
-      </button>
-    </div>
-
-    <!-- Footer -->
-    <div class="panel-footer">
-      <p class="version-info">Lida Job assistance v1.0.0</p>
+      <div class="secondary-actions">
+        <button class="action-btn reset-btn" (click)="resetSettings()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="23 4 23 10 17 10"></polyline>
+            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+          </svg>
+          Reset Defaults
+        </button>
+        <button class="action-btn logout-btn" (click)="logout()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+          Logout
+        </button>
+      </div>
+      <div class="footer-bottom">
+        <p class="version-info">Lida Jobseek v1.0.1</p>
+      </div>
     </div>
   </div>
 </div>

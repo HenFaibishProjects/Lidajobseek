@@ -6,6 +6,7 @@
     "start": "ng serve",
     "start:proxy": "ng serve --configuration development",
     "start:local": "ng serve --configuration local",
+    "start:prod-local": "ng serve --configuration production-local",
     "build": "ng build",
     "build:local": "ng build --configuration local",
     "watch": "ng build --watch --configuration development",
