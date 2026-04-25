@@ -74,7 +74,7 @@ export class SettingsPanelComponent implements OnInit {
 
     // Initial detection if phone exists
     if (this.settings.profile?.phoneNumber) {
-      this.detectedCountry = getCountryByPhone(this.settings.profile.phoneNumber);
+      this.detectedCountry = getCountryByPhone(this.settings.profile.phoneNumber, this.settings.country);
     }
   }
 
@@ -185,7 +185,7 @@ export class SettingsPanelComponent implements OnInit {
       if (this.settings.profile) {
         this.settings.profile.phoneNumber = sanitized;
       }
-      this.detectedCountry = getCountryByPhone(sanitized);
+      this.detectedCountry = getCountryByPhone(sanitized, this.settings.country);
     } else {
       this.settings.profile[key] = value;
     }

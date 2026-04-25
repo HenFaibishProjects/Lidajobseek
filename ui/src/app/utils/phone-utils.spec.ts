@@ -7,6 +7,12 @@ describe('PhoneUtils', () => {
     expect(country?.flag).toBe('🇺🇸');
   });
 
+  it('should prefer Canada for +1 if hint is provided', () => {
+    const country = getCountryByPhone('+1 1234567890', 'Canada');
+    expect(country?.name).toBe('Canada');
+    expect(country?.flag).toBe('🇨🇦');
+  });
+
   it('should recognize United Kingdom from +44', () => {
     const country = getCountryByPhone('+44 7700 900077');
     expect(country?.name).toBe('United Kingdom');

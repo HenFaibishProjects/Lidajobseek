@@ -39,17 +39,23 @@ export const COUNTRY_PHONE_DATA: CountryPhoneInfo[] = [
   { name: 'Uruguay', code: 'UY', dialCode: '+598', flag: '🇺🇾' }
 ];
 
-export function getCountryByPhone(phone: string): CountryPhoneInfo | null {
+export function getCountryByPhone(phone: string, preferredCountryName?: string): CountryPhoneInfo | null {
   if (!phone || !phone.startsWith('+')) return null;
   
   // Sort by dialCode length descending to match longest codes first (like +1 242 vs +1)
   const sortedData = [...COUNTRY_PHONE_DATA].sort((a, b) => b.dialCode.length - a.dialCode.length);
   
-  for (const country of sortedData) {
-    if (phone.startsWith(country.dialCode)) {
-      return country;
-    }
+  const matches = sortedData.filter(country => phone.startsWith(country.dialCode));
+  
+  if (matches.length === 0) return null;
+  if (matches.length === 1) return matches[0];
+  
+  // If multiple countries share a code (+1), try to match the user's selected country
+  if (preferredCountryName) {
+    const preferredMatch = matches.find(m => m.name === preferredCountryName);
+    if (preferredMatch) return preferredMatch;
   }
   
-  return null;
+  // Default to the first match if no preference matches
+  return matches[0];
 }
