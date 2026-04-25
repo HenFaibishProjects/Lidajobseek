@@ -12,68 +12,92 @@ import { ToastService } from '../../services/toast.service';
            class="toast"
            [ngClass]="toast.type"
            (click)="toastService.remove(toast.id)">
-        {{ toast.message }}
+        <div class="toast-icon">
+          <svg *ngIf="toast.type === 'success'" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          <svg *ngIf="toast.type === 'error'" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+          <svg *ngIf="toast.type === 'info'" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+          <svg *ngIf="toast.type === 'warning'" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+        </div>
+        <div class="toast-content">
+          {{ toast.message }}
+        </div>
+        <div class="toast-progress"></div>
       </div>
     </div>
   `,
   styles: [`
     .toast-container {
       position: fixed;
-      top: 24px;
-      right: 24px;
-      z-index: 9999;
+      top: 32px;
+      right: 32px;
+      z-index: 10000;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 16px;
+      pointer-events: none;
     }
     .toast {
-      position: relative;
-      padding: 14px 22px;
-      border-radius: 14px;
+      pointer-events: auto;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px 20px;
+      border-radius: 16px;
       color: white;
       font-size: 14px;
       font-weight: 600;
-      letter-spacing: 0.2px;
-      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.18);
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      backdrop-filter: blur(8px);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(12px);
       cursor: pointer;
-      animation: slideIn 0.35s ease-out;
-      min-width: 280px;
+      animation: toastIn 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+      min-width: 320px;
+      max-width: 450px;
+      position: relative;
       overflow: hidden;
+      transition: transform 0.2s ease, opacity 0.2s ease;
     }
-    .toast::after {
-      content: '';
+    .toast:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 30px 70px rgba(0, 0, 0, 0.2);
+    }
+    .toast:active {
+      transform: scale(0.98);
+    }
+    .toast-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.2);
+      flex-shrink: 0;
+    }
+    .toast-content {
+      flex: 1;
+      line-height: 1.4;
+    }
+    .toast-progress {
       position: absolute;
-      inset: 0;
-      background: linear-gradient(120deg, rgba(255, 255, 255, 0.2), transparent 60%);
-      opacity: 0.6;
-      pointer-events: none;
+      bottom: 0;
+      left: 0;
+      height: 3px;
+      background: rgba(255, 255, 255, 0.3);
+      animation: progress 3s linear forwards;
     }
-    .toast::before {
-      content: '';
-      position: absolute;
-      top: -20px;
-      right: -30px;
-      width: 120px;
-      height: 120px;
-      background: rgba(255, 255, 255, 0.25);
-      filter: blur(35px);
-      opacity: 0.4;
-    }
-    .success {
-      background: linear-gradient(135deg, #10b981 0%, #22c55e 45%, #34d399 100%);
-    }
-    .success::before {
-      background: rgba(255, 255, 255, 0.35);
-    }
-    .error { background: linear-gradient(135deg, #ef4444 0%, #f97316 100%); }
-    .info { background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%); }
-    .warning { background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%); }
+    .success { background: linear-gradient(135deg, #059669 0%, #10b981 100%); }
+    .error { background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%); }
+    .info { background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%); }
+    .warning { background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%); }
 
-    @keyframes slideIn {
-      from { transform: translateX(120%) scale(0.95); opacity: 0; }
+    @keyframes toastIn {
+      from { transform: translateX(100px) scale(0.9); opacity: 0; }
       to { transform: translateX(0) scale(1); opacity: 1; }
+    }
+    @keyframes progress {
+      from { width: 100%; }
+      to { width: 0%; }
     }
   `]
 })

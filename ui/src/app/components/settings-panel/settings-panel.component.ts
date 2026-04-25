@@ -1,11 +1,13 @@
-import { Component, OnInit, Output, EventEmitter, HostListener } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, HostListener, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { SettingsService, UserSettings } from '../../services/settings.service';
 import { AuthService } from '../../services/auth.service';
 import { ConfirmService } from '../../services/confirm.service';
+import { ToastService } from '../../services/toast.service';
 import countriesData from '../../../assets/countries.json';
+import { getCountryByPhone, CountryPhoneInfo } from '../../utils/phone-utils';
 
 @Component({
   selector: 'app-settings-panel',
@@ -18,20 +20,36 @@ export class SettingsPanelComponent implements OnInit {
   @Output() close = new EventEmitter<void>();
 
   settings!: UserSettings;
+  initialSettings!: string; // Used for deep change detection
   currentUser: any = null;
   countryOptions: string[] = [];
   countrySearch = '';
   showCountryDropdown = false;
+  detectedCountry: CountryPhoneInfo | null = null;
 
   constructor(
     private settingsService: SettingsService,
     private authService: AuthService,
     private confirmService: ConfirmService,
-    private router: Router
+    private router: Router,
+    private toast: ToastService,
+    private el: ElementRef
   ) {}
+
+  onPanelClick(event: MouseEvent) {
+    // Prevent the panel click from reaching the overlay (which would close the whole panel)
+    event.stopPropagation();
+
+    // Handle closing the country dropdown if clicking outside of it
+    const dropdownContainer = this.el.nativeElement.querySelector('.country-dropdown-container');
+    if (this.showCountryDropdown && dropdownContainer && !dropdownContainer.contains(event.target)) {
+      this.showCountryDropdown = false;
+    }
+  }
 
   ngOnInit() {
     this.settings = JSON.parse(JSON.stringify(this.settingsService.getSettings()));
+    this.initialSettings = JSON.stringify(this.settings); // Capture baseline for change detection
 
     this.countryOptions = Object.keys(countriesData).sort();
     this.countrySearch = this.settings.country;
@@ -53,11 +71,33 @@ export class SettingsPanelComponent implements OnInit {
         phoneNumber: '',
       };
     }
+
+    // Initial detection if phone exists
+    if (this.settings.profile?.phoneNumber) {
+      this.detectedCountry = getCountryByPhone(this.settings.profile.phoneNumber);
+    }
   }
 
   saveSettings() {
+    if (!this.isFormValid()) {
+      this.toast.show('Please fix the errors before saving', 'error');
+      return;
+    }
     this.settingsService.updateSettings(this.settings);
+    this.toast.show('Settings saved successfully', 'success');
     this.closePanel();
+  }
+
+  isFormValid(): boolean {
+    const phonePattern = /^[\+]?[0-9\-\s]*$/;
+    if (this.settings.profile?.phoneNumber && !phonePattern.test(this.settings.profile.phoneNumber)) {
+      return false;
+    }
+    return true;
+  }
+
+  hasChanges(): boolean {
+    return this.initialSettings !== JSON.stringify(this.settings);
   }
 
   cancelSettings() {
@@ -97,11 +137,14 @@ export class SettingsPanelComponent implements OnInit {
 
   toggleCountryDropdown() {
     this.showCountryDropdown = !this.showCountryDropdown;
+    if (this.showCountryDropdown) {
+      this.countrySearch = ''; // Clear search when opening
+    }
   }
 
   selectCountry(country: string) {
+    this.settings.country = country;
     this.countrySearch = country;
-    this.onCountryChange(country);
     this.showCountryDropdown = false;
   }
 
@@ -135,7 +178,33 @@ export class SettingsPanelComponent implements OnInit {
     if (!this.settings.profile) {
       this.settings.profile = { displayName: '', contactEmail: '', phoneNumber: '' };
     }
-    this.settings.profile[key] = value;
+    
+    // Sanitize phone number to allow only numbers, +, -, and spaces
+    if (key === 'phoneNumber') {
+      const sanitized = value.replace(/[^0-9+\-\s]/g, '');
+      if (this.settings.profile) {
+        this.settings.profile.phoneNumber = sanitized;
+      }
+      this.detectedCountry = getCountryByPhone(sanitized);
+    } else {
+      this.settings.profile[key] = value;
+    }
+  }
+
+  onPhoneKeydown(event: KeyboardEvent) {
+    const allowedKeys = [
+      '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 
+      '+', '-', ' ', 
+      'Backspace', 'Delete', 'Tab', 'Escape', 'Enter',
+      'ArrowLeft', 'ArrowRight', 'Home', 'End'
+    ];
+    
+    // Allow Ctrl+A, Ctrl+C, Ctrl+V, etc.
+    if (event.ctrlKey || event.metaKey) return;
+
+    if (!allowedKeys.includes(event.key)) {
+      event.preventDefault();
+    }
   }
 
   async resetSettings() {
@@ -146,6 +215,9 @@ export class SettingsPanelComponent implements OnInit {
 
     if (confirmed) {
       this.settingsService.resetSettings();
+      this.toast.show('Settings reset to defaults', 'info');
+      // Update local settings after reset
+      this.settings = JSON.parse(JSON.stringify(this.settingsService.getSettings()));
     }
   }
 
@@ -163,6 +235,8 @@ export class SettingsPanelComponent implements OnInit {
 
   @HostListener('document:keydown.escape', ['$event'])
   onEscapeKey(event: KeyboardEvent) {
-    this.closePanel();
+    if (this.showCountryDropdown) {
+      this.showCountryDropdown = false;
+    }
   }
 }

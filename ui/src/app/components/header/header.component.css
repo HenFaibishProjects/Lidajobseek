@@ -113,11 +113,12 @@ body:not(.dark-theme) .logo-tagline {
   min-width: 0;
   display: flex;
   align-items: center;
+  justify-content: center; /* Center nav items in the available space */
   gap: 14px;
   overflow-x: auto;
   overflow-y: hidden;
   scrollbar-width: thin;
-  padding: 2px 1px 1px 122px;
+  padding: 2px 1px 1px 0;
 }
 
 .nav-section {
@@ -366,6 +367,8 @@ body:not(.dark-theme) .sidebar-nav::-webkit-scrollbar-thumb:hover {
 
   .sidebar-nav {
     gap: 10px;
+    justify-content: flex-start; /* Left-align on smaller screens to ensure scrollability */
+    padding-left: 12px;
   }
 
   .section-label {

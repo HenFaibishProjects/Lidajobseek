@@ -1,5 +1,5 @@
 <div class="settings-overlay" (click)="closePanel()">
-  <div class="settings-panel" (click)="$event.stopPropagation()">
+  <div class="settings-panel" (click)="onPanelClick($event)">
     <!-- Header -->
     <div class="panel-header">
       <h2>
@@ -45,8 +45,10 @@
         
         <div class="profile-fields">
           <div class="setting-item">
-            <label class="setting-label">Display Name</label>
+            <label class="setting-label" for="displayName">Display Name</label>
             <input
+              id="displayName"
+              name="displayName"
               class="input-field"
               type="text"
               [(ngModel)]="settings.profile!.displayName"
@@ -54,8 +56,10 @@
               placeholder="Your name" />
           </div>
           <div class="setting-item">
-            <label class="setting-label">Contact Email</label>
+            <label class="setting-label" for="contactEmail">Contact Email</label>
             <input
+              id="contactEmail"
+              name="contactEmail"
               class="input-field"
               type="email"
               [(ngModel)]="settings.profile!.contactEmail"
@@ -63,13 +67,29 @@
               placeholder="email@example.com" />
           </div>
           <div class="setting-item">
-            <label class="setting-label">Phone Number</label>
-            <input
-              class="input-field"
-              type="tel"
-              [(ngModel)]="settings.profile!.phoneNumber"
-              (ngModelChange)="onProfileChange('phoneNumber', $event)"
-              placeholder="+1..." />
+            <label class="setting-label" for="phoneNumber">
+              Phone Number 
+              <span class="detected-country-label" *ngIf="detectedCountry">({{ detectedCountry.name }})</span>
+            </label>
+            <div class="phone-input-wrapper" [class.has-flag]="detectedCountry">
+              <div class="phone-flag-indicator" *ngIf="detectedCountry">
+                {{ detectedCountry.flag }}
+              </div>
+              <input
+                id="phoneNumber"
+                name="phoneNumber"
+                class="input-field"
+                type="tel"
+                [(ngModel)]="settings.profile!.phoneNumber"
+                (ngModelChange)="onProfileChange('phoneNumber', $event)"
+                (keydown)="onPhoneKeydown($event)"
+                placeholder="+1..."
+                pattern="[\+]?[0-9\-\s]*"
+                title="Phone number must only contain numbers, spaces, hyphens, and an optional leading +" />
+            </div>
+            <div class="field-error" *ngIf="settings.profile!.phoneNumber && !isFormValid()">
+              Invalid phone format (numbers, +, -, and spaces only)
+            </div>
           </div>
         </div>
       </div>
@@ -128,12 +148,12 @@
         <div class="setting-item">
           <label class="setting-label">Clock Format</label>
           <div class="radio-group">
-            <label class="radio-option">
-              <input type="radio" name="clockFormat" value="12" [checked]="settings.clockFormat === '12'" (change)="onClockFormatChange('12')">
+            <label class="radio-option" for="clock12">
+              <input id="clock12" type="radio" name="clockFormat" value="12" [checked]="settings.clockFormat === '12'" (change)="onClockFormatChange('12')">
               <span>12-hour (2:30 PM)</span>
             </label>
-            <label class="radio-option">
-              <input type="radio" name="clockFormat" value="24" [checked]="settings.clockFormat === '24'" (change)="onClockFormatChange('24')">
+            <label class="radio-option" for="clock24">
+              <input id="clock24" type="radio" name="clockFormat" value="24" [checked]="settings.clockFormat === '24'" (change)="onClockFormatChange('24')">
               <span>24-hour (14:30)</span>
             </label>
           </div>
@@ -141,32 +161,62 @@
         <div class="setting-item">
           <label class="setting-label">Date Format</label>
           <div class="radio-group">
-            <label class="radio-option">
-              <input type="radio" name="dateFormat" value="DD/MM/YYYY" [checked]="settings.dateFormat === 'DD/MM/YYYY'" (change)="onDateFormatChange('DD/MM/YYYY')">
+            <label class="radio-option" for="dateDDMM">
+              <input id="dateDDMM" type="radio" name="dateFormat" value="DD/MM/YYYY" [checked]="settings.dateFormat === 'DD/MM/YYYY'" (change)="onDateFormatChange('DD/MM/YYYY')">
               <span>DD/MM/YYYY</span>
             </label>
-            <label class="radio-option">
-              <input type="radio" name="dateFormat" value="MM/DD/YYYY" [checked]="settings.dateFormat === 'MM/DD/YYYY'" (change)="onDateFormatChange('MM/DD/YYYY')">
+            <label class="radio-option" for="dateMMDD">
+              <input id="dateMMDD" type="radio" name="dateFormat" value="MM/DD/YYYY" [checked]="settings.dateFormat === 'MM/DD/YYYY'" (change)="onDateFormatChange('MM/DD/YYYY')">
               <span>MM/DD/YYYY</span>
             </label>
-            <label class="radio-option">
-              <input type="radio" name="dateFormat" value="YYYY-MM-DD" [checked]="settings.dateFormat === 'YYYY-MM-DD'" (change)="onDateFormatChange('YYYY-MM-DD')">
+            <label class="radio-option" for="dateYYYYMM">
+              <input id="dateYYYYMM" type="radio" name="dateFormat" value="YYYY-MM-DD" [checked]="settings.dateFormat === 'YYYY-MM-DD'" (change)="onDateFormatChange('YYYY-MM-DD')">
               <span>YYYY-MM-DD</span>
             </label>
           </div>
         </div>
         <div class="setting-item">
-          <label class="setting-label">Country</label>
-          <div class="country-combobox" [class.open]="showCountryDropdown">
-            <input class="input-field" type="text" name="country" autocomplete="off" [(ngModel)]="countrySearch" (input)="onCountrySearchChange()" (focus)="onCountrySearchChange()" placeholder="Search country...">
-            <button type="button" class="country-toggle" (click)="toggleCountryDropdown()">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+          <label class="setting-label" for="countrySearch">Country</label>
+          <div class="country-dropdown-container" [class.open]="showCountryDropdown">
+            <!-- Selected Value / Toggle -->
+            <button type="button" class="dropdown-toggle" (click)="toggleCountryDropdown()">
+              <div class="selected-value">
+                <span class="flag-placeholder">📍</span>
+                <span>{{ settings.country || 'Select a country' }}</span>
+              </div>
+              <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                 <polyline points="6 9 12 15 18 9"></polyline>
               </svg>
             </button>
-            <div class="country-dropdown" *ngIf="showCountryDropdown">
-              <button type="button" class="country-option" *ngFor="let country of filteredCountryOptions" (click)="selectCountry(country)">{{ country }}</button>
-              <div class="country-empty" *ngIf="filteredCountryOptions.length === 0">No matches</div>
+
+            <!-- Floating Menu -->
+            <div class="dropdown-menu" *ngIf="showCountryDropdown">
+              <div class="dropdown-search">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input 
+                  id="countrySearch" 
+                  class="search-input" 
+                  type="text" 
+                  name="countrySearch" 
+                  autocomplete="off" 
+                  [(ngModel)]="countrySearch" 
+                  (input)="onCountrySearchChange()" 
+                  (click)="$event.stopPropagation()"
+                  placeholder="Search countries..." />
+              </div>
+              <div class="options-list">
+                <button type="button" 
+                        class="option-item" 
+                        *ngFor="let country of filteredCountryOptions" 
+                        [class.active]="country === settings.country"
+                        (click)="selectCountry(country)">
+                  {{ country }}
+                </button>
+                <div class="dropdown-empty" *ngIf="filteredCountryOptions.length === 0">No matches found</div>
+              </div>
             </div>
           </div>
         </div>
@@ -182,23 +232,23 @@
           Notifications
         </h3>
         <div class="setting-item">
-          <label class="toggle-setting">
+          <label class="toggle-setting" for="emailNotify">
             <span class="toggle-label">Email Notifications</span>
-            <input type="checkbox" [(ngModel)]="settings.notifications.email" (change)="onNotificationChange('email', settings.notifications.email)">
+            <input id="emailNotify" name="emailNotify" type="checkbox" [(ngModel)]="settings.notifications.email" (change)="onNotificationChange('email', settings.notifications.email)">
             <div class="switch"></div>
           </label>
         </div>
         <div class="setting-item">
-          <label class="toggle-setting">
+          <label class="toggle-setting" for="desktopNotify">
             <span class="toggle-label">Desktop Alerts</span>
-            <input type="checkbox" [(ngModel)]="settings.notifications.desktop" (change)="onNotificationChange('desktop', settings.notifications.desktop)">
+            <input id="desktopNotify" name="desktopNotify" type="checkbox" [(ngModel)]="settings.notifications.desktop" (change)="onNotificationChange('desktop', settings.notifications.desktop)">
             <div class="switch"></div>
           </label>
         </div>
         <div class="setting-item">
-          <label class="toggle-setting">
+          <label class="toggle-setting" for="followUpNotify">
             <span class="toggle-label">Follow-up Reminders</span>
-            <input type="checkbox" [(ngModel)]="settings.notifications.followUps" (change)="onNotificationChange('followUps', settings.notifications.followUps)">
+            <input id="followUpNotify" name="followUpNotify" type="checkbox" [(ngModel)]="settings.notifications.followUps" (change)="onNotificationChange('followUps', settings.notifications.followUps)">
             <div class="switch"></div>
           </label>
         </div>
@@ -215,28 +265,28 @@
           Preferences
         </h3>
         <div class="setting-item">
-          <label class="toggle-setting">
+          <label class="toggle-setting" for="showStats">
             <span class="toggle-label">Show Statistics Widget</span>
-            <input type="checkbox" [(ngModel)]="settings.dashboard.showStats" (change)="onDashboardChange('showStats', settings.dashboard.showStats)">
+            <input id="showStats" name="showStats" type="checkbox" [(ngModel)]="settings.dashboard.showStats" (change)="onDashboardChange('showStats', settings.dashboard.showStats)">
             <div class="switch"></div>
           </label>
         </div>
         <div class="setting-item">
-          <label class="toggle-setting">
+          <label class="toggle-setting" for="showTasks">
             <span class="toggle-label">Show Task List</span>
-            <input type="checkbox" [(ngModel)]="settings.dashboard.showTasks" (change)="onDashboardChange('showTasks', settings.dashboard.showTasks)">
+            <input id="showTasks" name="showTasks" type="checkbox" [(ngModel)]="settings.dashboard.showTasks" (change)="onDashboardChange('showTasks', settings.dashboard.showTasks)">
             <div class="switch"></div>
           </label>
         </div>
         <div class="setting-item">
           <label class="setting-label">Default Dashboard View</label>
           <div class="radio-group">
-            <label class="radio-option">
-              <input type="radio" name="defaultView" value="grid" [checked]="settings.dashboard.defaultView === 'grid'" (change)="onDashboardChange('defaultView', 'grid')">
+            <label class="radio-option" for="viewGrid">
+              <input id="viewGrid" type="radio" name="defaultView" value="grid" [checked]="settings.dashboard.defaultView === 'grid'" (change)="onDashboardChange('defaultView', 'grid')">
               <span>Grid Layout</span>
             </label>
-            <label class="radio-option">
-              <input type="radio" name="defaultView" value="list" [checked]="settings.dashboard.defaultView === 'list'" (change)="onDashboardChange('defaultView', 'list')">
+            <label class="radio-option" for="viewList">
+              <input id="viewList" type="radio" name="defaultView" value="list" [checked]="settings.dashboard.defaultView === 'list'" (change)="onDashboardChange('defaultView', 'list')">
               <span>List Layout</span>
             </label>
           </div>
@@ -250,7 +300,7 @@
         <button class="action-btn cancel-btn" (click)="cancelSettings()">
           Cancel
         </button>
-        <button class="action-btn save-btn" (click)="saveSettings()">
+        <button class="action-btn save-btn" (click)="saveSettings()" [disabled]="!isFormValid() || !hasChanges()">
           Save Changes
         </button>
       </div>
