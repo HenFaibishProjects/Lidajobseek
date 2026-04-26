@@ -47,12 +47,12 @@ const config: MikroOrmModuleOptions = {
   // },
 
   driverOptions: {
-  connection: {
-    ssl: process.env.DATABASE_URL?.includes('localhost')
-      ? false
-      : { rejectUnauthorized: false },
+    connection: {
+      ssl: process.env.DB_SSL === 'true'
+        ? { rejectUnauthorized: false }
+        : false,
+    },
   },
-},
 
   entities: [
     User,
