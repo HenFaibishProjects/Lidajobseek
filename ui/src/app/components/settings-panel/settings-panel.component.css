@@ -203,6 +203,31 @@
   animation: fadeIn 0.2s ease-out;
 }
 
+.field-tip {
+  font-size: 10px;
+  color: var(--text-tertiary);
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  line-height: 1.4;
+  padding: 8px 10px;
+  background: var(--bg-secondary);
+  border-radius: 6px;
+  border-left: 2px solid var(--primary-blue);
+  animation: fadeIn 0.3s ease-out;
+}
+
+.field-tip b {
+  color: var(--primary-blue);
+  font-weight: 600;
+}
+
+.field-tip svg {
+  color: var(--primary-blue);
+  flex-shrink: 0;
+}
+
 .save-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;

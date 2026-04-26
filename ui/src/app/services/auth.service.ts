@@ -46,6 +46,7 @@ export class AuthService {
   logout() {
     localStorage.removeItem(this.tokenKey);
     localStorage.removeItem('app_user');
+    localStorage.removeItem('jobseek_user_settings');
     this.router.navigate(['/login']);
   }
 

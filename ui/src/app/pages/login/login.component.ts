@@ -85,6 +85,7 @@ export class LoginComponent {
       next: () => {
         if (this.pendingRegisterToggle) {
           this.isRegister = true;
+          this.verificationCode = this.socialVerificationCode.trim();
           this.toastService.show('Verification confirmed. You can create your account now.', 'success');
           this.closeVerificationModal();
           return;

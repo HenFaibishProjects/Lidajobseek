@@ -26,6 +26,7 @@ export class SettingsPanelComponent implements OnInit {
   countrySearch = '';
   showCountryDropdown = false;
   detectedCountry: CountryPhoneInfo | null = null;
+  isPhoneAmbiguous = false; // True if code matches multiple countries (+1, etc)
 
   constructor(
     private settingsService: SettingsService,
@@ -73,8 +74,17 @@ export class SettingsPanelComponent implements OnInit {
     }
 
     // Initial detection if phone exists
+    this.detectCountryFromPhone();
+  }
+
+  private detectCountryFromPhone() {
     if (this.settings.profile?.phoneNumber) {
-      this.detectedCountry = getCountryByPhone(this.settings.profile.phoneNumber, this.settings.country);
+      const result = getCountryByPhone(this.settings.profile.phoneNumber, this.settings.country);
+      this.detectedCountry = result.country;
+      this.isPhoneAmbiguous = result.isAmbiguous;
+    } else {
+      this.detectedCountry = null;
+      this.isPhoneAmbiguous = false;
     }
   }
 
@@ -146,6 +156,7 @@ export class SettingsPanelComponent implements OnInit {
     this.settings.country = country;
     this.countrySearch = country;
     this.showCountryDropdown = false;
+    this.detectCountryFromPhone();
   }
 
   @HostListener('document:keydown', ['$event'])
@@ -185,7 +196,7 @@ export class SettingsPanelComponent implements OnInit {
       if (this.settings.profile) {
         this.settings.profile.phoneNumber = sanitized;
       }
-      this.detectedCountry = getCountryByPhone(sanitized, this.settings.country);
+      this.detectCountryFromPhone();
     } else {
       this.settings.profile[key] = value;
     }

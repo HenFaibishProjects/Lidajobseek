@@ -24,25 +24,33 @@ describe('ToastComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should add a toast when service emits', () => {
+  it('should display a toast when service emits', () => {
     toastService.show('Test Toast', 'success');
-    expect(component.toasts.length).toBe(1);
-    expect(component.toasts[0].message).toBe('Test Toast');
-    expect(component.toasts[0].type).toBe('success');
+    fixture.detectChanges();
+    
+    const toastElement = fixture.nativeElement.querySelector('.toast');
+    expect(toastElement).toBeTruthy();
+    expect(toastElement.textContent).toContain('Test Toast');
   });
 
   it('should remove toast after duration', fakeAsync(() => {
-    toastService.show('Temporary Toast', 'info', 1000);
-    expect(component.toasts.length).toBe(1);
+    toastService.show('Temporary Toast', 'info');
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.toast')).toBeTruthy();
     
-    tick(1500); // Wait for duration + animation buffer
-    expect(component.toasts.length).toBe(0);
+    tick(3500); // Service has 3000ms delay + buffer
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.toast')).toBeNull();
   }));
 
   it('should allow manual removal', () => {
     toastService.show('Manual Toast');
-    const toastId = component.toasts[0].id;
-    component.remove(toastId);
-    expect(component.toasts.length).toBe(0);
+    fixture.detectChanges();
+    
+    const toastElement = fixture.nativeElement.querySelector('.toast');
+    toastElement.click(); // Clicking the toast calls toastService.remove()
+    
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.toast')).toBeNull();
   });
 });

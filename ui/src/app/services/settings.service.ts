@@ -29,7 +29,7 @@ const DEFAULT_SETTINGS: UserSettings = {
   theme: 'light',
   clockFormat: '24',
   dateFormat: 'DD/MM/YYYY',
-  country: '',
+  country: 'United States',
   profile: {
     displayName: '',
     contactEmail: '',
@@ -179,14 +179,14 @@ export class SettingsService {
       patch.clockFormat = user.timeFormatPreference as TimeFormatPreference;
     }
 
-    const existingProfile = this.settingsSubject.value.profile ?? DEFAULT_SETTINGS.profile;
-    const displayName = (existingProfile?.displayName || user.name || '').trim();
-    const contactEmail = (existingProfile?.contactEmail || user.email || '').trim();
+    const existingProfile = this.settingsSubject.value.profile;
+    const displayName = (user.name || existingProfile?.displayName || '').trim();
+    const contactEmail = (user.email || existingProfile?.contactEmail || '').trim();
 
     patch.profile = {
       displayName,
       contactEmail,
-      phoneNumber: existingProfile?.phoneNumber || '',
+      phoneNumber: user.phone || existingProfile?.phoneNumber || '',
     };
 
     if (Object.keys(patch).length === 0) {

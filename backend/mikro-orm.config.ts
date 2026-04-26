@@ -40,11 +40,19 @@ const config: MikroOrmModuleOptions = {
     },
   },
 
+  // driverOptions: {
+  //   connection: {
+  //     ssl: process.env.CI === 'true' ? false : { rejectUnauthorized: false },
+  //   },
+  // },
+
   driverOptions: {
-    connection: {
-      ssl: process.env.CI === 'true' ? false : { rejectUnauthorized: false },
-    },
+  connection: {
+    ssl: process.env.DATABASE_URL?.includes('localhost')
+      ? false
+      : { rejectUnauthorized: false },
   },
+},
 
   entities: [
     User,
