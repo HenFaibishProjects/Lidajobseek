@@ -123,18 +123,152 @@
 }
 
 .profile-avatar {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: var(--primary-blue);
-  color: white;
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  background: var(--bg-tertiary);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: var(--font-size-lg);
-  font-weight: 600;
   flex-shrink: 0;
-  box-shadow: 0 4px 10px rgba(0, 120, 212, 0.2);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
+  padding: 2px;
+}
+
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.avatar-picker-setting {
+  margin-top: var(--space-md);
+}
+
+.mt-md {
+  margin-top: var(--space-md);
+}
+
+.custom-dropdown {
+  position: relative;
+  width: 100%;
+}
+
+.dropdown-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  color: var(--text-primary);
+}
+
+.dropdown-trigger:hover {
+  background: var(--bg-hover);
+  border-color: var(--gray-400);
+}
+
+.trigger-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.style-preview-mini {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  background: var(--bg-tertiary);
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  flex-shrink: 0;
+}
+
+.style-preview-mini img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.style-icon {
+  font-size: 18px;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+}
+
+.style-name {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+}
+
+.chevron {
+  font-size: 10px;
+  color: var(--text-tertiary);
+  transition: transform 0.3s ease;
+}
+
+.chevron.open {
+  transform: rotate(180deg);
+  color: var(--primary-blue);
+}
+
+/* Reusing dropdown-menu logic but for avatar */
+.custom-dropdown .dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  width: 100%;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2);
+  z-index: 100;
+  overflow: hidden;
+  display: block; /* Ensure visibility */
+}
+
+.custom-dropdown .options-list {
+  max-height: 300px;
+  overflow-y: auto;
+  padding: 6px;
+}
+
+.custom-dropdown .option-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--text-secondary);
+  text-align: left;
+}
+
+.custom-dropdown .option-item:hover {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.custom-dropdown .option-item.active {
+  background: var(--primary-blue-light);
+  color: var(--primary-blue);
+  font-weight: 600;
+}
+
+.field-hint {
+  font-size: 10px;
+  color: var(--text-tertiary);
+  margin-top: 8px;
+  opacity: 0.8;
 }
 
 .profile-info {
@@ -188,6 +322,20 @@
   background: var(--bg-primary);
   color: var(--text-primary);
   transition: var(--transition);
+}
+
+.input-field:disabled, .input-field.disabled-field {
+  background: var(--bg-tertiary) !important;
+  color: var(--text-tertiary) !important;
+  cursor: not-allowed;
+  opacity: 0.7;
+  border-color: var(--border-color) !important;
+}
+
+.input-field:disabled:focus, .input-field.disabled-field:focus {
+  outline: none !important;
+  box-shadow: none !important;
+  transform: none !important;
 }
 
 .input-field.ng-invalid.ng-touched {

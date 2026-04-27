@@ -17,6 +17,7 @@ interface UpdatePreferencesDto {
   country?: string;
   dateFormat?: DateFormatPreference;
   timeFormat?: TimeFormatPreference;
+  avatarStyle?: string;
 }
 
 @Injectable()
@@ -39,6 +40,7 @@ export class AuthService {
         countryPreference: user.countryPreference,
         dateFormatPreference: user.dateFormatPreference,
         timeFormatPreference: user.timeFormatPreference,
+        avatarStylePreference: user.avatarStylePreference,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt
       };
@@ -63,6 +65,7 @@ export class AuthService {
         countryPreference: user.countryPreference || '',
         dateFormatPreference: user.dateFormatPreference || 'DD/MM/YYYY',
         timeFormatPreference: user.timeFormatPreference || '24',
+        avatarStylePreference: user.avatarStylePreference || 'avataaars',
       }
     };
   }
@@ -123,6 +126,7 @@ export class AuthService {
       country: user.countryPreference || '',
       dateFormat: user.dateFormatPreference || 'DD/MM/YYYY',
       timeFormat: user.timeFormatPreference || '24',
+      avatarStyle: user.avatarStylePreference || 'avataaars',
     };
   }
 
@@ -132,6 +136,7 @@ export class AuthService {
       countryPreference?: string;
       dateFormatPreference?: DateFormatPreference;
       timeFormatPreference?: TimeFormatPreference;
+      avatarStylePreference?: string;
     } = {};
 
     if (dto.theme && ['light', 'dark', 'auto'].includes(dto.theme)) {
@@ -150,6 +155,10 @@ export class AuthService {
       patch.timeFormatPreference = dto.timeFormat;
     }
 
+    if (typeof dto.avatarStyle === 'string') {
+      patch.avatarStylePreference = dto.avatarStyle;
+    }
+
     const updatedUser = await this.usersService.updatePreferences(userId, patch);
     if (!updatedUser) {
       throw new UnauthorizedException('User not found');
@@ -160,6 +169,7 @@ export class AuthService {
       country: updatedUser.countryPreference || '',
       dateFormat: updatedUser.dateFormatPreference || 'DD/MM/YYYY',
       timeFormat: updatedUser.timeFormatPreference || '24',
+      avatarStyle: updatedUser.avatarStylePreference || 'avataaars',
     };
   }
 }

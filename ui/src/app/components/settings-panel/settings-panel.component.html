@@ -24,18 +24,16 @@
           Profile
         </h3>
         <div class="profile-card">
-          <div class="profile-avatar">
-            {{ (settings.profile?.displayName || currentUser.name || currentUser.email || 'U').charAt(0).toUpperCase() }}
+          <div class="profile-avatar overflow-hidden">
+            <img [src]="getAvatarUrl()" alt="Avatar" class="avatar-img" />
           </div>
           <div class="profile-info">
             <div class="profile-name">
               {{ settings.profile?.displayName || currentUser.name || 'User' }}
             </div>
-            <div class="profile-role">
-              {{ settings.profile?.contactEmail || currentUser.email }}
-            </div>
           </div>
         </div>
+
         
         <div class="profile-fields">
           <div class="setting-item">
@@ -54,11 +52,11 @@
             <input
               id="contactEmail"
               name="contactEmail"
-              class="input-field"
+              class="input-field disabled-field"
               type="email"
               [(ngModel)]="settings.profile!.contactEmail"
-              (ngModelChange)="onProfileChange('contactEmail', $event)"
-              placeholder="email@example.com" />
+              placeholder="email@example.com"
+              disabled />
           </div>
           <div class="setting-item">
             <label class="setting-label" for="phoneNumber">
@@ -94,8 +92,46 @@
               </svg>
               <span>Shared code detected. Matched to <b>{{ detectedCountry.name }}</b> based on your location.</span>
             </div>
-          </div>
         </div>
+
+        <div class="setting-item avatar-picker-setting mt-md">
+          <label class="setting-label">Avatar Identity Style</label>
+          
+          <div class="custom-dropdown">
+             
+             <button 
+               type="button" 
+               class="dropdown-trigger" 
+               (click)="toggleAvatarDropdown()">
+               <div class="trigger-content">
+                 <div class="style-preview-mini">
+                   <img [src]="getAvatarUrl()" alt="Current" />
+                 </div>
+                 <span class="style-name">{{ getSelectedAvatarStyle()?.name || 'Select a style' }}</span>
+               </div>
+               <span class="chevron" [class.open]="isAvatarDropdownOpen">▼</span>
+             </button>
+       
+             <div class="dropdown-menu" *ngIf="isAvatarDropdownOpen">
+               <div class="options-list">
+                 <button 
+                   type="button" 
+                   class="option-item" 
+                   *ngFor="let style of avatarStyles"
+                   [class.active]="settings.avatarStyle === style.id"
+                   (click)="selectAvatarStyle(style.id)">
+                   <div class="style-preview-mini">
+                      <img [src]="getAvatarUrl(style.id)" [alt]="style.name" loading="lazy" />
+                   </div>
+                   <span class="style-name">{{ style.name }}</span>
+                 </button>
+               </div>
+             </div>
+             
+          </div>
+          
+          <p class="field-hint">Your avatar is uniquely generated from your account email.</p>
+       </div>
       </div>
 
       <!-- Appearance Settings -->

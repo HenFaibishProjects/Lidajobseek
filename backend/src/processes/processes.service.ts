@@ -57,7 +57,55 @@ export class ProcessesService {
 
     const process = this.processRepository.create(data);
     await this.em.persistAndFlush(process);
+
+    // Sync Initial Interaction
+    if (process.initialInviteDate) {
+      await this.syncInitialInteraction(process);
+    }
+
     return process;
+  }
+
+  private async syncInitialInteraction(process: Process): Promise<void> {
+    // Check if an "Initial Interaction" already exists for this process
+    const existing = await this.em.findOne(Interaction, {
+      process,
+      summary: { $like: 'Initial Interaction:%' }
+    });
+
+    const method = process.firstContactChannel || process.initialInviteMethod || 'Direct';
+    const summary = `Initial Interaction: [${process.initiatedBy || 'Unknown'}] via ${method}`;
+    
+    if (existing) {
+      // Update existing if needed
+      existing.date = process.initialInviteDate!;
+      existing.interviewType = this.mapInviteMethodToInterviewType(method);
+      existing.summary = summary;
+      existing.notes = process.initialInviteContent || 'Initial contact for this role.';
+    } else {
+      // Create new
+      const interaction = this.em.create(Interaction, {
+        process,
+        date: process.initialInviteDate!,
+        interviewType: this.mapInviteMethodToInterviewType(method),
+        summary: summary,
+        notes: process.initialInviteContent || 'Initial contact for this role.',
+        createdAt: new Date(),
+      });
+      process.interactions.add(interaction);
+      this.em.persist(interaction);
+    }
+    await this.em.flush();
+  }
+
+  private mapInviteMethodToInterviewType(method?: string): string {
+    if (!method) return 'virtual_video';
+    const m = method.toLowerCase();
+    if (m.includes('linkedin')) return 'virtual_video';
+    if (m.includes('email')) return 'virtual_video';
+    if (m.includes('phone') || m.includes('call')) return 'phone_screen';
+    if (m.includes('referral')) return 'coffee_chat';
+    return 'virtual_video';
   }
 
   async findAll(userId: number): Promise<any[]> {
@@ -127,6 +175,8 @@ export class ProcessesService {
       dataFromThePhoneCall,
       initialInviteDate,
       initialInviteMethod,
+      initiatedBy,
+      firstContactChannel,
       initialInviteContent,
       baseSalary,
       equity,
@@ -156,6 +206,8 @@ export class ProcessesService {
     if (dataFromThePhoneCall !== undefined) data.dataFromThePhoneCall = dataFromThePhoneCall;
     if (initialInviteDate !== undefined) data.initialInviteDate = initialInviteDate ? new Date(initialInviteDate) : null;
     if (initialInviteMethod !== undefined) data.initialInviteMethod = initialInviteMethod;
+    if (initiatedBy !== undefined) data.initiatedBy = initiatedBy;
+    if (firstContactChannel !== undefined) data.firstContactChannel = firstContactChannel;
     if (initialInviteContent !== undefined) data.initialInviteContent = initialInviteContent;
     if (baseSalary !== undefined) data.baseSalary = baseSalary === '' ? null : baseSalary;
     if (equity !== undefined) data.equity = equity;
@@ -171,6 +223,12 @@ export class ProcessesService {
 
     Object.assign(process, data);
     await this.em.flush();
+
+    // Sync Initial Interaction after update
+    if (process.initialInviteDate) {
+      await this.syncInitialInteraction(process);
+    }
+
     return process;
   }
 

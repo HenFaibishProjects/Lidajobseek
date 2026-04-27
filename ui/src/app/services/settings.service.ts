@@ -7,6 +7,7 @@ export interface UserSettings {
   clockFormat: TimeFormatPreference;
   dateFormat: DateFormatPreference;
   country: string;
+  avatarStyle: string;
   profile?: {
     displayName: string;
     contactEmail: string;
@@ -30,6 +31,7 @@ const DEFAULT_SETTINGS: UserSettings = {
   clockFormat: '24',
   dateFormat: 'DD/MM/YYYY',
   country: 'United States',
+  avatarStyle: 'avataaars',
   profile: {
     displayName: '',
     contactEmail: '',
@@ -77,6 +79,7 @@ export class SettingsService {
           country: prefs.country,
           dateFormat: prefs.dateFormat,
           clockFormat: prefs.timeFormat,
+          avatarStyle: prefs.avatarStyle || 'avataaars',
         } as UserSettings;
 
         this.settingsSubject.next(merged);
@@ -111,6 +114,7 @@ export class SettingsService {
         country: newSettings.country,
         dateFormat: newSettings.dateFormat,
         timeFormat: newSettings.clockFormat,
+        avatarStyle: newSettings.avatarStyle,
       }).subscribe({
         error: () => {
           // local settings are already saved, avoid breaking UX
@@ -177,6 +181,10 @@ export class SettingsService {
 
     if (user.timeFormatPreference) {
       patch.clockFormat = user.timeFormatPreference as TimeFormatPreference;
+    }
+
+    if (user.avatarStylePreference) {
+      patch.avatarStyle = user.avatarStylePreference;
     }
 
     const existingProfile = this.settingsSubject.value.profile;

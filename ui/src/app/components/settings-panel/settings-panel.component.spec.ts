@@ -39,7 +39,8 @@ describe('SettingsPanelComponent', () => {
           displayName: 'Test User',
           contactEmail: 'test@example.com',
           phoneNumber: '+11234567890'
-        }
+        },
+        avatarStyle: 'avataaars'
       }),
       updateSettings: jasmine.createSpy('updateSettings'),
       resetSettings: jasmine.createSpy('resetSettings')
@@ -142,5 +143,48 @@ describe('SettingsPanelComponent', () => {
     component.selectCountry('Canada');
     expect(component.settings.country).toBe('Canada');
     expect(component.showCountryDropdown).toBeFalse();
+  });
+
+  describe('Avatar Features', () => {
+    it('should initialize with default avatar style', () => {
+      expect(component.settings.avatarStyle).toBe('avataaars');
+    });
+
+    it('should toggle avatar dropdown visibility', () => {
+      expect(component.isAvatarDropdownOpen).toBeFalse();
+      component.toggleAvatarDropdown();
+      expect(component.isAvatarDropdownOpen).toBeTrue();
+      component.toggleAvatarDropdown();
+      expect(component.isAvatarDropdownOpen).toBeFalse();
+    });
+
+    it('should update avatar style and close dropdown when a style is selected', () => {
+      component.isAvatarDropdownOpen = true;
+      component.selectAvatarStyle('bottts');
+      expect(component.settings.avatarStyle).toBe('bottts');
+      expect(component.isAvatarDropdownOpen).toBeFalse();
+    });
+
+    it('should generate correct DiceBear URL based on email and style', () => {
+      component.settings.profile!.contactEmail = 'john@example.com';
+      component.settings.avatarStyle = 'pixel-art';
+      const url = component.getAvatarUrl();
+      expect(url).toContain('7.x/pixel-art/svg');
+      expect(url).toContain('seed=john%40example.com');
+    });
+
+    it('should use style overwrite in getAvatarUrl when provided', () => {
+      component.settings.profile!.contactEmail = 'john@example.com';
+      component.settings.avatarStyle = 'avataaars';
+      const url = component.getAvatarUrl('big-ears');
+      expect(url).toContain('7.x/big-ears/svg');
+    });
+
+    it('should return correct info for selected avatar style', () => {
+      component.settings.avatarStyle = 'pixel-art';
+      const style = component.getSelectedAvatarStyle();
+      expect(style?.id).toBe('pixel-art');
+      expect(style?.name).toBe('Pixel Art');
+    });
   });
 });

@@ -51,12 +51,18 @@ export class Process {
   @Property({ onCreate: () => new Date(), onUpdate: () => new Date() })
   updatedAt: Date = new Date();
 
-  // Initial Invitation Details
+  // Initial Interaction Details
   @Property({ nullable: true })
   initialInviteDate?: Date;
 
   @Property({ nullable: true })
   initialInviteMethod?: string;
+
+  @Property({ nullable: true })
+  initiatedBy?: string;
+
+  @Property({ nullable: true })
+  firstContactChannel?: string;
 
   @Property({ nullable: true })
   initialInviteContent?: string;

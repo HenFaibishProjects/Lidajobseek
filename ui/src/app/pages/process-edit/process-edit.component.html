@@ -76,11 +76,15 @@
 
                             <div class="form-group">
                                 <label>Current Stage <span class="required">*</span></label>
-                                <select name="currentStage" [(ngModel)]="process.currentStage" required class="input-field" [class.error]="isFieldInvalid('currentStage')"
-                                    (blur)="onFieldBlur('currentStage')">
-                                    <option *ngFor="let stage of stages" [value]="stage">{{stage}}</option>
+                                <select name="currentStage" [(ngModel)]="process.currentStage" (ngModelChange)="onStageChange()" required class="input-field" (blur)="onFieldBlur('currentStage')" [class.error]="isFieldInvalid('currentStage')">
+                                    <option *ngFor="let stage of stages" [value]="stage">
+                                        {{stage}} {{ (stage !== stages[0] && stage !== stages[1]) ? '⚡' : '' }}
+                                    </option>
                                 </select>
                                 <p *ngIf="isFieldInvalid('currentStage')" class="error-message">Current stage is required</p>
+                                <p class="field-hint" *ngIf="shouldShowInteractionSection">
+                                    <span class="info-tag">Active Stage</span> Selecting this stage will open the interaction panel below.
+                                </p>
                             </div>
                         </div>
                     </section>
@@ -196,63 +200,14 @@
                 </div>
                     </section>
 
-                    <section class="form-section">
+                    <section class="form-section highlight-section" *ngIf="process?.currentStage && process.currentStage !== stages[0] && process.currentStage !== stages[1]">
                 <div class="section-title">
-                    <h2>Conversation notes</h2>
-                    <p>Capture the signal from your first call with HR or a recruiter.</p>
-                </div>
-
-                <div class="form-group">
-                    <label>Data From the Phone Call</label>
-                    <textarea name="dataFromThePhoneCall" [(ngModel)]="process.dataFromThePhoneCall" rows="4"
-                        placeholder="What did you learn in the initial call that makes you interested in this role?..."
-                        class="input-field"></textarea>
-                    <p class="muted-hint">Capture key insights from your initial conversation with HR/recruiter.</p>
-                </div>
-                    </section>
-
-                    <section class="form-section highlight-section">
-                <div class="section-title">
-                    <h2>📨 Initial Invitation</h2>
+                    <h2>📨 Initial Interaction</h2>
                     <p>Details about how you were initially contacted for this role.</p>
                 </div>
 
-                <div class="form-row invitation-row">
-                    <div class="form-group">
-                        <label class="label-with-icon">
-                            <button type="button" class="label-icon" (click)="datePicker.showPicker()"
-                                aria-label="Open date picker">
-                                📅
-                            </button>
-                            Invitation Date
-                        </label>
-                        <div class="input-icon-wrapper">
-                            <input #datePicker type="date" name="initialInviteDate"
-                                [(ngModel)]="process.initialInviteDate" class="input-field date-input">
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Invitation Method</label>
-                        <select name="initialInviteMethod" [(ngModel)]="process.initialInviteMethod"
-                            class="input-field">
-                            <option value="">Select method</option>
-                            <option value="Email">Email</option>
-                            <option value="LinkedIn">LinkedIn</option>
-                            <option value="Referral">Referral</option>
-                            <option value="Phone Call">Phone Call</option>
-                            <option value="Job Board">Job Board</option>
-                            <option value="Recruiter">Recruiter</option>
-                            <option value="Other">Other</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Invitation Content</label>
-                    <textarea name="initialInviteContent" [(ngModel)]="process.initialInviteContent" rows="4"
-                        placeholder="Paste or write the invitation content here..." class="input-field"></textarea>
-                    <p class="muted-hint">What did the invitation say? Copy-paste or summarize the message.</p>
+                <div class="interaction-details-wrapper">
+                    <app-initial-interaction-fields [(process)]="process"></app-initial-interaction-fields>
                 </div>
                     </section>
 

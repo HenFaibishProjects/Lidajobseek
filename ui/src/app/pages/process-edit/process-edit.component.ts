@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit, ViewChild, OnDestroy } from '@angular/core';
+import { Component, HostListener, OnInit, ViewChild, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
@@ -9,11 +9,12 @@ import countriesData from '../../../assets/countries.json';
 import { DateFormatPipe } from '../../pipes/date-format.pipe';
 import { PROCESS_STAGES } from '../../shared/process-stages';
 import { Subscription } from 'rxjs';
+import { InitialInteractionFieldsComponent } from '../../components/initial-interaction-fields/initial-interaction-fields.component';
 
 @Component({
     selector: 'app-process-edit',
     standalone: true,
-    imports: [CommonModule, FormsModule, RouterModule, DateFormatPipe],
+    imports: [CommonModule, FormsModule, RouterModule, DateFormatPipe, InitialInteractionFieldsComponent],
     templateUrl: './process-edit.component.html',
     styleUrls: ['./process-edit.component.css']
 })
@@ -32,38 +33,41 @@ export class ProcessEditComponent implements OnInit, OnDestroy {
 
     get completionPercent(): number {
         if (!this.process) return 0;
-        const fieldsToCheck: Array<keyof typeof this.process> = [
-            'companyName',
-            'roleTitle',
-            'techStack',
-            'source',
-            'salaryExpectation',
-            'dataFromThePhoneCall',
-            'initialInviteDate',
-            'initialInviteMethod',
-            'initialInviteContent'
+        
+        // Fields that count individually (1 point each)
+        const individualFields = [
+            'companyName', 'roleTitle', 'techStack', 'source', 
+            'location', 'workMode', 'daysFromOffice', 
+            'salaryExpectation', 'signingBonus', 'equity', 'bonus', 'benefits',
+            'dataFromThePhoneCall', 'nextFollowUp', 'notes'
         ];
 
-        let filled = fieldsToCheck.filter(key => {
-            const value = this.process[key];
+        let filledCount = individualFields.filter(key => {
+            const value = this.process[key as keyof typeof this.process];
+            // Don't count default initial values as "progress" for some fields
+            if (key === 'currentStage' && value === this.stages[0]) return false;
+            if (key === 'workMode' && value === 'remote') return false;
+            
             if (typeof value === 'string') return value.trim().length > 0;
+            if (typeof value === 'number') return value > 0;
             return value !== null && value !== undefined && value !== '';
         }).length;
 
-        let totalFields = fieldsToCheck.length;
-
-        if (this.process.workMode !== 'remote') {
-            totalFields++;
-            if (this.process.location?.trim()) filled++;
+        // Interaction fields (Grouped to count as max 2 points total to avoid spikes)
+        const interactionFields = ['initialInviteDate', 'initialInviteMethod', 'initiatedBy', 'firstContactChannel', 'initialInviteContent'];
+        const interactionFilled = interactionFields.filter(key => {
+            const value = this.process[key as keyof typeof this.process];
+            if (typeof value === 'string') return value.trim().length > 0;
+            return value !== null && value !== undefined && value !== '';
+        }).length;
+        
+        if (interactionFilled > 0) {
+            filledCount += (interactionFilled >= 3 ? 2 : 1);
         }
 
-        if (this.process.workMode === 'hybrid') {
-            totalFields++;
-            if (this.process.daysFromOffice !== null && this.process.daysFromOffice > 0) filled++;
-        }
-
-        if (totalFields === 0) return 0;
-        return Math.round((filled / totalFields) * 100);
+        // Total "points" in the form (around 18-20 for ~5-7% per action)
+        const totalPoints = individualFields.length + 2; 
+        return Math.round((filledCount / totalPoints) * 100);
     }
 
     constructor(
@@ -71,7 +75,8 @@ export class ProcessEditComponent implements OnInit, OnDestroy {
         private router: Router,
         private processesService: ProcessesService,
         private toastService: ToastService,
-        private settingsService: SettingsService
+        private settingsService: SettingsService,
+        private cdr: ChangeDetectorRef
     ) {
         const settings = this.settingsService.getSettings();
         this.selectedCountry = settings.country;
@@ -100,6 +105,18 @@ export class ProcessEditComponent implements OnInit, OnDestroy {
         const id = Number(this.route.snapshot.paramMap.get('id'));
         this.processesService.getById(id).subscribe(data => {
             this.process = { ...data };
+            
+            // Format dates for HTML date inputs (YYYY-MM-DD)
+            if (this.process.initialInviteDate) {
+                this.process.initialInviteDate = new Date(this.process.initialInviteDate).toISOString().split('T')[0];
+            }
+            if (this.process.nextFollowUp) {
+                this.process.nextFollowUp = new Date(this.process.nextFollowUp).toISOString().split('T')[0];
+            }
+            if (this.process.offerDeadline) {
+                this.process.offerDeadline = new Date(this.process.offerDeadline).toISOString().split('T')[0];
+            }
+
             // Remove relation fields that shouldn't be sent in update
             delete this.process.interactions;
             delete this.process.reviews;
@@ -165,6 +182,21 @@ export class ProcessEditComponent implements OnInit, OnDestroy {
         }
     }
 
+    onStageChange() {
+        // Auto-populate initial interaction fields if section is shown and empty
+        if (this.shouldShowInteractionSection) {
+            if (!this.process.initialInviteDate) {
+                this.process.initialInviteDate = new Date().toISOString().split('T')[0];
+            }
+            if (!this.process.initialInviteMethod) {
+                this.process.initialInviteMethod = 'LinkedIn';
+                this.process.initiatedBy = 'Recruiter';
+                this.process.firstContactChannel = 'LinkedIn';
+            }
+        }
+        this.cdr.detectChanges();
+    }
+
     isFieldInvalid(fieldName: string): boolean {
         const field = this.processForm?.form?.get(fieldName);
         return !!(field && field.invalid && (field.dirty || field.touched || this.formSubmitted));
@@ -173,6 +205,12 @@ export class ProcessEditComponent implements OnInit, OnDestroy {
     onFieldBlur(fieldName: string) {
         const field = this.processForm?.form?.get(fieldName);
         if (field) field.markAsTouched();
+    }
+
+    get shouldShowInteractionSection(): boolean {
+        if (!this.process || !this.process.currentStage) return false;
+        const current = this.process.currentStage;
+        return current !== this.stages[0] && current !== this.stages[1];
     }
 
     onSubmit() {
@@ -189,6 +227,15 @@ export class ProcessEditComponent implements OnInit, OnDestroy {
         this.isSubmitting = true;
 
         const payload = { ...this.process };
+
+        // If interaction section is hidden, clear the fields
+        if (!this.shouldShowInteractionSection) {
+            payload.initialInviteDate = null;
+            payload.initialInviteMethod = '';
+            payload.initiatedBy = '';
+            payload.firstContactChannel = '';
+            payload.initialInviteContent = '';
+        }
 
         // Ensure dates are ISO or null
         if (payload.nextFollowUp) {

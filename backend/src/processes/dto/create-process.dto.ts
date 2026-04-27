@@ -11,9 +11,11 @@ export class CreateProcessDto {
   dataFromThePhoneCall?: string;
   nextFollowUp?: string;
 
-  // Initial Invitation Details
+  // Initial Interaction Details
   initialInviteDate?: string;
   initialInviteMethod?: string;
+  initiatedBy?: string;
+  firstContactChannel?: string;
   initialInviteContent?: string;
 
   // Career Intelligence

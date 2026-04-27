@@ -1,0 +1,52 @@
+<div class="interaction-info-hint">
+    <span class="info-icon">💡</span>
+    <p>Since this process started beyond a regular application, record the initial contact details here to track the history correctly.</p>
+</div>
+
+<div class="interaction-fields-grid">
+    <div class="form-group full-width">
+        <label>Interaction Date</label>
+        <div class="input-with-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            <input type="date" name="initialInviteDate" [(ngModel)]="process.initialInviteDate" (ngModelChange)="onChange()" class="input-field">
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>Initiated By</label>
+        <select name="initiatedBy" [(ngModel)]="process.initiatedBy" (ngModelChange)="onChange()" class="input-field">
+            <option value="">Select initiator</option>
+            <option value="I Applied">I Applied</option>
+            <option value="HR">HR</option>
+            <option value="Recruiter">Recruiter</option>
+            <option value="Hiring Manager">Hiring Manager</option>
+            <option value="Referral">Referral</option>
+            <option value="Other">Other</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>First Contact Channel</label>
+        <select name="firstContactChannel" [(ngModel)]="process.firstContactChannel" (ngModelChange)="onChange()" class="input-field">
+            <option value="">Select channel</option>
+            <option value="Email">Email</option>
+            <option value="Phone Call">Phone Call</option>
+            <option value="LinkedIn">LinkedIn</option>
+            <option value="WhatsApp">WhatsApp</option>
+            <option value="In Person">In Person</option>
+            <option value="Career Event">Career Event</option>
+            <option value="Other">Other</option>
+        </select>
+    </div>
+
+    <div class="form-group full-width">
+        <label>Notes / Context</label>
+        <textarea name="initialInviteContent" [(ngModel)]="process.initialInviteContent" (ngModelChange)="onChange()"
+            placeholder="e.g. Recruiter reached out on LinkedIn offering a Senior role..." rows="3" class="input-field"></textarea>
+    </div>
+</div>

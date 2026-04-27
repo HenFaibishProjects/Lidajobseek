@@ -22,6 +22,32 @@ export class SettingsPanelComponent implements OnInit {
   settings!: UserSettings;
   initialSettings!: string; // Used for deep change detection
   currentUser: any = null;
+  
+  // NEW: State for the Avatar Dropdown
+  isAvatarDropdownOpen: boolean = false;
+  
+  // FIXED: Removed "const" here, class properties don't use const
+  avatarStyles = [
+    { id: 'avataaars', name: 'Illustration', icon: '👤' },
+    { id: 'bottts', name: 'Robots', icon: '🤖' },
+    { id: 'pixel-art', name: 'Pixel Art', icon: '👾' },
+    { id: 'adventurer', name: 'Adventurer', icon: '🧗' },
+    { id: 'big-ears', name: 'Minimalist', icon: '👂' },
+    { id: 'notionists', name: 'Notionist', icon: '🎨' },
+    { id: 'lorelei', name: 'Lorelei', icon: '🌸' },
+    { id: 'micah', name: 'Micah', icon: '😎' },
+    { id: 'open-peeps', name: 'Modern Peeps', icon: '🧍' },
+    { id: 'personas', name: 'Personas', icon: '🧑‍🎤' },
+    { id: 'miniavs', name: 'Miniavs', icon: '🤏' },
+    { id: 'fun-emoji', name: 'Fun Emoji', icon: '🤪' },
+    { id: 'croodles', name: 'Doodles', icon: '✏️' },
+    { id: 'identicon', name: 'Identicon', icon: '🔣' },
+    { id: 'initials', name: 'Initials', icon: '🔠' },
+    { id: 'shapes', name: 'Geometry', icon: '🔺' },
+    { id: 'rings', name: 'Rings', icon: '⭕' },
+    { id: 'thumbs', name: 'Thumbs', icon: '👍' }
+  ];
+
   countryOptions: string[] = [];
   countrySearch = '';
   showCountryDropdown = false;
@@ -118,6 +144,26 @@ export class SettingsPanelComponent implements OnInit {
     this.settings.theme = theme as any;
   }
 
+  // --- NEW: AVATAR DROPDOWN METHODS ---
+  toggleAvatarDropdown() {
+    this.isAvatarDropdownOpen = !this.isAvatarDropdownOpen;
+  }
+
+  getSelectedAvatarStyle() {
+    return this.avatarStyles.find(style => style.id === this.settings.avatarStyle);
+  }
+
+  selectAvatarStyle(styleId: string) {
+    this.settings.avatarStyle = styleId;
+    this.isAvatarDropdownOpen = false; // Close it after selection
+  }
+
+  getAvatarUrl(styleOverwrite?: string): string {
+    const seed = this.settings.profile?.contactEmail || this.currentUser?.email || 'default';
+    const style = styleOverwrite || this.settings.avatarStyle || 'avataaars';
+    return `https://api.dicebear.com/7.x/${style}/svg?seed=${encodeURIComponent(seed)}`;
+  }
+
   onClockFormatChange(format: '12' | '24') {
     this.settings.clockFormat = format as any;
   }
@@ -169,11 +215,19 @@ export class SettingsPanelComponent implements OnInit {
     }
   }
 
+  // NEW: Updated Click listener to close BOTH dropdowns if you click outside
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent) {
     const target = event.target as HTMLElement | null;
+    
+    // Close country dropdown
     if (!target?.closest('.country-combobox')) {
       this.showCountryDropdown = false;
+    }
+    
+    // Close avatar dropdown
+    if (!target?.closest('.custom-dropdown')) { 
+      this.isAvatarDropdownOpen = false;
     }
   }
 
@@ -248,6 +302,10 @@ export class SettingsPanelComponent implements OnInit {
   onEscapeKey(event: KeyboardEvent) {
     if (this.showCountryDropdown) {
       this.showCountryDropdown = false;
+    }
+    // NEW: Allow escape key to close Avatar dropdown too
+    if (this.isAvatarDropdownOpen) {
+      this.isAvatarDropdownOpen = false;
     }
   }
 }

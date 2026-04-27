@@ -27,7 +27,7 @@ export class UsersService {
 
   async updatePreferences(
     id: number,
-    data: Partial<Pick<User, 'themePreference' | 'countryPreference' | 'dateFormatPreference' | 'timeFormatPreference'>>,
+    data: Partial<Pick<User, 'themePreference' | 'countryPreference' | 'dateFormatPreference' | 'timeFormatPreference' | 'avatarStylePreference'>>,
   ): Promise<User | null> {
     const user = await this.userRepository.findOne({ id });
     if (!user) {
@@ -39,6 +39,7 @@ export class UsersService {
     if (data.countryPreference !== undefined) user.countryPreference = data.countryPreference || '';
     if (data.dateFormatPreference !== undefined) user.dateFormatPreference = data.dateFormatPreference;
     if (data.timeFormatPreference !== undefined) user.timeFormatPreference = data.timeFormatPreference;
+    if (data.avatarStylePreference !== undefined) user.avatarStylePreference = data.avatarStylePreference;
 
     await this.em.flush();
     return user;

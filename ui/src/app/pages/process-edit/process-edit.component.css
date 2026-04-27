@@ -499,7 +499,7 @@ select.input-field {
   line-height: 1.4;
 }
 
-/* ===== HIGHLIGHT SECTION (Initial Invitation) ===== */
+/* ===== HIGHLIGHT SECTION (Initial Interaction) ===== */
 .highlight-section {
   background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(14, 116, 144, 0.12) 100%);
   padding: var(--space-xl);

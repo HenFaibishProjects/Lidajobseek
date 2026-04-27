@@ -32,6 +32,9 @@ export class User {
   @Property({ nullable: true, default: '24' })
   timeFormatPreference?: '12' | '24';
 
+  @Property({ nullable: true, default: 'avataaars' })
+  avatarStylePreference?: string;
+
   @Property({ onCreate: () => new Date() })
   createdAt: Date = new Date();
 

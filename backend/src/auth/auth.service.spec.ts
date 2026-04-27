@@ -114,9 +114,10 @@ describe('AuthService', () => {
 
   describe('getPreferences', () => {
     it('should return user preferences', async () => {
-      mockUsersService.findById.mockResolvedValue({ id: 1, themePreference: 'dark' });
+      mockUsersService.findById.mockResolvedValue({ id: 1, themePreference: 'dark', avatarStylePreference: 'bottts' });
       const result = await service.getPreferences(1);
       expect(result.theme).toBe('dark');
+      expect(result.avatarStyle).toBe('bottts');
     });
 
     it('should throw UnauthorizedException if user not found', async () => {
@@ -131,9 +132,18 @@ describe('AuthService', () => {
       mockUsersService.updatePreferences.mockResolvedValue({ id: 1, themePreference: 'dark' });
 
       const result = await service.updatePreferences(1, dto);
-
       expect(result.theme).toBe('dark');
       expect(mockUsersService.updatePreferences).toHaveBeenCalledWith(1, { themePreference: 'dark' });
+    });
+
+    it('should update avatar style preference', async () => {
+      const dto = { avatarStyle: 'pixel-art' };
+      mockUsersService.updatePreferences.mockResolvedValue({ id: 1, avatarStylePreference: 'pixel-art' });
+
+      const result = await service.updatePreferences(1, dto);
+
+      expect(result.avatarStyle).toBe('pixel-art');
+      expect(mockUsersService.updatePreferences).toHaveBeenCalledWith(1, { avatarStylePreference: 'pixel-art' });
     });
 
     it('should ignore invalid preference values', async () => {

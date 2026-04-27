@@ -611,6 +611,16 @@
   font-family: inherit;
 }
 
+/* Fix for Chrome autofill background issue */
+.input-field:-webkit-autofill,
+.input-field:-webkit-autofill:hover,
+.input-field:-webkit-autofill:focus {
+  -webkit-text-fill-color: #1a1a1a !important;
+  -webkit-box-shadow: 0 0 0px 1000px #f8f9fa inset !important;
+  transition: background-color 5000s ease-in-out 0s;
+  font-family: inherit !important;
+}
+
 .input-field:focus {
   outline: none;
   border-color: #667eea;

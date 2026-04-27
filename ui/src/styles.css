@@ -315,6 +315,29 @@ input, textarea, select {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
 }
 
+/* Global Autofill & State Consistency Fix */
+body input:-webkit-autofill,
+body input:-webkit-autofill:hover,
+body input:-webkit-autofill:focus,
+body textarea:-webkit-autofill,
+body textarea:-webkit-autofill:hover,
+body textarea:-webkit-autofill:focus,
+body select:-webkit-autofill,
+body select:-webkit-autofill:hover,
+body select:-webkit-autofill:focus,
+body .input-field:-webkit-autofill,
+body .input-field:-webkit-autofill:hover,
+body .input-field:-webkit-autofill:focus,
+body .form-input:-webkit-autofill,
+body .form-input:-webkit-autofill:hover,
+body .form-input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--text-primary) !important;
+  -webkit-box-shadow: 0 0 0px 1000px var(--bg-primary) inset !important;
+  transition: background-color 5000s ease-in-out 0s;
+  font-family: var(--font-family) !important;
+  border: 1px solid var(--border-dark) !important;
+}
+
 input:hover:not(:disabled), textarea:hover:not(:disabled), select:hover:not(:disabled) {
   border-color: var(--gray-500);
 }
@@ -324,6 +347,15 @@ input:focus, textarea:focus, select:focus {
   border-color: var(--border-focus);
   box-shadow: 0 0 0 3px rgba(0, 120, 212, 0.1), 0 1px 2px rgba(0, 0, 0, 0.05);
   background: var(--bg-primary);
+}
+
+body input:-webkit-autofill:focus,
+body textarea:-webkit-autofill:focus,
+body select:-webkit-autofill:focus,
+body .input-field:-webkit-autofill:focus,
+body .form-input:-webkit-autofill:focus {
+  border-color: var(--border-focus) !important;
+  -webkit-box-shadow: 0 0 0px 1000px var(--bg-primary) inset, 0 0 0 3px rgba(0, 120, 212, 0.1) !important;
 }
 
 input::placeholder, textarea::placeholder {
@@ -377,11 +409,24 @@ label {
   margin-bottom: var(--space-md);
 }
 
-.form-helper {
+.field-hint {
   font-size: var(--font-size-sm);
   color: var(--text-tertiary);
   margin-top: 6px;
   line-height: 1.4;
+}
+
+.info-tag {
+  display: inline-block;
+  padding: 2px 6px;
+  background: rgba(0, 120, 212, 0.1);
+  color: var(--primary-blue);
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-right: 4px;
+  border: 1px solid rgba(0, 120, 212, 0.2);
 }
 
 .form-error {
