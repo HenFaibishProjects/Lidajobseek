@@ -73,12 +73,13 @@ export class ProcessesService {
       summary: { $like: 'Initial Interaction:%' }
     });
 
-    const summary = `Initial Interaction: [${process.initiatedBy || 'Unknown'}] via ${process.firstContactChannel || 'Direct'}`;
+    const method = process.firstContactChannel || process.initialInviteMethod || 'Direct';
+    const summary = `Initial Interaction: [${process.initiatedBy || 'Unknown'}] via ${method}`;
     
     if (existing) {
       // Update existing if needed
       existing.date = process.initialInviteDate!;
-      existing.interviewType = this.mapInviteMethodToInterviewType(process.firstContactChannel);
+      existing.interviewType = this.mapInviteMethodToInterviewType(method);
       existing.summary = summary;
       existing.notes = process.initialInviteContent || 'Initial contact for this role.';
     } else {
@@ -86,7 +87,7 @@ export class ProcessesService {
       const interaction = this.em.create(Interaction, {
         process,
         date: process.initialInviteDate!,
-        interviewType: this.mapInviteMethodToInterviewType(process.firstContactChannel),
+        interviewType: this.mapInviteMethodToInterviewType(method),
         summary: summary,
         notes: process.initialInviteContent || 'Initial contact for this role.',
         createdAt: new Date(),
