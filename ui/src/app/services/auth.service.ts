@@ -13,6 +13,7 @@ export interface PreferencesResponse {
   country: string;
   dateFormat: DateFormatPreference;
   timeFormat: TimeFormatPreference;
+  avatarStyle: string;
 }
 
 @Injectable({
@@ -96,6 +97,7 @@ export class AuthService {
           countryPreference: prefs.country,
           dateFormatPreference: prefs.dateFormat,
           timeFormatPreference: prefs.timeFormat,
+          avatarStylePreference: prefs.avatarStyle,
         });
       }),
     );

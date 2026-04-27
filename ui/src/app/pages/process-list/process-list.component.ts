@@ -41,6 +41,7 @@ export class ProcessListComponent implements OnInit, OnDestroy {
     availableWorkModes: string[] = ['remote', 'hybrid', 'onsite'];
 
     userDisplayName: string = 'Your Job Search';
+    settings!: UserSettings;
     private settingsSub!: Subscription;
 
     constructor(
@@ -61,9 +62,10 @@ export class ProcessListComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit() {
-        const initialSettings = this.settingsService.getSettings();
-        this.userDisplayName = this.getDisplayName(initialSettings);
+        this.settings = this.settingsService.getSettings();
+        this.userDisplayName = this.getDisplayName(this.settings);
         this.settingsSub = this.settingsService.settings$.subscribe((s) => {
+            this.settings = s;
             this.userDisplayName = this.getDisplayName(s);
         });
 
@@ -88,6 +90,12 @@ export class ProcessListComponent implements OnInit, OnDestroy {
         if (this.settingsSub) {
             this.settingsSub.unsubscribe();
         }
+    }
+
+    getAvatarUrl(): string {
+        const seed = this.settings?.profile?.contactEmail || this.authService.getUser()?.email || 'default';
+        const style = this.settings?.avatarStyle || 'avataaars';
+        return `https://api.dicebear.com/7.x/${style}/svg?seed=${encodeURIComponent(seed)}`;
     }
 
     private getDisplayName(settings: UserSettings): string {

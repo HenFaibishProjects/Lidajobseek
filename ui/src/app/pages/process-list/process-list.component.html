@@ -4,6 +4,9 @@
         <div class="hero-content">
             <div class="hero-text">
                 <h1 class="hero-title">
+                    <div class="hero-avatar" *ngIf="settings">
+                        <img [src]="getAvatarUrl()" alt="User Avatar">
+                    </div>
                     <span class="gradient-text">{{ userDisplayName }} Processes</span>
                 </h1>
                 <p class="hero-subtitle">Track, manage, and succeed in your career journey</p>
