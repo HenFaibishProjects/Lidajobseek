@@ -80,10 +80,19 @@ describe('UsersService', () => {
       mockRepo.findOne.mockResolvedValue(user);
 
       const result = await service.updatePreferences(1, { themePreference: 'dark' });
-
       expect(user.themePreference).toBe('dark');
       expect(em.flush).toHaveBeenCalled();
       expect(result).toBe(user);
+    });
+
+    it('should update avatar style preference', async () => {
+      const user = { id: 1, avatarStylePreference: 'avataaars' } as any;
+      mockRepo.findOne.mockResolvedValue(user);
+
+      await service.updatePreferences(1, { avatarStylePreference: 'bottts' });
+
+      expect(user.avatarStylePreference).toBe('bottts');
+      expect(em.flush).toHaveBeenCalled();
     });
 
     it('should return null if user not found for preference update', async () => {

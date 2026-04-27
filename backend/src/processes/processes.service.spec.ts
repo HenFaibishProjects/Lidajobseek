@@ -77,6 +77,45 @@ describe('ProcessesService', () => {
         initialInviteDate: expect.any(Date),
       }));
     });
+
+    it('should call syncInitialInteraction if initialInviteDate is present', async () => {
+      const dto = { companyName: 'Test', initialInviteDate: '2026-04-01' };
+      mockEm.findOne.mockResolvedValue(null); // No existing interaction
+      mockRepo.create.mockReturnValue({ 
+        ...dto, 
+        initialInviteDate: new Date(dto.initialInviteDate),
+        interactions: { add: jest.fn() },
+        contacts: { add: jest.fn() },
+        reviews: { add: jest.fn() }
+      });
+
+      await service.create(dto as any, 1);
+
+      expect(mockEm.findOne).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({
+        summary: { $like: 'Initial Interaction:%' }
+      }));
+      expect(mockEm.persist).toHaveBeenCalled(); // Should persist the new interaction
+    });
+
+    it('should update existing interaction if one already exists', async () => {
+      const dto = { companyName: 'Test', initialInviteDate: '2026-04-01' };
+      const existingInteraction = { id: 100, summary: 'Initial Interaction: Old' };
+      mockEm.findOne.mockResolvedValue(existingInteraction);
+      mockRepo.create.mockReturnValue({ 
+        ...dto, 
+        initialInviteDate: new Date(dto.initialInviteDate),
+        interactions: { add: jest.fn() },
+        contacts: { add: jest.fn() },
+        reviews: { add: jest.fn() }
+      });
+
+      await service.create(dto as any, 1);
+
+      expect(mockEm.findOne).toHaveBeenCalled();
+      expect(existingInteraction.summary).toContain('Initial Interaction:');
+      expect(mockEm.persist).not.toHaveBeenCalled(); // Should NOT persist a new one, just update the existing
+      expect(mockEm.flush).toHaveBeenCalled();
+    });
   });
 
   describe('findAll', () => {
