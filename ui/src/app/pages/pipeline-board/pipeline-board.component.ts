@@ -14,6 +14,7 @@ import { ProcessesService } from '../../services/processes.service';
 import { ToastService } from '../../services/toast.service';
 import { DateFormatPipe } from '../../pipes/date-format.pipe';
 import { Subscription } from 'rxjs';
+import { LucideAngularModule } from 'lucide-angular';
 
 // Kanban column definitions — ordered pipeline stages
 const BOARD_COLUMNS: { id: string; label: string; stages: string[] }[] = [
@@ -85,7 +86,7 @@ function stageToColumnId(stage: string): string {
 @Component({
   selector: 'app-pipeline-board',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, DateFormatPipe],
+  imports: [CommonModule, FormsModule, RouterModule, DateFormatPipe, LucideAngularModule],
   templateUrl: './pipeline-board.component.html',
   styleUrl: './pipeline-board.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -101,6 +102,9 @@ export class PipelineBoardComponent implements OnInit, OnDestroy {
   filterWorkMode = '';
   filterActiveOnly = false;
 
+  // Tip state
+  showTip = true;
+
   // Drag state
   draggingId: number | null = null;
   dragOverColumnId: string | null = null;
@@ -112,7 +116,7 @@ export class PipelineBoardComponent implements OnInit, OnDestroy {
   constructor(
     private processesService: ProcessesService,
     private toastService: ToastService,
-    private cdr: ChangeDetectorRef
+    protected cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
@@ -277,5 +281,9 @@ export class PipelineBoardComponent implements OnInit, OnDestroy {
     this.searchText = '';
     this.filterWorkMode = '';
     this.filterActiveOnly = false;
+  }
+
+  dismissTip() {
+    this.showTip = false;
   }
 }

@@ -2,10 +2,16 @@
   "name": "lidajobseek",
   "version": "1.0.0",
   "private": true,
-  "workspaces": [
-    "backend",
-    "ui"
-  ],
+  "workspaces": {
+    "packages": [
+      "backend",
+      "ui"
+    ],
+    "nohoist": [
+      "**/lucide-angular",
+      "**/lucide-angular/**"
+    ]
+  },
   "scripts": {
   "prebuild": "cd backend",
   "build": "npm run build -w backend && npm run build -w ui && node -e \"const fs = require('fs'); const path = require('path'); const browserDir = path.join(__dirname, 'dist', 'public', 'browser'); const publicDir = path.join(__dirname, 'dist', 'public'); if (fs.existsSync(browserDir)) { const files = fs.readdirSync(browserDir); files.forEach(file => { const src = path.join(browserDir, file); const dest = path.join(publicDir, file); fs.renameSync(src, dest); }); fs.rmSync(browserDir, { recursive: true, force: true }); console.log('Moved browser files to public directory'); } else { console.log('No browser directory found'); }\"",

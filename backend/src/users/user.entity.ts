@@ -35,6 +35,9 @@ export class User {
   @Property({ nullable: true, default: 'avataaars' })
   avatarStylePreference?: string;
 
+  @Property({ nullable: true, default: true })
+  hasSeenOnboarding?: boolean;
+
   @Property({ onCreate: () => new Date() })
   createdAt: Date = new Date();
 

@@ -24,6 +24,7 @@ export interface UserSettings {
     showTasks: boolean;
     defaultView: 'grid' | 'list';
   };
+  hasSeenOnboarding: boolean;
 }
 
 const DEFAULT_SETTINGS: UserSettings = {
@@ -47,7 +48,8 @@ const DEFAULT_SETTINGS: UserSettings = {
     showStats: true,
     showTasks: true,
     defaultView: 'grid'
-  }
+  },
+  hasSeenOnboarding: true
 };
 
 @Injectable({
@@ -80,6 +82,7 @@ export class SettingsService {
           dateFormat: prefs.dateFormat,
           clockFormat: prefs.timeFormat,
           avatarStyle: prefs.avatarStyle || 'avataaars',
+          hasSeenOnboarding: prefs.hasSeenOnboarding ?? this.settingsSubject.value.hasSeenOnboarding,
         } as UserSettings;
 
         this.settingsSubject.next(merged);
@@ -115,6 +118,7 @@ export class SettingsService {
         dateFormat: newSettings.dateFormat,
         timeFormat: newSettings.clockFormat,
         avatarStyle: newSettings.avatarStyle,
+        hasSeenOnboarding: newSettings.hasSeenOnboarding,
       }).subscribe({
         error: () => {
           // local settings are already saved, avoid breaking UX
@@ -185,6 +189,10 @@ export class SettingsService {
 
     if (user.avatarStylePreference) {
       patch.avatarStyle = user.avatarStylePreference;
+    }
+
+    if (user.hasSeenOnboarding !== undefined) {
+      patch.hasSeenOnboarding = user.hasSeenOnboarding;
     }
 
     const existingProfile = this.settingsSubject.value.profile;

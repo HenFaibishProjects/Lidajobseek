@@ -16,30 +16,64 @@
             </div>
             <div class="hero-actions">
                 <button class="btn-glass" (click)="exportData()" title="Export Data">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                        <polyline points="7 10 12 15 17 10"></polyline>
-                        <line x1="12" y1="15" x2="12" y2="3"></line>
-                    </svg>
+                    <lucide-icon name="download" [size]="18" strokeWidth="2"></lucide-icon>
                     <span>Export</span>
                 </button>
                 <button class="btn-glass" (click)="fileInput.click()" title="Import Data">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                        <polyline points="17 8 12 3 7 8"></polyline>
-                        <line x1="12" y1="3" x2="12" y2="15"></line>
-                    </svg>
+                    <lucide-icon name="upload" [size]="18" strokeWidth="2"></lucide-icon>
                     <span>Import</span>
                 </button>
                 <input #fileInput type="file" (change)="onFileSelected($event)" style="display: none" accept=".json">
                 <button class="btn-primary-gradient" routerLink="/new">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="2.5">
-                        <line x1="12" y1="5" x2="12" y2="19"></line>
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                    </svg>
+                    <lucide-icon name="plus" [size]="18" strokeWidth="2.5"></lucide-icon>
                     <span>New Application</span>
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Guided Checklist (only visible if not allDone) -->
+    <div class="guided-checklist" *ngIf="!isLoading && !checklist.allDone">
+        <h3>Getting Started Checklist</h3>
+        <p>Complete these steps to unlock the full potential of Lidajobseek.</p>
+        <div class="checklist-items">
+            <div class="checklist-item" [class.completed]="checklist.hasProcess">
+                <div class="check-circle">
+                    <svg *ngIf="checklist.hasProcess" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </div>
+                <div class="check-content">
+                    <span class="check-title">Add first application</span>
+                    <a *ngIf="!checklist.hasProcess" routerLink="/new" class="check-action">Add now</a>
+                </div>
+            </div>
+
+            <div class="checklist-item" [class.completed]="checklist.hasInterview">
+                <div class="check-circle">
+                    <svg *ngIf="checklist.hasInterview" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </div>
+                <div class="check-content">
+                    <span class="check-title">Track an interview</span>
+                    <span *ngIf="!checklist.hasInterview" class="check-desc">Update a process to an interview stage or add an interaction.</span>
+                </div>
+            </div>
+
+            <div class="checklist-item" [class.completed]="checklist.profileComplete">
+                <div class="check-circle">
+                    <svg *ngIf="checklist.profileComplete" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </div>
+                <div class="check-content">
+                    <span class="check-title">Complete profile</span>
+                    <a *ngIf="!checklist.profileComplete" routerLink="/profile" class="check-action">Go to Profile</a>
+                </div>
+            </div>
+            
+            <div class="checklist-item completed">
+                <div class="check-circle">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </div>
+                <div class="check-content">
+                    <span class="check-title">View Dashboard</span>
+                </div>
             </div>
         </div>
     </div>
@@ -232,7 +266,7 @@
                         </a>
                     </ng-container>
                     <ng-template #noScored>
-                        <div class="insight-empty">Score processes via the decision panel to see top picks</div>
+                        <div class="insight-empty">Score your applications via the decision panel to reveal your top matches</div>
                     </ng-template>
                 </div>
             </div>
@@ -413,8 +447,8 @@
                             <line x1="9" y1="15" x2="15" y2="15"></line>
                         </svg>
                     </div>
-                    <h3>No applications match these filters</h3>
-                    <p>Try clearing filters or create a new application to start filling your board.</p>
+                    <h3>No applications match your current filters</h3>
+                    <p>Try adjusting your filters, or create a new application to populate your board.</p>
                     <div class="empty-actions">
                         <button class="btn-secondary" (click)="clearFilters()">Clear filters</button>
                         <button class="btn-primary-gradient" routerLink="/new">

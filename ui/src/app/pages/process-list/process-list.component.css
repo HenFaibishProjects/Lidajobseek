@@ -1363,11 +1363,35 @@ body.dark-theme .skeleton {
     .kpi-value {
         font-size: var(--font-size-xl);
     }
+    .process-layout {
+        grid-template-columns: 1fr;
+    }
+    .filters-panel {
+        position: static;
+        top: 0;
+    }
+    .hero-content {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .hero-actions {
+        width: 100%;
+        justify-content: flex-start;
+    }
 }
 
 @media (max-width: 480px) {
     .kpi-strip {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-columns: 1fr;
+    }
+    .hero-actions button {
+        width: 100%;
+        justify-content: center;
+    }
+    .card-footer {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
     }
 }
 
@@ -1405,3 +1429,98 @@ body.dark-theme .kpi-cyan   .kpi-icon { background: rgba(6,182,212,0.2);   color
 
 /* Suppress the old stat cards (now removed from HTML, but keep selector clean) */
 .stats-grid { display: none; }
+
+/* ─── Guided Checklist ──────────────────────────────────── */
+
+.guided-checklist {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl);
+    margin: 0 var(--space-xl);
+    box-shadow: var(--shadow-sm);
+}
+
+.guided-checklist h3 {
+    margin: 0 0 8px 0;
+    font-size: 1.25rem;
+    color: var(--text-primary);
+}
+
+.guided-checklist p {
+    margin: 0 0 24px 0;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+.checklist-items {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+}
+
+.checklist-item {
+    display: flex;
+    gap: 12px;
+    padding: 16px;
+    border-radius: var(--radius-md);
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    transition: all 0.2s ease;
+}
+
+.checklist-item.completed {
+    background: rgba(16, 185, 129, 0.05);
+    border-color: rgba(16, 185, 129, 0.2);
+}
+
+.check-circle {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid var(--gray-400);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+}
+
+.checklist-item.completed .check-circle {
+    background: #10b981;
+    border-color: #10b981;
+    color: white;
+}
+
+.check-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.check-title {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+}
+
+.checklist-item.completed .check-title {
+    color: var(--text-secondary);
+    text-decoration: line-through;
+}
+
+.check-desc {
+    font-size: 0.85rem;
+    color: var(--text-tertiary);
+}
+
+.check-action {
+    font-size: 0.85rem;
+    color: var(--primary-blue);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.check-action:hover {
+    text-decoration: underline;
+}

@@ -11,6 +11,7 @@ import { DateFormatPipe } from '../../pipes/date-format.pipe';
 import { PROCESS_STAGES } from '../../shared/process-stages';
 import { Subscription } from 'rxjs';
 import Chart from 'chart.js/auto';
+import { LucideAngularModule } from 'lucide-angular';
 
 const ACTIVE_STAGES = new Set([
     'Application Submitted', 'Resume Under Review',
@@ -42,7 +43,7 @@ const RESPONDED_STAGES = new Set([
 @Component({
     selector: 'app-process-list',
     standalone: true,
-    imports: [CommonModule, FormsModule, RouterModule, DateFormatPipe],
+    imports: [CommonModule, FormsModule, RouterModule, DateFormatPipe, LucideAngularModule],
     templateUrl: './process-list.component.html',
     styleUrls: ['./process-list.component.css']
 })
@@ -260,6 +261,17 @@ export class ProcessListComponent implements OnInit, OnDestroy {
                 action: 'Follow-up required',
                 date: p.nextFollowUp
             }));
+    }
+
+    get checklist() {
+        const hasProcess = this.processes.length > 0;
+        const hasInterview = this.processes.some(p => 
+            (p._count?.interactions && p._count.interactions > 0) || 
+            INTERVIEW_STAGES.has(p.currentStage)
+        );
+        const profileComplete = !!this.settings?.profile?.displayName && !!this.settings?.profile?.phoneNumber;
+        const allDone = hasProcess && hasInterview && profileComplete;
+        return { hasProcess, hasInterview, profileComplete, allDone };
     }
 
     exportData() {

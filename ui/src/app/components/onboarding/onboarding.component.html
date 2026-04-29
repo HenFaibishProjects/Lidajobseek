@@ -1,0 +1,94 @@
+<div class="onboarding-overlay">
+  <div class="onboarding-modal">
+    <!-- Step 1: Welcome -->
+    <div *ngIf="step === 1" class="onboarding-step fade-in">
+      <div class="step-icon">👋</div>
+      <h2>Welcome to Lidajobseek!</h2>
+      <p class="subtitle">Your professional job search copilot.</p>
+      
+      <div class="value-props">
+        <div class="value-prop">
+          <span class="icon">📊</span>
+          <div class="text">
+            <strong>Track Everything</strong>
+            <span>Keep applications, interviews, and offers organized.</span>
+          </div>
+        </div>
+        <div class="value-prop">
+          <span class="icon">🤖</span>
+          <div class="text">
+            <strong>AI Copilot</strong>
+            <span>Generate tailored CVs, emails, and interview prep.</span>
+          </div>
+        </div>
+        <div class="value-prop">
+          <span class="icon">📈</span>
+          <div class="text">
+            <strong>Actionable Insights</strong>
+            <span>See what's working and improve your process.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn-primary" (click)="nextStep()">Get Started</button>
+        <button class="btn-ghost" (click)="skip()">Skip</button>
+      </div>
+    </div>
+
+    <!-- Step 2: Goal -->
+    <div *ngIf="step === 2" class="onboarding-step fade-in">
+      <div class="step-icon">🎯</div>
+      <h2>What's your current goal?</h2>
+      <p class="subtitle">We'll tailor your experience to match.</p>
+
+      <div class="goal-options">
+        <div class="goal-card" [class.selected]="selectedGoal === 'active'" (click)="selectGoal('active')">
+          <div class="goal-icon">🔥</div>
+          <div class="goal-title">Active Search</div>
+          <div class="goal-desc">I am actively applying and interviewing for roles.</div>
+        </div>
+        <div class="goal-card" [class.selected]="selectedGoal === 'passive'" (click)="selectGoal('passive')">
+          <div class="goal-icon">👀</div>
+          <div class="goal-title">Passive Search</div>
+          <div class="goal-desc">I'm open to strong opportunities, but not in a rush.</div>
+        </div>
+        <div class="goal-card" [class.selected]="selectedGoal === 'exploring'" (click)="selectGoal('exploring')">
+          <div class="goal-icon">🧭</div>
+          <div class="goal-title">Exploring</div>
+          <div class="goal-desc">I'm organizing my profile and testing the waters.</div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn-primary" [disabled]="!selectedGoal" (click)="nextStep()">Continue</button>
+        <button class="btn-ghost" (click)="skip()">Skip</button>
+      </div>
+    </div>
+
+    <!-- Step 3: Quick Setup -->
+    <div *ngIf="step === 3" class="onboarding-step fade-in">
+      <div class="step-icon">🚀</div>
+      <h2>Want a quick demonstration?</h2>
+      <p class="subtitle">We can populate your board with sample data so you can explore features immediately.</p>
+
+      <div class="setup-illustration">
+        <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" class="illustration-svg">
+          <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+          <path d="M3 9h18"></path>
+          <path d="M9 21V9"></path>
+        </svg>
+      </div>
+
+      <div class="actions vertical-actions">
+        <button class="btn-primary btn-large" [disabled]="isSaving" (click)="addSampleData()">
+          <span *ngIf="!isSaving">Yes, load a sample pipeline</span>
+          <span *ngIf="isSaving">Loading...</span>
+        </button>
+        <button class="btn-secondary btn-large" [disabled]="isSaving" (click)="finishOnboarding()">
+          No thanks, I'll start fresh
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -13,6 +13,7 @@ export interface ConfirmOptions {
   confirmText?: string;
   cancelText?: string;
   buttons?: ConfirmButton[];
+  danger?: boolean;
 }
 
 @Injectable({
@@ -38,6 +39,24 @@ export class ConfirmService {
         resolve(result);
         sub.unsubscribe();
         this.confirmSubject.next(null); // Close dialog
+      });
+    });
+  }
+
+  delete(itemName: string = 'this item'): Promise<boolean> {
+    this.confirmSubject.next({
+      title: 'Delete Permanently',
+      message: `Are you sure you want to delete ${itemName}? This action cannot be undone.`,
+      confirmText: 'Delete',
+      cancelText: 'Keep it',
+      danger: true
+    });
+
+    return new Promise((resolve) => {
+      const sub = this.result$.subscribe((result) => {
+        resolve(result);
+        sub.unsubscribe();
+        this.confirmSubject.next(null);
       });
     });
   }

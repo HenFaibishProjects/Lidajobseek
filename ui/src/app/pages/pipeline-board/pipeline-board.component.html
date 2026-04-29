@@ -3,10 +3,7 @@
   <div class="board-filters">
     <div class="filters-left">
       <div class="search-wrapper">
-        <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="11" cy="11" r="8"></circle>
-          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-        </svg>
+        <lucide-icon name="search" class="search-icon" [size]="16" strokeWidth="2"></lucide-icon>
         <input
           type="text"
           class="filter-search search-input"
@@ -35,13 +32,21 @@
         Clear filters
       </button>
       <a routerLink="/new" class="btn-add-process">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-          <line x1="12" y1="5" x2="12" y2="19"></line>
-          <line x1="5" y1="12" x2="19" y2="12"></line>
-        </svg>
+        <lucide-icon name="plus" [size]="16" strokeWidth="2.5"></lucide-icon>
         Add process
       </a>
     </div>
+  </div>
+
+  <!-- Helper Tip -->
+  <div class="helper-tip" *ngIf="showTip && !loading && allProcesses.length > 0">
+    <div class="tip-content">
+      <span class="tip-icon">💡</span>
+      <strong>Pro Tip:</strong> You can drag and drop cards between columns to quickly update their stage.
+    </div>
+    <button class="tip-dismiss" (click)="dismissTip()" aria-label="Dismiss tip">
+      <lucide-icon name="x" [size]="14" strokeWidth="2"></lucide-icon>
+    </button>
   </div>
 
   <!-- Loading state -->
@@ -126,7 +131,7 @@
             </div>
 
             <!-- Card link overlay -->
-            <a class="card-link" [routerLink]="['/process', p.id]" aria-label="Open {{ p.companyName }}"></a>
+            <a class="card-link" [routerLink]="['/process', p.id]" [attr.aria-label]="'Open ' + p.companyName"></a>
           </div>
 
           <!-- Empty column state -->

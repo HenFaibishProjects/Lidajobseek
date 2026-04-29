@@ -14,6 +14,7 @@ export interface PreferencesResponse {
   dateFormat: DateFormatPreference;
   timeFormat: TimeFormatPreference;
   avatarStyle: string;
+  hasSeenOnboarding?: boolean;
 }
 
 @Injectable({
