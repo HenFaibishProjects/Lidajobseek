@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewChecked, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -47,7 +47,7 @@ const RESPONDED_STAGES = new Set([
     templateUrl: './process-list.component.html',
     styleUrls: ['./process-list.component.css']
 })
-export class ProcessListComponent implements OnInit, OnDestroy {
+export class ProcessListComponent implements OnInit, OnDestroy, AfterViewChecked {
     @ViewChild('dashTimelineChart') timelineRef!: ElementRef;
     @ViewChild('dashStageChart') stageRef!: ElementRef;
 
@@ -75,6 +75,7 @@ export class ProcessListComponent implements OnInit, OnDestroy {
     settings!: UserSettings;
     private settingsSub!: Subscription;
     private dashCharts: { [key: string]: any } = {};
+    private chartsNeedInit = false;
 
     constructor(
         private processesService: ProcessesService,
@@ -109,7 +110,9 @@ export class ProcessListComponent implements OnInit, OnDestroy {
                 this.applyFilters();
                 this.findTasks();
                 this.isLoading = false;
-                setTimeout(() => this.initDashCharts(), 0);
+                // Mark charts as needing a redraw — AfterViewChecked will
+                // draw them on the next render cycle once the canvases exist.
+                this.chartsNeedInit = true;
             },
             error: (err) => {
                 console.error('Failed to load processes', err);
@@ -117,6 +120,14 @@ export class ProcessListComponent implements OnInit, OnDestroy {
                 this.isLoading = false;
             }
         });
+    }
+
+    ngAfterViewChecked() {
+        // Only draw when data says we need a redraw AND the canvas refs exist.
+        if (this.chartsNeedInit && this.timelineRef?.nativeElement && this.stageRef?.nativeElement) {
+            this.chartsNeedInit = false; // clear flag first to avoid loop
+            this.initDashCharts();
+        }
     }
 
     ngOnDestroy() {
