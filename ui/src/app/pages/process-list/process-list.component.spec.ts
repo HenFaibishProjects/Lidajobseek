@@ -97,4 +97,33 @@ describe('ProcessListComponent', () => {
     const name = (component as any).getDisplayName(emptySettings);
     expect(name).toBe('shepard'); // derived from email in authServiceMock
   });
+
+  it('should initialize charts when chartsNeedInit is true and view refs are available', () => {
+    // Mock ElementRefs
+    component.timelineRef = { nativeElement: {} } as any;
+    component.stageRef = { nativeElement: {} } as any;
+    
+    // Spy on initDashCharts (private, so cast to any)
+    spyOn(component as any, 'initDashCharts').and.callThrough();
+    
+    // Trigger chartsNeedInit via a mock load
+    (component as any).chartsNeedInit = true;
+    
+    // Call hook
+    component.ngAfterViewChecked();
+    
+    expect((component as any).chartsNeedInit).toBeFalse();
+    expect((component as any).initDashCharts).toHaveBeenCalled();
+  });
+
+  it('should not initialize charts if refs are missing even if flag is true', () => {
+    spyOn(component as any, 'initDashCharts');
+    (component as any).chartsNeedInit = true;
+    component.timelineRef = undefined as any;
+    
+    component.ngAfterViewChecked();
+    
+    expect((component as any).chartsNeedInit).toBeTrue();
+    expect((component as any).initDashCharts).not.toHaveBeenCalled();
+  });
 });

@@ -62,15 +62,16 @@ describe('UsersService', () => {
   });
 
   describe('create', () => {
-    it('should create and persist a new user', async () => {
+    it('should create and persist a new user with onboarding flag set to false', async () => {
       const data = { email: 'new@t.com', password: 'hash' };
-      mockRepo.create.mockReturnValue(data);
+      const expectedUser = { ...data, hasSeenOnboarding: false };
+      mockRepo.create.mockReturnValue(expectedUser);
 
       const result = await service.create(data);
 
-      expect(repo.create).toHaveBeenCalledWith(data);
-      expect(em.persistAndFlush).toHaveBeenCalledWith(data);
-      expect(result).toBe(data);
+      expect(repo.create).toHaveBeenCalledWith({ ...data, hasSeenOnboarding: false });
+      expect(em.persistAndFlush).toHaveBeenCalledWith(expectedUser);
+      expect(result).toBe(expectedUser);
     });
   });
 
@@ -92,6 +93,16 @@ describe('UsersService', () => {
       await service.updatePreferences(1, { avatarStylePreference: 'bottts' });
 
       expect(user.avatarStylePreference).toBe('bottts');
+      expect(em.flush).toHaveBeenCalled();
+    });
+
+    it('should update hasSeenOnboarding preference', async () => {
+      const user = { id: 1, hasSeenOnboarding: false } as any;
+      mockRepo.findOne.mockResolvedValue(user);
+
+      await service.updatePreferences(1, { hasSeenOnboarding: true });
+
+      expect(user.hasSeenOnboarding).toBe(true);
       expect(em.flush).toHaveBeenCalled();
     });
 

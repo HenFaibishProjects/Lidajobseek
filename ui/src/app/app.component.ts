@@ -10,6 +10,7 @@ import { OnboardingComponent } from './components/onboarding/onboarding.componen
 import { AuthService } from './services/auth.service';
 import { SettingsService } from './services/settings.service';
 import { ToastService } from './services/toast.service';
+import { KeyboardShortcutsService } from './services/keyboard-shortcuts.service';
 
 @Component({
   selector: 'app-root',
@@ -29,7 +30,8 @@ export class AppComponent implements OnInit {
   constructor(
     private authService: AuthService,
     private settingsService: SettingsService,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private keyboardShortcutsService: KeyboardShortcutsService
   ) { }
 
   get isAuthenticated(): boolean {
