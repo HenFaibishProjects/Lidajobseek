@@ -42,3 +42,35 @@
     padding: 12px;
   }
 }
+
+/* Global AI Career Chat float button */
+.cc-float-btn {
+  position: fixed;
+  bottom: 28px;
+  right: 88px;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6d28d9, #8b5cf6);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  box-shadow: 0 4px 20px rgba(109,40,217,0.45);
+  z-index: 990;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.cc-float-btn:hover {
+  transform: scale(1.08);
+  box-shadow: 0 6px 28px rgba(109,40,217,0.6);
+}
+.cc-float-btn:active { transform: scale(0.96); }
+
+@media (max-width: 480px) {
+  .cc-float-btn {
+    right: 24px;
+    bottom: 80px;
+  }
+}

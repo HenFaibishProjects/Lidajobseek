@@ -62,6 +62,9 @@
                                         <span class="node-date">{{ inter.date | dateFormat:'datetime' }}</span>
                                     </div>
                                     <div class="node-actions">
+                                        <button class="btn-icon" (click)="openInteractionAiPanel(inter.id)" title="Analyze with AI">
+                                            <lucide-icon name="sparkles" [size]="14" strokeWidth="2"></lucide-icon>
+                                        </button>
                                         <button class="btn-icon" [routerLink]="['/process', process.id, 'interaction', inter.id, 'edit']" title="Edit">
                                             <lucide-icon name="edit" [size]="14" strokeWidth="2"></lucide-icon>
                                         </button>
@@ -289,6 +292,19 @@
         </aside>
     </div>
 </div>
+
+<!-- AI Assistant floating button -->
+<button class="ai-float-btn" (click)="toggleAiPanel()" title="AI Assistant" *ngIf="process">
+    <lucide-icon name="sparkles" [size]="22" strokeWidth="2"></lucide-icon>
+</button>
+
+<!-- AI Assistant panel -->
+<app-ai-assistant-panel
+    *ngIf="showAiPanel && process"
+    [processId]="activeInteractionId == null ? process.id : undefined"
+    [interactionId]="activeInteractionId ?? undefined"
+    (closed)="showAiPanel = false; activeInteractionId = null">
+</app-ai-assistant-panel>
 
 <style>
     /* ===== RESET & BASE OVERRIDES ===== */
@@ -934,5 +950,31 @@
         .header-actions { flex-direction: column; }
         .dl-item { flex-direction: column; align-items: flex-start; gap: 8px; }
         .review-actions { flex-direction: column; align-items: flex-start; gap: 12px; }
+    }
+
+    .ai-float-btn {
+        position: fixed;
+        bottom: 28px;
+        right: 24px;
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #7c3aed, #a78bfa);
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        box-shadow: 0 4px 20px rgba(124,58,237,0.45);
+        z-index: 998;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .ai-float-btn:hover {
+        transform: scale(1.08);
+        box-shadow: 0 6px 28px rgba(124,58,237,0.6);
+    }
+    .ai-float-btn:active {
+        transform: scale(0.96);
     }
 </style>

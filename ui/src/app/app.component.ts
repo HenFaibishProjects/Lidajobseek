@@ -7,21 +7,24 @@ import { SettingsPanelComponent } from './components/settings-panel/settings-pan
 import { ScrollToTopComponent } from './components/scroll-to-top/scroll-to-top.component';
 import { HeaderComponent } from './components/header/header.component';
 import { OnboardingComponent } from './components/onboarding/onboarding.component';
+import { CareerChatPanelComponent } from './components/career-chat-panel/career-chat-panel.component';
 import { AuthService } from './services/auth.service';
 import { SettingsService } from './services/settings.service';
 import { ToastService } from './services/toast.service';
 import { KeyboardShortcutsService } from './services/keyboard-shortcuts.service';
+import { LucideAngularModule } from 'lucide-angular';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterModule, ToastComponent, ConfirmDialogComponent, SettingsPanelComponent, ScrollToTopComponent, HeaderComponent, OnboardingComponent],
+  imports: [CommonModule, RouterOutlet, RouterModule, ToastComponent, ConfirmDialogComponent, SettingsPanelComponent, ScrollToTopComponent, HeaderComponent, OnboardingComponent, CareerChatPanelComponent, LucideAngularModule],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
 export class AppComponent implements OnInit {
   title = 'ui';
   showSettings = false;
+  showCareerChat = false;
 
   get showOnboarding(): boolean {
     return this.isAuthenticated && !this.settingsService.getSettings().hasSeenOnboarding;
@@ -52,6 +55,10 @@ export class AppComponent implements OnInit {
 
   closeOnboarding() {
     this.settingsService.updateSettings({ hasSeenOnboarding: true });
+  }
+
+  toggleCareerChat() {
+    this.showCareerChat = !this.showCareerChat;
   }
 
   logout() {

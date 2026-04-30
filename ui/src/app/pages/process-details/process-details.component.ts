@@ -11,16 +11,19 @@ import { ToastService } from '../../services/toast.service';
 import { DateFormatPipe } from '../../pipes/date-format.pipe';
 import { getInterviewTypeLabel as resolveInterviewTypeLabel } from '../../shared/interview-types';
 import { LucideAngularModule } from 'lucide-angular';
+import { AiAssistantPanelComponent } from '../../components/ai-assistant-panel/ai-assistant-panel.component';
 
 @Component({
     selector: 'app-process-details',
     standalone: true,
-    imports: [CommonModule, RouterModule, FormsModule, DateFormatPipe, LucideAngularModule],
+    imports: [CommonModule, RouterModule, FormsModule, DateFormatPipe, LucideAngularModule, AiAssistantPanelComponent],
     templateUrl: './process-details.component.html'
 })
 export class ProcessDetailsComponent implements OnInit {
     process: any;
     showContactForm = false;
+    showAiPanel = false;
+    activeInteractionId: number | null = null;
     newContact: any = {
         name: '',
         role: '',
@@ -147,5 +150,15 @@ export class ProcessDetailsComponent implements OnInit {
 
     getInterviewTypeLabel(interviewType: string): string {
         return resolveInterviewTypeLabel(interviewType);
+    }
+
+    toggleAiPanel() {
+        this.activeInteractionId = null;
+        this.showAiPanel = !this.showAiPanel;
+    }
+
+    openInteractionAiPanel(interactionId: number) {
+        this.activeInteractionId = interactionId;
+        this.showAiPanel = true;
     }
 }

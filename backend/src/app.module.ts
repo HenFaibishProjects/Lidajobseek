@@ -16,6 +16,7 @@ import { MikroOrmModule } from '@mikro-orm/nestjs';
 import config from '../mikro-orm.config';
 import { Contact } from './contacts/contact.entity';
 import { ProfilesModule } from './profiles/profiles.module';
+import { AiAssistantModule } from './ai-assistant/ai-assistant.module';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { AuthGuard } from './auth/auth.guard';
 import { APP_GUARD } from '@nestjs/core';
@@ -72,6 +73,7 @@ import { APP_GUARD } from '@nestjs/core';
     ReviewsModule,
     ResourcesModule,
     ProfilesModule,
+    AiAssistantModule,
     ThrottlerModule.forRoot([{
       name: 'default',
       ttl: 60000,
