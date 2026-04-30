@@ -18,8 +18,9 @@ export class ToastService {
   show(message: string, type: 'success' | 'error' | 'info' | 'warning' = 'info') {
     const id = this.counter++;
     const toast: Toast = { id, message, type };
-    const currentToasts = this.toastsSubject.value;
-    this.toastsSubject.next([...currentToasts, toast]);
+    
+    // Prevent stacking by replacing any existing toasts with the new one
+    this.toastsSubject.next([toast]);
 
     // Auto-remove after 3 seconds
     setTimeout(() => {
