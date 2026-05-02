@@ -8,6 +8,7 @@ import { ConfirmService } from '../../services/confirm.service';
 import { Router } from '@angular/router';
 import { ToastService } from '../../services/toast.service';
 import { of } from 'rxjs';
+import { ProcessesService } from '../../services/processes.service';
 
 describe('SettingsPanelComponent', () => {
   let component: SettingsPanelComponent;
@@ -17,6 +18,7 @@ describe('SettingsPanelComponent', () => {
   let confirmServiceMock: any;
   let toastServiceMock: any;
   let routerMock: any;
+  let processesServiceMock: any;
 
   beforeEach(async () => {
     settingsServiceMock = {
@@ -58,8 +60,9 @@ describe('SettingsPanelComponent', () => {
       show: jasmine.createSpy('show')
     };
 
-    routerMock = {
-      navigate: jasmine.createSpy('navigate')
+    processesServiceMock = {
+      exportData: jasmine.createSpy('exportData'),
+      importData: jasmine.createSpy('importData').and.returnValue(of(true))
     };
 
     await TestBed.configureTestingModule({
@@ -69,7 +72,8 @@ describe('SettingsPanelComponent', () => {
         { provide: AuthService, useValue: authServiceMock },
         { provide: ConfirmService, useValue: confirmServiceMock },
         { provide: ToastService, useValue: toastServiceMock },
-        { provide: Router, useValue: routerMock }
+        { provide: Router, useValue: routerMock },
+        { provide: ProcessesService, useValue: processesServiceMock }
       ]
     }).compileComponents();
 
@@ -185,6 +189,30 @@ describe('SettingsPanelComponent', () => {
       const style = component.getSelectedAvatarStyle();
       expect(style?.id).toBe('pixel-art');
       expect(style?.name).toBe('Pixel Art');
+    });
+  });
+
+  describe('Data Management', () => {
+    it('should call exportData when export is triggered', () => {
+      component.exportData();
+      expect(processesServiceMock.exportData).toHaveBeenCalled();
+    });
+
+    it('should trigger file input click for import', () => {
+      const mockInput = { click: jasmine.createSpy('click') };
+      spyOn(document, 'getElementById').and.returnValue(mockInput as any);
+      
+      component.triggerImport();
+      expect(mockInput.click).toHaveBeenCalled();
+    });
+
+    it('should call importData when file is selected', () => {
+      const mockFile = new File(['{}'], 'test.json', { type: 'application/json' });
+      const mockEvent = { target: { files: [mockFile] } };
+      
+      component.onFileSelected(mockEvent as any);
+      expect(processesServiceMock.importData).toHaveBeenCalledWith(mockFile);
+      expect(toastServiceMock.show).toHaveBeenCalledWith(jasmine.any(String), 'success');
     });
   });
 });

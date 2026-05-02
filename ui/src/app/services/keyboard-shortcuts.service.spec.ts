@@ -1,3 +1,4 @@
+import { TestBed } from '@angular/core/testing';
 import { KeyboardShortcutsService } from './keyboard-shortcuts.service';
 import { Router } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
@@ -94,5 +95,12 @@ describe('KeyboardShortcutsService', () => {
 
     expect(spy).not.toHaveBeenCalled();
     document.body.removeChild(input);
+  });
+
+  it('should navigate to dashboard when D key is pressed', () => {
+    spyOn(router, 'navigate');
+    const event = new KeyboardEvent('keydown', { key: 'd' });
+    document.dispatchEvent(event);
+    expect(router.navigate).toHaveBeenCalledWith(['/processes']);
   });
 });

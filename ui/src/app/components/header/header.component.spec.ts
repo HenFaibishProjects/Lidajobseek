@@ -84,4 +84,9 @@ describe('HeaderComponent', () => {
     const hamburger = fixture.debugElement.query(By.css('.hamburger-btn'));
     expect(hamburger).toBeTruthy();
   });
+
+  it('should display the brand name Reqcue', () => {
+    const brandElement = fixture.debugElement.query(By.css('.brand-name'));
+    expect(brandElement.nativeElement.textContent).toContain('Reqcue');
+  });
 });

@@ -22,7 +22,7 @@ import { LucideAngularModule } from 'lucide-angular';
   styleUrl: './app.component.css'
 })
 export class AppComponent implements OnInit {
-  title = 'ui';
+  title = 'Reqcue';
   showSettings = false;
   showCareerChat = false;
 

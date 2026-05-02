@@ -98,7 +98,68 @@ describe('ProcessListComponent', () => {
     expect(name).toBe('shepard'); // derived from email in authServiceMock
   });
 
-  it('should initialize charts when chartsNeedInit is true and view refs are available', () => {
+  it('should calculate KPI metrics correctly from processes', () => {
+    const mockProcesses = [
+      { id: '1', currentStage: 'Rejected', createdAt: new Date() },
+      { id: '2', currentStage: 'Offer Received', createdAt: new Date() },
+      { id: '3', currentStage: 'Technical Interview', createdAt: new Date() },
+      { id: '4', currentStage: 'Application Submitted', createdAt: new Date() }
+    ];
+    component.processes = mockProcesses;
+    component.kpiTimeRange = 'all';
+
+    expect(component.kpiProcesses.length).toBe(4);
+    expect(component.getRejectionRate()).toBe(25); // 1/4
+    expect(component.getOfferCount()).toBe(1);
+    expect(component.getInterviewCount()).toBe(2); // Offer Received and Technical Interview are interviews
+  });
+
+  it('should filter KPIs based on time range', () => {
+    const oldDate = new Date();
+    oldDate.setFullYear(oldDate.getFullYear() - 2);
+    
+    const mockProcesses = [
+      { id: '1', currentStage: 'Rejected', createdAt: new Date() }, // Today
+      { id: '2', currentStage: 'Rejected', createdAt: oldDate }     // 2 years ago
+    ];
+    component.processes = mockProcesses;
+    
+    component.kpiTimeRange = 'year';
+    expect(component.kpiProcesses.length).toBe(1);
+    expect(component.getRejectionRate()).toBe(100);
+
+    component.kpiTimeRange = 'all';
+    expect(component.kpiProcesses.length).toBe(2);
+    expect(component.getRejectionRate()).toBe(100);
+  });
+
+  it('should handle zero processes gracefully in KPIs', () => {
+    component.processes = [];
+    component.kpiTimeRange = 'all';
+    
+    expect(component.kpiProcesses.length).toBe(0);
+    expect(component.getRejectionRate()).toBe(0);
+    expect(component.getOfferCount()).toBe(0);
+    expect(component.getInterviewCount()).toBe(0);
+  });
+
+  it('should not crash if a process has a missing createdAt date', () => {
+    component.processes = [{ id: '1', currentStage: 'Applied', createdAt: null as any }];
+    component.kpiTimeRange = 'week';
+    
+    expect(() => component.kpiProcesses).not.toThrow();
+    expect(component.kpiProcesses.length).toBe(0);
+  });
+
+  it('should provide correct timeline subtitles', () => {
+    component.kpiTimeRange = 'week';
+    expect(component.getTimelineSubtitle()).toContain('Last 7 days');
+    
+    component.kpiTimeRange = 'year';
+    expect(component.getTimelineSubtitle()).toContain('Last 12 months');
+  });
+
+  it('should initialize charts when loading completes and view is ready', () => {
     // Mock ElementRefs
     component.timelineRef = { nativeElement: {} } as any;
     component.stageRef = { nativeElement: {} } as any;
@@ -106,24 +167,25 @@ describe('ProcessListComponent', () => {
     // Spy on initDashCharts (private, so cast to any)
     spyOn(component as any, 'initDashCharts').and.callThrough();
     
-    // Trigger chartsNeedInit via a mock load
-    (component as any).chartsNeedInit = true;
+    // Set state
+    component.isLoading = false;
+    component.processes = [{ id: '1' }];
+    (component as any).dashCharts = {};
     
     // Call hook
     component.ngAfterViewChecked();
     
-    expect((component as any).chartsNeedInit).toBeFalse();
     expect((component as any).initDashCharts).toHaveBeenCalled();
   });
 
-  it('should not initialize charts if refs are missing even if flag is true', () => {
+  it('should not re-initialize charts if already built', () => {
     spyOn(component as any, 'initDashCharts');
-    (component as any).chartsNeedInit = true;
-    component.timelineRef = undefined as any;
+    component.isLoading = false;
+    component.processes = [{ id: '1' }];
+    (component as any).dashCharts = { timeline: {} }; // simulate already built
     
     component.ngAfterViewChecked();
     
-    expect((component as any).chartsNeedInit).toBeTrue();
     expect((component as any).initDashCharts).not.toHaveBeenCalled();
   });
 });
