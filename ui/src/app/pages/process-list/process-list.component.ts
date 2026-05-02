@@ -114,7 +114,7 @@ export class ProcessListComponent implements OnInit, OnDestroy, AfterViewChecked
         }
 
         const stage = (process?.currentStage ?? '').toString().trim().toLowerCase();
-        return stage === 'rejected' || stage === 'reject' || stage === 'withdrawn';
+        return stage === 'rejected' || stage === 'reject' || stage === 'withdrawn' || stage === 'offer declined';
     }
 
     ngOnInit() {

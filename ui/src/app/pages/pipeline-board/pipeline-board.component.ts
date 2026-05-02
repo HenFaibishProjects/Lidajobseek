@@ -74,7 +74,7 @@ const COLUMN_DEFAULT_STAGE: Record<string, string> = {
   closed: 'Rejected',
 };
 
-const CLOSED_STAGES = new Set(['Withdrawn', 'Rejected', 'Position Put On Hold', 'Ghosted / No Response']);
+const CLOSED_STAGES = new Set(['Withdrawn', 'Rejected', 'Position Put On Hold', 'Ghosted / No Response', 'Offer Declined']);
 
 function stageToColumnId(stage: string): string {
   for (const col of BOARD_COLUMNS) {
