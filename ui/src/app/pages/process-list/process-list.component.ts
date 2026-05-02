@@ -156,7 +156,11 @@ export class ProcessListComponent implements OnInit, OnDestroy, AfterViewChecked
 
     ngOnDestroy() {
         if (this.settingsSub) this.settingsSub.unsubscribe();
-        Object.values(this.dashCharts).forEach(c => c?.destroy());
+        Object.values(this.dashCharts).forEach(c => {
+            if (c && typeof c.destroy === 'function') {
+                c.destroy();
+            }
+        });
     }
 
     // ─── Dashboard Charts ─────────────────────────────────────────────────────

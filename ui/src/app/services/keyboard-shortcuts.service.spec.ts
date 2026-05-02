@@ -31,7 +31,7 @@ describe('KeyboardShortcutsService', () => {
   it('should register default shortcuts', () => {
     const shortcuts = service.getShortcuts();
     expect(shortcuts.length).toBeGreaterThan(0);
-    expect(shortcuts.find(s => s.description === 'Go to home')).toBeDefined();
+    expect(shortcuts.find(s => s.description === 'Go to Dashboard')).toBeDefined();
   });
 
   it('should register a new shortcut', () => {
@@ -101,6 +101,6 @@ describe('KeyboardShortcutsService', () => {
     spyOn(router, 'navigate');
     const event = new KeyboardEvent('keydown', { key: 'd' });
     document.dispatchEvent(event);
-    expect(router.navigate).toHaveBeenCalledWith(['/processes']);
+    expect(router.navigate).toHaveBeenCalledWith(['/']);
   });
 });

@@ -361,8 +361,7 @@ export class SettingsPanelComponent implements OnInit {
         this.processesService.importData(processes, mode).subscribe({
           next: () => {
             this.toast.show('Import successful', 'success');
-            // Normally we'd reload data or refresh the page
-            window.location.reload();
+            this.reloadPage();
           },
           error: (err) => {
             console.error('Import failed', err);
@@ -377,5 +376,9 @@ export class SettingsPanelComponent implements OnInit {
       event.target.value = '';
     };
     reader.readAsText(file);
+  }
+
+  reloadPage() {
+    window.location.reload();
   }
 }

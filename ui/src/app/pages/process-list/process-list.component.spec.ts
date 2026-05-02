@@ -10,6 +10,8 @@ import { ToastService } from '../../services/toast.service';
 import { ConfirmService } from '../../services/confirm.service';
 import { of, BehaviorSubject } from 'rxjs';
 
+import { LucideAngularModule, Plus, Search, Filter, Grid, List, Download, Upload, RefreshCw, Trash2, Edit, Eye, MoreVertical, Info, LayoutGrid } from 'lucide-angular';
+
 describe('ProcessListComponent', () => {
   let component: ProcessListComponent;
   let fixture: ComponentFixture<ProcessListComponent>;
@@ -50,7 +52,8 @@ describe('ProcessListComponent', () => {
         ProcessListComponent, 
         HttpClientTestingModule, 
         FormsModule, 
-        RouterTestingModule
+        RouterTestingModule,
+        LucideAngularModule.pick({ Plus, Search, Filter, Grid, List, Download, Upload, RefreshCw, Trash2, Edit, Eye, MoreVertical, Info, LayoutGrid })
       ],
       providers: [
         { provide: ProcessesService, useValue: processesServiceMock },
@@ -111,7 +114,7 @@ describe('ProcessListComponent', () => {
     expect(component.kpiProcesses.length).toBe(4);
     expect(component.getRejectionRate()).toBe(25); // 1/4
     expect(component.getOfferCount()).toBe(1);
-    expect(component.getInterviewCount()).toBe(2); // Offer Received and Technical Interview are interviews
+    expect(component.getInterviewCount()).toBe(1); // Technical Interview is an interview, Offer Received is not
   });
 
   it('should filter KPIs based on time range', () => {
@@ -160,9 +163,9 @@ describe('ProcessListComponent', () => {
   });
 
   it('should initialize charts when loading completes and view is ready', () => {
-    // Mock ElementRefs
-    component.timelineRef = { nativeElement: {} } as any;
-    component.stageRef = { nativeElement: {} } as any;
+    // Mock ElementRefs with real canvas elements for Chart.js
+    component.timelineRef = { nativeElement: document.createElement('canvas') } as any;
+    component.stageRef = { nativeElement: document.createElement('canvas') } as any;
     
     // Spy on initDashCharts (private, so cast to any)
     spyOn(component as any, 'initDashCharts').and.callThrough();

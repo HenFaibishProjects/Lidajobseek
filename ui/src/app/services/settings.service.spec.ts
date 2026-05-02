@@ -78,9 +78,11 @@ describe('SettingsService', () => {
   });
 
   it('should handle corrupted local storage JSON', () => {
+    spyOn(console, 'error');
     mockLocalStorage.setItem('jobseek_user_settings', '{ invalid }');
     const service = getService();
     expect(service.getSettings().theme).toBe('light'); 
+    expect(console.error).toHaveBeenCalled();
   });
 
   it('should sync with server if authenticated', () => {

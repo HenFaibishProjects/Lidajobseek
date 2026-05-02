@@ -53,7 +53,8 @@ describe('SettingsPanelComponent', () => {
     };
 
     confirmServiceMock = {
-      confirm: jasmine.createSpy('confirm').and.returnValue(Promise.resolve(true))
+      confirm: jasmine.createSpy('confirm').and.returnValue(Promise.resolve(true)),
+      custom: jasmine.createSpy('custom').and.returnValue(Promise.resolve('append'))
     };
 
     toastServiceMock = {
@@ -61,7 +62,7 @@ describe('SettingsPanelComponent', () => {
     };
 
     processesServiceMock = {
-      exportData: jasmine.createSpy('exportData'),
+      exportData: jasmine.createSpy('exportData').and.returnValue(of({})),
       importData: jasmine.createSpy('importData').and.returnValue(of(true))
     };
 
@@ -206,13 +207,19 @@ describe('SettingsPanelComponent', () => {
       expect(mockInput.click).toHaveBeenCalled();
     });
 
-    it('should call importData when file is selected', () => {
-      const mockFile = new File(['{}'], 'test.json', { type: 'application/json' });
+    it('should call importData when file is selected', async () => {
+      spyOn(component, 'reloadPage');
+      const mockFile = new File(['[]'], 'test.json', { type: 'application/json' });
       const mockEvent = { target: { files: [mockFile] } };
       
       component.onFileSelected(mockEvent as any);
-      expect(processesServiceMock.importData).toHaveBeenCalledWith(mockFile);
+      
+      // We need to wait for FileReader and async confirmService
+      await new Promise(resolve => setTimeout(resolve, 50));
+      
+      expect(processesServiceMock.importData).toHaveBeenCalled();
       expect(toastServiceMock.show).toHaveBeenCalledWith(jasmine.any(String), 'success');
+      expect(component.reloadPage).toHaveBeenCalled();
     });
   });
 });

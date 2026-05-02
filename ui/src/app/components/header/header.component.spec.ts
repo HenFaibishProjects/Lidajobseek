@@ -16,13 +16,17 @@ describe('HeaderComponent', () => {
       imports: [HeaderComponent, RouterTestingModule]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(HeaderComponent);
-    component = fixture.componentInstance;
     router = TestBed.inject(Router);
     
-    // Mock router events
-    (router as any).events = routerEventsSubject.asObservable();
+    // Mock router events using defineProperty since it's a read-only property in Router
+    // MUST do this before createComponent so the constructor sees the mock
+    Object.defineProperty(router, 'events', {
+      value: routerEventsSubject.asObservable(),
+      writable: true
+    });
 
+    fixture = TestBed.createComponent(HeaderComponent);
+    component = fixture.componentInstance;
     fixture.detectChanges();
   });
 
@@ -86,7 +90,9 @@ describe('HeaderComponent', () => {
   });
 
   it('should display the brand name Reqcue', () => {
-    const brandElement = fixture.debugElement.query(By.css('.brand-name'));
+    component.isAuthenticated = true;
+    fixture.detectChanges();
+    const brandElement = fixture.debugElement.query(By.css('.logo-text'));
     expect(brandElement.nativeElement.textContent).toContain('Reqcue');
   });
 });
