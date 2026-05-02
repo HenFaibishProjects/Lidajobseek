@@ -8,6 +8,7 @@ import { ConfirmService } from '../../services/confirm.service';
 import { ToastService } from '../../services/toast.service';
 import countriesData from '../../../assets/countries.json';
 import { getCountryByPhone, CountryPhoneInfo } from '../../utils/phone-utils';
+import { ProcessesService } from '../../services/processes.service';
 
 @Component({
   selector: 'app-settings-panel',
@@ -60,7 +61,8 @@ export class SettingsPanelComponent implements OnInit {
     private confirmService: ConfirmService,
     private router: Router,
     private toast: ToastService,
-    private el: ElementRef
+    private el: ElementRef,
+    private processesService: ProcessesService
   ) {}
 
   onPanelClick(event: MouseEvent) {
@@ -307,5 +309,66 @@ export class SettingsPanelComponent implements OnInit {
     if (this.isAvatarDropdownOpen) {
       this.isAvatarDropdownOpen = false;
     }
+  }
+
+  exportData() {
+    this.processesService.exportData().subscribe({
+      next: (data) => {
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `jobseek-export-${new Date().toISOString().split('T')[0]}.json`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+        this.toast.show('Export successful', 'success');
+      },
+      error: (err) => {
+        console.error('Export failed', err);
+        this.toast.show('Export failed', 'error');
+      }
+    });
+  }
+
+  onFileSelected(event: any) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (e: any) => {
+      try {
+        const processes = JSON.parse(e.target.result);
+
+        const mode = await this.confirmService.custom({
+          title: 'Import Data',
+          message: 'How would you like to import the data?',
+          buttons: [
+            { text: 'Append', value: 'append', class: 'btn-secondary' },
+            { text: 'Overwrite', value: 'overwrite', class: 'btn-danger' },
+            { text: 'Cancel', value: null, class: 'btn-secondary' }
+          ]
+        });
+
+        if (!mode) return;
+
+        this.processesService.importData(processes, mode).subscribe({
+          next: () => {
+            this.toast.show('Import successful', 'success');
+            // Normally we'd reload data or refresh the page
+            window.location.reload();
+          },
+          error: (err) => {
+            console.error('Import failed', err);
+            this.toast.show('Import failed', 'error');
+          }
+        });
+      } catch (err) {
+        console.error('Invalid file', err);
+        this.toast.show('Invalid JSON file', 'error');
+      }
+      // Reset input
+      event.target.value = '';
+    };
+    reader.readAsText(file);
   }
 }

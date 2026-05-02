@@ -15,15 +15,7 @@
                 </p>
             </div>
             <div class="hero-actions">
-                <button class="btn-glass" (click)="exportData()" title="Export Data">
-                    <lucide-icon name="download" [size]="18" strokeWidth="2"></lucide-icon>
-                    <span>Export</span>
-                </button>
-                <button class="btn-glass" (click)="fileInput.click()" title="Import Data">
-                    <lucide-icon name="upload" [size]="18" strokeWidth="2"></lucide-icon>
-                    <span>Import</span>
-                </button>
-                <input #fileInput type="file" (change)="onFileSelected($event)" style="display: none" accept=".json">
+
                 <button class="btn-primary-gradient" routerLink="/new">
                     <lucide-icon name="plus" [size]="18" strokeWidth="2.5"></lucide-icon>
                     <span>New Application</span>
@@ -32,155 +24,102 @@
         </div>
     </div>
 
-    <!-- Guided Checklist (only visible if not allDone) -->
-    <div class="guided-checklist" *ngIf="!isLoading && !checklist.allDone">
-        <h3>Getting Started Checklist</h3>
-        <p>Complete these steps to unlock the full potential of Lidajobseek.</p>
-        <div class="checklist-items">
-            <div class="checklist-item" [class.completed]="checklist.hasProcess">
-                <div class="check-circle">
-                    <svg *ngIf="checklist.hasProcess" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                </div>
-                <div class="check-content">
-                    <span class="check-title">Add first application</span>
-                    <a *ngIf="!checklist.hasProcess" routerLink="/new" class="check-action">Add now</a>
-                </div>
-            </div>
-
-            <div class="checklist-item" [class.completed]="checklist.hasInterview">
-                <div class="check-circle">
-                    <svg *ngIf="checklist.hasInterview" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                </div>
-                <div class="check-content">
-                    <span class="check-title">Track an interview</span>
-                    <span *ngIf="!checklist.hasInterview" class="check-desc">Update a process to an interview stage or add an interaction.</span>
-                </div>
-            </div>
-
-            <div class="checklist-item" [class.completed]="checklist.profileComplete">
-                <div class="check-circle">
-                    <svg *ngIf="checklist.profileComplete" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                </div>
-                <div class="check-content">
-                    <span class="check-title">Complete profile</span>
-                    <a *ngIf="!checklist.profileComplete" routerLink="/profile" class="check-action">Go to Profile</a>
-                </div>
-            </div>
-            
-            <div class="checklist-item completed">
-                <div class="check-circle">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                </div>
-                <div class="check-content">
-                    <span class="check-title">View Dashboard</span>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- ═══ DASHBOARD INSIGHTS (KPIs + Charts + Panels) ═══ -->
     <div class="dashboard-insights" *ngIf="!isLoading">
 
-        <!-- KPI Strip — 6 cards -->
-        <div class="kpi-strip">
-            <div class="kpi-card kpi-blue">
-                <div class="kpi-icon">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect>
-                        <rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect>
-                    </svg>
-                </div>
-                <div class="kpi-body">
-                    <div class="kpi-value">{{ processes.length }}</div>
-                    <div class="kpi-label">Total Applications</div>
+        <!-- KPI Strip — 4 cards -->
+        <section class="performance-section">
+            <div class="kpi-header">
+                <h2 class="kpi-title">Performance Metrics</h2>
+                <div class="kpi-range-selector">
+                    <button class="kpi-range-btn" [class.active]="currentKpiRange === 'all'" (click)="currentKpiRange = 'all'">All Time</button>
+                    <button class="kpi-range-btn" [class.active]="currentKpiRange === 'year'" (click)="currentKpiRange = 'year'">Year</button>
+                    <button class="kpi-range-btn" [class.active]="currentKpiRange === 'quarter'" (click)="currentKpiRange = 'quarter'">Quarter</button>
+                    <button class="kpi-range-btn" [class.active]="currentKpiRange === 'month'" (click)="currentKpiRange = 'month'">Month</button>
+                    <button class="kpi-range-btn" [class.active]="currentKpiRange === 'week'" (click)="currentKpiRange = 'week'">Week</button>
                 </div>
             </div>
 
-            <div class="kpi-card kpi-green">
-                <div class="kpi-icon">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
-                    </svg>
+            <div class="kpi-strip">
+                <div class="kpi-card kpi-blue">
+                    <div class="kpi-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect>
+                        </svg>
+                    </div>
+                    <div class="kpi-body">
+                        <div class="kpi-value">{{ kpiProcesses.length }}</div>
+                        <div class="kpi-label">Total Applications</div>
+                    </div>
                 </div>
-                <div class="kpi-body">
-                    <div class="kpi-value">{{ getActiveCount() }}</div>
-                    <div class="kpi-label">Active Processes</div>
+
+                <div class="kpi-card kpi-amber">
+                    <div class="kpi-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                    </div>
+                    <div class="kpi-body">
+                        <div class="kpi-value">{{ getInterviewCount() }}</div>
+                        <div class="kpi-label kpi-label-with-tooltip">
+                            In Interviews
+                            <lucide-icon name="info" [size]="14" class="kpi-info-icon" title="Filtered by time range. Excludes: Submitted, Review, and Closed stages"></lucide-icon>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="kpi-card kpi-purple">
+                    <div class="kpi-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="8" r="7"></circle>
+                            <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline>
+                        </svg>
+                    </div>
+                    <div class="kpi-body">
+                        <div class="kpi-value">{{ getOfferCount() }}</div>
+                        <div class="kpi-label">Offers</div>
+                    </div>
+                </div>
+
+                <div class="kpi-card kpi-red">
+                    <div class="kpi-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </div>
+                    <div class="kpi-body">
+                        <div class="kpi-value">{{ getRejectionRate() }}%</div>
+                        <div class="kpi-label">Rejection Rate</div>
+                    </div>
                 </div>
             </div>
 
-            <div class="kpi-card kpi-amber">
-                <div class="kpi-icon">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                        <line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line>
-                        <line x1="3" y1="10" x2="21" y2="10"></line>
-                    </svg>
+            <!-- Charts Row — Now inside the section -->
+            <div class="charts-row">
+                <div class="chart-card">
+                    <div class="chart-card-header">
+                        <span class="chart-title">Applications over time</span>
+                        <span class="chart-subtitle">{{ getTimelineSubtitle() }}</span>
+                    </div>
+                    <div class="chart-canvas-wrapper">
+                        <canvas #dashTimelineChart></canvas>
+                    </div>
                 </div>
-                <div class="kpi-body">
-                    <div class="kpi-value">{{ getInterviewCount() }}</div>
-                    <div class="kpi-label">In Interviews</div>
-                </div>
-            </div>
-
-            <div class="kpi-card kpi-purple">
-                <div class="kpi-icon">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="8" r="7"></circle>
-                        <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline>
-                    </svg>
-                </div>
-                <div class="kpi-body">
-                    <div class="kpi-value">{{ getOfferCount() }}</div>
-                    <div class="kpi-label">Offers</div>
+                <div class="chart-card">
+                    <div class="chart-card-header">
+                        <span class="chart-title">Pipeline distribution</span>
+                        <span class="chart-subtitle">By current stage</span>
+                    </div>
+                    <div class="chart-canvas-wrapper">
+                        <canvas #dashStageChart></canvas>
+                    </div>
                 </div>
             </div>
-
-            <div class="kpi-card kpi-red">
-                <div class="kpi-icon">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                </div>
-                <div class="kpi-body">
-                    <div class="kpi-value">{{ getRejectionRate() }}%</div>
-                    <div class="kpi-label">Rejection Rate</div>
-                </div>
-            </div>
-
-            <div class="kpi-card kpi-cyan">
-                <div class="kpi-icon">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.15 12 19.79 19.79 0 0 1 1.08 3.38 2 2 0 0 1 3.04 1.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.09 8.5a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21 15.72v.2z"></path>
-                    </svg>
-                </div>
-                <div class="kpi-body">
-                    <div class="kpi-value">{{ getResponseRate() }}%</div>
-                    <div class="kpi-label">Response Rate</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Charts Row -->
-        <div class="charts-row">
-            <div class="chart-card">
-                <div class="chart-card-header">
-                    <span class="chart-title">Applications over time</span>
-                    <span class="chart-subtitle">Last 6 months</span>
-                </div>
-                <div class="chart-canvas-wrapper">
-                    <canvas #dashTimelineChart></canvas>
-                </div>
-            </div>
-            <div class="chart-card">
-                <div class="chart-card-header">
-                    <span class="chart-title">Pipeline distribution</span>
-                    <span class="chart-subtitle">By current stage</span>
-                </div>
-                <div class="chart-canvas-wrapper">
-                    <canvas #dashStageChart></canvas>
-                </div>
-            </div>
-        </div>
+        </section>
 
         <!-- Insight Panels -->
         <div class="insight-panels">
@@ -362,10 +301,7 @@
                     title="Grid view"
                     aria-label="Grid view"
                 >
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
-                        <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
-                    </svg>
+                    <lucide-icon name="layout-grid" [size]="16"></lucide-icon>
                 </button>
                 <button
                     class="view-toggle-btn"
@@ -374,10 +310,7 @@
                     title="List view"
                     aria-label="List view"
                 >
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
-                        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
-                    </svg>
+                    <lucide-icon name="list" [size]="16"></lucide-icon>
                 </button>
             </div>
         </div>

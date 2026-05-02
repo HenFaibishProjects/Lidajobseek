@@ -332,6 +332,33 @@
           </div>
         </div>
       </div>
+
+      <!-- Data Management -->
+      <div class="settings-section">
+        <h3 class="section-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          Data Management
+        </h3>
+        <div class="setting-item">
+          <label class="setting-label">Backup & Restore</label>
+          <div style="display: flex; gap: 12px; margin-top: 8px;">
+            <button class="action-btn" (click)="exportData()" title="Export Data" style="flex: 1; justify-content: center; background: var(--bg-hover); border: 1px solid var(--border-color); color: var(--text-primary);">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              <span>Export</span>
+            </button>
+            <button class="action-btn" (click)="fileInput.click()" title="Import Data" style="flex: 1; justify-content: center; background: var(--bg-hover); border: 1px solid var(--border-color); color: var(--text-primary);">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+              <span>Import</span>
+            </button>
+            <input #fileInput type="file" (change)="onFileSelected($event)" style="display: none" accept=".json">
+          </div>
+          <p class="field-hint" style="margin-top: 12px;">Export all your job search data to a JSON file, or import a previously exported file.</p>
+        </div>
+      </div>
     </div>
 
     <!-- Actions Footer -->
@@ -362,7 +389,7 @@
         </button>
       </div>
       <div class="footer-bottom">
-        <p class="version-info">Lida Jobseek v1.0.1</p>
+        <p class="version-info">Reqcue v1.0.1</p>
       </div>
     </div>
   </div>

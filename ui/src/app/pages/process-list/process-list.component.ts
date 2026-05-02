@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, AfterViewChecked, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -34,6 +34,19 @@ const OFFER_STAGES = new Set([
 
 const CLOSED_STAGES = new Set([
     'Withdrawn', 'Rejected', 'Position Put On Hold', 'Ghosted / No Response', 'Offer Declined',
+]);
+
+const NON_INTERVIEW_STAGES = new Set([
+    'Application Submitted',
+    'Resume Under Review',
+    'Initial Call Scheduled',
+    'Offer Received',
+    'Offer in Negotiation',
+    'Offer Declined',
+    'Withdrawn',
+    'Rejected',
+    'Position Put On Hold',
+    'Ghosted / No Response'
 ]);
 
 const RESPONDED_STAGES = new Set([
@@ -78,7 +91,14 @@ export class ProcessListComponent implements OnInit, OnDestroy, AfterViewChecked
     settings!: UserSettings;
     private settingsSub!: Subscription;
     private dashCharts: { [key: string]: any } = {};
-    private chartsNeedInit = false;
+    
+    kpiTimeRange: 'all' | 'week' | 'month' | 'quarter' | 'year' = 'all';
+
+    get currentKpiRange() { return this.kpiTimeRange; }
+    set currentKpiRange(val: any) {
+        this.kpiTimeRange = val;
+        this.initDashCharts();
+    }
 
     constructor(
         private processesService: ProcessesService,
@@ -113,9 +133,9 @@ export class ProcessListComponent implements OnInit, OnDestroy, AfterViewChecked
                 this.applyFilters();
                 this.findTasks();
                 this.isLoading = false;
-                // Mark charts as needing a redraw — AfterViewChecked will
-                // draw them on the next render cycle once the canvases exist.
-                this.chartsNeedInit = true;
+                setTimeout(() => {
+                    this.initDashCharts();
+                }, 0);
             },
             error: (err) => {
                 console.error('Failed to load processes', err);
@@ -125,10 +145,11 @@ export class ProcessListComponent implements OnInit, OnDestroy, AfterViewChecked
         });
     }
 
+
+
     ngAfterViewChecked() {
-        // Only draw when data says we need a redraw AND the canvas refs exist.
-        if (this.chartsNeedInit && this.timelineRef?.nativeElement && this.stageRef?.nativeElement) {
-            this.chartsNeedInit = false; // clear flag first to avoid loop
+        // If data is loaded and canvas is ready but charts are not built, build them
+        if (!this.isLoading && this.processes.length > 0 && !this.dashCharts['timeline'] && this.timelineRef?.nativeElement) {
             this.initDashCharts();
         }
     }
@@ -150,24 +171,65 @@ export class ProcessListComponent implements OnInit, OnDestroy, AfterViewChecked
         return document.body.classList.contains('dark-theme') ? '#94a3b8' : '#64748b';
     }
 
+    getTimelineSubtitle(): string {
+        switch (this.kpiTimeRange) {
+            case 'week': return 'Daily trend (Last 7 days)';
+            case 'month': return 'Weekly trend (Last 30 days)';
+            case 'quarter': return 'Monthly trend (Last 90 days)';
+            case 'year': return 'Monthly trend (Last 12 months)';
+            default: return 'Monthly trend (All Time)';
+        }
+    }
+
     private buildTimelineChart() {
         if (this.dashCharts['timeline']) this.dashCharts['timeline'].destroy();
-        const months: string[] = [];
-        const data: number[] = [];
+        
+        let labels: string[] = [];
+        let data: number[] = [];
         const today = new Date();
-        for (let i = 5; i >= 0; i--) {
-            const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
-            months.push(d.toLocaleString('default', { month: 'short', year: '2-digit' }));
-            data.push(this.processes.filter(p => {
-                const pd = new Date(p.createdAt);
-                return pd.getMonth() === d.getMonth() && pd.getFullYear() === d.getFullYear();
-            }).length);
+        
+        if (this.kpiTimeRange === 'week') {
+            // Last 7 days
+            for (let i = 6; i >= 0; i--) {
+                const d = new Date(today);
+                d.setDate(today.getDate() - i);
+                labels.push(d.toLocaleDateString('default', { weekday: 'short', day: 'numeric' }));
+                data.push(this.processes.filter(p => {
+                    const pd = new Date(p.createdAt);
+                    return pd.toDateString() === d.toDateString();
+                }).length);
+            }
+        } else if (this.kpiTimeRange === 'month') {
+            // Last 4 weeks
+            for (let i = 3; i >= 0; i--) {
+                const start = new Date(today);
+                start.setDate(today.getDate() - (i * 7 + 6));
+                const end = new Date(today);
+                end.setDate(today.getDate() - (i * 7));
+                labels.push(`Week ${4-i}`);
+                data.push(this.processes.filter(p => {
+                    const pd = new Date(p.createdAt);
+                    return pd >= start && pd <= end;
+                }).length);
+            }
+        } else {
+            // Months view (all, year, quarter)
+            const count = this.kpiTimeRange === 'year' ? 12 : (this.kpiTimeRange === 'quarter' ? 3 : 6);
+            for (let i = count - 1; i >= 0; i--) {
+                const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+                labels.push(d.toLocaleString('default', { month: 'short', year: '2-digit' }));
+                data.push(this.processes.filter(p => {
+                    const pd = new Date(p.createdAt);
+                    return pd.getMonth() === d.getMonth() && pd.getFullYear() === d.getFullYear();
+                }).length);
+            }
         }
+
         const color = this.chartTextColor();
         this.dashCharts['timeline'] = new Chart(this.timelineRef.nativeElement, {
             type: 'bar',
             data: {
-                labels: months,
+                labels,
                 datasets: [{ label: 'Applications', data, backgroundColor: 'rgba(59,130,246,0.7)', borderRadius: 5, barThickness: 18 }]
             },
             options: {
@@ -175,7 +237,7 @@ export class ProcessListComponent implements OnInit, OnDestroy, AfterViewChecked
                 plugins: { legend: { display: false } },
                 scales: {
                     y: { beginAtZero: true, ticks: { stepSize: 1, color }, grid: { color: 'rgba(148,163,184,0.15)' } },
-                    x: { ticks: { color }, grid: { display: false } }
+                    x: { ticks: { color, font: { size: 10 } }, grid: { display: false } }
                 }
             }
         });
@@ -184,7 +246,7 @@ export class ProcessListComponent implements OnInit, OnDestroy, AfterViewChecked
     private buildStageChart() {
         if (this.dashCharts['stage']) this.dashCharts['stage'].destroy();
         const counts: Record<string, number> = {};
-        this.processes.forEach(p => { counts[p.currentStage] = (counts[p.currentStage] || 0) + 1; });
+        this.kpiProcesses.forEach(p => { counts[p.currentStage] = (counts[p.currentStage] || 0) + 1; });
         const labels = Object.keys(counts);
         const data = Object.values(counts);
         const color = this.chartTextColor();
@@ -202,17 +264,43 @@ export class ProcessListComponent implements OnInit, OnDestroy, AfterViewChecked
     }
 
     // ─── KPI Stats ────────────────────────────────────────────────────────────
+    
+    get kpiProcesses(): any[] {
+        if (this.kpiTimeRange === 'all') return this.processes;
+        
+        const now = new Date();
+        const startDate = new Date();
+        
+        switch (this.kpiTimeRange) {
+            case 'week':
+                startDate.setDate(now.getDate() - 7);
+                break;
+            case 'month':
+                startDate.setMonth(now.getMonth() - 1);
+                break;
+            case 'quarter':
+                startDate.setMonth(now.getMonth() - 3);
+                break;
+            case 'year':
+                startDate.setFullYear(now.getFullYear() - 1);
+                break;
+        }
+        
+        return this.processes.filter(p => new Date(p.createdAt) >= startDate);
+    }
 
     getRejectionRate(): number {
-        if (!this.processes.length) return 0;
-        const rejected = this.processes.filter(p => p.currentStage === 'Rejected').length;
-        return Math.round((rejected / this.processes.length) * 100);
+        const procs = this.kpiProcesses;
+        if (!procs.length) return 0;
+        const rejected = procs.filter(p => p.currentStage === 'Rejected').length;
+        return Math.round((rejected / procs.length) * 100);
     }
 
     getResponseRate(): number {
-        if (!this.processes.length) return 0;
-        const responded = this.processes.filter(p => !RESPONDED_STAGES.has(p.currentStage)).length;
-        return Math.round((responded / this.processes.length) * 100);
+        const procs = this.kpiProcesses;
+        if (!procs.length) return 0;
+        const responded = procs.filter(p => !RESPONDED_STAGES.has(p.currentStage)).length;
+        return Math.round((responded / procs.length) * 100);
     }
 
     // ─── Insight Panels ───────────────────────────────────────────────────────
@@ -277,76 +365,9 @@ export class ProcessListComponent implements OnInit, OnDestroy, AfterViewChecked
             }));
     }
 
-    get checklist() {
-        const hasProcess = this.processes.length > 0;
-        const hasInterview = this.processes.some(p => 
-            (p._count?.interactions && p._count.interactions > 0) || 
-            INTERVIEW_STAGES.has(p.currentStage)
-        );
-        const profileComplete = !!this.settings?.profile?.displayName && !!this.settings?.profile?.phoneNumber;
-        const allDone = hasProcess && hasInterview && profileComplete;
-        return { hasProcess, hasInterview, profileComplete, allDone };
-    }
 
-    exportData() {
-        this.processesService.exportData().subscribe({
-            next: (data) => {
-                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `jobseek-export-${new Date().toISOString().split('T')[0]}.json`;
-                a.click();
-                window.URL.revokeObjectURL(url);
-                this.toastService.show('Export successful', 'success');
-            },
-            error: (err) => {
-                console.error('Export failed', err);
-                this.toastService.show('Export failed', 'error');
-            }
-        });
-    }
 
-    onFileSelected(event: any) {
-        const file = event.target.files[0];
-        if (!file) return;
 
-        const reader = new FileReader();
-        reader.onload = async (e: any) => {
-            try {
-                const processes = JSON.parse(e.target.result);
-
-                const mode = await this.confirmService.custom({
-                    title: 'Import Data',
-                    message: 'How would you like to import the data?',
-                    buttons: [
-                        { text: 'Append', value: 'append', class: 'btn-secondary' },
-                        { text: 'Overwrite', value: 'overwrite', class: 'btn-danger' },
-                        { text: 'Cancel', value: null, class: 'btn-secondary' }
-                    ]
-                });
-
-                if (!mode) return;
-
-                this.processesService.importData(processes, mode).subscribe({
-                    next: () => {
-                        this.toastService.show('Import successful', 'success');
-                        this.ngOnInit(); // Reload data
-                    },
-                    error: (err) => {
-                        console.error('Import failed', err);
-                        this.toastService.show('Import failed', 'error');
-                    }
-                });
-            } catch (err) {
-                console.error('Invalid file', err);
-                this.toastService.show('Invalid JSON file', 'error');
-            }
-            // Reset input
-            event.target.value = '';
-        };
-        reader.readAsText(file);
-    }
 
     // Apply filters
     applyFilters() {
@@ -498,14 +519,14 @@ export class ProcessListComponent implements OnInit, OnDestroy, AfterViewChecked
 
     // Stats helper methods
     getActiveCount(): number {
-        return this.processes.filter(p => ACTIVE_STAGES.has(p.currentStage)).length;
+        return this.kpiProcesses.filter(p => ACTIVE_STAGES.has(p.currentStage)).length;
     }
 
     getInterviewCount(): number {
-        return this.processes.filter(p => INTERVIEW_STAGES.has(p.currentStage)).length;
+        return this.kpiProcesses.filter(p => !NON_INTERVIEW_STAGES.has(p.currentStage)).length;
     }
 
     getOfferCount(): number {
-        return this.processes.filter(p => OFFER_STAGES.has(p.currentStage)).length;
+        return this.kpiProcesses.filter(p => OFFER_STAGES.has(p.currentStage)).length;
     }
 }
