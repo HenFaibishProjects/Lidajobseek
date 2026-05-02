@@ -90,6 +90,7 @@ describe('SettingsService', () => {
     authServiceSpy.getPreferences.and.returnValue(of(mockPrefs as any));
 
     service.syncWithServer();
+    const current = service.getSettings();
 
     expect(current.dateFormat).toBe('YYYY-MM-DD');
     expect(current.clockFormat).toBe('12');

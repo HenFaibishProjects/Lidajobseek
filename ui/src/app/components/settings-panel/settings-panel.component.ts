@@ -330,6 +330,13 @@ export class SettingsPanelComponent implements OnInit {
     });
   }
 
+  triggerImport() {
+    const fileInput = document.getElementById('importFile') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.click();
+    }
+  }
+
   onFileSelected(event: any) {
     const file = event.target.files[0];
     if (!file) return;
