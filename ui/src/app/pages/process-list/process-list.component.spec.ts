@@ -12,7 +12,7 @@ import { of, BehaviorSubject } from 'rxjs';
 
 import { LucideAngularModule, Plus, Search, Filter, Grid, List, Download, Upload, RefreshCw, Trash2, Edit, Eye, MoreVertical, Info, LayoutGrid } from 'lucide-angular';
 
-describe('ProcessListComponent', () => {
+describe('ProcessListComponent', () => { 
   let component: ProcessListComponent;
   let fixture: ComponentFixture<ProcessListComponent>;
   let processesServiceMock: any;
