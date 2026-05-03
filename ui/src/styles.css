@@ -108,22 +108,30 @@ body {
 
 /* ===== SCROLLBAR ===== */
 ::-webkit-scrollbar {
-  width: 12px;
-  height: 12px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--gray-100);
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--gray-400);
-  border-radius: 6px;
-  border: 3px solid var(--gray-100);
+  background: var(--gray-300);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--gray-500);
+  background: var(--gray-400);
+  background-clip: padding-box;
+}
+
+/* Text selection */
+::selection {
+  background: rgba(0, 120, 212, 0.15);
+  color: var(--text-primary);
 }
 
 /* ===== TYPOGRAPHY ===== */
@@ -149,12 +157,12 @@ p {
 a {
   color: var(--primary-blue);
   text-decoration: none;
-  transition: var(--transition);
+  transition: color 0.15s ease;
 }
 
 a:hover {
   color: var(--primary-blue-hover);
-  text-decoration: underline;
+  text-decoration: none;
 }
 
 /* ===== BUTTONS ===== */
@@ -178,14 +186,16 @@ button, .btn {
 }
 
 button:disabled, .btn:disabled {
-  opacity: 0.5;
+  opacity: 0.45;
   cursor: not-allowed;
   pointer-events: none;
+  filter: saturate(0.7);
 }
 
 button:focus-visible, .btn:focus-visible {
   outline: 2px solid var(--primary-blue);
-  outline-offset: 2px;
+  outline-offset: 3px;
+  border-radius: var(--radius-md);
 }
 
 button:active:not(:disabled), .btn:active:not(:disabled) {
@@ -565,7 +575,7 @@ label {
   background: var(--bg-primary);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
-  overflow: hidden;
+  overflow-x: auto;
   box-shadow: var(--shadow-sm);
 }
 
@@ -686,14 +696,19 @@ tbody td {
   text-align: center;
   padding: var(--space-2xl);
   background: var(--bg-secondary);
-  border: 2px dashed var(--border-color);
-  border-radius: var(--radius-lg);
+  border: 1.5px dashed var(--border-dark);
+  border-radius: var(--radius-xl);
+  transition: border-color 0.2s ease;
+}
+
+.empty-state:hover {
+  border-color: var(--primary-blue);
 }
 
 .empty-state-icon {
   font-size: 48px;
   margin-bottom: var(--space-md);
-  opacity: 0.3;
+  opacity: 0.25;
 }
 
 .empty-state-title {
@@ -706,16 +721,19 @@ tbody td {
 .empty-state-text {
   color: var(--text-secondary);
   margin-bottom: var(--space-lg);
+  max-width: 360px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 /* ===== LOADING ===== */
 .spinner {
   width: 32px;
   height: 32px;
-  border: 3px solid var(--border-color);
+  border: 2.5px solid var(--border-color);
   border-top-color: var(--primary-blue);
   border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+  animation: spin 0.7s linear infinite;
   margin: var(--space-lg) auto;
 }
 
@@ -724,15 +742,33 @@ tbody td {
 }
 
 .spinner-sm {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   border-width: 2px;
 }
 
 .spinner-lg {
   width: 48px;
   height: 48px;
-  border-width: 4px;
+  border-width: 3px;
+}
+
+/* Skeleton shimmer utility */
+@keyframes shimmer {
+  0% { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--bg-tertiary) 25%,
+    var(--bg-secondary) 50%,
+    var(--bg-tertiary) 75%
+  );
+  background-size: 800px 100%;
+  animation: shimmer 1.4s infinite linear;
+  border-radius: var(--radius-md);
 }
 
 /* Loading overlay */
@@ -762,6 +798,41 @@ tbody td {
   margin-top: var(--space-md);
   color: var(--text-secondary);
   font-size: var(--font-size-base);
+}
+
+/* Skeleton pulse – apply to individual skeleton bones */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+
+.skeleton-pulse {
+  animation: pulse 1.6s ease-in-out infinite;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-md);
+}
+
+/* Inline spinner for submit buttons */
+.spinner-small {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 0.65s linear infinite;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+/* Global page-enter fade */
+@keyframes pageFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.page-enter {
+  animation: pageFadeIn 0.3s ease-out;
 }
 
 /* ===== RESPONSIVE ===== */
@@ -802,6 +873,13 @@ tbody td {
   thead th,
   tbody td {
     padding: 8px 12px;
+  }
+}
+
+/* Prevent iOS Zoom on Inputs */
+@media screen and (max-width: 768px) {
+  input, select, textarea, .input-field, .form-input {
+    font-size: 16px !important;
   }
 }
 

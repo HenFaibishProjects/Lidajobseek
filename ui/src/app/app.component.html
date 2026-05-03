@@ -1,6 +1,6 @@
 <div class="app-layout">
     <!-- Header Component -->
-    <app-header 
+    <app-header
         [isAuthenticated]="isAuthenticated"
         [showSettings]="showSettings"
         (toggleSettings)="toggleSettings()"
@@ -19,3 +19,15 @@
 <app-confirm-dialog></app-confirm-dialog>
 <app-settings-panel *ngIf="showSettings" (close)="closeSettings()"></app-settings-panel>
 <app-scroll-to-top *ngIf="isAuthenticated"></app-scroll-to-top>
+<app-onboarding *ngIf="showOnboarding" (close)="closeOnboarding()"></app-onboarding>
+
+<!-- Global AI Career Chat button -->
+<button *ngIf="isAuthenticated" class="cc-float-btn" (click)="toggleCareerChat()" title="AI Career Chat">
+    <lucide-icon name="sparkles" [size]="22" strokeWidth="2"></lucide-icon>
+</button>
+
+<!-- Global AI Career Chat panel -->
+<app-career-chat-panel
+    *ngIf="showCareerChat && isAuthenticated"
+    (closed)="showCareerChat = false">
+</app-career-chat-panel>

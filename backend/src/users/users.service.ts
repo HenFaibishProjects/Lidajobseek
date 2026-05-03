@@ -20,14 +20,14 @@ export class UsersService {
     }
 
   async create(data: { email: string; password: string; name?: string }): Promise<User> {
-    const user = this.userRepository.create(data as any);
+    const user = this.userRepository.create({ ...data, hasSeenOnboarding: false } as any);
     await this.em.persistAndFlush(user);
     return user;
   }
 
   async updatePreferences(
     id: number,
-    data: Partial<Pick<User, 'themePreference' | 'countryPreference' | 'dateFormatPreference' | 'timeFormatPreference' | 'avatarStylePreference'>>,
+    data: Partial<Pick<User, 'themePreference' | 'countryPreference' | 'dateFormatPreference' | 'timeFormatPreference' | 'avatarStylePreference' | 'hasSeenOnboarding'>>,
   ): Promise<User | null> {
     const user = await this.userRepository.findOne({ id });
     if (!user) {
@@ -40,6 +40,7 @@ export class UsersService {
     if (data.dateFormatPreference !== undefined) user.dateFormatPreference = data.dateFormatPreference;
     if (data.timeFormatPreference !== undefined) user.timeFormatPreference = data.timeFormatPreference;
     if (data.avatarStylePreference !== undefined) user.avatarStylePreference = data.avatarStylePreference;
+    if (data.hasSeenOnboarding !== undefined) user.hasSeenOnboarding = data.hasSeenOnboarding;
 
     await this.em.flush();
     return user;

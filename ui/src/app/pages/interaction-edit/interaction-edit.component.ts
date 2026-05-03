@@ -5,20 +5,26 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { InteractionsService } from '../../services/interactions.service';
 import { ProcessesService } from '../../services/processes.service';
 import { DateFormatPipe } from '../../pipes/date-format.pipe';
-import { INTERVIEW_TYPES, normalizeInterviewType } from '../../shared/interview-types';
+import { INTERVIEW_TYPES, getGroupedInterviewTypes, normalizeInterviewType } from '../../shared/interview-types';
 
 @Component({
     selector: 'app-interaction-edit',
     standalone: true,
-    imports: [CommonModule, FormsModule, RouterModule, DateFormatPipe],
+    imports: [CommonModule, FormsModule, RouterModule],
     templateUrl: './interaction-edit.component.html',
-    styleUrls: ['./interaction-edit.component.css']
+    styleUrl: './interaction-edit.component.css'
 })
 export class InteractionEditComponent implements OnInit {
     interaction: any;
     processId!: number;
+    isSubmitting = false;
+
     interviewTypes = INTERVIEW_TYPES;
-    availableRoles = ['HR', 'Tech Lead', 'Team Member', 'Team Lead', 'Manager', 'CTO', 'Director', 'Group Leader', 'Architect'];
+    groupedTypes = getGroupedInterviewTypes();
+    typeCategories = Object.keys(this.groupedTypes) as (keyof typeof this.groupedTypes)[];
+
+    availableRoles = ['HR', 'Recruiter', 'Hiring Manager', 'Tech Lead', 'Team Lead', 'Team Member', 'Manager', 'Director', 'VP', 'CTO', 'Architect', 'Group Leader', 'Peer'];
+
     datePart: string = '';
     timePart: string = '';
 
@@ -33,17 +39,12 @@ export class InteractionEditComponent implements OnInit {
         this.processId = Number(this.route.snapshot.paramMap.get('pid'));
         const id = Number(this.route.snapshot.paramMap.get('id'));
 
-        // We can't easily get a single interaction by ID from the API yet,
-        // so we fetch the whole process and find it.
-        // Or we add a Get by ID for interactions.
-        // Let's just fetch it from the process for now.
         this.processesService.getById(this.processId).subscribe(data => {
             const inter = data.interactions.find((i: any) => i.id === id);
             if (inter) {
                 this.interaction = { ...inter };
                 this.interaction.interviewType = normalizeInterviewType(this.interaction.interviewType);
 
-                // Prepare local date/time controls
                 const d = new Date(this.interaction.date);
                 const tzOffset = d.getTimezoneOffset() * 60000;
                 const localIso = new Date(d.getTime() - tzOffset).toISOString();
@@ -68,12 +69,23 @@ export class InteractionEditComponent implements OnInit {
         this.interaction.participants.splice(index, 1);
     }
 
+    getSelectedTypeLabel(): string {
+        return this.interviewTypes.find(t => t.id === this.interaction?.interviewType)?.label ?? '';
+    }
+
+    getSelectedTypeColor(): string {
+        return this.interviewTypes.find(t => t.id === this.interaction?.interviewType)?.color ?? '#6b7280';
+    }
+
     onSubmit() {
+        if (this.isSubmitting) return;
+        this.isSubmitting = true;
         const payload = { ...this.interaction };
         payload.date = new Date(this.interaction.date).toISOString();
 
-        this.interactionsService.update(this.interaction.id, payload).subscribe(() => {
-            this.router.navigate(['/process', this.processId]);
+        this.interactionsService.update(this.interaction.id, payload).subscribe({
+            next: () => this.router.navigate(['/process', this.processId]),
+            error: () => { this.isSubmitting = false; }
         });
     }
 }

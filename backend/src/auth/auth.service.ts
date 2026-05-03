@@ -18,6 +18,7 @@ interface UpdatePreferencesDto {
   dateFormat?: DateFormatPreference;
   timeFormat?: TimeFormatPreference;
   avatarStyle?: string;
+  hasSeenOnboarding?: boolean;
 }
 
 @Injectable()
@@ -41,6 +42,7 @@ export class AuthService {
         dateFormatPreference: user.dateFormatPreference,
         timeFormatPreference: user.timeFormatPreference,
         avatarStylePreference: user.avatarStylePreference,
+        hasSeenOnboarding: user.hasSeenOnboarding,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt
       };
@@ -66,6 +68,7 @@ export class AuthService {
         dateFormatPreference: user.dateFormatPreference || 'DD/MM/YYYY',
         timeFormatPreference: user.timeFormatPreference || '24',
         avatarStylePreference: user.avatarStylePreference || 'avataaars',
+        hasSeenOnboarding: user.hasSeenOnboarding ?? true,
       }
     };
   }
@@ -127,6 +130,8 @@ export class AuthService {
       dateFormat: user.dateFormatPreference || 'DD/MM/YYYY',
       timeFormat: user.timeFormatPreference || '24',
       avatarStyle: user.avatarStylePreference || 'avataaars',
+      hasSeenOnboarding: user.hasSeenOnboarding ?? true,
+      pricingPlan: user.pricingPlan || 'free',
     };
   }
 
@@ -137,6 +142,7 @@ export class AuthService {
       dateFormatPreference?: DateFormatPreference;
       timeFormatPreference?: TimeFormatPreference;
       avatarStylePreference?: string;
+      hasSeenOnboarding?: boolean;
     } = {};
 
     if (dto.theme && ['light', 'dark', 'auto'].includes(dto.theme)) {
@@ -159,6 +165,10 @@ export class AuthService {
       patch.avatarStylePreference = dto.avatarStyle;
     }
 
+    if (typeof dto.hasSeenOnboarding === 'boolean') {
+      patch.hasSeenOnboarding = dto.hasSeenOnboarding;
+    }
+
     const updatedUser = await this.usersService.updatePreferences(userId, patch);
     if (!updatedUser) {
       throw new UnauthorizedException('User not found');
@@ -170,6 +180,7 @@ export class AuthService {
       dateFormat: updatedUser.dateFormatPreference || 'DD/MM/YYYY',
       timeFormat: updatedUser.timeFormatPreference || '24',
       avatarStyle: updatedUser.avatarStylePreference || 'avataaars',
+      hasSeenOnboarding: updatedUser.hasSeenOnboarding ?? true,
     };
   }
 }

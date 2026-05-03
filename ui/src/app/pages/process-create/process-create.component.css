@@ -473,11 +473,15 @@ select.input-field {
 }
 
 .location-work-row {
-  grid-template-columns: 1fr;
+  grid-template-columns: 1fr 1fr;
 }
 
 .location-work-row .workmode-group {
   align-self: start;
+}
+
+.days-inline {
+  margin-top: var(--space-sm);
 }
 
 .invitation-row {
@@ -663,6 +667,14 @@ select.input-field {
 
   .form-actions {
     flex-direction: column-reverse;
+    position: sticky;
+    bottom: 0;
+    background: var(--bg-primary);
+    padding: var(--space-md) var(--space-lg);
+    margin: var(--space-xl) -var(--space-xl) -var(--space-xl) -var(--space-xl);
+    box-shadow: 0 -10px 20px rgba(0, 0, 0, 0.05);
+    z-index: 100;
+    border-top: 1px solid var(--border-color);
   }
 
   .form-actions .btn-secondary,

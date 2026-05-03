@@ -6,12 +6,12 @@
   background: var(--bg-secondary);
 }
 
-/* Main Content */
+/* Main Content — sits below the 64px sticky top bar */
 .app-main {
   flex: 1;
   min-height: 100vh;
   background: var(--bg-secondary);
-  padding-top: 96px;
+  padding-top: 64px; /* exact top-bar height */
 }
 
 .app-main-no-sidebar {
@@ -26,15 +26,51 @@
   margin: 0 auto;
 }
 
-/* Responsive */
-@media (max-width: 1024px) {
+/* Mobile — smaller top bar + bottom tab bar */
+@media (max-width: 767px) {
   .app-main {
-    padding-top: 140px;
+    padding-top: 56px;
+    padding-bottom: calc(62px + env(safe-area-inset-bottom, 0px));
+  }
+  .content-wrapper {
+    padding: 16px;
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 480px) {
   .content-wrapper {
-    padding: 20px;
+    padding: 12px;
+  }
+}
+
+/* Global AI Career Chat float button */
+.cc-float-btn {
+  position: fixed;
+  bottom: 28px;
+  right: 88px;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6d28d9, #8b5cf6);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  box-shadow: 0 4px 20px rgba(109,40,217,0.45);
+  z-index: 990;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.cc-float-btn:hover {
+  transform: scale(1.08);
+  box-shadow: 0 6px 28px rgba(109,40,217,0.6);
+}
+.cc-float-btn:active { transform: scale(0.96); }
+
+@media (max-width: 480px) {
+  .cc-float-btn {
+    right: 24px;
+    bottom: 80px;
   }
 }

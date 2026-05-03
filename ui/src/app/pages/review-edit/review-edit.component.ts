@@ -9,7 +9,8 @@ import { ProcessesService } from '../../services/processes.service';
     selector: 'app-review-edit',
     standalone: true,
     imports: [CommonModule, FormsModule, RouterModule],
-    templateUrl: './review-edit.component.html'
+    templateUrl: './review-edit.component.html',
+    styleUrls: ['./review-edit.component.css']
 })
 export class ReviewEditComponent implements OnInit {
     review: any;

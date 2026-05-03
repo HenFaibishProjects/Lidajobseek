@@ -14,6 +14,8 @@ export interface PreferencesResponse {
   dateFormat: DateFormatPreference;
   timeFormat: TimeFormatPreference;
   avatarStyle: string;
+  hasSeenOnboarding?: boolean;
+  pricingPlan?: 'free' | 'premium' | 'enterprise';
 }
 
 @Injectable({
@@ -79,8 +81,23 @@ export class AuthService {
   }
 
   isPremiumUser(): boolean {
+    // Primary check: user object in localStorage (updated on login + server sync)
     const plan = this.getPricingPlan();
-    return plan === 'premium' || plan === 'enterprise';
+    if (plan === 'premium' || plan === 'enterprise') return true;
+
+    // Fallback: decode JWT token payload directly
+    const token = this.getToken();
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const tokenPlan = payload.pricingPlan || 'free';
+        return tokenPlan === 'premium' || tokenPlan === 'enterprise';
+      } catch {
+        // Token parsing failed, ignore
+      }
+    }
+
+    return false;
   }
 
   getPreferences() {

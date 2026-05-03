@@ -1,139 +1,252 @@
 <header *ngIf="isAuthenticated" class="app-navbar">
-    <!-- Logo Header -->
-    <div class="sidebar-header">
+
+    <!-- ═══ Logo ═══ -->
+    <div class="navbar-logo-zone">
         <a class="app-logo" routerLink="/">
             <div class="logo-icon">
-                <img src="assets/logo.png" alt="Lida Logo" class="logo-image" />
+                <img src="assets/logo.png" alt="Reqcue Logo" class="logo-image" />
             </div>
             <div class="logo-content">
-                <span class="logo-text">Lida Job Assistant</span>
-                <span class="logo-tagline">Your Career Tracker</span>
+                <span class="logo-text">Reqcue</span>
+                <span class="logo-tagline">Your next move in every job process</span>
             </div>
         </a>
     </div>
 
-    <!-- Navigation Menu -->
-    <nav class="sidebar-nav" aria-label="Primary navigation">
-        <div class="nav-section">
-            <span class="section-label">Main</span>
-            <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-item">
-                <div class="nav-icon-wrapper">
-                    <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2">
-                        <rect x="3" y="3" width="7" height="7"></rect>
-                        <rect x="14" y="3" width="7" height="7"></rect>
-                        <rect x="14" y="14" width="7" height="7"></rect>
-                        <rect x="3" y="14" width="7" height="7"></rect>
+    <!-- ═══ Desktop Nav (all items) ═══ -->
+    <nav class="navbar-links" aria-label="Primary navigation">
+        <div class="nav-group">
+
+            <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-item" title="Dashboard [D]">
+                <span class="nav-icon-wrap">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect>
                     </svg>
-                </div>
-                <span class="nav-label">Processes</span>
-                <div class="nav-indicator"></div>
+                </span>
+                <span class="nav-label"><span class="shortcut-hint">D</span>ashboard</span>
+                <span class="nav-pip"></span>
             </a>
-            <a routerLink="/calendar" routerLinkActive="active" class="nav-item">
-                <div class="nav-icon-wrapper">
-                    <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2">
-                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                        <line x1="16" y1="2" x2="16" y2="6"></line>
-                        <line x1="8" y1="2" x2="8" y2="6"></line>
+
+            <a routerLink="/pipeline" routerLinkActive="active" class="nav-item" title="Pipeline [P]">
+                <span class="nav-icon-wrap">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="5" height="18" rx="1"></rect>
+                        <rect x="10" y="3" width="5" height="12" rx="1"></rect>
+                        <rect x="17" y="3" width="5" height="7" rx="1"></rect>
+                    </svg>
+                </span>
+                <span class="nav-label"><span class="shortcut-hint">P</span>ipeline</span>
+                <span class="nav-pip"></span>
+            </a>
+
+            <a routerLink="/calendar" routerLinkActive="active" class="nav-item" title="Calendar [C]">
+                <span class="nav-icon-wrap">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line>
                         <line x1="3" y1="10" x2="21" y2="10"></line>
                     </svg>
-                </div>
-                <span class="nav-label">Calendar</span>
-                <div class="nav-indicator"></div>
+                </span>
+                <span class="nav-label"><span class="shortcut-hint">C</span>alendar</span>
+                <span class="nav-pip"></span>
             </a>
-            <a routerLink="/profile" routerLinkActive="active" class="nav-item">
-                <div class="nav-icon-wrapper">
-                    <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2">
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                        <circle cx="12" cy="7" r="4"></circle>
-                    </svg>
-                </div>
-                <span class="nav-label">Profile</span>
-                <div class="nav-indicator"></div>
-            </a>
-            <a routerLink="/instructions" routerLinkActive="active" class="nav-item">
-                <div class="nav-icon-wrapper">
-                    <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2">
-                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-                    </svg>
-                </div>
-                <span class="nav-label">Guide</span>
-                <div class="nav-indicator"></div>
-            </a>
-        </div>
 
-        <div class="nav-section">
-            <span class="section-label">Insights</span>
-            <a routerLink="/analytics" routerLinkActive="active" class="nav-item">
-                <div class="nav-icon-wrapper">
-                    <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2">
+            <a routerLink="/analytics" routerLinkActive="active" class="nav-item" title="Analytics [A]">
+                <span class="nav-icon-wrap">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <line x1="18" y1="20" x2="18" y2="10"></line>
                         <line x1="12" y1="20" x2="12" y2="4"></line>
                         <line x1="6" y1="20" x2="6" y2="14"></line>
                     </svg>
-                </div>
-                <span class="nav-label">Analytics</span>
-                <div class="nav-indicator"></div>
+                </span>
+                <span class="nav-label"><span class="shortcut-hint">A</span>nalytics</span>
+                <span class="nav-pip"></span>
             </a>
-            <a routerLink="/coach-hub" routerLinkActive="active" class="nav-item">
-                <div class="nav-icon-wrapper">
-                    <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2">
+
+            <a routerLink="/coach-hub" routerLinkActive="active" class="nav-item" title="Coach Hub [H]">
+                <span class="nav-icon-wrap">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                         <polyline points="14 2 14 8 20 8"></polyline>
                         <line x1="16" y1="13" x2="8" y2="13"></line>
                         <line x1="16" y1="17" x2="8" y2="17"></line>
-                        <polyline points="10 9 9 9 8 9"></polyline>
                     </svg>
-                </div>
-                <span class="nav-label">Coach Hub</span>
-                <div class="nav-indicator"></div>
+                </span>
+                <span class="nav-label">Coach <span class="shortcut-hint">H</span>ub</span>
+                <span class="nav-pip"></span>
             </a>
-        </div>
 
-        <div class="nav-section">
-            <span class="section-label">Account</span>
-            <a routerLink="/pricing" routerLinkActive="active" class="nav-item">
-                <div class="nav-icon-wrapper">
-                    <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2">
+            <span class="nav-divider"></span>
+
+            <a routerLink="/profile" routerLinkActive="active" class="nav-item" title="Profile [F]">
+                <span class="nav-icon-wrap">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                </span>
+                <span class="nav-label">Pro<span class="shortcut-hint">f</span>ile</span>
+                <span class="nav-pip"></span>
+            </a>
+
+            <a routerLink="/instructions" routerLinkActive="active" class="nav-item" title="Guide [G]">
+                <span class="nav-icon-wrap">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                    </svg>
+                </span>
+                <span class="nav-label"><span class="shortcut-hint">G</span>uide</span>
+                <span class="nav-pip"></span>
+            </a>
+
+            <a routerLink="/pricing" routerLinkActive="active" class="nav-item nav-item--pricing" title="Pricing [I]">
+                <span class="nav-icon-wrap">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="12" cy="12" r="10"></circle>
                         <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"></path>
                         <line x1="12" y1="18" x2="12" y2="22"></line>
                         <line x1="12" y1="2" x2="12" y2="6"></line>
                     </svg>
-                </div>
-                <span class="nav-label">Pricing Plans</span>
-                <div class="nav-indicator"></div>
+                </span>
+                <span class="nav-label">Pr<span class="shortcut-hint">i</span>cing</span>
+                <span class="nav-pip"></span>
+            </a>
+
+        </div>
+    </nav>
+
+    <!-- ═══ Right Actions ═══ -->
+    <div class="navbar-actions">
+        <button class="action-btn settings-btn" type="button" title="Settings" (click)="toggleSettings.emit()">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M12 1v6M12 17v6M4.22 4.22l4.24 4.24M15.54 15.54l4.24 4.24M1 12h6M17 12h6M4.22 19.78l4.24-4.24M15.54 8.46l4.24-4.24"></path>
+            </svg>
+            <span class="action-label">Settings</span>
+        </button>
+        <button class="action-btn logout-btn" type="button" title="Log out" (click)="logout.emit()">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+            <span class="action-label">Logout</span>
+        </button>
+
+        <!-- Hamburger — ONLY tablet/mobile -->
+        <button class="hamburger-btn" type="button" [class.open]="drawerOpen"
+                (click)="toggleDrawer()" aria-label="Toggle menu" [attr.aria-expanded]="drawerOpen">
+            <span class="ham-line"></span>
+            <span class="ham-line"></span>
+            <span class="ham-line"></span>
+        </button>
+    </div>
+</header>
+
+<!-- ═══ Drawer overlay ═══ -->
+<div *ngIf="isAuthenticated" class="drawer-overlay" [class.open]="drawerOpen" (click)="closeDrawer()" aria-hidden="true"></div>
+
+<!-- ═══ Slide-over Drawer (tablet + mobile only) ═══ -->
+<aside *ngIf="isAuthenticated" class="nav-drawer" [class.open]="drawerOpen" aria-label="Navigation drawer">
+
+    <div class="drawer-header">
+        <a class="drawer-logo" routerLink="/" (click)="closeDrawer()">
+            <div class="logo-icon">
+                <img src="assets/logo.png" alt="Reqcue Logo" class="logo-image" />
+            </div>
+            <div class="logo-content">
+                <span class="logo-text">ReqCue - Your next move in every job process</span>
+                <span class="logo-tagline">Your Career Tracker</span>
+            </div>
+        </a>
+        <button class="drawer-close" (click)="closeDrawer()" aria-label="Close menu">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+        </button>
+    </div>
+
+    <nav class="drawer-nav">
+        <div class="drawer-section">
+            <span class="drawer-section-label">Main</span>
+            <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="drawer-item" (click)="closeDrawer()">
+                <span class="drawer-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg></span>
+                <span><span class="shortcut-hint">D</span>ashboard</span>
+            </a>
+            <a routerLink="/pipeline" routerLinkActive="active" class="drawer-item" (click)="closeDrawer()">
+                <span class="drawer-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="5" height="18" rx="1"></rect><rect x="10" y="3" width="5" height="12" rx="1"></rect><rect x="17" y="3" width="5" height="7" rx="1"></rect></svg></span>
+                <span><span class="shortcut-hint">P</span>ipeline</span>
+            </a>
+            <a routerLink="/calendar" routerLinkActive="active" class="drawer-item" (click)="closeDrawer()">
+                <span class="drawer-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg></span>
+                <span><span class="shortcut-hint">C</span>alendar</span>
+            </a>
+            <a routerLink="/profile" routerLinkActive="active" class="drawer-item" (click)="closeDrawer()">
+                <span class="drawer-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></span>
+                <span>Pro<span class="shortcut-hint">f</span>ile</span>
+            </a>
+            <a routerLink="/instructions" routerLinkActive="active" class="drawer-item" (click)="closeDrawer()">
+                <span class="drawer-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg></span>
+                <span><span class="shortcut-hint">G</span>uide</span>
+            </a>
+        </div>
+
+        <div class="drawer-section">
+            <span class="drawer-section-label">Insights</span>
+            <a routerLink="/analytics" routerLinkActive="active" class="drawer-item" (click)="closeDrawer()">
+                <span class="drawer-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg></span>
+                <span><span class="shortcut-hint">A</span>nalytics</span>
+            </a>
+            <a routerLink="/coach-hub" routerLinkActive="active" class="drawer-item" (click)="closeDrawer()">
+                <span class="drawer-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg></span>
+                <span>Coach <span class="shortcut-hint">H</span>ub</span>
+            </a>
+        </div>
+
+        <div class="drawer-section">
+            <span class="drawer-section-label">Account</span>
+            <a routerLink="/pricing" routerLinkActive="active" class="drawer-item" (click)="closeDrawer()">
+                <span class="drawer-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"></path><line x1="12" y1="18" x2="12" y2="22"></line><line x1="12" y1="2" x2="12" y2="6"></line></svg></span>
+                <span>Pr<span class="shortcut-hint">i</span>cing Plans</span>
             </a>
         </div>
     </nav>
 
-    <!-- Sidebar Footer -->
-    <div class="sidebar-footer">
-        <button class="footer-btn settings-btn" type="button" title="Open settings" (click)="toggleSettings.emit()">
-            <div class="footer-btn-icon">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="3"></circle>
-                    <path d="M12 1v6M12 17v6M4.22 4.22l4.24 4.24M15.54 15.54l4.24 4.24M1 12h6M17 12h6M4.22 19.78l4.24-4.24M15.54 8.46l4.24-4.24"></path>
-                </svg>
-            </div>
-            <span class="footer-btn-label">Settings</span>
+    <div class="drawer-footer">
+        <button class="drawer-footer-btn settings" type="button" (click)="toggleSettings.emit(); closeDrawer()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M12 1v6M12 17v6M4.22 4.22l4.24 4.24M15.54 15.54l4.24 4.24M1 12h6M17 12h6M4.22 19.78l4.24-4.24M15.54 8.46l4.24-4.24"></path></svg>
+            Settings
         </button>
-        <button class="footer-btn logout-btn" type="button" title="Log out" (click)="logout.emit()">
-            <div class="footer-btn-icon">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                    <polyline points="16 17 21 12 16 7"></polyline>
-                    <line x1="21" y1="12" x2="9" y2="12"></line>
-                </svg>
-            </div>
-            <span class="footer-btn-label">Logout</span>
+        <button class="drawer-footer-btn logout" type="button" (click)="logout.emit()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+            Log out
         </button>
     </div>
-</header>
+</aside>
+
+<!-- ═══ Bottom Tab Bar — mobile only ═══ -->
+<nav *ngIf="isAuthenticated" class="bottom-tabbar" aria-label="Mobile navigation">
+    <a routerLink="/" routerLinkActive="tab-active" [routerLinkActiveOptions]="{exact: true}" class="tab-item">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+        <span><span class="shortcut-hint">D</span>ashboard</span>
+    </a>
+    <a routerLink="/pipeline" routerLinkActive="tab-active" class="tab-item">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="5" height="18" rx="1"></rect><rect x="10" y="3" width="5" height="12" rx="1"></rect><rect x="17" y="3" width="5" height="7" rx="1"></rect></svg>
+        <span><span class="shortcut-hint">P</span>ipeline</span>
+    </a>
+    <a routerLink="/calendar" routerLinkActive="tab-active" class="tab-item">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+        <span><span class="shortcut-hint">C</span>alendar</span>
+    </a>
+    <a routerLink="/analytics" routerLinkActive="tab-active" class="tab-item">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+        <span><span class="shortcut-hint">A</span>nalytics</span>
+    </a>
+    <button class="tab-item tab-more" type="button" (click)="toggleDrawer()" [class.tab-active]="drawerOpen" aria-label="More">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="12" r="1" fill="currentColor"></circle><circle cx="12" cy="12" r="1" fill="currentColor"></circle><circle cx="19" cy="12" r="1" fill="currentColor"></circle></svg>
+        <span>More</span>
+    </button>
+</nav>

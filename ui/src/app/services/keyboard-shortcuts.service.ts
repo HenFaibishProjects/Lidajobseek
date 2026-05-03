@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
+import { ToastService } from './toast.service';
 
 export interface KeyboardShortcut {
   key: string;
@@ -20,55 +21,72 @@ export class KeyboardShortcutsService {
 
   shortcutTriggered$ = this.shortcutTriggered.asObservable();
 
-  constructor(private router: Router) {
+  constructor(
+    private router: Router,
+    private toastService: ToastService
+  ) {
+    console.log('KeyboardShortcutsService initialized');
     this.initializeDefaultShortcuts();
     this.setupEventListener();
   }
 
   private initializeDefaultShortcuts() {
     this.registerShortcut({
-      key: 'n',
-      ctrl: true,
-      description: 'Create new process',
-      action: () => this.router.navigate(['/new'])
-    });
-
-    this.registerShortcut({
-      key: 'h',
-      ctrl: true,
-      description: 'Go to home',
+      key: 'd',
+      description: 'Go to Dashboard',
       action: () => this.router.navigate(['/'])
     });
 
     this.registerShortcut({
-      key: 'a',
-      ctrl: true,
-      description: 'Go to analytics',
-      action: () => this.router.navigate(['/analytics'])
+      key: 'p',
+      description: 'Go to Pipeline',
+      action: () => this.router.navigate(['/pipeline'])
     });
 
     this.registerShortcut({
       key: 'c',
-      ctrl: true,
-      description: 'Go to calendar',
+      description: 'Go to Calendar',
       action: () => this.router.navigate(['/calendar'])
     });
 
     this.registerShortcut({
-      key: 'k',
-      ctrl: true,
-      description: 'Go to coach hub',
+      key: 'a',
+      description: 'Go to Analytics',
+      action: () => this.router.navigate(['/analytics'])
+    });
+
+    this.registerShortcut({
+      key: 'h',
+      description: 'Go to Coach Hub',
       action: () => this.router.navigate(['/coach-hub'])
     });
 
     this.registerShortcut({
+      key: 'f',
+      description: 'Go to Profile',
+      action: () => this.router.navigate(['/profile'])
+    });
+
+    this.registerShortcut({
+      key: 'g',
+      description: 'Go to Guide',
+      action: () => this.router.navigate(['/instructions'])
+    });
+
+    this.registerShortcut({
+      key: 'i',
+      description: 'Go to Pricing',
+      action: () => this.router.navigate(['/pricing'])
+    });
+
+    this.registerShortcut({
       key: '/',
-      ctrl: true,
-      description: 'Focus search',
+      description: 'Focus Search',
       action: () => {
         const searchInput = document.querySelector<HTMLInputElement>('.search-input');
         if (searchInput) {
           searchInput.focus();
+          searchInput.select();
         }
       }
     });
@@ -83,26 +101,30 @@ export class KeyboardShortcutsService {
       // Don't trigger shortcuts when typing in input fields
       const target = event.target as HTMLElement;
       if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
-        // Allow Ctrl+A for select all in inputs
-        if (event.key.toLowerCase() === 'a' && event.ctrlKey) {
-          return;
-        }
         return;
       }
 
+      // Debug: console.log(`Key pressed: ${event.key}, Ctrl: ${event.ctrlKey}, Alt: ${event.altKey}, Shift: ${event.shiftKey}`);
+
       const matchingShortcut = this.shortcuts.find(shortcut => {
-        return (
-          shortcut.key.toLowerCase() === event.key.toLowerCase() &&
-          !!shortcut.ctrl === (event.ctrlKey || event.metaKey) &&
-          !!shortcut.alt === event.altKey &&
-          !!shortcut.shift === event.shiftKey
-        );
+        const keyMatch = shortcut.key.toLowerCase() === event.key.toLowerCase();
+        
+        // If the shortcut doesn't specify modifiers, we strictly expect none
+        const ctrlMatch = (shortcut.ctrl ?? false) === (event.ctrlKey || event.metaKey);
+        const altMatch = (shortcut.alt ?? false) === event.altKey;
+        const shiftMatch = (shortcut.shift ?? false) === event.shiftKey;
+
+        return keyMatch && ctrlMatch && altMatch && shiftMatch;
       });
 
       if (matchingShortcut) {
+        console.log('Triggering shortcut:', matchingShortcut.description);
         event.preventDefault();
         matchingShortcut.action();
         this.shortcutTriggered.next(matchingShortcut.description);
+        
+        // Give visual feedback
+        this.toastService.show(`Shortcut: ${matchingShortcut.description}`, 'success');
       }
     });
   }

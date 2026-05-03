@@ -1,0 +1,136 @@
+<div class="ai-panel-overlay" (click)="close()"></div>
+<div class="ai-panel" role="dialog" [attr.aria-label]="panelTitle">
+
+  <!-- Header -->
+  <div class="ai-panel-header">
+    <div class="ai-panel-title">
+      <lucide-icon name="sparkles" [size]="18" strokeWidth="2"></lucide-icon>
+      <span>{{ panelTitle }}</span>
+    </div>
+    <button class="ai-close-btn" (click)="close()" aria-label="Close">
+      <lucide-icon name="x" [size]="16" strokeWidth="2"></lucide-icon>
+    </button>
+  </div>
+
+  <!-- Premium gate -->
+  <div *ngIf="!isPremium" class="ai-gate">
+    <lucide-icon name="star" [size]="32" strokeWidth="1.5"></lucide-icon>
+    <h3>Premium Feature</h3>
+    <p>AI-powered insights are available on the Professional plan. Upgrade to get summaries, signal analysis, and next-step recommendations.</p>
+    <button class="btn-sleek primary" (click)="goToPricing()">View Plans</button>
+  </div>
+
+  <!-- Premium content -->
+  <div *ngIf="isPremium" class="ai-panel-body">
+    <div class="ai-action-row">
+      <button class="btn-sleek primary ai-summarize-btn" (click)="analyze()" [disabled]="isLoading">
+        <lucide-icon *ngIf="!isLoading" name="sparkles" [size]="14" strokeWidth="2"></lucide-icon>
+        <span *ngIf="!isLoading">{{ actionLabel }}</span>
+        <span *ngIf="isLoading" class="ai-spinner"></span>
+        <span *ngIf="isLoading">Analyzing…</span>
+      </button>
+    </div>
+
+    <div class="ai-question-row">
+      <input
+        class="ai-input"
+        type="text"
+        [placeholder]="questionPlaceholder"
+        [(ngModel)]="userQuestion"
+        (keyup.enter)="analyze()"
+        [disabled]="isLoading"
+      />
+    </div>
+
+    <!-- Error state -->
+    <div *ngIf="error" class="ai-error">
+      <lucide-icon name="alert-circle" [size]="16" strokeWidth="2"></lucide-icon>
+      <span>{{ error }}</span>
+    </div>
+
+    <!-- Loading state -->
+    <div *ngIf="isLoading" class="ai-loading-state">
+      <div class="ai-skeleton ai-skeleton-lg"></div>
+      <div class="ai-skeleton ai-skeleton-md"></div>
+      <div class="ai-skeleton ai-skeleton-sm"></div>
+    </div>
+
+    <!-- Process result -->
+    <div *ngIf="processResult && !isLoading" class="ai-result">
+      <div class="ai-section">
+        <h4>Summary</h4>
+        <p>{{ processResult.summary }}</p>
+      </div>
+
+      <div class="ai-section" *ngIf="processResult.risks.length">
+        <h4>Risks</h4>
+        <ul>
+          <li *ngFor="let risk of processResult.risks">{{ risk }}</li>
+        </ul>
+      </div>
+
+      <div class="ai-section" *ngIf="processResult.recommendedNextSteps.length">
+        <h4>Recommended Next Steps</h4>
+        <ul>
+          <li *ngFor="let step of processResult.recommendedNextSteps">{{ step }}</li>
+        </ul>
+      </div>
+
+      <div class="ai-section" *ngIf="processResult.followUpSuggestion">
+        <h4>Follow-up Suggestion</h4>
+        <p>{{ processResult.followUpSuggestion }}</p>
+      </div>
+
+      <div class="ai-confidence" [ngClass]="'confidence-' + processResult.confidence">
+        <span class="confidence-dot"></span>
+        <span>Confidence: {{ confidenceLabel() }}</span>
+      </div>
+    </div>
+
+    <!-- Interaction result -->
+    <div *ngIf="interactionResult && !isLoading" class="ai-result">
+      <div class="ai-section">
+        <h4>Debrief Summary</h4>
+        <p>{{ interactionResult.summary }}</p>
+      </div>
+
+      <div class="ai-section" *ngIf="interactionResult.positiveSignals.length">
+        <h4 class="signals-positive">Positive Signals</h4>
+        <ul>
+          <li *ngFor="let s of interactionResult.positiveSignals">{{ s }}</li>
+        </ul>
+      </div>
+
+      <div class="ai-section" *ngIf="interactionResult.riskSignals.length">
+        <h4 class="signals-risk">Risk Signals</h4>
+        <ul>
+          <li *ngFor="let s of interactionResult.riskSignals">{{ s }}</li>
+        </ul>
+      </div>
+
+      <div class="ai-section" *ngIf="interactionResult.openQuestions.length">
+        <h4>Open Questions</h4>
+        <ul>
+          <li *ngFor="let q of interactionResult.openQuestions">{{ q }}</li>
+        </ul>
+      </div>
+
+      <div class="ai-section" *ngIf="interactionResult.recommendedNextSteps.length">
+        <h4>Recommended Next Steps</h4>
+        <ul>
+          <li *ngFor="let step of interactionResult.recommendedNextSteps">{{ step }}</li>
+        </ul>
+      </div>
+
+      <div class="ai-section" *ngIf="interactionResult.followUpDraft">
+        <h4>Follow-up Draft</h4>
+        <p class="follow-up-draft">{{ interactionResult.followUpDraft }}</p>
+      </div>
+
+      <div class="ai-confidence" [ngClass]="'confidence-' + interactionResult.confidence">
+        <span class="confidence-dot"></span>
+        <span>Confidence: {{ confidenceLabel() }}</span>
+      </div>
+    </div>
+  </div>
+</div>

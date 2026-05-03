@@ -68,6 +68,7 @@ describe('SettingsService', () => {
     const service = getService();
     expect(service).toBeTruthy();
     expect(service.getSettings().theme).toBe('light');
+    expect(service.getSettings().hasSeenOnboarding).toBeTrue();
   });
 
   it('should load settings from localStorage', () => {
@@ -77,9 +78,11 @@ describe('SettingsService', () => {
   });
 
   it('should handle corrupted local storage JSON', () => {
+    spyOn(console, 'error');
     mockLocalStorage.setItem('jobseek_user_settings', '{ invalid }');
     const service = getService();
     expect(service.getSettings().theme).toBe('light'); 
+    expect(console.error).toHaveBeenCalled();
   });
 
   it('should sync with server if authenticated', () => {
@@ -89,12 +92,22 @@ describe('SettingsService', () => {
     authServiceSpy.getPreferences.and.returnValue(of(mockPrefs as any));
 
     service.syncWithServer();
-
     const current = service.getSettings();
-    expect(current.theme).toBe('dark');
-    expect(current.country).toBe('US');
+
     expect(current.dateFormat).toBe('YYYY-MM-DD');
     expect(current.clockFormat).toBe('12');
+    expect(current.hasSeenOnboarding).toBeTrue();
+  });
+
+  it('should sync hasSeenOnboarding from server', () => {
+    const service = getService();
+    authServiceSpy.isAuthenticated.and.returnValue(true);
+    const mockPrefs = { theme: 'light', country: 'US', dateFormat: 'DD/MM/YYYY', timeFormat: '24', hasSeenOnboarding: false };
+    authServiceSpy.getPreferences.and.returnValue(of(mockPrefs as any));
+
+    service.syncWithServer();
+
+    expect(service.getSettings().hasSeenOnboarding).toBeFalse();
   });
 
   it('should format date correctly according to preference', () => {

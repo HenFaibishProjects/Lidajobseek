@@ -70,14 +70,15 @@ describe('AuthService', () => {
   });
 
   describe('login', () => {
-    it('should return access token and user info', async () => {
-      const user = { id: 1, email: 'test@test.com', name: 'Test' };
+    it('should return access token and user info with onboarding status', async () => {
+      const user = { id: 1, email: 'test@test.com', name: 'Test', hasSeenOnboarding: false };
       mockJwtService.sign.mockReturnValue('jwt_token');
 
       const result = await service.login(user);
 
       expect(result.access_token).toBe('jwt_token');
       expect(result.user.email).toBe(user.email);
+      expect(result.user.hasSeenOnboarding).toBe(false);
     });
   });
 
@@ -113,11 +114,12 @@ describe('AuthService', () => {
   });
 
   describe('getPreferences', () => {
-    it('should return user preferences', async () => {
-      mockUsersService.findById.mockResolvedValue({ id: 1, themePreference: 'dark', avatarStylePreference: 'bottts' });
+    it('should return user preferences including onboarding flag', async () => {
+      mockUsersService.findById.mockResolvedValue({ id: 1, themePreference: 'dark', avatarStylePreference: 'bottts', hasSeenOnboarding: true });
       const result = await service.getPreferences(1);
       expect(result.theme).toBe('dark');
       expect(result.avatarStyle).toBe('bottts');
+      expect(result.hasSeenOnboarding).toBe(true);
     });
 
     it('should throw UnauthorizedException if user not found', async () => {
@@ -144,6 +146,16 @@ describe('AuthService', () => {
 
       expect(result.avatarStyle).toBe('pixel-art');
       expect(mockUsersService.updatePreferences).toHaveBeenCalledWith(1, { avatarStylePreference: 'pixel-art' });
+    });
+
+    it('should update hasSeenOnboarding preference', async () => {
+      const dto = { hasSeenOnboarding: true };
+      mockUsersService.updatePreferences.mockResolvedValue({ id: 1, hasSeenOnboarding: true });
+
+      const result = await service.updatePreferences(1, dto);
+
+      expect(result.hasSeenOnboarding).toBe(true);
+      expect(mockUsersService.updatePreferences).toHaveBeenCalledWith(1, { hasSeenOnboarding: true });
     });
 
     it('should ignore invalid preference values', async () => {

@@ -1,0 +1,114 @@
+<div class="cc-overlay" (click)="close()"></div>
+<div class="cc-panel" role="dialog" aria-label="Career Chat">
+
+  <!-- Header -->
+  <div class="cc-header">
+    <div class="cc-title">
+      <lucide-icon name="sparkles" [size]="18" strokeWidth="2"></lucide-icon>
+      <span>Career Chat</span>
+      <span class="cc-badge">AI</span>
+    </div>
+    <button class="cc-close-btn" (click)="close()" aria-label="Close">
+      <lucide-icon name="x" [size]="16" strokeWidth="2"></lucide-icon>
+    </button>
+  </div>
+
+  <!-- Premium gate -->
+  <div *ngIf="!isPremium" class="cc-gate">
+    <lucide-icon name="star" [size]="32" strokeWidth="1.5"></lucide-icon>
+    <h3>Premium Feature</h3>
+    <p>Career Chat is available on the Professional plan. Ask AI anything about your job search using your actual data.</p>
+    <button class="btn-sleek primary" (click)="goToPricing()">View Plans</button>
+  </div>
+
+  <!-- Premium body -->
+  <div *ngIf="isPremium" class="cc-body">
+
+    <!-- Quick prompt chips -->
+    <div class="cc-chips" *ngIf="!isLoading && !result">
+      <button
+        *ngFor="let prompt of quickPrompts"
+        class="cc-chip"
+        (click)="selectChip(prompt)"
+        [disabled]="isLoading">
+        {{ prompt }}
+      </button>
+    </div>
+
+    <!-- Input row -->
+    <div class="cc-input-row">
+      <input
+        class="cc-input"
+        type="text"
+        placeholder="Ask about your job search…"
+        [(ngModel)]="message"
+        (keyup.enter)="send()"
+        [disabled]="isLoading"
+        autocomplete="off"
+      />
+      <button
+        class="cc-send-btn"
+        (click)="send()"
+        [disabled]="isLoading || !message.trim()"
+        aria-label="Send">
+        <span *ngIf="!isLoading">
+          <lucide-icon name="sparkles" [size]="16" strokeWidth="2"></lucide-icon>
+        </span>
+        <span *ngIf="isLoading" class="cc-spinner"></span>
+      </button>
+    </div>
+
+    <!-- Error -->
+    <div *ngIf="error" class="cc-error">
+      <lucide-icon name="alert-circle" [size]="15" strokeWidth="2"></lucide-icon>
+      <span>{{ error }}</span>
+    </div>
+
+    <!-- Loading -->
+    <div *ngIf="isLoading" class="cc-loading">
+      <div class="cc-skeleton cc-skel-lg"></div>
+      <div class="cc-skeleton cc-skel-md"></div>
+      <div class="cc-skeleton cc-skel-sm"></div>
+    </div>
+
+    <!-- Result -->
+    <div *ngIf="result && !isLoading" class="cc-result">
+
+      <div class="cc-section">
+        <p class="cc-answer">{{ result.answer }}</p>
+      </div>
+
+      <div class="cc-section" *ngIf="result.suggestedActions.length">
+        <h4>Suggested Actions</h4>
+        <ul>
+          <li *ngFor="let action of result.suggestedActions">{{ action }}</li>
+        </ul>
+      </div>
+
+      <div class="cc-section cc-related" *ngIf="result.relatedProcesses.length">
+        <h4>Related Applications</h4>
+        <div class="cc-related-list">
+          <button
+            *ngFor="let p of result.relatedProcesses"
+            class="cc-related-item"
+            (click)="navigateToProcess(p.processId)">
+            <span class="cc-related-company">{{ p.company }}</span>
+            <span class="cc-related-role">{{ p.role }}</span>
+            <lucide-icon name="chevron-right" [size]="12" strokeWidth="2"></lucide-icon>
+          </button>
+        </div>
+      </div>
+
+      <div class="cc-confidence" [ngClass]="'confidence-' + result.confidence">
+        <span class="confidence-dot"></span>
+        <span>Confidence: {{ confidenceLabel() }}</span>
+      </div>
+
+      <!-- Ask another -->
+      <button class="cc-ask-again" (click)="result = null; message = ''">
+        Ask another question
+      </button>
+    </div>
+
+  </div>
+</div>

@@ -6,13 +6,16 @@ import { AuthService } from './services/auth.service';
 import { SettingsService } from './services/settings.service';
 import { ToastService } from './services/toast.service';
 
+import { LucideAngularModule, Sparkles } from 'lucide-angular';
+
 describe('AppComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
         AppComponent,
         RouterTestingModule,
-        HttpClientTestingModule
+        HttpClientTestingModule,
+        LucideAngularModule.pick({ Sparkles })
       ],
       providers: [
         { provide: AuthService, useValue: jasmine.createSpyObj('AuthService', ['isAuthenticated', 'logout']) },
@@ -31,6 +34,6 @@ describe('AppComponent', () => {
   it(`should have the 'ui' title`, () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;
-    expect(app.title).toEqual('ui');
+    expect(app.title).toEqual('Reqcue');
   });
 });

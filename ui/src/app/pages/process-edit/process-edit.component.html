@@ -11,18 +11,14 @@
         </nav>
 
         <header class="form-hero">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px;">
+            <div class="hero-top">
                 <div>
                     <span class="form-badge">Edit Process</span>
                     <h1>Edit Process</h1>
                     <p class="subtitle">Modify details for {{ process.companyName }}.</p>
                 </div>
-                <div class="hero-actions" style="display: flex; gap: 12px;">
-                    <button type="button" class="btn-secondary" [routerLink]="['/process', process.id]">Cancel Edit</button>
-                </div>
             </div>
-            
-            <div class="form-meta" style="margin-top: 12px;">Required fields are marked with <span class="required">*</span></div>
+            <div class="form-meta">Required fields are marked with <span class="required">*</span></div>
             <div class="hero-progress" aria-label="Completion progress">
                 <div class="progress" role="progressbar" [attr.aria-valuenow]="completionPercent" aria-valuemin="0" aria-valuemax="100">
                     <div class="progress-bar" [style.width.%]="completionPercent"></div>
@@ -37,14 +33,14 @@
                     <section class="form-section">
                         <div class="section-title">
                             <h2>Role details</h2>
-                            <p>Tell us about the company, position, and stack.</p>
+                            <p class="section-desc">Basic information to identify this opportunity on your board.</p>
                         </div>
 
                         <div class="form-row">
                             <div class="form-group">
                                 <label>Company Name <span class="required">*</span></label>
                                 <input type="text" name="companyName" [(ngModel)]="process.companyName" required
-                                    placeholder="e.g. Google" class="input-field" [class.error]="isFieldInvalid('companyName')"
+                                    placeholder="e.g. Acme Corp" class="input-field" [class.error]="isFieldInvalid('companyName')"
                                     (blur)="onFieldBlur('companyName')">
                                 <p *ngIf="isFieldInvalid('companyName')" class="error-message">Company name is required</p>
                                 <p class="field-hint">Use the official company name for easy reporting later.</p>
@@ -53,24 +49,24 @@
                             <div class="form-group">
                                 <label>Role Title <span class="required">*</span></label>
                                 <input type="text" name="roleTitle" [(ngModel)]="process.roleTitle" required
-                                    placeholder="e.g. Senior Software Engineer" class="input-field" [class.error]="isFieldInvalid('roleTitle')"
+                                    placeholder="e.g. Senior Frontend Engineer" class="input-field" [class.error]="isFieldInvalid('roleTitle')"
                                     (blur)="onFieldBlur('roleTitle')">
                                 <p *ngIf="isFieldInvalid('roleTitle')" class="error-message">Role title is required</p>
                             </div>
                         </div>
 
                         <div class="form-group">
-                            <label>Tech Stack <span class="required">*</span></label>
+                            <label>Core Technologies (Tech Stack) <span class="required">*</span></label>
                             <input type="text" name="techStack" [(ngModel)]="process.techStack" required
-                                placeholder="e.g. Angular, NestJS, Postgres" class="input-field" [class.error]="isFieldInvalid('techStack')"
+                                placeholder="e.g. React, Node.js, PostgreSQL" class="input-field" [class.error]="isFieldInvalid('techStack')"
                                 (blur)="onFieldBlur('techStack')">
                             <p *ngIf="isFieldInvalid('techStack')" class="error-message">Tech stack is required</p>
                         </div>
 
                         <div class="form-row">
                             <div class="form-group">
-                                <label>Source</label>
-                                <input type="text" name="source" [(ngModel)]="process.source" placeholder="e.g. LinkedIn"
+                                <label>Source (Where did you find this?)</label>
+                                <input type="text" name="source" [(ngModel)]="process.source" placeholder="e.g. LinkedIn, Referral, Company site"
                                     class="input-field">
                             </div>
 
@@ -92,7 +88,7 @@
                     <section class="form-section">
                         <div class="section-title">
                             <h2>Location & work style</h2>
-                            <p>Set expectations around location and in-office time.</p>
+                            <p class="section-desc">Specify where you'll be working and how often.</p>
                         </div>
 
                         <div class="form-row location-work-row">
@@ -113,7 +109,7 @@
                                         (input)="onLocationSearchChange()"
                                         (focus)="onLocationSearchChange()"
                                         (blur)="onFieldBlur('locationSearch')"
-                                        [placeholder]="process.workMode === 'remote' ? 'Location is optional for remote mode' : (selectedCountry ? 'Select town' : 'Select a country in settings')">
+                                        [placeholder]="process.workMode === 'remote' ? 'Optional for remote' : (selectedCountry ? 'Search or pick a city' : 'Set country in settings first')">
                                     <button
                                         type="button"
                                         class="location-toggle country-toggle"
@@ -146,21 +142,19 @@
                                     <option value="hybrid">Hybrid</option>
                                     <option value="onsite">On-site</option>
                                 </select>
+                                <div class="form-group days-inline" *ngIf="process.workMode === 'hybrid'">
+                                    <label>Days/week in office</label>
+                                    <input type="number" name="daysFromOffice" [(ngModel)]="process.daysFromOffice" min="1" max="5"
+                                        placeholder="e.g. 2" class="input-field">
+                                </div>
                             </div>
-                        </div>
-
-                        <div class="form-group" *ngIf="process.workMode === 'hybrid'">
-                            <label>Days from Office per Week</label>
-                            <input type="number" name="daysFromOffice" [(ngModel)]="process.daysFromOffice" min="1" max="5"
-                                placeholder="e.g. 2" class="input-field">
-                            <p class="muted-hint">How many days per week are required in the office?</p>
                         </div>
                     </section>
 
                     <section class="form-section">
                 <div class="section-title">
                     <h2>Compensation</h2>
-                    <p>Optional, but helpful for comparison and negotiation prep.</p>
+                    <p class="section-desc">Track your targets to easily compare future offers.</p>
                 </div>
 
                 <div class="form-group salary-group">

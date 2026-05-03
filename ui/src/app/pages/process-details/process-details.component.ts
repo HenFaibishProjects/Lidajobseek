@@ -10,16 +10,20 @@ import { ConfirmService } from '../../services/confirm.service';
 import { ToastService } from '../../services/toast.service';
 import { DateFormatPipe } from '../../pipes/date-format.pipe';
 import { getInterviewTypeLabel as resolveInterviewTypeLabel } from '../../shared/interview-types';
+import { LucideAngularModule } from 'lucide-angular';
+import { AiAssistantPanelComponent } from '../../components/ai-assistant-panel/ai-assistant-panel.component';
 
 @Component({
     selector: 'app-process-details',
     standalone: true,
-    imports: [CommonModule, RouterModule, FormsModule, DateFormatPipe],
+    imports: [CommonModule, RouterModule, FormsModule, DateFormatPipe, LucideAngularModule, AiAssistantPanelComponent],
     templateUrl: './process-details.component.html'
 })
 export class ProcessDetailsComponent implements OnInit {
     process: any;
     showContactForm = false;
+    showAiPanel = false;
+    activeInteractionId: number | null = null;
     newContact: any = {
         name: '',
         role: '',
@@ -89,27 +93,27 @@ export class ProcessDetailsComponent implements OnInit {
     }
 
     async deleteProcess() {
-        if (await this.confirmService.confirm('Are you sure you want to delete this whole process? This cannot be undone.', 'Delete Process')) {
+        if (await this.confirmService.delete('this application')) {
             this.processesService.delete(this.process.id).subscribe(() => {
-                this.toastService.show('Process deleted', 'success');
+                this.toastService.show('Application removed from your pipeline', 'success');
                 this.router.navigate(['/']);
             });
         }
     }
 
     async deleteInteraction(id: number) {
-        if (await this.confirmService.confirm('Delete this interaction?', 'Delete Interaction')) {
+        if (await this.confirmService.delete('this interaction round')) {
             this.interactionsService.delete(id).subscribe(() => {
-                this.toastService.show('Interaction deleted', 'success');
+                this.toastService.show('Interaction round removed', 'success');
                 this.loadProcess();
             });
         }
     }
 
     async deleteReview(id: number) {
-        if (await this.confirmService.confirm('Delete this self-review?', 'Delete Review')) {
+        if (await this.confirmService.delete('this reflection')) {
             this.reviewsService.delete(id).subscribe(() => {
-                this.toastService.show('Review deleted', 'success');
+                this.toastService.show('Reflection removed', 'success');
                 this.loadProcess();
             });
         }
@@ -131,9 +135,9 @@ export class ProcessDetailsComponent implements OnInit {
     }
 
     async deleteContact(id: number) {
-        if (await this.confirmService.confirm('Delete this contact?', 'Delete Contact')) {
+        if (await this.confirmService.delete('this contact')) {
             this.contactsService.delete(id).subscribe(() => {
-                this.toastService.show('Contact deleted', 'success');
+                this.toastService.show('Contact removed', 'success');
                 this.loadProcess();
             });
         }
@@ -146,5 +150,15 @@ export class ProcessDetailsComponent implements OnInit {
 
     getInterviewTypeLabel(interviewType: string): string {
         return resolveInterviewTypeLabel(interviewType);
+    }
+
+    toggleAiPanel() {
+        this.activeInteractionId = null;
+        this.showAiPanel = !this.showAiPanel;
+    }
+
+    openInteractionAiPanel(interactionId: number) {
+        this.activeInteractionId = interactionId;
+        this.showAiPanel = true;
     }
 }

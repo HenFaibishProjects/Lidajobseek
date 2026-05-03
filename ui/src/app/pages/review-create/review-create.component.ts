@@ -8,7 +8,8 @@ import { ReviewsService } from '../../services/reviews.service';
     selector: 'app-review-create',
     standalone: true,
     imports: [CommonModule, FormsModule, RouterModule],
-    templateUrl: './review-create.component.html'
+    templateUrl: './review-create.component.html',
+    styleUrls: ['./review-create.component.css']
 })
 export class ReviewCreateComponent implements OnInit {
     processId!: number;

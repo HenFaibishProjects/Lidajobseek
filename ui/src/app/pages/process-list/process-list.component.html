@@ -15,64 +15,201 @@
                 </p>
             </div>
             <div class="hero-actions">
-                <button class="btn-glass" (click)="exportData()" title="Export Data">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                        <polyline points="7 10 12 15 17 10"></polyline>
-                        <line x1="12" y1="15" x2="12" y2="3"></line>
-                    </svg>
-                    <span>Export</span>
-                </button>
-                <button class="btn-glass" (click)="fileInput.click()" title="Import Data">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                        <polyline points="17 8 12 3 7 8"></polyline>
-                        <line x1="12" y1="3" x2="12" y2="15"></line>
-                    </svg>
-                    <span>Import</span>
-                </button>
-                <input #fileInput type="file" (change)="onFileSelected($event)" style="display: none" accept=".json">
+
                 <button class="btn-primary-gradient" routerLink="/new">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="2.5">
-                        <line x1="12" y1="5" x2="12" y2="19"></line>
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                    </svg>
+                    <lucide-icon name="plus" [size]="18" strokeWidth="2.5"></lucide-icon>
                     <span>New Application</span>
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Stats Overview -->
-    <div class="stats-grid">
-        <div class="stat-card stat-primary">
-            <div class="stat-icon">📊</div>
-            <div class="stat-content">
-                <div class="stat-value">{{ filteredProcesses.length }}</div>
-                <div class="stat-label">Total Applications</div>
+
+    <!-- ═══ DASHBOARD INSIGHTS (KPIs + Charts + Panels) ═══ -->
+    <div class="dashboard-insights" *ngIf="!isLoading">
+
+        <!-- KPI Strip — 4 cards -->
+        <section class="performance-section">
+            <div class="kpi-header">
+                <h2 class="kpi-title">Performance Metrics</h2>
+                <div class="kpi-range-selector">
+                    <button class="kpi-range-btn" [class.active]="currentKpiRange === 'all'" (click)="currentKpiRange = 'all'">All Time</button>
+                    <button class="kpi-range-btn" [class.active]="currentKpiRange === 'year'" (click)="currentKpiRange = 'year'">Year</button>
+                    <button class="kpi-range-btn" [class.active]="currentKpiRange === 'quarter'" (click)="currentKpiRange = 'quarter'">Quarter</button>
+                    <button class="kpi-range-btn" [class.active]="currentKpiRange === 'month'" (click)="currentKpiRange = 'month'">Month</button>
+                    <button class="kpi-range-btn" [class.active]="currentKpiRange === 'week'" (click)="currentKpiRange = 'week'">Week</button>
+                </div>
             </div>
-        </div>
-        <div class="stat-card stat-success">
-            <div class="stat-icon">⚡</div>
-            <div class="stat-content">
-                <div class="stat-value">{{ getActiveCount() }}</div>
-                <div class="stat-label">Active Processes</div>
+
+            <div class="kpi-strip">
+                <div class="kpi-card kpi-blue">
+                    <div class="kpi-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect>
+                        </svg>
+                    </div>
+                    <div class="kpi-body">
+                        <div class="kpi-value">{{ kpiProcesses.length }}</div>
+                        <div class="kpi-label">Total Applications</div>
+                    </div>
+                </div>
+
+                <div class="kpi-card kpi-amber">
+                    <div class="kpi-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                    </div>
+                    <div class="kpi-body">
+                        <div class="kpi-value">{{ getInterviewCount() }}</div>
+                        <div class="kpi-label kpi-label-with-tooltip">
+                            In Interviews
+                            <lucide-icon name="info" [size]="14" class="kpi-info-icon" title="Filtered by time range. Excludes: Submitted, Review, and Closed stages"></lucide-icon>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="kpi-card kpi-purple">
+                    <div class="kpi-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="8" r="7"></circle>
+                            <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline>
+                        </svg>
+                    </div>
+                    <div class="kpi-body">
+                        <div class="kpi-value">{{ getOfferCount() }}</div>
+                        <div class="kpi-label">Offers</div>
+                    </div>
+                </div>
+
+                <div class="kpi-card kpi-red">
+                    <div class="kpi-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </div>
+                    <div class="kpi-body">
+                        <div class="kpi-value">{{ getRejectionRate() }}%</div>
+                        <div class="kpi-label">Rejection Rate</div>
+                    </div>
+                </div>
             </div>
-        </div>
-        <div class="stat-card stat-warning">
-            <div class="stat-icon">📅</div>
-            <div class="stat-content">
-                <div class="stat-value">{{ getInterviewCount() }}</div>
-                <div class="stat-label">Interviews</div>
+
+            <!-- Charts Row — Now inside the section -->
+            <div class="charts-row">
+                <div class="chart-card">
+                    <div class="chart-card-header">
+                        <span class="chart-title">Applications over time</span>
+                        <span class="chart-subtitle">{{ getTimelineSubtitle() }}</span>
+                    </div>
+                    <div class="chart-canvas-wrapper">
+                        <canvas #dashTimelineChart></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-card-header">
+                        <span class="chart-title">Pipeline distribution</span>
+                        <span class="chart-subtitle">By current stage</span>
+                    </div>
+                    <div class="chart-canvas-wrapper">
+                        <canvas #dashStageChart></canvas>
+                    </div>
+                </div>
             </div>
-        </div>
-        <div class="stat-card stat-info">
-            <div class="stat-icon">🎯</div>
-            <div class="stat-content">
-                <div class="stat-value">{{ getOfferCount() }}</div>
-                <div class="stat-label">Offers</div>
+        </section>
+
+        <!-- Insight Panels -->
+        <div class="insight-panels">
+
+            <!-- Follow-up overdue -->
+            <div class="insight-card">
+                <div class="insight-card-header">
+                    <div class="insight-icon insight-icon-red">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                    </div>
+                    <span class="insight-title">Follow-ups due</span>
+                    <span class="insight-badge insight-badge-red" *ngIf="tasks.length">{{ tasks.length }}</span>
+                </div>
+                <div class="insight-body">
+                    <ng-container *ngIf="tasks.length; else noFollowUps">
+                        <a class="insight-item" *ngFor="let t of tasks.slice(0, 4)" [routerLink]="['/process', t.id]">
+                            <span class="insight-company">{{ t.company }}</span>
+                            <span class="insight-tag tag-red">Overdue</span>
+                        </a>
+                    </ng-container>
+                    <ng-template #noFollowUps>
+                        <div class="insight-empty">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            No follow-ups due
+                        </div>
+                    </ng-template>
+                </div>
             </div>
+
+            <!-- Interviews this week -->
+            <div class="insight-card">
+                <div class="insight-card-header">
+                    <div class="insight-icon insight-icon-amber">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                    </div>
+                    <span class="insight-title">Interviews this week</span>
+                    <span class="insight-badge insight-badge-amber" *ngIf="getInterviewsThisWeek().length">{{ getInterviewsThisWeek().length }}</span>
+                </div>
+                <div class="insight-body">
+                    <ng-container *ngIf="getInterviewsThisWeek().length; else noInterviews">
+                        <a class="insight-item" *ngFor="let p of getInterviewsThisWeek()" [routerLink]="['/process', p.id]">
+                            <div class="insight-item-main">
+                                <span class="insight-company">{{ p.companyName }}</span>
+                                <span class="insight-role">{{ p.roleTitle }}</span>
+                            </div>
+                            <span class="insight-tag tag-amber">{{ p.currentStage }}</span>
+                        </a>
+                    </ng-container>
+                    <ng-template #noInterviews>
+                        <div class="insight-empty">No interviews active this week</div>
+                    </ng-template>
+                </div>
+            </div>
+
+            <!-- Top scored -->
+            <div class="insight-card">
+                <div class="insight-card-header">
+                    <div class="insight-icon insight-icon-purple">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                        </svg>
+                    </div>
+                    <span class="insight-title">Top opportunities</span>
+                </div>
+                <div class="insight-body">
+                    <ng-container *ngIf="getTopScored().length; else noScored">
+                        <a class="insight-item" *ngFor="let p of getTopScored()" [routerLink]="['/process', p.id]">
+                            <div class="insight-item-main">
+                                <span class="insight-company">{{ p.companyName }}</span>
+                                <span class="insight-role">{{ p.roleTitle }}</span>
+                            </div>
+                            <span class="insight-score" [ngClass]="scoreClass(avgScore(p))">{{ avgScore(p) }}/10</span>
+                        </a>
+                    </ng-container>
+                    <ng-template #noScored>
+                        <div class="insight-empty">Score your applications via the decision panel to reveal your top matches</div>
+                    </ng-template>
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -156,6 +293,26 @@
                     Use the filters on the left to focus on active conversations, upcoming interviews, or offers.
                 </p>
             </div>
+            <div class="view-toggle" role="group" aria-label="View mode">
+                <button
+                    class="view-toggle-btn"
+                    [class.view-toggle-btn--active]="viewMode === 'grid'"
+                    (click)="viewMode = 'grid'"
+                    title="Grid view"
+                    aria-label="Grid view"
+                >
+                    <lucide-icon name="layout-grid" [size]="16"></lucide-icon>
+                </button>
+                <button
+                    class="view-toggle-btn"
+                    [class.view-toggle-btn--active]="viewMode === 'list'"
+                    (click)="viewMode = 'list'"
+                    title="List view"
+                    aria-label="List view"
+                >
+                    <lucide-icon name="list" [size]="16"></lucide-icon>
+                </button>
+            </div>
         </div>
 
         <!-- Loading Skeleton -->
@@ -181,7 +338,7 @@
     </div>
 
     <!-- Process Cards Grid -->
-        <div class="processes-grid" *ngIf="!isLoading && filteredProcesses.length > 0; else noData">
+        <div class="processes-grid" *ngIf="!isLoading && filteredProcesses.length > 0 && viewMode === 'grid'; else listOrEmpty">
         <div *ngFor="let p of filteredProcesses" class="process-card"
             [class.card-closed]="p.currentStage === 'Rejected' || p.currentStage === 'Withdrawn'"
             [routerLink]="['/process', p.id]">
@@ -238,9 +395,94 @@
         </div>
     </div>
 
-            <!-- Empty State -->
-            <ng-template #noData>
-                <div class="empty-state-modern">
+    <!-- List view / empty fallback -->
+    <ng-template #listOrEmpty>
+        <!-- Process List View -->
+        <div class="processes-list" *ngIf="!isLoading && filteredProcesses.length > 0 && viewMode === 'list'">
+            <!-- List header -->
+            <div class="list-header-row">
+                <div class="list-col list-col-company">
+                    <button class="list-sort-btn" (click)="sort('company')">
+                        Company
+                        <svg *ngIf="isSorted('company')" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline *ngIf="getSortDirection('company') === 'asc'" points="18 15 12 9 6 15"/>
+                            <polyline *ngIf="getSortDirection('company') === 'desc'" points="6 9 12 15 18 9"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="list-col list-col-role">Role</div>
+                <div class="list-col list-col-stage">
+                    <button class="list-sort-btn" (click)="sort('stage')">
+                        Stage
+                        <svg *ngIf="isSorted('stage')" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline *ngIf="getSortDirection('stage') === 'asc'" points="18 15 12 9 6 15"/>
+                            <polyline *ngIf="getSortDirection('stage') === 'desc'" points="6 9 12 15 18 9"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="list-col list-col-mode">Mode</div>
+                <div class="list-col list-col-interactions">
+                    <button class="list-sort-btn" (click)="sort('interactions')">
+                        Sessions
+                        <svg *ngIf="isSorted('interactions')" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline *ngIf="getSortDirection('interactions') === 'asc'" points="18 15 12 9 6 15"/>
+                            <polyline *ngIf="getSortDirection('interactions') === 'desc'" points="6 9 12 15 18 9"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="list-col list-col-updated">
+                    <button class="list-sort-btn" (click)="sort('updated')">
+                        Updated
+                        <svg *ngIf="isSorted('updated')" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline *ngIf="getSortDirection('updated') === 'asc'" points="18 15 12 9 6 15"/>
+                            <polyline *ngIf="getSortDirection('updated') === 'desc'" points="6 9 12 15 18 9"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- List rows -->
+            <a
+                class="list-row"
+                *ngFor="let p of filteredProcesses"
+                [routerLink]="['/process', p.id]"
+                [class.list-row--closed]="p.currentStage === 'Rejected' || p.currentStage === 'Withdrawn'"
+            >
+                <div class="list-col list-col-company">
+                    <div class="list-avatar">{{ p.companyName.charAt(0).toUpperCase() }}</div>
+                    <div class="list-company-wrap">
+                        <span class="list-company-name">{{ p.companyName }}</span>
+                        <span class="list-location" *ngIf="p.location">
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                            {{ p.location }}
+                        </span>
+                    </div>
+                </div>
+                <div class="list-col list-col-role">
+                    <span class="list-role-text">{{ p.roleTitle }}</span>
+                </div>
+                <div class="list-col list-col-stage">
+                    <span class="badge-stage" [ngClass]="getStatusClass(p.currentStage)">{{ p.currentStage }}</span>
+                </div>
+                <div class="list-col list-col-mode">
+                    <span class="list-mode-badge" *ngIf="p.workMode" [attr.data-mode]="p.workMode">{{ p.workMode | titlecase }}</span>
+                    <span *ngIf="!p.workMode" class="list-empty-cell">—</span>
+                </div>
+                <div class="list-col list-col-interactions">
+                    <span class="list-sessions" *ngIf="p._count?.interactions">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                        {{ p._count.interactions }}
+                    </span>
+                    <span *ngIf="!p._count?.interactions" class="list-empty-cell">—</span>
+                </div>
+                <div class="list-col list-col-updated">
+                    <span class="list-date">{{ p.updatedAt | dateFormat:'date' }}</span>
+                </div>
+            </a>
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state-modern" *ngIf="!isLoading && filteredProcesses.length === 0">
                     <div class="empty-illustration">
                         <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -249,8 +491,8 @@
                             <line x1="9" y1="15" x2="15" y2="15"></line>
                         </svg>
                     </div>
-                    <h3>No applications match these filters</h3>
-                    <p>Try clearing filters or create a new application to start filling your board.</p>
+                    <h3>No applications match your current filters</h3>
+                    <p>Try adjusting your filters, or create a new application to populate your board.</p>
                     <div class="empty-actions">
                         <button class="btn-secondary" (click)="clearFilters()">Clear filters</button>
                         <button class="btn-primary-gradient" routerLink="/new">
@@ -262,7 +504,7 @@
                         </button>
                     </div>
                 </div>
-            </ng-template>
+        </ng-template>
         </section>
     </div>
 </div>

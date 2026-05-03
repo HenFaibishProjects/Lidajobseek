@@ -17,6 +17,7 @@ import { PricingComponent } from './pages/pricing/pricing.component';
 import { AuthGuard } from './guards/auth.guard';
 import { ProfileComponent } from './pages/profile/profile.component';
 import { ProfileCvComponent } from './pages/profile-cv/profile-cv.component';
+import { PipelineBoardComponent } from './pages/pipeline-board/pipeline-board.component';
 
 export const routes: Routes = [
     { path: 'login', component: LoginComponent },
@@ -31,6 +32,7 @@ export const routes: Routes = [
             { path: 'coach-hub', component: CoachHubComponent },
             { path: 'calendar', component: CalendarComponent },
             { path: 'schedule-interview', component: ScheduleInterviewComponent },
+            { path: 'pipeline', component: PipelineBoardComponent },
             { path: 'profile', component: ProfileComponent },
             { path: 'profile/cv', component: ProfileCvComponent },
             {

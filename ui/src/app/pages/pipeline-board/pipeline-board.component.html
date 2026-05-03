@@ -1,0 +1,220 @@
+<div class="pb-root">
+
+  <!-- ── Top Bar ─────────────────────────────────────────────────── -->
+  <header class="pb-topbar">
+    <div class="pb-topbar-left">
+      <div class="pb-brand">
+        <div class="pb-brand-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="4" height="18" rx="1.5"/><rect x="10" y="3" width="4" height="13" rx="1.5"/><rect x="17" y="3" width="4" height="8" rx="1.5"/></svg>
+        </div>
+        <div>
+          <h1 class="pb-title">Pipeline</h1>
+          <p class="pb-subtitle" *ngIf="!loading">{{ totalVisible() }} processes tracked</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="pb-topbar-right">
+      <a routerLink="/new" class="pb-btn-add">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        New Process
+      </a>
+    </div>
+  </header>
+
+  <!-- ── Filter Bar ──────────────────────────────────────────────── -->
+  <div class="pb-filterbar">
+    <div class="pb-filters-row">
+
+      <!-- Search -->
+      <div class="pb-search-wrap">
+        <svg class="pb-search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input
+          type="text"
+          class="pb-search search-input"
+          placeholder="Search company, role, location..."
+          [(ngModel)]="searchText"
+          (ngModelChange)="cdr.markForCheck()"
+          aria-label="Search processes"
+        />
+        <button class="pb-search-clear" *ngIf="searchText" (click)="searchText = ''; cdr.markForCheck()" aria-label="Clear search">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <!-- Work mode chips -->
+      <div class="pb-chip-group" role="group" aria-label="Work mode filter">
+        <button
+          class="pb-chip"
+          [class.pb-chip--active]="filterWorkMode === ''"
+          (click)="filterWorkMode = ''; cdr.markForCheck()"
+        >All</button>
+        <button
+          class="pb-chip pb-chip--remote"
+          [class.pb-chip--active]="filterWorkMode === 'remote'"
+          (click)="filterWorkMode = filterWorkMode === 'remote' ? '' : 'remote'; cdr.markForCheck()"
+        >
+          <span class="pb-chip-dot"></span> Remote
+        </button>
+        <button
+          class="pb-chip pb-chip--hybrid"
+          [class.pb-chip--active]="filterWorkMode === 'hybrid'"
+          (click)="filterWorkMode = filterWorkMode === 'hybrid' ? '' : 'hybrid'; cdr.markForCheck()"
+        >
+          <span class="pb-chip-dot"></span> Hybrid
+        </button>
+        <button
+          class="pb-chip pb-chip--onsite"
+          [class.pb-chip--active]="filterWorkMode === 'onsite'"
+          (click)="filterWorkMode = filterWorkMode === 'onsite' ? '' : 'onsite'; cdr.markForCheck()"
+        >
+          <span class="pb-chip-dot"></span> On-site
+        </button>
+      </div>
+
+      <!-- Toggle: active only -->
+      <button
+        class="pb-toggle"
+        [class.pb-toggle--on]="filterActiveOnly"
+        (click)="filterActiveOnly = !filterActiveOnly; cdr.markForCheck()"
+        role="switch"
+        [attr.aria-checked]="filterActiveOnly"
+      >
+        <span class="pb-toggle-track">
+          <span class="pb-toggle-thumb"></span>
+        </span>
+        <span class="pb-toggle-label">Active only</span>
+      </button>
+
+      <!-- Clear all -->
+      <button
+        class="pb-btn-clear"
+        *ngIf="searchText || filterWorkMode || filterActiveOnly"
+        (click)="clearFilters()"
+      >
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        Clear
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Loading ─────────────────────────────────────────────────── -->
+  <div class="pb-loading" *ngIf="loading">
+    <div class="pb-loading-inner">
+      <div class="pb-spinner"></div>
+      <p class="pb-loading-text">Loading your pipeline...</p>
+    </div>
+  </div>
+
+  <!-- ── Empty ───────────────────────────────────────────────────── -->
+  <div class="pb-empty" *ngIf="!loading && allProcesses.length === 0">
+    <div class="pb-empty-icon">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="4" height="18" rx="1.5"/><rect x="10" y="3" width="4" height="13" rx="1.5"/><rect x="17" y="3" width="4" height="8" rx="1.5"/></svg>
+    </div>
+    <h2 class="pb-empty-title">Your pipeline is empty</h2>
+    <p class="pb-empty-desc">Add your first job application to see it on the board.</p>
+    <a routerLink="/new" class="pb-btn-primary">Add your first process</a>
+  </div>
+
+  <!-- ── Board ───────────────────────────────────────────────────── -->
+  <div class="pb-board-scroll" *ngIf="!loading && allProcesses.length > 0">
+
+    <!-- Drag tip -->
+    <div class="pb-drag-tip" *ngIf="showTip">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span>Drag &amp; drop cards between columns to update their stage instantly</span>
+      <button class="pb-tip-close" (click)="dismissTip()" aria-label="Dismiss tip">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <div class="pb-columns">
+      <div
+        class="pb-col"
+        *ngFor="let col of columns; trackBy: trackByColumnId"
+        [attr.data-col]="col.id"
+        [class.pb-col--drag-over]="dragOverColumnId === col.id"
+        (dragover)="onDragOver($event, col.id)"
+        (dragleave)="onDragLeave($event, col.id)"
+        (drop)="onDrop($event, col.id)"
+      >
+        <!-- Column header -->
+        <div class="pb-col-head">
+          <div class="pb-col-indicator" [attr.data-col]="col.id"></div>
+          <span class="pb-col-label">{{ col.label }}</span>
+          <span class="pb-col-count" [class.pb-col-count--zero]="getColumnCards(col.id).length === 0">
+            {{ getColumnCards(col.id).length }}
+          </span>
+        </div>
+
+        <!-- Drop progress bar (shown on drag-over) -->
+        <div class="pb-col-drop-bar" *ngIf="dragOverColumnId === col.id"></div>
+
+        <!-- Cards -->
+        <div class="pb-col-body">
+          <div
+            class="pb-card"
+            *ngFor="let p of getColumnCards(col.id); trackBy: trackById"
+            draggable="true"
+            [class.pb-card--dragging]="draggingId === p.id"
+            (dragstart)="onDragStart($event, p.id)"
+            (dragend)="onDragEnd($event)"
+          >
+            <!-- Card header -->
+            <div class="pb-card-head">
+              <div class="pb-card-avatar" [attr.data-letter]="(p.companyName || '?')[0].toUpperCase()">
+                {{ (p.companyName || '?')[0].toUpperCase() }}
+              </div>
+              <div class="pb-card-identity">
+                <div class="pb-card-company">{{ p.companyName }}</div>
+                <div class="pb-card-role">{{ p.roleTitle }}</div>
+              </div>
+              <div class="pb-card-drag-handle" aria-hidden="true">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.4"><circle cx="9" cy="6" r="1" fill="currentColor"/><circle cx="9" cy="12" r="1" fill="currentColor"/><circle cx="9" cy="18" r="1" fill="currentColor"/><circle cx="15" cy="6" r="1" fill="currentColor"/><circle cx="15" cy="12" r="1" fill="currentColor"/><circle cx="15" cy="18" r="1" fill="currentColor"/></svg>
+              </div>
+            </div>
+
+            <!-- Stage pill -->
+            <div class="pb-card-stage" [ngClass]="getStatusClass(p.currentStage)">
+              {{ p.currentStage }}
+            </div>
+
+            <!-- Meta row -->
+            <div class="pb-card-meta" *ngIf="p.location || p.workMode">
+              <span class="pb-card-location" *ngIf="p.location">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                {{ p.location }}
+              </span>
+              <span class="pb-card-mode" *ngIf="p.workMode" [attr.data-mode]="p.workMode">{{ p.workMode }}</span>
+            </div>
+
+            <!-- Footer -->
+            <div class="pb-card-footer">
+              <span class="pb-card-date">{{ p.updatedAt | dateFormat:'date' }}</span>
+              <span class="pb-card-score" *ngIf="hasScore(p)" [ngClass]="scoreClass(avgScore(p))">
+                ★ {{ avgScore(p) }}/10
+              </span>
+            </div>
+
+
+            <!-- Full card link overlay -->
+            <a
+              class="pb-card-link"
+              [routerLink]="['/process', p.id]"
+              [attr.aria-label]="'Open ' + p.companyName"
+            ></a>
+          </div>
+
+          <!-- Empty column drop zone -->
+          <div class="pb-col-empty" *ngIf="getColumnCards(col.id).length === 0">
+            <div class="pb-col-empty-inner">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.4"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M12 8v8M8 12h8" stroke-dasharray="3 3" opacity="0.6"/></svg>
+              <span>Drop here</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

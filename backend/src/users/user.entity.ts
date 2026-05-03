@@ -17,28 +17,31 @@ export class User {
   @Property({ nullable: true })
   name?: string;
 
-  @Property({ nullable: true, default: 'free' })
+  @Property({ fieldName: 'pricing_plan', nullable: true, default: 'free' })
   pricingPlan?: 'free' | 'premium' | 'enterprise';
 
-  @Property({ nullable: true, default: 'light' })
+  @Property({ fieldName: 'theme_preference', nullable: true, default: 'light' })
   themePreference?: 'light' | 'dark' | 'auto';
 
-  @Property({ nullable: true, default: '' })
+  @Property({ fieldName: 'country_preference', nullable: true, default: '' })
   countryPreference?: string;
 
-  @Property({ nullable: true, default: 'DD/MM/YYYY' })
+  @Property({ fieldName: 'date_format_preference', nullable: true, default: 'DD/MM/YYYY' })
   dateFormatPreference?: 'MM/DD/YYYY' | 'DD/MM/YYYY' | 'YYYY-MM-DD';
 
-  @Property({ nullable: true, default: '24' })
+  @Property({ fieldName: 'time_format_preference', nullable: true, default: '24' })
   timeFormatPreference?: '12' | '24';
 
-  @Property({ nullable: true, default: 'avataaars' })
+  @Property({ fieldName: 'avatar_style_preference', nullable: true, default: 'avataaars' })
   avatarStylePreference?: string;
 
-  @Property({ onCreate: () => new Date() })
+  @Property({ fieldName: 'has_seen_onboarding', nullable: true, default: true })
+  hasSeenOnboarding?: boolean;
+
+  @Property({ fieldName: 'created_at', onCreate: () => new Date() })
   createdAt: Date = new Date();
 
-  @Property({ onCreate: () => new Date(), onUpdate: () => new Date() })
+  @Property({ fieldName: 'updated_at', onCreate: () => new Date(), onUpdate: () => new Date() })
   updatedAt: Date = new Date();
 
   @OneToMany(() => Process, process => process.user)

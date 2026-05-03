@@ -20,11 +20,11 @@
             </div>
             <div class="header-actions">
                 <button class="btn-sleek secondary" [routerLink]="['/process', process.id, 'edit']">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                    <lucide-icon name="pencil" [size]="14" strokeWidth="2"></lucide-icon>
                     <span>Edit</span>
                 </button>
                 <button class="btn-sleek danger" (click)="deleteProcess()">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    <lucide-icon name="trash-2" [size]="14" strokeWidth="2"></lucide-icon>
                     <span>Delete</span>
                 </button>
             </div>
@@ -43,7 +43,7 @@
             <section class="premium-card">
                 <div class="card-header">
                     <div class="header-title">
-                        <h3>Interactions Pipeline</h3>
+                        <h3>Interview Rounds & Interactions</h3>
                         <span class="badge-count" *ngIf="process.interactions?.length">{{ process.interactions.length }}</span>
                     </div>
                     <button class="btn-circle primary" [routerLink]="['/process', process.id, 'interaction', 'new']" title="Record Interaction">
@@ -62,11 +62,14 @@
                                         <span class="node-date">{{ inter.date | dateFormat:'datetime' }}</span>
                                     </div>
                                     <div class="node-actions">
+                                        <button class="btn-icon" (click)="openInteractionAiPanel(inter.id)" title="Analyze with AI">
+                                            <lucide-icon name="sparkles" [size]="14" strokeWidth="2"></lucide-icon>
+                                        </button>
                                         <button class="btn-icon" [routerLink]="['/process', process.id, 'interaction', inter.id, 'edit']" title="Edit">
-                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                                            <lucide-icon name="edit" [size]="14" strokeWidth="2"></lucide-icon>
                                         </button>
                                         <button class="btn-icon danger" (click)="deleteInteraction(inter.id)" title="Delete">
-                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                            <lucide-icon name="trash-2" [size]="14" strokeWidth="2"></lucide-icon>
                                         </button>
                                     </div>
                                 </div>
@@ -100,10 +103,10 @@
                     <ng-template #noInteractions>
                         <div class="empty-state">
                             <div class="empty-icon">
-                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                                <lucide-icon name="calendar" [size]="32" strokeWidth="1.5"></lucide-icon>
                             </div>
                             <p>No interactions recorded yet.</p>
-                            <span class="empty-sub">Keep track of all your interviews here.</span>
+                            <span class="empty-sub">Keep track of your interview rounds and communications here.</span>
                         </div>
                     </ng-template>
                 </div>
@@ -112,7 +115,7 @@
             <section class="premium-card">
                 <div class="card-header">
                     <div class="header-title">
-                        <h3>Self Reviews</h3>
+                        <h3>Post-Interview Reflections</h3>
                         <span class="badge-count" *ngIf="process.reviews?.length">{{ process.reviews.length }}</span>
                     </div>
                     <button class="btn-circle primary" [routerLink]="['/process', process.id, 'review', 'new']" title="Add Review">
@@ -136,13 +139,13 @@
                             <div class="feedback-columns">
                                 <div class="f-col positive">
                                     <div class="f-label">
-                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> What Went Well
+                                        <lucide-icon name="check-circle-2" [size]="12" strokeWidth="2"></lucide-icon> What Went Well
                                     </div>
                                     <p>{{ rev.whatWentWell }}</p>
                                 </div>
                                 <div class="f-col negative">
                                     <div class="f-label">
-                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg> Needs Improvement
+                                        <lucide-icon name="alert-circle" [size]="12" strokeWidth="2"></lucide-icon> Needs Improvement
                                     </div>
                                     <p>{{ rev.whatFailed }}</p>
                                 </div>
@@ -163,7 +166,7 @@
                     <ng-template #noReviews>
                         <div class="empty-state">
                             <div class="empty-icon">
-                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                                <lucide-icon name="file-text" [size]="32" strokeWidth="1.5"></lucide-icon>
                             </div>
                             <p>No self-reviews added.</p>
                             <span class="empty-sub">Reflect after interviews to boost your chances.</span>
@@ -178,7 +181,7 @@
             
             <section class="premium-card sidebar-card sticky-card">
                 <div class="card-header">
-                    <h3>Process Profile</h3>
+                    <h3>Application Details</h3>
                     <div class="completion-ring" [title]="completionPercent + '% Complete'">
                         {{ completionPercent }}%
                     </div>
@@ -289,6 +292,19 @@
         </aside>
     </div>
 </div>
+
+<!-- AI Assistant floating button -->
+<button class="ai-float-btn" (click)="toggleAiPanel()" title="AI Assistant" *ngIf="process">
+    <lucide-icon name="sparkles" [size]="22" strokeWidth="2"></lucide-icon>
+</button>
+
+<!-- AI Assistant panel -->
+<app-ai-assistant-panel
+    *ngIf="showAiPanel && process"
+    [processId]="activeInteractionId == null ? process.id : undefined"
+    [interactionId]="activeInteractionId ?? undefined"
+    (closed)="showAiPanel = false; activeInteractionId = null">
+</app-ai-assistant-panel>
 
 <style>
     /* ===== RESET & BASE OVERRIDES ===== */
@@ -910,7 +926,55 @@
     /* Responsive */
     @media (max-width: 1024px) {
         .dashboard-grid { grid-template-columns: 1fr; }
-        .hero-main { flex-direction: column; align-items: flex-start; gap: 16px; }
+        .hero-main { gap: 16px; }
+    }
+    
+    @media (max-width: 768px) {
+        .hero-content { flex-direction: column; align-items: flex-start; }
+        .hero-main { flex-direction: column; align-items: flex-start; }
         .header-actions { margin-top: 16px; width: 100%; justify-content: flex-start; }
+        .title-row { flex-direction: column; align-items: flex-start; gap: 8px; }
+        
+        .feedback-columns { grid-template-columns: 1fr; }
+        .form-grid { grid-template-columns: 1fr; }
+        .form-input { grid-column: span 1 !important; }
+        .btn-sleek.primary.full-width { grid-column: span 1 !important; }
+        
+        .dashboard-wrapper { padding: 0 var(--space-md) var(--space-2xl); }
+        .hero-header { border-radius: 16px; margin: var(--space-md) 0 var(--space-xl); }
+        .card-header, .card-body { padding: var(--space-md); }
+    }
+    
+    @media (max-width: 480px) {
+        .btn-sleek { width: 100%; margin-bottom: 8px; }
+        .header-actions { flex-direction: column; }
+        .dl-item { flex-direction: column; align-items: flex-start; gap: 8px; }
+        .review-actions { flex-direction: column; align-items: flex-start; gap: 12px; }
+    }
+
+    .ai-float-btn {
+        position: fixed;
+        bottom: 28px;
+        right: 24px;
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #7c3aed, #a78bfa);
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        box-shadow: 0 4px 20px rgba(124,58,237,0.45);
+        z-index: 998;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .ai-float-btn:hover {
+        transform: scale(1.08);
+        box-shadow: 0 6px 28px rgba(124,58,237,0.6);
+    }
+    .ai-float-btn:active {
+        transform: scale(0.96);
     }
 </style>

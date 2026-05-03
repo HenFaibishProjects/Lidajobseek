@@ -26,40 +26,39 @@
                     <section class="form-section">
                         <div class="section-title">
                             <h2>Role details</h2>
-                            <p>Tell us about the company, position, and stack.</p>
+                            <p class="section-desc">Basic information to identify this opportunity on your board.</p>
                         </div>
 
                         <div class="form-row">
                             <div class="form-group">
                                 <label>Company Name <span class="required">*</span></label>
                                 <input type="text" name="companyName" [(ngModel)]="process.companyName" required
-                                    placeholder="e.g. Google" class="input-field" (blur)="onFieldBlur('companyName')"
-                                    [class.error]="isFieldInvalid('companyName')">
+                                    placeholder="e.g. Acme Corp" class="input-field" (blur)="onFieldBlur('companyName')"
+                                    [class.error]="isFieldInvalid('companyName')" autofocus>
                                 <p *ngIf="isFieldInvalid('companyName')" class="error-message">Company name is required</p>
-                                <p class="field-hint">Use the official company name for easy reporting later.</p>
                             </div>
 
                             <div class="form-group">
                                 <label>Role Title <span class="required">*</span></label>
                                 <input type="text" name="roleTitle" [(ngModel)]="process.roleTitle" required
-                                    placeholder="e.g. Senior Software Engineer" class="input-field" (blur)="onFieldBlur('roleTitle')"
+                                    placeholder="e.g. Senior Frontend Engineer" class="input-field" (blur)="onFieldBlur('roleTitle')"
                                     [class.error]="isFieldInvalid('roleTitle')">
                                 <p *ngIf="isFieldInvalid('roleTitle')" class="error-message">Role title is required</p>
                             </div>
                         </div>
 
                         <div class="form-group">
-                            <label>Tech Stack <span class="required">*</span></label>
+                            <label>Core Technologies (Tech Stack) <span class="required">*</span></label>
                             <input type="text" name="techStack" [(ngModel)]="process.techStack" required
-                                placeholder="e.g. Angular, NestJS, Postgres" class="input-field" (blur)="onFieldBlur('techStack')"
+                                placeholder="e.g. React, Node.js, PostgreSQL" class="input-field" (blur)="onFieldBlur('techStack')"
                                 [class.error]="isFieldInvalid('techStack')">
                             <p *ngIf="isFieldInvalid('techStack')" class="error-message">Tech stack is required</p>
                         </div>
 
                         <div class="form-row">
                             <div class="form-group">
-                                <label>Source</label>
-                                <input type="text" name="source" [(ngModel)]="process.source" placeholder="e.g. LinkedIn"
+                                <label>Source (Where did you find this?)</label>
+                                <input type="text" name="source" [(ngModel)]="process.source" placeholder="e.g. LinkedIn, Referral, Company site"
                                     class="input-field">
                             </div>
 
@@ -82,7 +81,7 @@
                     <section class="form-section">
                         <div class="section-title">
                             <h2>Location & work style</h2>
-                            <p>Set expectations around location and in-office time.</p>
+                            <p class="section-desc">Specify where you'll be working and how often.</p>
                         </div>
 
                         <div class="form-row location-work-row">
@@ -91,7 +90,6 @@
                                     Location
                                     <span class="required" *ngIf="process.workMode !== 'remote'">*</span>
                                 </label>
-                                <p class="field-hint">Can’t find your city? You can type free text and choose the <strong>Other</strong> option.</p>
                                 <div class="location-combobox country-combobox" [class.open]="showLocationDropdown">
                                     <input
                                         class="input-field"
@@ -104,7 +102,7 @@
                                         (input)="onLocationSearchChange()"
                                         (focus)="onLocationSearchChange()"
                                         (blur)="onFieldBlur('locationSearch')"
-                                        [placeholder]="process.workMode === 'remote' ? 'Location is optional for remote mode' : (selectedCountry ? 'Select town from your country list' : 'Type location or set country in settings')"
+                                        [placeholder]="process.workMode === 'remote' ? 'Optional for remote' : (selectedCountry ? 'Search or pick a city' : 'Set country in settings first')"
                                         [class.error]="isFieldInvalid('locationSearch')">
                                     <p *ngIf="isFieldInvalid('locationSearch')" class="error-message">Location is required</p>
                                     <button
@@ -146,23 +144,19 @@
                                     <option value="hybrid">Hybrid</option>
                                     <option value="onsite">On-site</option>
                                 </select>
+                                <div class="form-group days-inline" *ngIf="process.workMode === 'hybrid'">
+                                    <label>Days/week in office</label>
+                                    <input type="number" name="daysFromOffice" [(ngModel)]="process.daysFromOffice" min="1" max="5"
+                                        placeholder="e.g. 2" class="input-field">
+                                </div>
                             </div>
-                        </div>
-
-                
-
-                        <div class="form-group" *ngIf="process.workMode === 'hybrid'">
-                            <label>Days from Office per Week</label>
-                            <input type="number" name="daysFromOffice" [(ngModel)]="process.daysFromOffice" min="1" max="5"
-                                placeholder="e.g. 2" class="input-field">
-                            <p class="muted-hint">How many days per week are required in the office?</p>
                         </div>
                     </section>
 
                     <section class="form-section">
                         <div class="section-title">
                             <h2>Compensation</h2>
-                            <p>Optional, but helpful for comparison and negotiation prep.</p>
+                            <p class="section-desc">Track your targets to easily compare future offers.</p>
                         </div>
 
                         <div class="form-group salary-group">
@@ -223,24 +217,24 @@
                         <div class="aside-kpis">
                             <div class="kpi">
                                 <div class="kpi-label">Company</div>
-                                <div class="kpi-value">{{ process.companyName || '—' }}</div>
+                                <div class="kpi-value">{{ process.companyName || '&#8212;' }}</div>
                             </div>
                             <div class="kpi">
                                 <div class="kpi-label">Role</div>
-                                <div class="kpi-value">{{ process.roleTitle || '—' }}</div>
+                                <div class="kpi-value">{{ process.roleTitle || '&#8212;' }}</div>
                             </div>
                             <div class="kpi">
                                 <div class="kpi-label">Stage</div>
-                                <div class="kpi-value">{{ process.currentStage || '—' }}</div>
+                                <div class="kpi-value">{{ process.currentStage || '&#8212;' }}</div>
                             </div>
                             <div class="kpi">
                                 <div class="kpi-label">Work mode</div>
-                                <div class="kpi-value">{{ process.workMode || '—' }}</div>
+                                <div class="kpi-value">{{ process.workMode || '&#8212;' }}</div>
                             </div>
                         </div>
                         <div class="aside-tip">
                             <div class="tip-badge">Tip</div>
-                            <div class="tip-text">Keep the summary short and specific — it makes prep effortless later.</div>
+                            <div class="tip-text">Keep the summary short and specific &#8212; it makes prep effortless later.</div>
                         </div>
                     </div>
                 </aside>
