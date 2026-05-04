@@ -15,7 +15,7 @@ async function bootstrap() {
           'font-src': ["'self'", 'https://fonts.gstatic.com'],
           'style-src': ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
           'script-src-attr': ["'unsafe-inline'"],
-          'img-src': ["'self'", 'data:', 'blob:'],
+          'img-src': ["'self'", 'data:', 'blob:', 'https://api.dicebear.com'],
         },
       },
     }),
@@ -47,6 +47,8 @@ async function bootstrap() {
 
   app.enableCors({
     origin: corsOrigins,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    allowedHeaders: 'Content-Type, Accept, Authorization',
     credentials: true,
   });
 

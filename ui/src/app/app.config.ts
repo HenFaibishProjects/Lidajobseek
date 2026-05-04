@@ -6,11 +6,11 @@ import { AuthInterceptor } from './interceptors/auth.interceptor';
 import { registerLocaleData } from '@angular/common';
 import localeEnGb from '@angular/common/locales/en-GB';
 import {
-  LucideAngularModule,
   Pencil, Trash2, Edit, CheckCircle2, AlertCircle, Calendar, FileText, Circle,
   Download, Upload, Plus, Star, Phone, MapPin, Briefcase, MessageCircle, X,
   Search, Filter, LayoutGrid, List, Sparkles, Info
 } from 'lucide-angular';
+import { provideLucideIcons } from './lucide-provider';
 
 registerLocaleData(localeEnGb);
 
@@ -21,12 +21,10 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(withInterceptorsFromDi()),
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
     { provide: LOCALE_ID, useValue: 'en-GB' },
-    importProvidersFrom(
-      LucideAngularModule.pick({
-        Pencil, Trash2, Edit, CheckCircle2, AlertCircle, Calendar, FileText, Circle,
-        Download, Upload, Plus, Star, Phone, MapPin, Briefcase, MessageCircle, X,
-        Search, Filter, LayoutGrid, List, Sparkles, Info
-      })
-    )
+    provideLucideIcons({
+      Pencil, Trash2, Edit, CheckCircle2, AlertCircle, Calendar, FileText, Circle,
+      Download, Upload, Plus, Star, Phone, MapPin, Briefcase, MessageCircle, X,
+      Search, Filter, LayoutGrid, List, Sparkles, Info
+    })
   ]
 };
