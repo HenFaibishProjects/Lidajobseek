@@ -32,13 +32,11 @@ async function bootstrap() {
     }
   }
 
-  // Ensure database schema exists (only in CI or when explicitly requested)
-  if (process.env.DB_SYNC === 'true' || process.env.CI === 'true') {
-    const orm = app.get(MikroORM);
-    const generator = orm.getSchemaGenerator();
-    await generator.ensureDatabase();
-    await generator.updateSchema();
-  }
+  // Ensure database schema is up-to-date automatically
+  const orm = app.get(MikroORM);
+  const generator = orm.getSchemaGenerator();
+  await generator.ensureDatabase();
+  await generator.updateSchema({ safe: true });
 
   const corsOrigins = (process.env.CORS_ORIGINS ?? 'http://localhost:4200,http://127.0.0.1:4200')
     .split(',')
