@@ -11,19 +11,7 @@ import { ToastService } from '../../services/toast.service';
 import { ConfirmService } from '../../services/confirm.service';
 import { of, BehaviorSubject } from 'rxjs';
 
-import { LucideAngularModule } from 'lucide-angular';
-import { Component, Input } from '@angular/core';
 
-@Component({
-  selector: 'lucide-icon',
-  template: '',
-  standalone: true
-})
-class MockLucideIconComponent {
-  @Input() name: any;
-  @Input() size: any;
-  @Input() strokeWidth: any;
-}
 
 describe('ProcessListComponent', () => { 
   let component: ProcessListComponent;
@@ -74,12 +62,7 @@ describe('ProcessListComponent', () => {
         { provide: ToastService, useValue: { show: jasmine.createSpy('show') } },
         { provide: ConfirmService, useValue: { custom: jasmine.createSpy('custom') } }
       ]
-    })
-    .overrideComponent(ProcessListComponent, {
-      remove: { imports: [LucideAngularModule] },
-      add: { imports: [MockLucideIconComponent] }
-    })
-    .compileComponents();
+    }).compileComponents();
 
     fixture = TestBed.createComponent(ProcessListComponent);
     component = fixture.componentInstance;

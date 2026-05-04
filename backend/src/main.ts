@@ -14,6 +14,7 @@ async function bootstrap() {
           ...helmet.contentSecurityPolicy.getDefaultDirectives(),
           'font-src': ["'self'", 'https://fonts.gstatic.com'],
           'style-src': ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+          'script-src-attr': ["'unsafe-inline'"],
           'img-src': ["'self'", 'data:', 'blob:'],
         },
       },

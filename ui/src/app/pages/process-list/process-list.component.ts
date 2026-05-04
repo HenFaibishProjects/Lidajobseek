@@ -11,7 +11,7 @@ import { DateFormatPipe } from '../../pipes/date-format.pipe';
 import { PROCESS_STAGES } from '../../shared/process-stages';
 import { Subscription } from 'rxjs';
 import Chart from 'chart.js/auto';
-import { LucideAngularModule } from 'lucide-angular';
+
 
 const ACTIVE_STAGES = new Set([
     'Application Submitted', 'Resume Under Review',
@@ -56,7 +56,7 @@ const RESPONDED_STAGES = new Set([
 @Component({
     selector: 'app-process-list',
     standalone: true,
-    imports: [CommonModule, FormsModule, RouterModule, DateFormatPipe, LucideAngularModule],
+    imports: [CommonModule, FormsModule, RouterModule, DateFormatPipe],
     templateUrl: './process-list.component.html',
     styleUrls: ['./process-list.component.css']
 })
