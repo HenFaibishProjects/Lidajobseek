@@ -112,7 +112,14 @@ export class InteractionEditComponent implements OnInit {
                         error: () => this.router.navigate(['/process', this.processId]),
                     });
                 } else {
-                    this.router.navigate(['/process', this.processId]);
+                    if (this.existingReviewId) {
+                        this.reviewsService.delete(this.existingReviewId).subscribe({
+                            next: () => this.router.navigate(['/process', this.processId]),
+                            error: () => this.router.navigate(['/process', this.processId])
+                        });
+                    } else {
+                        this.router.navigate(['/process', this.processId]);
+                    }
                 }
             },
             error: () => { this.isSubmitting = false; }
