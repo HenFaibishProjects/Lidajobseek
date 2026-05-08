@@ -197,7 +197,17 @@ export class ProcessesService {
     const data: any = {};
     if (companyName !== undefined) data.companyName = companyName;
     if (companyWebsite !== undefined) data.companyWebsite = companyWebsite;
-    if (companyLogoUrl !== undefined) data.companyLogoUrl = companyLogoUrl;
+    if (companyLogoUrl !== undefined) {
+      // Only overwrite with a real URL — never let a null wipe a valid stored logo
+      if (typeof companyLogoUrl === 'string' && companyLogoUrl.trim().length > 0) {
+        data.companyLogoUrl = companyLogoUrl;
+      } else if (companyLogoUrl === null && process.companyLogoUrl) {
+        // Explicit null is only accepted when there is NO existing logo
+        // (i.e. user intentionally clearing a bad URL, not an error-handler accident)
+        // Leave the existing logo intact if one is already stored
+      }
+    }
+
     if (jobDescriptionUrl !== undefined) data.jobDescriptionUrl = jobDescriptionUrl;
     if (roleTitle !== undefined) data.roleTitle = roleTitle;
     if (techStack !== undefined) data.techStack = techStack;

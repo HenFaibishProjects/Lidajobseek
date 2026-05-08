@@ -15,7 +15,7 @@ async function bootstrap() {
           'font-src': ["'self'", 'https://fonts.gstatic.com'],
           'style-src': ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
           'script-src-attr': ["'unsafe-inline'"],
-          'img-src': ["'self'", 'data:', 'blob:', 'https://api.dicebear.com', 'https://www.google.com'],
+          'img-src': ["'self'", 'data:', 'blob:', 'https://api.dicebear.com', 'https://www.google.com', 'https://*.gstatic.com'],
         },
       },
     }),
@@ -32,13 +32,10 @@ async function bootstrap() {
     }
   }
 
-  // Ensure database schema exists (only in CI or when explicitly requested)
-  if (process.env.DB_SYNC === 'true' || process.env.CI === 'true') {
-    const orm = app.get(MikroORM);
-    const generator = orm.getSchemaGenerator();
-    await generator.ensureDatabase();
-    await generator.updateSchema();
-  }
+  // Auto-sync DB schema on every startup (safe: only ADDs missing columns, never drops)
+  const orm = app.get(MikroORM);
+  const generator = orm.getSchemaGenerator();
+  await generator.updateSchema();
 
   const corsOrigins = (process.env.CORS_ORIGINS ?? 'http://localhost:4200,http://127.0.0.1:4200')
     .split(',')

@@ -25,7 +25,7 @@ const config: MikroOrmModuleOptions = {
   ensureDatabase: false,
 
   pool: {
-    // min:0 — don't keep idle connections; Neon's pgBouncer resets them
+    // min:0 -don't keep idle connections; Neon's pgBouncer resets them
     // and that causes ECONNRESET when the app tries to reuse a dead socket.
     min: 0,
     // Neon free tier allows ~20 pooler connections; cap at 5 to stay safe.

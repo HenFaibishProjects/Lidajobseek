@@ -17,7 +17,13 @@ export class ContactsController {
 
   @Post()
   create(@Body() data: any, @Req() req: any) {
-    return this.contactsService.create(data, req.user.userId);
+    // Normalise: frontend may send `processId`, entity expects `process`
+    const normalized = { ...data };
+    if (normalized.processId !== undefined && normalized.process === undefined) {
+      normalized.process = normalized.processId;
+      delete normalized.processId;
+    }
+    return this.contactsService.create(normalized, req.user.userId);
   }
 
   @Get()

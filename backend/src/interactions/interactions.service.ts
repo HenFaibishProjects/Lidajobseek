@@ -88,7 +88,7 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
 
   private buildReminderEmail(interaction: Interaction) {
     const interviewDate = new Date(interaction.date);
-    const subject = `Interview reminder: ${interaction.process.companyName} — ${interaction.process.roleTitle}`;
+    const subject = `Interview reminder: ${interaction.process.companyName} -${interaction.process.roleTitle}`;
 
     const dateText = interviewDate.toLocaleString('en-GB', {
       dateStyle: 'medium',
@@ -404,7 +404,7 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
         count++;
       }
     }
-    
+
     await this.em.flush();
     return { count };
   }

@@ -21,6 +21,10 @@ export class Contact {
   @Property({ nullable: true })
   email?: string;
 
+  @Property({ nullable: true })
+  phone?: string;
+
+
   @ManyToOne(() => Process)
   process!: Process;
 }

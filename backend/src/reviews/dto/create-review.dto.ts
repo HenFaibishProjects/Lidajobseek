@@ -5,4 +5,10 @@ export class CreateReviewDto {
   whatWentWell: string;
   whatFailed: string;
   gaps: string;
+  mood?: string;
+  energyLevel?: number;
+  keyLearning?: string;
+  nextActionPlan?: string;
+  contactPersonId?: number;
+  interactionId?: number;
 }
