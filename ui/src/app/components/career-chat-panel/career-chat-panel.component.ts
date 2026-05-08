@@ -39,9 +39,9 @@ export class CareerChatPanelComponent implements OnInit {
     private aiAssistantService: AiAssistantService,
     private authService: AuthService,
     private router: Router,
-  ) {}
+  ) { }
 
-  ngOnInit() {}
+  ngOnInit() { }
 
   close() {
     this.closed.emit();
@@ -86,9 +86,9 @@ export class CareerChatPanelComponent implements OnInit {
 
   confidenceLabel(): string {
     const map: Record<string, string> = {
-      low: 'Low — limited data',
-      medium: 'Medium — partial data',
-      high: 'High — solid data',
+      low: 'Low -limited data',
+      medium: 'Medium -partial data',
+      high: 'High -solid data',
     };
     return map[this.result?.confidence ?? ''] ?? '';
   }

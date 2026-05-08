@@ -21,6 +21,7 @@ import { AiAssistantPanelComponent } from '../../components/ai-assistant-panel/a
 })
 export class ProcessDetailsComponent implements OnInit {
     process: any;
+    logoLoadError = false;
     showContactForm = false;
     showAiPanel = false;
     activeInteractionId: number | null = null;
@@ -29,8 +30,10 @@ export class ProcessDetailsComponent implements OnInit {
         role: '',
         linkedIn: '',
         email: '',
+        phone: '',
         socialHooks: ''
     };
+    editingContact: any = null;
 
     get completionPercent(): number {
         if (!this.process) return 0;
@@ -97,6 +100,7 @@ export class ProcessDetailsComponent implements OnInit {
         if (id) {
             this.processesService.getById(id).subscribe(data => {
                 this.process = data;
+                this.logoLoadError = false;  // reset on every load
             });
         }
     }
@@ -128,6 +132,19 @@ export class ProcessDetailsComponent implements OnInit {
         }
     }
 
+    /** Returns the review linked to a specific interaction, or null */
+    getInteractionReview(interactionId: number): any | null {
+        return this.process?.reviews?.find((r: any) => r.interactionId === interactionId) || null;
+    }
+
+    getMoodEmoji(key: string): string {
+        const map: Record<string, string> = {
+            great: '🚀', good: '😊', neutral: '😐', tough: '😓', rough: '😞'
+        };
+        return map[key] || '';
+    }
+
+
     addContact() {
         if (!this.newContact.name) return;
 
@@ -137,9 +154,28 @@ export class ProcessDetailsComponent implements OnInit {
         };
 
         this.contactsService.create(contactData).subscribe(() => {
+            this.toastService.show('Contact saved', 'success');
             this.loadProcess();
             this.showContactForm = false;
-            this.newContact = { name: '', role: '', linkedIn: '', email: '', socialHooks: '' };
+            this.newContact = { name: '', role: '', linkedIn: '', email: '', phone: '', socialHooks: '' };
+        });
+    }
+
+    startEditContact(contact: any) {
+        this.editingContact = { ...contact };
+    }
+
+    cancelEdit() {
+        this.editingContact = null;
+    }
+
+    saveEditContact() {
+        if (!this.editingContact?.name) return;
+        const { id, ...data } = this.editingContact;
+        this.contactsService.update(id, data).subscribe(() => {
+            this.toastService.show('Contact updated', 'success');
+            this.editingContact = null;
+            this.loadProcess();
         });
     }
 

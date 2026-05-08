@@ -22,10 +22,12 @@ describe('ProcessFormComponent', () => {
   const DEFAULT_LOGO = 'assets/default-company.png';
 
   function makeSettings(overrides: Partial<{ country: string }> = {}) {
-    return { country: 'Israel', theme: 'light', clockFormat: '24', dateFormat: 'DD/MM/YYYY',
-             avatarStyle: 'avataaars', notifications: { email: true, desktop: true, followUps: true, interviews: true },
-             dashboard: { showStats: true, showTasks: true, defaultView: 'grid' }, hasSeenOnboarding: true,
-             ...overrides } as any;
+    return {
+      country: 'Israel', theme: 'light', clockFormat: '24', dateFormat: 'DD/MM/YYYY',
+      avatarStyle: 'avataaars', notifications: { email: true, desktop: true, followUps: true, interviews: true },
+      dashboard: { showStats: true, showTasks: true, defaultView: 'grid' }, hasSeenOnboarding: true,
+      ...overrides
+    } as any;
   }
 
   beforeEach(async () => {
@@ -274,7 +276,7 @@ describe('ProcessFormComponent', () => {
       component.process.roleTitle = 'Engineer';
       component.process.techStack = 'React Node PostgreSQL';
       component.process.companyWebsite = 'google.com';
-      // 10+10+15+10 = 45 — amber
+      // 10+10+15+10 = 45 -amber
       expect(component.progressColor).toBe('#f59e0b');
     });
 

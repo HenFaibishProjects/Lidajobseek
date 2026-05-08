@@ -5,8 +5,7 @@ import { AppService } from './app.service';
 import { ProcessesModule } from './processes/processes.module';
 import { InteractionsModule } from './interactions/interactions.module';
 import { ReviewsModule } from './reviews/reviews.module';
-import { ContactsService } from './contacts/contacts.service';
-import { ContactsController } from './contacts/contacts.controller';
+import { ContactsModule } from './contacts/contacts.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { existsSync } from 'fs';
@@ -14,7 +13,6 @@ import { ResourcesModule } from './resources/resources.module';
 import { AuthModule } from './auth/auth.module';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import config from '../mikro-orm.config';
-import { Contact } from './contacts/contact.entity';
 import { ProfilesModule } from './profiles/profiles.module';
 import { AiAssistantModule } from './ai-assistant/ai-assistant.module';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
@@ -39,7 +37,6 @@ import { APP_GUARD } from '@nestjs/core';
       })(),
     }),
     MikroOrmModule.forRoot(config),
-    MikroOrmModule.forFeature([Contact]),
     AuthModule,
     ServeStaticModule.forRoot(
       {
@@ -71,6 +68,7 @@ import { APP_GUARD } from '@nestjs/core';
     ProcessesModule,
     InteractionsModule,
     ReviewsModule,
+    ContactsModule,
     ResourcesModule,
     ProfilesModule,
     AiAssistantModule,
@@ -80,10 +78,9 @@ import { APP_GUARD } from '@nestjs/core';
       limit: 20,
     }]),
   ],
-  controllers: [AppController, ContactsController],
+  controllers: [AppController],
   providers: [
     AppService,
-    ContactsService,
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,

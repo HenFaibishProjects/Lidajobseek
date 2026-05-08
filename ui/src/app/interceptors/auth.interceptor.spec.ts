@@ -62,7 +62,7 @@ describe('AuthInterceptor', () => {
   it('should NOT add Authorization header to /login even if a token exists', () => {
     authService.getToken.and.returnValue('fake-token');
 
-    httpClient.post('/api/auth/login', {}).subscribe({ error: () => {} });
+    httpClient.post('/api/auth/login', {}).subscribe({ error: () => { } });
 
     const req = httpMock.expectOne('/api/auth/login');
     expect(req.request.headers.has('Authorization')).toBeFalse();
@@ -72,7 +72,7 @@ describe('AuthInterceptor', () => {
   it('should NOT add Authorization header to /register even if a token exists', () => {
     authService.getToken.and.returnValue('fake-token');
 
-    httpClient.post('/api/auth/register', {}).subscribe({ error: () => {} });
+    httpClient.post('/api/auth/register', {}).subscribe({ error: () => { } });
 
     const req = httpMock.expectOne('/api/auth/register');
     expect(req.request.headers.has('Authorization')).toBeFalse();
@@ -82,7 +82,7 @@ describe('AuthInterceptor', () => {
   it('should NOT add Authorization header to /verify-code even if a token exists', () => {
     authService.getToken.and.returnValue('fake-token');
 
-    httpClient.post('/api/auth/verify-code', {}).subscribe({ error: () => {} });
+    httpClient.post('/api/auth/verify-code', {}).subscribe({ error: () => { } });
 
     const req = httpMock.expectOne('/api/auth/verify-code');
     expect(req.request.headers.has('Authorization')).toBeFalse();
@@ -102,7 +102,7 @@ describe('AuthInterceptor', () => {
     expect(completed).toBeTrue(); // EMPTY completes without error
   });
 
-  it('should NOT call authService.logout on 401 for /login — lets the error propagate', () => {
+  it('should NOT call authService.logout on 401 for /login -lets the error propagate', () => {
     authService.getToken.and.returnValue(null);
     let errorReceived = false;
 

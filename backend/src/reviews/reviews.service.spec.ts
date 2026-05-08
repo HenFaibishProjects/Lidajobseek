@@ -72,12 +72,12 @@ describe('ReviewsService', () => {
 
   describe('update', () => {
     it('should update review and flush changes', async () => {
-      const review = { id: 1, content: 'Old' };
+      const review = { id: 1, whatWentWell: 'Old' };
       mockRepo.findOne.mockResolvedValue(review);
 
-      await service.update(1, { content: 'New' }, 123);
+      await service.update(1, { whatWentWell: 'New' }, 123);
 
-      expect(review.content).toBe('New');
+      expect(review.whatWentWell).toBe('New');
       expect(em.flush).toHaveBeenCalled();
     });
 

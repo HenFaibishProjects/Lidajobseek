@@ -11,14 +11,29 @@ export class ReviewsService {
     @InjectRepository(SelfReview)
     private readonly reviewRepository: EntityRepository<SelfReview>,
     private readonly em: EntityManager,
-  ) {}
+  ) { }
 
   async create(dto: CreateReviewDto, userId: number): Promise<SelfReview> {
-    const processExists = await this.em.findOne(Process, { id: dto.processId, user: userId });
-    if (!processExists) {
+    const process = await this.em.findOne(Process, { id: dto.processId, user: userId });
+    if (!process) {
       throw new NotFoundException(`Process with ID ${dto.processId} not found or unauthorized`);
     }
-    const review = this.reviewRepository.create(dto as any);
+
+    const review = this.reviewRepository.create({
+      stage: dto.stage,
+      confidence: dto.confidence,
+      whatWentWell: dto.whatWentWell,
+      whatFailed: dto.whatFailed,
+      gaps: dto.gaps,
+      mood: dto.mood,
+      energyLevel: dto.energyLevel,
+      keyLearning: dto.keyLearning,
+      nextActionPlan: dto.nextActionPlan,
+      contactPersonId: dto.contactPersonId,
+      interactionId: dto.interactionId,
+      process,
+    } as any);
+
     await this.em.persistAndFlush(review);
     return review;
   }
@@ -35,7 +50,17 @@ export class ReviewsService {
     if (!review) {
       throw new NotFoundException(`Review with ID ${id} not found`);
     }
-    Object.assign(review, data);
+
+    // Whitelist safe fields -never overwrite process relation via raw data
+    const allowed = [
+      'stage', 'confidence', 'whatWentWell', 'whatFailed', 'gaps',
+      'mood', 'energyLevel', 'keyLearning', 'nextActionPlan',
+      'contactPersonId', 'interactionId',
+    ];
+    for (const field of allowed) {
+      if (field in data) (review as any)[field] = data[field];
+    }
+
     await this.em.flush();
     return review;
   }

@@ -1,41 +1,40 @@
 <div class="form-view">
     <div class="form-card">
-    <header class="form-hero">
-        <span class="form-badge">Profile</span>
-        <h1>Your Career Profile</h1>
-        <p class="subtitle">Build a rich "about me" page you can share with other users.</p>
+        <header class="form-hero">
+            <span class="form-badge">Profile</span>
+            <h1>Your Career Profile</h1>
+            <p class="subtitle">Build a rich "about me" page you can share with other users.</p>
 
-        <!-- Profile Completion Indicator -->
-        <div class="completion-card">
-            <div class="completion-header">
-                <span class="completion-title">Profile Completion</span>
-                <span class="completion-percentage" [style.color]="getCompletionColor()">
-                    {{ completionPercentage }}%
-                </span>
-            </div>
-            <div class="completion-bar">
-                <div class="completion-fill"
-                     [style.width.%]="completionPercentage"
-                     [style.background]="getCompletionColor()"></div>
-            </div>
-            <div *ngIf="missingFields.length > 0" class="missing-fields">
-                <p class="missing-title">Missing fields:</p>
-                <div class="missing-list">
-                    <span *ngFor="let field of missingFields.slice(0, 3)" class="missing-badge">
-                        {{ getPriorityIcon(field.priority) }} {{ field.label }}
-                    </span>
-                    <span *ngIf="missingFields.length > 3" class="missing-more">
-                        +{{ missingFields.length - 3 }} more
+            <!-- Profile Completion Indicator -->
+            <div class="completion-card">
+                <div class="completion-header">
+                    <span class="completion-title">Profile Completion</span>
+                    <span class="completion-percentage" [style.color]="getCompletionColor()">
+                        {{ completionPercentage }}%
                     </span>
                 </div>
+                <div class="completion-bar">
+                    <div class="completion-fill" [style.width.%]="completionPercentage"
+                        [style.background]="getCompletionColor()"></div>
+                </div>
+                <div *ngIf="missingFields.length > 0" class="missing-fields">
+                    <p class="missing-title">Missing fields:</p>
+                    <div class="missing-list">
+                        <span *ngFor="let field of missingFields.slice(0, 3)" class="missing-badge">
+                            {{ getPriorityIcon(field.priority) }} {{ field.label }}
+                        </span>
+                        <span *ngIf="missingFields.length > 3" class="missing-more">
+                            +{{ missingFields.length - 3 }} more
+                        </span>
+                    </div>
+                </div>
+                <p *ngIf="completionPercentage === 100" class="completion-success">
+                    🎉 Profile complete! You're ready to generate an impressive CV.
+                </p>
             </div>
-            <p *ngIf="completionPercentage === 100" class="completion-success">
-                🎉 Profile complete! You're ready to generate an impressive CV.
-            </p>
-        </div>
 
-        <div class="form-meta">Everything here is optional — share the full profile when you're ready.</div>
-    </header>
+            <div class="form-meta">Everything here is optional -share the full profile when you're ready.</div>
+        </header>
 
         <form class="data-form" (ngSubmit)="saveProfile()">
             <section class="form-section">
@@ -138,10 +137,10 @@
                             Generate AI-Powered CV
                         </a>
                     </div>
-                    <p class="muted-hint">Choose a classic template-based CV or let DeepSeek AI create an enhanced version.</p>
+                    <p class="muted-hint">Choose a classic template-based CV or let DeepSeek AI create an enhanced
+                        version.</p>
                     <a *ngIf="profile.lastCvUrl && profile.lastCvGeneratedAt" class="last-cv-link"
-                       [routerLink]="['/profile/cv']"
-                       [queryParams]="{ ai: profile.lastCvAi ? 'true' : 'false' }">
+                        [routerLink]="['/profile/cv']" [queryParams]="{ ai: profile.lastCvAi ? 'true' : 'false' }">
                         📋 View last generated CV ({{ profile.lastCvAi ? 'AI-Enhanced' : 'Template' }}) -
                         Generated {{ profile.lastCvGeneratedAt | date: 'short' }}
                     </a>
@@ -150,17 +149,17 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label>Email to share with</label>
-                        <input type="email" name="shareEmail" [(ngModel)]="shareEmail"
-                            placeholder="name@company.com" class="input-field">
+                        <input type="email" name="shareEmail" [(ngModel)]="shareEmail" placeholder="name@company.com"
+                            class="input-field">
                     </div>
 
                     <div class="form-group share-action">
                         <button type="button" class="btn-primary" (click)="shareProfile()" [disabled]="loading">
                             Share Profile
                         </button>
-                        <p *ngIf="shareResult" class="share-status"
-                            [class.success]="shareResult.exists" [class.error]="!shareResult.exists">
-                            {{ shareResult.exists ? 'User found — profile shared.' : 'User not found.' }}
+                        <p *ngIf="shareResult" class="share-status" [class.success]="shareResult.exists"
+                            [class.error]="!shareResult.exists">
+                            {{ shareResult.exists ? 'User found -profile shared.' : 'User not found.' }}
                         </p>
                     </div>
                 </div>

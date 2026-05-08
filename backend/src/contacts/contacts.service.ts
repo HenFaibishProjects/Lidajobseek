@@ -38,6 +38,7 @@ export class ContactsService {
     if (data.linkedIn !== undefined) contact.linkedIn = data.linkedIn;
     if (data.socialHooks !== undefined) contact.socialHooks = data.socialHooks;
     if (data.email !== undefined) contact.email = data.email;
+    if (data.phone !== undefined) contact.phone = data.phone;
 
     await this.em.flush();
     return contact;

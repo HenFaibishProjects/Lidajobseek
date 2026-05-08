@@ -37,7 +37,7 @@ export class AiAssistantPanelComponent implements OnInit {
     private aiAssistantService: AiAssistantService,
     private authService: AuthService,
     private router: Router,
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.isPremium = this.authService.isPremiumUser();
@@ -97,9 +97,9 @@ export class AiAssistantPanelComponent implements OnInit {
   confidenceLabel(): string {
     const confidence = this.processResult?.confidence ?? this.interactionResult?.confidence;
     const map: Record<string, string> = {
-      low: 'Low — limited data available',
-      medium: 'Medium — partial data',
-      high: 'High — solid data',
+      low: 'Low -limited data available',
+      medium: 'Medium -partial data',
+      high: 'High -solid data',
     };
     return map[confidence ?? ''] ?? '';
   }
