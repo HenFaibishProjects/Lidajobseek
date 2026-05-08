@@ -1,0 +1,80 @@
+<section class="ic-section ic-section--reflection">
+  <div class="ic-section-head">
+    <span class="ic-section-number ic-section-number--reflection">{{ sectionNumber }}</span>
+    <div>
+      <h2 class="ic-section-title">Post-Interaction Reflection</h2>
+      <p class="ic-section-desc">How did it go? Capture it while it's fresh -optional but powerful.</p>
+    </div>
+  </div>
+
+  <div class="ic-reflection-body">
+
+    <!-- Row 1: Confidence + Mood -->
+    <div class="ic-ref-row">
+      <div class="ic-ref-field">
+        <label class="ic-ref-label">Confidence</label>
+        <div class="ic-star-row">
+          <button type="button" *ngFor="let n of [1,2,3,4,5]" class="ic-star-btn"
+            [class.ic-star-btn--active]="reflection.confidence >= n" (click)="setConfidence(n)">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <polygon
+                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+            </svg>
+          </button>
+          <span class="ic-star-label">{{ confidenceLabels[reflection.confidence] }}</span>
+        </div>
+      </div>
+
+      <div class="ic-ref-field">
+        <label class="ic-ref-label">Overall Mood</label>
+        <div class="ic-mood-row">
+          <button type="button" *ngFor="let m of moods" class="ic-mood-btn"
+            [class.ic-mood-btn--active]="reflection.mood === m.key" (click)="toggleMood(m.key)" [title]="m.label">
+            <span class="ic-mood-emoji">{{ m.emoji }}</span>
+            <span class="ic-mood-text">{{ m.label }}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 2: What went well + What to improve -->
+    <div class="ic-ref-grid">
+      <div class="ic-ref-field">
+        <label class="ic-ref-label ic-ref-label--green">✓ What went well?</label>
+        <textarea name="reflWhatWentWell" [(ngModel)]="reflection.whatWentWell" rows="2"
+          placeholder="Moments you nailed - clear answers, good rapport…"
+          class="ic-textarea ic-textarea--green"></textarea>
+      </div>
+      <div class="ic-ref-field">
+        <label class="ic-ref-label ic-ref-label--red">✗ What could be better?</label>
+        <textarea name="reflWhatFailed" [(ngModel)]="reflection.whatFailed" rows="2"
+          placeholder="Where you got stuck or wished you had prepared differently…"
+          class="ic-textarea ic-textarea--red"></textarea>
+      </div>
+    </div>
+
+    <!-- Row 3: Gaps + Key Learning -->
+    <div class="ic-ref-grid">
+      <div class="ic-ref-field">
+        <label class="ic-ref-label ic-ref-label--amber">⚠ Gaps to close</label>
+        <textarea name="reflGaps" [(ngModel)]="reflection.gaps" rows="2"
+          placeholder="Topics or concepts to study before the next round…"
+          class="ic-textarea ic-textarea--amber"></textarea>
+      </div>
+      <div class="ic-ref-field">
+        <label class="ic-ref-label">💡 Key Learning</label>
+        <textarea name="reflKeyLearning" [(ngModel)]="reflection.keyLearning" rows="2"
+          placeholder="The single most important insight from this interaction…" class="ic-textarea"></textarea>
+      </div>
+    </div>
+
+    <!-- Row 4: Next Action Plan (full width) -->
+    <div class="ic-ref-field ic-ref-field--full">
+      <label class="ic-ref-label">✅ Next Action Plan</label>
+      <textarea name="reflNextAction" [(ngModel)]="reflection.nextActionPlan" rows="2"
+        placeholder="Concrete steps before the next interaction (study X, practice Y, send thank-you)…"
+        class="ic-textarea"></textarea>
+    </div>
+
+  </div>
+</section>

@@ -45,7 +45,9 @@ export const routes: Routes = [
             { path: 'process/:id/interaction/new', component: InteractionCreateComponent },
             { path: 'process/:pid/interaction/:id/edit', component: InteractionEditComponent },
             { path: 'process/:id/review/new', component: ReviewCreateComponent },
-            { path: 'process/:pid/review/:id/edit', component: ReviewEditComponent }
+            { path: 'process/:pid/review/:id/edit', component: ReviewEditComponent },
+            { path: 'process/:id/interaction/:iid/reflection/new', component: ReviewCreateComponent },
+            { path: 'process/:pid/interaction/:iid/reflection/:id/edit', component: ReviewEditComponent }
         ]
     }
 ];

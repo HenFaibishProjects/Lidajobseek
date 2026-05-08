@@ -16,7 +16,7 @@ import { DateFormatPipe } from '../../pipes/date-format.pipe';
 import { Subscription } from 'rxjs';
 import { LucideAngularModule } from 'lucide-angular';
 
-// Kanban column definitions — ordered pipeline stages
+// Kanban column definitions -ordered pipeline stages
 const BOARD_COLUMNS: { id: string; label: string; stages: string[] }[] = [
   {
     id: 'applied',
@@ -117,7 +117,7 @@ export class PipelineBoardComponent implements OnInit, OnDestroy {
     private processesService: ProcessesService,
     private toastService: ToastService,
     protected cdr: ChangeDetectorRef
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.loadProcesses();
@@ -243,7 +243,7 @@ export class PipelineBoardComponent implements OnInit, OnDestroy {
     const process = this.allProcesses.find((p) => p.id === processId);
     if (!process) return;
 
-    // Already in this column — no-op
+    // Already in this column -no-op
     if (stageToColumnId(process.currentStage) === columnId) return;
 
     const newStage = COLUMN_DEFAULT_STAGE[columnId];

@@ -4,9 +4,12 @@
         <div class="hero-bg-glow"></div>
         <div class="hero-content">
             <div class="hero-main">
-                <div class="company-logo-placeholder" [class.has-logo]="process.companyLogoUrl">
-                    <img *ngIf="process.companyLogoUrl" [src]="process.companyLogoUrl" class="logo-img-details" (error)="process.companyLogoUrl = null">
-                    <span *ngIf="!process.companyLogoUrl">{{ process.companyName.charAt(0).toUpperCase() }}</span>
+                <div class="company-logo-placeholder" [class.has-logo]="process.companyLogoUrl && !logoLoadError">
+                    <img *ngIf="process.companyLogoUrl && !logoLoadError"
+                         [src]="process.companyLogoUrl"
+                         class="logo-img-details"
+                         (error)="logoLoadError = true">
+                    <span *ngIf="!process.companyLogoUrl || logoLoadError">{{ process.companyName.charAt(0).toUpperCase() }}</span>
                 </div>
                 <div class="title-block">
                     <div class="title-row">
@@ -98,6 +101,60 @@
                                         <a *ngIf="inter.nextInviteLink" [href]="inter.nextInviteLink" target="_blank" class="join-link">🎥 Join Meeting</a>
                                     </div>
                                 </div>
+
+                                <!-- ── Post-Interaction Reflection ── -->
+                                <div class="reflection-zone">
+                                    <!-- Has reflection -->
+                                    <ng-container *ngIf="getInteractionReview(inter.id) as rev">
+                                        <div class="reflection-preview">
+                                            <div class="rp-header">
+                                                <div class="rp-title">
+                                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                                                    Reflection
+                                                </div>
+                                                <div class="rp-badges">
+                                                    <span class="rp-conf level-{{rev.confidence}}">★ {{rev.confidence}}/5</span>
+                                                    <span class="rp-mood" *ngIf="rev.mood">{{ getMoodEmoji(rev.mood) }}</span>
+                                                </div>
+                                            </div>
+                                            <div class="rp-cols">
+                                                <div class="rp-col rp-col--green" *ngIf="rev.whatWentWell">
+                                                    <span class="rp-col-label">✓ Went well</span>
+                                                    <p>{{ rev.whatWentWell }}</p>
+                                                </div>
+                                                <div class="rp-col rp-col--red" *ngIf="rev.whatFailed">
+                                                    <span class="rp-col-label">✗ Improve</span>
+                                                    <p>{{ rev.whatFailed }}</p>
+                                                </div>
+                                            </div>
+                                            <div class="rp-learning" *ngIf="rev.keyLearning">
+                                                <span class="rp-col-label">💡 Key Learning</span>
+                                                <p>{{ rev.keyLearning }}</p>
+                                            </div>
+                                            <div class="rp-actions">
+                                                <a class="rp-edit-btn"
+                                                    [routerLink]="['/process', process.id, 'interaction', inter.id, 'reflection', rev.id, 'edit']">
+                                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                                                    Edit
+                                                </a>
+                                                <button class="rp-del-btn" (click)="deleteReview(rev.id)">
+                                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                                                    Delete
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </ng-container>
+
+                                    <!-- No reflection yet -->
+                                    <ng-container *ngIf="!getInteractionReview(inter.id)">
+                                        <a class="reflection-cta"
+                                            [routerLink]="['/process', process.id, 'interaction', inter.id, 'reflection', 'new']">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                                            Write Reflection
+                                        </a>
+                                    </ng-container>
+                                </div>
+
                             </div>
                         </div>
                     </div>
@@ -113,74 +170,12 @@
                 </div>
             </section>
 
-            <section class="premium-card">
-                <div class="card-header">
-                    <div class="header-title">
-                        <h3>Post-Interview Reflections</h3>
-                        <span class="badge-count" *ngIf="process.reviews?.length">{{ process.reviews.length }}</span>
-                    </div>
-                    <button class="btn-circle primary" [routerLink]="['/process', process.id, 'review', 'new']" title="Add Review">
-                        <span>+</span>
-                    </button>
-                </div>
-
-                <div class="card-body">
-                    <div class="review-grid" *ngIf="process.reviews?.length > 0; else noReviews">
-                        <div class="review-card glass-panel" *ngFor="let rev of process.reviews">
-                            <div class="review-header">
-                                <div class="r-meta">
-                                    <span class="r-stage">{{ rev.stage }}</span>
-                                    <span class="r-date">{{ rev.createdAt | dateFormat:'date' }}</span>
-                                </div>
-                                <div class="confidence-meter">
-                                    Confidence <span class="c-score level-{{rev.confidence}}">{{ rev.confidence }}/5</span>
-                                </div>
-                            </div>
-                            
-                            <div class="feedback-columns">
-                                <div class="f-col positive">
-                                    <div class="f-label">
-                                        <lucide-icon name="check-circle-2" [size]="12" strokeWidth="2"></lucide-icon> What Went Well
-                                    </div>
-                                    <p>{{ rev.whatWentWell }}</p>
-                                </div>
-                                <div class="f-col negative">
-                                    <div class="f-label">
-                                        <lucide-icon name="alert-circle" [size]="12" strokeWidth="2"></lucide-icon> Needs Improvement
-                                    </div>
-                                    <p>{{ rev.whatFailed }}</p>
-                                </div>
-                                <div class="f-col neutral" *ngIf="rev.gaps">
-                                    <div class="f-label">
-                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg> Gaps to Address
-                                    </div>
-                                    <p>{{ rev.gaps }}</p>
-                                </div>
-                            </div>
-
-                            <div class="review-actions">
-                                <button class="btn-link" [routerLink]="['/process', process.id, 'review', rev.id, 'edit']">Edit Review</button>
-                                <button class="btn-link danger" (click)="deleteReview(rev.id)">Delete</button>
-                            </div>
-                        </div>
-                    </div>
-                    <ng-template #noReviews>
-                        <div class="empty-state">
-                            <div class="empty-icon">
-                                <lucide-icon name="file-text" [size]="32" strokeWidth="1.5"></lucide-icon>
-                            </div>
-                            <p>No self-reviews added.</p>
-                            <span class="empty-sub">Reflect after interviews to boost your chances.</span>
-                        </div>
-                    </ng-template>
-                </div>
-            </section>
         </div>
 
         <!-- RIGHT COLUMN: Sidebar -->
         <aside class="sidebar-column">
             
-            <section class="premium-card sidebar-card sticky-card">
+            <section class="premium-card sidebar-card">
                 <div class="card-header">
                     <h3>Application Details</h3>
                     <div class="completion-ring" [title]="completionPercent + '% Complete'">
@@ -256,50 +251,209 @@
                 </div>
             </section>
 
-            <section class="premium-card sidebar-card">
-                <div class="card-header">
-                    <div class="header-title">
-                        <h3>Network</h3>
-                        <span class="badge-count" *ngIf="process.contacts?.length">{{ process.contacts.length }}</span>
+            <section class="premium-card network-card">
+                <!-- Network Card Header -->
+                <div class="network-header">
+                    <div class="network-header-left">
+                        <div class="network-icon-wrap">
+                            <lucide-icon name="users" [size]="16" strokeWidth="2"></lucide-icon>
+                        </div>
+                        <div>
+                            <h3 class="network-title">Network</h3>
+                            <span class="network-subtitle">Key contacts at this company</span>
+                        </div>
                     </div>
-                    <button class="btn-circle secondary" (click)="showContactForm = !showContactForm" [ngClass]="{'active': showContactForm}">
-                        <span>{{ showContactForm ? '×' : '+' }}</span>
-                    </button>
+                    <div class="network-header-right">
+                        <span class="network-badge" *ngIf="process.contacts?.length">{{ process.contacts.length }}</span>
+                        <button class="net-add-btn" (click)="showContactForm = !showContactForm"
+                            [class.net-add-btn--active]="showContactForm"
+                            [title]="showContactForm ? 'Cancel' : 'Add Contact'">
+                            <span class="net-add-icon">{{ showContactForm ? '✕' : '+' }}</span>
+                        </button>
+                    </div>
                 </div>
 
-                <div class="card-body" style="padding-top: 0;">
-                    
-                    <div class="expandable-form" [class.open]="showContactForm">
-                        <div class="form-grid">
-                            <input type="text" [(ngModel)]="newContact.name" placeholder="Name" class="form-input">
-                            <input type="text" [(ngModel)]="newContact.role" placeholder="Role (e.g. Recruiter)" class="form-input">
-                            <input type="text" [(ngModel)]="newContact.linkedIn" placeholder="LinkedIn URL" class="form-input" style="grid-column: span 2;">
-                            <input type="email" [(ngModel)]="newContact.email" placeholder="Email" class="form-input" style="grid-column: span 2;">
-                            <textarea [(ngModel)]="newContact.socialHooks" rows="2" placeholder="Social hooks / Notes" class="form-input" style="grid-column: span 2;"></textarea>
-                            <button class="btn-sleek primary full-width" (click)="addContact()" style="grid-column: span 2;">Save Contact</button>
-                        </div>
-                    </div>
-
-                    <div class="contact-list" *ngIf="process.contacts?.length > 0; else noContactsList">
-                        <div class="contact-item" *ngFor="let contact of process.contacts">
-                            <div class="c-avatar">{{ contact.name.charAt(0) }}</div>
-                            <div class="c-info">
-                                <strong>{{ contact.name }}</strong>
-                                <span>{{ contact.role }}</span>
-                                <div class="c-links">
-                                    <a *ngIf="contact.linkedIn" [href]="contact.linkedIn" target="_blank">LinkedIn</a>
-                                    <a *ngIf="contact.email" [href]="'mailto:' + contact.email">Email</a>
+                <!-- Expandable Add-Contact Form -->
+                <div class="net-form-wrap" [class.net-form-wrap--open]="showContactForm">
+                    <div class="net-form">
+                        <p class="net-form-title">Add a contact</p>
+                        <div class="net-field-row">
+                            <div class="net-field">
+                                <label class="net-label">Name *</label>
+                                <div class="net-input-wrap">
+                                    <lucide-icon name="user" [size]="14" strokeWidth="2" class="net-input-icon"></lucide-icon>
+                                    <input type="text" [(ngModel)]="newContact.name" placeholder="Full name" class="net-input">
                                 </div>
                             </div>
-                            <button class="btn-icon danger sm" (click)="deleteContact(contact.id)">×</button>
+                            <div class="net-field">
+                                <label class="net-label">Role</label>
+                                <div class="net-input-wrap">
+                                    <lucide-icon name="briefcase" [size]="14" strokeWidth="2" class="net-input-icon"></lucide-icon>
+                                    <input type="text" [(ngModel)]="newContact.role" placeholder="e.g. Recruiter" class="net-input">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="net-field">
+                            <label class="net-label">LinkedIn URL</label>
+                            <div class="net-input-wrap">
+                                <lucide-icon name="link" [size]="14" strokeWidth="2" class="net-input-icon"></lucide-icon>
+                                <input type="text" [(ngModel)]="newContact.linkedIn" placeholder="https://linkedin.com/in/..." class="net-input">
+                            </div>
+                        </div>
+                        <div class="net-field-row">
+                            <div class="net-field">
+                                <label class="net-label">Email</label>
+                                <div class="net-input-wrap">
+                                    <lucide-icon name="mail" [size]="14" strokeWidth="2" class="net-input-icon"></lucide-icon>
+                                    <input type="email" [(ngModel)]="newContact.email" placeholder="contact@company.com" class="net-input">
+                                </div>
+                            </div>
+                            <div class="net-field">
+                                <label class="net-label">Phone</label>
+                                <div class="net-input-wrap">
+                                    <lucide-icon name="phone" [size]="14" strokeWidth="2" class="net-input-icon"></lucide-icon>
+                                    <input type="tel" [(ngModel)]="newContact.phone" placeholder="+1 555 000 0000" class="net-input">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="net-field">
+                            <label class="net-label">Notes</label>
+                            <textarea [(ngModel)]="newContact.socialHooks" rows="2"
+                                placeholder="Social hooks, how you know them, talking points…"
+                                class="net-input net-textarea"></textarea>
+                        </div>
+                        <button class="net-save-btn" (click)="addContact()">
+                            <lucide-icon name="user-plus" [size]="15" strokeWidth="2"></lucide-icon>
+                            Save Contact
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Contact List -->
+                <div class="net-body">
+                    <div class="net-contact-list" *ngIf="process.contacts?.length > 0; else noContactsList">
+                        <div class="net-contact" *ngFor="let contact of process.contacts; let i = index">
+
+                            <!-- ── VIEW MODE ── -->
+                            <ng-container *ngIf="editingContact?.id !== contact.id">
+                                <div class="net-avatar" [class]="'net-avatar--' + (i % 5)">
+                                    {{ contact.name.charAt(0).toUpperCase() }}
+                                </div>
+                                <div class="net-contact-info">
+                                    <div class="net-contact-name">{{ contact.name }}</div>
+                                    <div class="net-contact-role" *ngIf="contact.role">{{ contact.role }}</div>
+                                    <div class="net-contact-meta" *ngIf="contact.email || contact.phone">
+                                        <span *ngIf="contact.email">
+                                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>{{ contact.email }}
+                                        </span>
+                                        <span *ngIf="contact.phone">
+                                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.61 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>{{ contact.phone }}
+                                        </span>
+                                    </div>
+                                    <div class="net-social-hooks" *ngIf="contact.socialHooks">{{ contact.socialHooks }}</div>
+                                    <div class="net-contact-links">
+                                        <a *ngIf="contact.linkedIn" [href]="contact.linkedIn" target="_blank"
+                                            class="net-link net-link--li" title="View LinkedIn profile">
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                                            LinkedIn
+                                        </a>
+                                        <a *ngIf="contact.email" [href]="'mailto:' + contact.email"
+                                            class="net-link net-link--email" title="Send email">
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                                            Email
+                                        </a>
+                                        <a *ngIf="contact.phone" [href]="'tel:' + contact.phone"
+                                            class="net-link net-link--phone" title="Call">
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.61 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                                            Call
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="net-contact-actions">
+                                    <button class="net-edit-btn" (click)="startEditContact(contact)" title="Edit contact">
+                                        <lucide-icon name="pencil" [size]="13" strokeWidth="2"></lucide-icon>
+                                    </button>
+                                    <button class="net-delete-btn" (click)="deleteContact(contact.id)" title="Remove contact">
+                                        <lucide-icon name="trash-2" [size]="13" strokeWidth="2"></lucide-icon>
+                                    </button>
+                                </div>
+                            </ng-container>
+
+                            <!-- ── EDIT MODE ── -->
+                            <ng-container *ngIf="editingContact?.id === contact.id">
+                                <div class="net-edit-form">
+                                    <div class="net-field-row">
+                                        <div class="net-field">
+                                            <label class="net-label">Name *</label>
+                                            <div class="net-input-wrap">
+                                                <lucide-icon name="user" [size]="14" strokeWidth="2" class="net-input-icon"></lucide-icon>
+                                                <input type="text" [(ngModel)]="editingContact.name" class="net-input">
+                                            </div>
+                                        </div>
+                                        <div class="net-field">
+                                            <label class="net-label">Role</label>
+                                            <div class="net-input-wrap">
+                                                <lucide-icon name="briefcase" [size]="14" strokeWidth="2" class="net-input-icon"></lucide-icon>
+                                                <input type="text" [(ngModel)]="editingContact.role" class="net-input">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="net-field-row">
+                                        <div class="net-field">
+                                            <label class="net-label">Email</label>
+                                            <div class="net-input-wrap">
+                                                <lucide-icon name="mail" [size]="14" strokeWidth="2" class="net-input-icon"></lucide-icon>
+                                                <input type="email" [(ngModel)]="editingContact.email" class="net-input">
+                                            </div>
+                                        </div>
+                                        <div class="net-field">
+                                            <label class="net-label">Phone</label>
+                                            <div class="net-input-wrap">
+                                                <lucide-icon name="phone" [size]="14" strokeWidth="2" class="net-input-icon"></lucide-icon>
+                                                <input type="tel" [(ngModel)]="editingContact.phone" class="net-input">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="net-field">
+                                        <label class="net-label">LinkedIn URL</label>
+                                        <div class="net-input-wrap">
+                                            <lucide-icon name="link" [size]="14" strokeWidth="2" class="net-input-icon"></lucide-icon>
+                                            <input type="text" [(ngModel)]="editingContact.linkedIn" class="net-input">
+                                        </div>
+                                    </div>
+                                    <div class="net-field">
+                                        <label class="net-label">Notes</label>
+                                        <textarea [(ngModel)]="editingContact.socialHooks" rows="2"
+                                            class="net-input net-textarea"></textarea>
+                                    </div>
+                                    <div class="net-edit-actions">
+                                        <button class="net-save-btn net-save-btn--sm" (click)="saveEditContact()">
+                                            <lucide-icon name="check" [size]="14" strokeWidth="2"></lucide-icon>
+                                            Save
+                                        </button>
+                                        <button class="net-cancel-btn" (click)="cancelEdit()">
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </div>
+                            </ng-container>
+
                         </div>
                     </div>
+
                     <ng-template #noContactsList>
-                        <div class="empty-state mini">
-                            <p>No contacts added yet.</p>
+                        <div class="net-empty">
+                            <div class="net-empty-icon">
+                                <lucide-icon name="users" [size]="28" strokeWidth="1.5"></lucide-icon>
+                            </div>
+                            <p class="net-empty-title">No contacts yet</p>
+                            <p class="net-empty-sub">Add recruiters, hiring managers, or anyone relevant to this process.</p>
+                            <button class="net-empty-cta" (click)="showContactForm = true">
+                                <lucide-icon name="plus" [size]="14" strokeWidth="2"></lucide-icon>
+                                Add first contact
+                            </button>
                         </div>
                     </ng-template>
-
                 </div>
             </section>
 
@@ -836,9 +990,6 @@
         gap: var(--space-2xl);
     }
 
-    .sticky-card {
-        top: 24px;
-    }
 
     .completion-ring {
         background: #eef2ff; color: #4f46e5;
@@ -893,56 +1044,542 @@
 
     .notes-box p { font-size: 14px; line-height: 1.6; color: var(--text-primary); margin: 0; }
 
-    /* ===== NETWORK CONTACTS ===== */
-    .expandable-form {
-        max-height: 0; overflow: hidden;
-        transition: max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+    /* ===== NETWORK CARD ===== */
+    .network-card {
+        overflow: visible !important;
+        margin-bottom: 0;
+    }
+
+    /* --- Header --- */
+    .network-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 20px 20px 18px;
+        border-bottom: 1px solid rgba(148,163,184,0.12);
+    }
+
+    .network-header-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .network-icon-wrap {
+        width: 34px; height: 34px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        display: flex; align-items: center; justify-content: center;
+        color: #fff;
+        flex-shrink: 0;
+        box-shadow: 0 4px 12px rgba(99,102,241,0.3);
+    }
+
+    .network-title {
+        margin: 0;
+        font-size: 15px; font-weight: 700;
+        color: var(--text-primary);
+        letter-spacing: -0.01em;
+        line-height: 1.2;
+    }
+
+    .network-subtitle {
+        display: block;
+        font-size: 11px;
+        color: var(--text-tertiary);
+        margin-top: 1px;
+        font-weight: 400;
+    }
+
+    .network-header-right {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .network-badge {
+        background: linear-gradient(135deg, #eef2ff, #e0e7ff);
+        color: #4f46e5;
+        font-weight: 800; font-size: 11px;
+        padding: 3px 9px;
+        border-radius: 20px;
+        letter-spacing: 0.03em;
+    }
+
+    body.dark-theme .network-badge {
+        background: rgba(79,70,229,0.2);
+        color: #818cf8;
+    }
+
+    .net-add-btn {
+        width: 32px; height: 32px;
+        border-radius: 10px;
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        color: var(--text-secondary);
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.4,0,0.2,1);
+        font-size: 18px; line-height: 1;
+    }
+
+    .net-add-btn:hover {
+        background: #eef2ff;
+        border-color: #6366f1;
+        color: #6366f1;
+        transform: scale(1.05);
+    }
+
+    .net-add-btn--active {
+        background: rgba(239,68,68,0.08) !important;
+        border-color: rgba(239,68,68,0.2) !important;
+        color: #ef4444 !important;
+        transform: rotate(0deg) !important;
+    }
+
+    .net-add-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%; height: 100%;
+        font-weight: 400;
+        font-size: 16px;
+    }
+
+    /* --- Expandable Form --- */
+    .net-form-wrap {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.45s cubic-bezier(0.16,1,0.3,1), opacity 0.3s ease;
         opacity: 0;
     }
 
-    .expandable-form.open { max-height: 400px; opacity: 1; margin-bottom: 24px; }
-
-    .form-grid {
-        display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
-        background: var(--bg-subtle); padding: 16px; border-radius: 16px;
-        border: 1px solid var(--border-color);
+    .net-form-wrap--open {
+        max-height: 560px;
+        opacity: 1;
     }
 
-    .form-input {
-        background: var(--bg-primary); border: 1px solid var(--border-color);
-        border-radius: 8px; padding: 10px 12px; color: var(--text-primary); font-size: 14px;
+    .net-form {
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        border-bottom: 1px solid rgba(148,163,184,0.12);
+        background: rgba(248,250,252,0.6);
     }
-    .form-input:focus { outline: none; border-color: #6366f1; box-shadow: 0 0 0 2px rgba(99,102,241,0.1); }
 
-    .contact-list {
-        display: flex; flex-direction: column; gap: 12px;
+    body.dark-theme .net-form {
+        background: rgba(15,23,42,0.3);
     }
 
-    .contact-item {
-        display: flex; align-items: center; gap: 12px;
-        padding: 12px; background: var(--bg-secondary);
-        border: 1px solid var(--border-color); border-radius: 12px;
-        transition: transform 0.2s ease;
+    .net-form-title {
+        margin: 0;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--text-tertiary);
     }
-    
-    .contact-item:hover { transform: translateX(4px); }
 
-    .c-avatar {
-        width: 40px; height: 40px; border-radius: 12px;
-        background: linear-gradient(135deg, #cbd5e1, #94a3b8);
-        color: white; font-weight: 800; font-size: 18px;
+    .net-field-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+
+    .net-field {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .net-label {
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--text-tertiary);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+    }
+
+    .net-input-wrap {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .net-input-icon {
+        position: absolute;
+        left: 10px;
+        color: var(--text-tertiary);
+        pointer-events: none;
+        opacity: 0.7;
+    }
+
+    .net-input {
+        width: 100%;
+        box-sizing: border-box;
+        background: var(--bg-primary);
+        border: 1px solid rgba(148,163,184,0.25);
+        border-radius: 10px;
+        padding: 9px 12px 9px 34px;
+        font-size: 13px;
+        color: var(--text-primary);
+        font-family: inherit;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .net-input::placeholder { color: var(--text-muted, #94a3b8); }
+
+    .net-input:focus {
+        outline: none;
+        border-color: #6366f1;
+        box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
+    }
+
+    .net-textarea {
+        padding: 9px 12px;
+        resize: none;
+        min-height: 60px;
+        line-height: 1.5;
+    }
+
+    .net-save-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: 100%;
+        padding: 11px;
+        background: linear-gradient(135deg, #4f46e5, #6366f1);
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 14px rgba(79,70,229,0.3);
+        font-family: inherit;
+        letter-spacing: 0.01em;
+    }
+
+    .net-save-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 18px rgba(79,70,229,0.4);
+    }
+
+    .net-save-btn:active {
+        transform: translateY(0);
+    }
+
+    /* --- Contact List --- */
+    .net-body {
+        padding: 16px;
+    }
+
+    .net-contact-list {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .net-contact {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 12px;
+        border-radius: 12px;
+        transition: background 0.18s ease, transform 0.18s ease;
+        cursor: default;
+    }
+
+    .net-contact:hover {
+        background: var(--bg-secondary);
+        transform: translateX(3px);
+    }
+
+    /* Avatar gradient palette */
+    .net-avatar {
+        width: 38px; height: 38px;
+        border-radius: 12px;
         display: flex; align-items: center; justify-content: center;
+        font-size: 15px; font-weight: 800;
+        color: #fff;
+        flex-shrink: 0;
+        letter-spacing: -0.03em;
+        box-shadow: 0 3px 8px rgba(0,0,0,0.12);
     }
-    
-    body.dark-theme .c-avatar { background: linear-gradient(135deg, #475569, #334155); }
 
-    .c-info { flex: 1; display: flex; flex-direction: column; }
-    .c-info strong { font-size: 14px; color: var(--text-primary); }
-    .c-info span { font-size: 12px; color: var(--text-secondary); }
-    
-    .c-links { margin-top: 4px; display: flex; gap: 12px; }
-    .c-links a { font-size: 12px; color: #6366f1; text-decoration: none; font-weight: 500; }
-    .c-links a:hover { text-decoration: underline; }
+    .net-avatar--0 { background: linear-gradient(135deg, #6366f1, #8b5cf6); }
+    .net-avatar--1 { background: linear-gradient(135deg, #0ea5e9, #6366f1); }
+    .net-avatar--2 { background: linear-gradient(135deg, #10b981, #0ea5e9); }
+    .net-avatar--3 { background: linear-gradient(135deg, #f59e0b, #f97316); }
+    .net-avatar--4 { background: linear-gradient(135deg, #ec4899, #8b5cf6); }
+
+    .net-contact-info {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .net-contact-name {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--text-primary);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .net-contact-role {
+        font-size: 11px;
+        color: var(--text-tertiary);
+        font-weight: 500;
+    }
+
+    .net-social-hooks {
+        font-size: 11px;
+        color: var(--text-secondary);
+        line-height: 1.4;
+        margin-top: 2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .net-contact-links {
+        display: flex;
+        gap: 6px;
+        margin-top: 5px;
+        flex-wrap: wrap;
+    }
+
+    .net-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 3px 8px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.15s ease;
+    }
+
+    .net-link--li {
+        background: rgba(10,102,194,0.08);
+        color: #0a66c2;
+        border: 1px solid rgba(10,102,194,0.15);
+    }
+
+    .net-link--li:hover {
+        background: #0a66c2;
+        color: #fff;
+        border-color: #0a66c2;
+    }
+
+    .net-link--email {
+        background: rgba(99,102,241,0.08);
+        color: #6366f1;
+        border: 1px solid rgba(99,102,241,0.15);
+    }
+
+    .net-link--email:hover {
+        background: #6366f1;
+        color: #fff;
+        border-color: #6366f1;
+    }
+
+    .net-delete-btn {
+        width: 28px; height: 28px;
+        border-radius: 8px;
+        border: none;
+        background: transparent;
+        color: var(--text-tertiary);
+        cursor: pointer;
+        display: flex; align-items: center; justify-content: center;
+        opacity: 0;
+        transition: all 0.18s ease;
+        flex-shrink: 0;
+    }
+
+    .net-contact:hover .net-delete-btn {
+        opacity: 1;
+    }
+
+    .net-delete-btn:hover {
+        background: rgba(239,68,68,0.1);
+        color: #ef4444;
+    }
+
+    /* Phone link pill */
+    .net-link--phone {
+        background: rgba(16,185,129,0.08);
+        color: #059669;
+        border: 1px solid rgba(16,185,129,0.15);
+    }
+
+    .net-link--phone:hover {
+        background: #059669;
+        color: #fff;
+        border-color: #059669;
+    }
+
+    /* Contact meta row (email + phone inline) */
+    .net-contact-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 3px;
+    }
+
+    .net-contact-meta span {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 11px;
+        color: var(--text-secondary);
+    }
+
+    /* Action buttons column (edit + delete) */
+    .net-contact-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        align-items: center;
+        flex-shrink: 0;
+    }
+
+    .net-edit-btn {
+        width: 28px; height: 28px;
+        border-radius: 8px;
+        border: none;
+        background: transparent;
+        color: var(--text-tertiary);
+        cursor: pointer;
+        display: flex; align-items: center; justify-content: center;
+        opacity: 0;
+        transition: all 0.18s ease;
+        flex-shrink: 0;
+    }
+
+    .net-contact:hover .net-edit-btn,
+    .net-contact:hover .net-delete-btn {
+        opacity: 1;
+    }
+
+    .net-edit-btn:hover {
+        background: rgba(99,102,241,0.1);
+        color: #6366f1;
+    }
+
+    /* Inline edit form */
+    .net-edit-form {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        padding: 14px;
+        background: var(--bg-subtle, rgba(248,250,252,0.8));
+        border: 1px solid rgba(99,102,241,0.15);
+        border-radius: 12px;
+    }
+
+    body.dark-theme .net-edit-form {
+        background: rgba(15,23,42,0.4);
+        border-color: rgba(99,102,241,0.2);
+    }
+
+    .net-edit-actions {
+        display: flex;
+        gap: 8px;
+    }
+
+    .net-save-btn--sm {
+        padding: 8px 14px;
+        font-size: 12px;
+        flex: 1;
+    }
+
+    .net-cancel-btn {
+        flex: 1;
+        padding: 8px 14px;
+        border-radius: 10px;
+        border: 1px solid var(--border-color);
+        background: var(--bg-secondary);
+        color: var(--text-secondary);
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+        transition: all 0.18s ease;
+    }
+
+    .net-cancel-btn:hover {
+        background: var(--bg-subtle);
+        color: var(--text-primary);
+    }
+
+    /* --- Empty State --- */
+
+    .net-empty {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 28px 16px;
+        gap: 8px;
+    }
+
+    .net-empty-icon {
+        width: 52px; height: 52px;
+        border-radius: 16px;
+        background: linear-gradient(135deg, rgba(99,102,241,0.08), rgba(139,92,246,0.08));
+        border: 1px dashed rgba(99,102,241,0.2);
+        display: flex; align-items: center; justify-content: center;
+        color: #6366f1;
+        margin-bottom: 4px;
+    }
+
+    .net-empty-title {
+        margin: 0;
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+
+    .net-empty-sub {
+        margin: 0;
+        font-size: 12px;
+        color: var(--text-tertiary);
+        line-height: 1.5;
+        max-width: 220px;
+    }
+
+    .net-empty-cta {
+        margin-top: 8px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 16px;
+        background: linear-gradient(135deg, #4f46e5, #6366f1);
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 12px rgba(79,70,229,0.25);
+        font-family: inherit;
+    }
+
+    .net-empty-cta:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(79,70,229,0.35);
+    }
 
     /* ===== BUTTONS & UTILS ===== */
     .btn-sleek {
@@ -1043,4 +1680,142 @@
     .ai-float-btn:active {
         transform: scale(0.96);
     }
+
+    /* ═══ REFLECTION ZONE ═══ */
+    .reflection-zone {
+        margin-top: 14px;
+        padding-top: 12px;
+        border-top: 1px dashed rgba(148,163,184,0.2);
+    }
+
+    .reflection-cta {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 7px 14px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #6366f1;
+        background: rgba(99,102,241,0.06);
+        border: 1px dashed rgba(99,102,241,0.3);
+        text-decoration: none;
+        transition: all 0.18s ease;
+        cursor: pointer;
+    }
+    .reflection-cta:hover {
+        background: rgba(99,102,241,0.12);
+        border-color: rgba(99,102,241,0.5);
+        transform: translateY(-1px);
+    }
+
+    .reflection-preview {
+        background: rgba(99,102,241,0.03);
+        border: 1px solid rgba(99,102,241,0.12);
+        border-radius: 12px;
+        padding: 12px 14px;
+    }
+
+    .rp-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 10px;
+    }
+
+    .rp-title {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: #6366f1;
+    }
+
+    .rp-badges {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .rp-conf {
+        font-size: 11px;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 20px;
+        background: rgba(245,158,11,0.1);
+        color: #d97706;
+    }
+    .rp-conf.level-4, .rp-conf.level-5 { background: rgba(16,185,129,0.1); color: #059669; }
+    .rp-conf.level-1, .rp-conf.level-2 { background: rgba(239,68,68,0.1); color: #dc2626; }
+
+    .rp-mood { font-size: 16px; line-height: 1; }
+
+    .rp-cols {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-bottom: 8px;
+    }
+
+    .rp-col { display: flex; flex-direction: column; gap: 4px; }
+    .rp-col p { margin: 0; font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+
+    .rp-col-label {
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-tertiary, #94a3b8);
+    }
+
+    .rp-col--green .rp-col-label { color: #059669; }
+    .rp-col--red .rp-col-label { color: #dc2626; }
+
+    .rp-learning {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        padding-top: 8px;
+        border-top: 1px solid rgba(148,163,184,0.1);
+    }
+    .rp-learning p { margin: 0; font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+
+    .rp-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+        padding-top: 8px;
+        border-top: 1px solid rgba(148,163,184,0.1);
+    }
+
+    .rp-edit-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 11px;
+        font-weight: 600;
+        color: #6366f1;
+        text-decoration: none;
+        cursor: pointer;
+        transition: opacity 0.15s;
+    }
+    .rp-edit-btn:hover { opacity: 0.75; text-decoration: underline; }
+
+    .rp-del-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 11px;
+        font-weight: 600;
+        color: #ef4444;
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 0;
+        transition: opacity 0.15s;
+    }
+    .rp-del-btn:hover { opacity: 0.75; }
 </style>

@@ -14,7 +14,8 @@
             <div class="hero-copy">
                 <span class="hero-kicker">Premium planner</span>
                 <h1>Design the Perfect Interview Slot</h1>
-                <p>Everything in one cinematic flow: choose the opportunity, lock schedule details, add interviewers, and capture prep insights.</p>
+                <p>Everything in one cinematic flow: choose the opportunity, lock schedule details, add interviewers,
+                    and capture prep insights.</p>
             </div>
 
             <div class="hero-status" aria-label="Completion progress">
@@ -23,7 +24,8 @@
                     <span>ready to schedule</span>
                 </div>
 
-                <div class="progress" role="progressbar" [attr.aria-valuenow]="completionPercent" aria-valuemin="0" aria-valuemax="100">
+                <div class="progress" role="progressbar" [attr.aria-valuenow]="completionPercent" aria-valuemin="0"
+                    aria-valuemax="100">
                     <div class="progress-bar" [style.width.%]="completionPercent"></div>
                 </div>
 
@@ -44,7 +46,8 @@
                             <span class="panel-step">01</span>
                             <div>
                                 <h2>Opportunity & core details</h2>
-                                <p>Search and choose the process from one unified flow, then define interview essentials.</p>
+                                <p>Search and choose the process from one unified flow, then define interview
+                                    essentials.</p>
                             </div>
                         </div>
 
@@ -54,20 +57,13 @@
 
                             <div class="search-box">
                                 <span class="search-icon" aria-hidden="true">🔎</span>
-                                <input
-                                    type="text"
-                                    name="processSearch"
-                                    [(ngModel)]="processSearch"
-                                    placeholder="Search company, role, stage, location"
-                                    class="input-field"
+                                <input type="text" name="processSearch" [(ngModel)]="processSearch"
+                                    placeholder="Search company, role, stage, location" class="input-field"
                                     autocomplete="off">
                             </div>
 
                             <div class="process-results" *ngIf="hasProcessSearch && filteredProcesses.length > 0">
-                                <button
-                                    *ngFor="let process of filteredProcesses"
-                                    type="button"
-                                    class="process-option"
+                                <button *ngFor="let process of filteredProcesses" type="button" class="process-option"
                                     [class.active]="+interaction.processId === +process.id"
                                     (click)="selectProcess(process)">
                                     <div class="process-top">
@@ -79,16 +75,21 @@
                                 </button>
                             </div>
 
-                            <p class="open-process-note" title="Interview interactions can only be added to open processes.">Only open processes are shown and can be selected for interview interactions.</p>
-                            <p *ngIf="hasProcessSearch && filteredProcesses.length === 0" class="muted-hint">No matches found. Try another keyword.</p>
-                            <p *ngIf="!interaction.processId && interviewForm.submitted" class="error-message">Please select a process</p>
+                            <p class="open-process-note"
+                                title="Interview interactions can only be added to open processes.">Only open processes
+                                are shown and can be selected for interview interactions.</p>
+                            <p *ngIf="hasProcessSearch && filteredProcesses.length === 0" class="muted-hint">No matches
+                                found. Try another keyword.</p>
+                            <p *ngIf="!interaction.processId && interviewForm.submitted" class="error-message">Please
+                                select a process</p>
                         </div>
 
                         <div class="selected-process" *ngIf="selectedProcess">
-                            <div class="selected-avatar">{{ selectedProcess.companyName?.charAt(0)?.toUpperCase() }}</div>
+                            <div class="selected-avatar">{{ selectedProcess.companyName?.charAt(0)?.toUpperCase() }}
+                            </div>
                             <div class="selected-meta">
                                 <span>Chosen opportunity</span>
-                                <strong>{{ selectedProcess.companyName }} — {{ selectedProcess.roleTitle }}</strong>
+                                <strong>{{ selectedProcess.companyName }} -{{ selectedProcess.roleTitle }}</strong>
                             </div>
                             <em>{{ selectedProcess.currentStage }}</em>
                         </div>
@@ -98,33 +99,39 @@
                                 <label>Date <span class="required">*</span></label>
                                 <input type="date" name="datePart" [(ngModel)]="datePart" (change)="updateDateTime()"
                                     class="input-field" required [class.error]="!datePart && interviewForm.submitted">
-                                <p *ngIf="!datePart && interviewForm.submitted" class="error-message">Date is required</p>
+                                <p *ngIf="!datePart && interviewForm.submitted" class="error-message">Date is required
+                                </p>
                             </div>
 
                             <div class="form-group">
                                 <label>Time <span class="required">*</span></label>
                                 <input type="time" name="timePart" [(ngModel)]="timePart" (change)="updateDateTime()"
                                     class="input-field" required [class.error]="!timePart && interviewForm.submitted">
-                                <p *ngIf="!timePart && interviewForm.submitted" class="error-message">Time is required</p>
+                                <p *ngIf="!timePart && interviewForm.submitted" class="error-message">Time is required
+                                </p>
                             </div>
 
                             <div class="form-group">
                                 <label>Interview type <span class="required">*</span></label>
-                                <select name="interviewType" [(ngModel)]="interaction.interviewType" class="input-field" required
-                                    [class.error]="!interaction.interviewType && interviewForm.submitted">
-                                    <option *ngFor="let type of interviewTypes" [value]="type.id">{{ type.label }}</option>
+                                <select name="interviewType" [(ngModel)]="interaction.interviewType" class="input-field"
+                                    required [class.error]="!interaction.interviewType && interviewForm.submitted">
+                                    <option *ngFor="let type of interviewTypes" [value]="type.id">{{ type.label }}
+                                    </option>
                                 </select>
-                                <p *ngIf="!interaction.interviewType && interviewForm.submitted" class="error-message">Type is required</p>
+                                <p *ngIf="!interaction.interviewType && interviewForm.submitted" class="error-message">
+                                    Type is required</p>
                             </div>
                         </div>
 
                         <div class="form-group">
                             <label>Interview summary <span class="required">*</span></label>
-                            <textarea name="summary" [(ngModel)]="interaction.summary" rows="4" required class="input-field"
+                            <textarea name="summary" [(ngModel)]="interaction.summary" rows="4" required
+                                class="input-field"
                                 placeholder="Main goals, agenda, expectations, and preparation focus"
                                 [class.error]="(!interaction.summary || !interaction.summary.trim()) && interviewForm.submitted"></textarea>
                             <p class="muted-hint">This summary becomes your pre-interview briefing note.</p>
-                            <p *ngIf="(!interaction.summary || !interaction.summary.trim()) && interviewForm.submitted" class="error-message">Summary is required</p>
+                            <p *ngIf="(!interaction.summary || !interaction.summary.trim()) && interviewForm.submitted"
+                                class="error-message">Summary is required</p>
                         </div>
                     </section>
 
@@ -143,14 +150,17 @@
                                     (change)="onReminderEnabledChange()">
                                 Enable reminder
                             </label>
-                            <span class="reminder-chip" *ngIf="interaction.reminder.enabled">{{ reminderTimingLabel }}</span>
+                            <span class="reminder-chip" *ngIf="interaction.reminder.enabled">{{ reminderTimingLabel
+                                }}</span>
                         </div>
 
                         <div class="reminder-panel" *ngIf="interaction.reminder.enabled">
                             <div class="form-group">
                                 <label>When should we remind you?</label>
-                                <select name="reminderBefore" [(ngModel)]="interaction.reminder.beforeMinutes" class="input-field">
-                                    <option *ngFor="let option of reminderOptions" [ngValue]="option.value">{{ option.label }}</option>
+                                <select name="reminderBefore" [(ngModel)]="interaction.reminder.beforeMinutes"
+                                    class="input-field">
+                                    <option *ngFor="let option of reminderOptions" [ngValue]="option.value">{{
+                                        option.label }}</option>
                                 </select>
                             </div>
 
@@ -191,19 +201,24 @@
                         <div class="participants-wrap">
                             <div class="participants-title">
                                 <label>Interviewers & attendees</label>
-                                <button type="button" class="btn-chip" (click)="addParticipant()">+ Add participant</button>
+                                <button type="button" class="btn-chip" (click)="addParticipant()">+ Add
+                                    participant</button>
                             </div>
 
                             <div class="participants-list">
                                 <div *ngFor="let p of interaction.participants; let i = index" class="participant-row">
-                                    <div class="participant-dot" aria-hidden="true">{{ (p.name || 'P').charAt(0).toUpperCase() }}</div>
+                                    <div class="participant-dot" aria-hidden="true">{{ (p.name ||
+                                        'P').charAt(0).toUpperCase() }}</div>
                                     <select [name]="'role' + i" [(ngModel)]="p.role" class="input-field">
                                         <option *ngFor="let role of availableRoles" [value]="role">{{role}}</option>
                                     </select>
-                                    <input type="text" [name]="'name' + i" [(ngModel)]="p.name" placeholder="Full name" class="input-field">
-                                    <button type="button" class="btn-remove" (click)="removeParticipant(i)" aria-label="Remove interviewer">&times;</button>
+                                    <input type="text" [name]="'name' + i" [(ngModel)]="p.name" placeholder="Full name"
+                                        class="input-field">
+                                    <button type="button" class="btn-remove" (click)="removeParticipant(i)"
+                                        aria-label="Remove interviewer">&times;</button>
                                 </div>
-                                <p class="muted-hint" *ngIf="interaction.participants.length === 0">No participants yet. Add people now if known.</p>
+                                <p class="muted-hint" *ngIf="interaction.participants.length === 0">No participants yet.
+                                    Add people now if known.</p>
                             </div>
                         </div>
                     </section>
@@ -232,13 +247,15 @@
 
                             <div class="form-group">
                                 <label>Tests / technical assessment</label>
-                                <textarea name="testsAssessment" [(ngModel)]="interaction.testsAssessment" rows="3" class="input-field"
+                                <textarea name="testsAssessment" [(ngModel)]="interaction.testsAssessment" rows="3"
+                                    class="input-field"
                                     placeholder="Coding test, system design round, take-home task"></textarea>
                             </div>
 
                             <div class="form-group">
                                 <label>Role insights</label>
-                                <textarea name="roleInsights" [(ngModel)]="interaction.roleInsights" rows="3" class="input-field"
+                                <textarea name="roleInsights" [(ngModel)]="interaction.roleInsights" rows="3"
+                                    class="input-field"
                                     placeholder="What matters most for this role and team culture"></textarea>
                             </div>
                         </div>
@@ -252,11 +269,13 @@
                         <div class="snapshot-items">
                             <div>
                                 <span>Opportunity</span>
-                                <strong>{{ selectedProcess ? (selectedProcess.companyName + ' — ' + selectedProcess.roleTitle) : 'Not selected' }}</strong>
+                                <strong>{{ selectedProcess ? (selectedProcess.companyName + ' -' +
+                                    selectedProcess.roleTitle) : 'Not selected' }}</strong>
                             </div>
                             <div>
                                 <span>Interview date</span>
-                                <strong>{{ datePart && timePart ? ((datePart | dateFormat:'date') + ' • ' + timePart) : 'Not set' }}</strong>
+                                <strong>{{ datePart && timePart ? ((datePart | dateFormat:'date') + ' • ' + timePart) :
+                                    'Not set' }}</strong>
                             </div>
                             <div>
                                 <span>Type</span>
@@ -268,7 +287,8 @@
                             </div>
                         </div>
 
-                        <p class="snapshot-tip">Pro tip: include interviewers now so your follow-up notes stay accurate and rich.</p>
+                        <p class="snapshot-tip">Pro tip: include interviewers now so your follow-up notes stay accurate
+                            and rich.</p>
                     </div>
                 </aside>
             </div>

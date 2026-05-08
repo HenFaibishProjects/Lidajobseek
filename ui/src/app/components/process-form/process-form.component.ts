@@ -38,46 +38,47 @@ export class ProcessFormComponent implements OnInit, OnDestroy {
   private _lastCountry: string = '';
 
   readonly CURRENCIES = [
-    { code: 'ILS', symbol: '₪', label: 'ILS — Israeli Shekel' },
-    { code: 'USD', symbol: '$', label: 'USD — US Dollar' },
-    { code: 'EUR', symbol: '€', label: 'EUR — Euro' },
-    { code: 'GBP', symbol: '£', label: 'GBP — British Pound' },
-    { code: 'AED', symbol: 'د.إ', label: 'AED — UAE Dirham' },
-    { code: 'AUD', symbol: 'A$', label: 'AUD — Australian Dollar' },
-    { code: 'BRL', symbol: 'R$', label: 'BRL — Brazilian Real' },
-    { code: 'CAD', symbol: 'C$', label: 'CAD — Canadian Dollar' },
-    { code: 'CHF', symbol: 'Fr', label: 'CHF — Swiss Franc' },
-    { code: 'CNY', symbol: '¥', label: 'CNY — Chinese Yuan' },
-    { code: 'CZK', symbol: 'Kč', label: 'CZK — Czech Koruna' },
-    { code: 'DKK', symbol: 'kr', label: 'DKK — Danish Krone' },
-    { code: 'HKD', symbol: 'HK$', label: 'HKD — Hong Kong Dollar' },
-    { code: 'HUF', symbol: 'Ft', label: 'HUF — Hungarian Forint' },
-    { code: 'IDR', symbol: 'Rp', label: 'IDR — Indonesian Rupiah' },
-    { code: 'INR', symbol: '₹', label: 'INR — Indian Rupee' },
-    { code: 'JPY', symbol: '¥', label: 'JPY — Japanese Yen' },
-    { code: 'KRW', symbol: '₩', label: 'KRW — South Korean Won' },
-    { code: 'MXN', symbol: 'MX$', label: 'MXN — Mexican Peso' },
-    { code: 'NOK', symbol: 'kr', label: 'NOK — Norwegian Krone' },
-    { code: 'NZD', symbol: 'NZ$', label: 'NZD — New Zealand Dollar' },
-    { code: 'PLN', symbol: 'zł', label: 'PLN — Polish Zloty' },
-    { code: 'RON', symbol: 'lei', label: 'RON — Romanian Leu' },
-    { code: 'RUB', symbol: '₽', label: 'RUB — Russian Ruble' },
-    { code: 'SAR', symbol: 'ر.س', label: 'SAR — Saudi Riyal' },
-    { code: 'SEK', symbol: 'kr', label: 'SEK — Swedish Krona' },
-    { code: 'SGD', symbol: 'S$', label: 'SGD — Singapore Dollar' },
-    { code: 'THB', symbol: '฿', label: 'THB — Thai Baht' },
-    { code: 'TRY', symbol: '₺', label: 'TRY — Turkish Lira' },
-    { code: 'TWD', symbol: 'NT$', label: 'TWD — Taiwan Dollar' },
-    { code: 'UAH', symbol: '₴', label: 'UAH — Ukrainian Hryvnia' },
-    { code: 'ZAR', symbol: 'R', label: 'ZAR — South African Rand' },
+
+    { code: 'USD', symbol: '$', label: 'USD - US Dollar' },
+    { code: 'EUR', symbol: '€', label: 'EUR - Euro' },
+    { code: 'GBP', symbol: '£', label: 'GBP - British Pound' },
+    { code: 'AED', symbol: 'د.إ', label: 'AED - UAE Dirham' },
+    { code: 'AUD', symbol: 'A$', label: 'AUD - Australian Dollar' },
+    { code: 'BRL', symbol: 'R$', label: 'BRL - Brazilian Real' },
+    { code: 'CAD', symbol: 'C$', label: 'CAD - Canadian Dollar' },
+    { code: 'CHF', symbol: 'Fr', label: 'CHF - Swiss Franc' },
+    { code: 'CNY', symbol: '¥', label: 'CNY - Chinese Yuan' },
+    { code: 'CZK', symbol: 'Kč', label: 'CZK - Czech Koruna' },
+    { code: 'DKK', symbol: 'kr', label: 'DKK - Danish Krone' },
+    { code: 'HKD', symbol: 'HK$', label: 'HKD - Hong Kong Dollar' },
+    { code: 'HUF', symbol: 'Ft', label: 'HUF - Hungarian Forint' },
+    { code: 'IDR', symbol: 'Rp', label: 'IDR - Indonesian Rupiah' },
+    { code: 'INR', symbol: '₹', label: 'INR - Indian Rupee' },
+    { code: 'JPY', symbol: '¥', label: 'JPY - Japanese Yen' },
+    { code: 'KRW', symbol: '₩', label: 'KRW - South Korean Won' },
+    { code: 'MXN', symbol: 'MX$', label: 'MXN - Mexican Peso' },
+    { code: 'NOK', symbol: 'kr', label: 'NOK - Norwegian Krone' },
+    { code: 'NZD', symbol: 'NZ$', label: 'NZD - New Zealand Dollar' },
+    { code: 'PLN', symbol: 'zł', label: 'PLN - Polish Zloty' },
+    { code: 'RON', symbol: 'lei', label: 'RON - Romanian Leu' },
+    { code: 'RUB', symbol: '₽', label: 'RUB - Russian Ruble' },
+    { code: 'SAR', symbol: 'ر.س', label: 'SAR - Saudi Riyal' },
+    { code: 'SEK', symbol: 'kr', label: 'SEK - Swedish Krona' },
+    { code: 'SGD', symbol: 'S$', label: 'SGD - Singapore Dollar' },
+    { code: 'THB', symbol: '฿', label: 'THB - Thai Baht' },
+    { code: 'TRY', symbol: '₺', label: 'TRY - Turkish Lira' },
+    { code: 'TWD', symbol: 'NT$', label: 'TWD - Taiwan Dollar' },
+    { code: 'UAH', symbol: '₴', label: 'UAH - Ukrainian Hryvnia' },
+    { code: 'ZAR', symbol: 'R', label: 'ZAR - South African Rand' },
+    { code: 'ILS', symbol: '₪', label: 'ILS - Israeli Shekel' },
   ];
 
   readonly SALARY_PERIODS = [
     { value: 'Month', label: 'per Month' },
-    { value: 'Year',  label: 'per Year' },
-    { value: 'Week',  label: 'per Week' },
-    { value: 'Day',   label: 'per Day' },
-    { value: 'Hour',  label: 'per Hour' },
+    { value: 'Year', label: 'per Year' },
+    { value: 'Week', label: 'per Week' },
+    { value: 'Day', label: 'per Day' },
+    { value: 'Hour', label: 'per Hour' },
   ];
 
   constructor(
@@ -102,7 +103,13 @@ export class ProcessFormComponent implements OnInit, OnDestroy {
     return this.settingsService.getSettings().country || 'Israel';
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    // Self-heal: if a website is set but logo was lost, re-fetch silently
+    if (this.process?.companyWebsite && !this.process?.companyLogoUrl) {
+      setTimeout(() => this.fetchLogo(), 300);
+    }
+  }
+
 
   ngOnDestroy(): void {
     if (this.logoFailedTimer) {
@@ -123,8 +130,8 @@ export class ProcessFormComponent implements OnInit, OnDestroy {
   get techStackScore(): number {
     const n = this.techTermCount();
     if (n === 0) return 0;
-    if (n <= 2)  return 10;
-    if (n <= 5)  return 15;
+    if (n <= 2) return 10;
+    if (n <= 5) return 15;
     return 20;
   }
 
@@ -133,18 +140,18 @@ export class ProcessFormComponent implements OnInit, OnDestroy {
     if (!p) return 0;
 
     const hasRealLogo = !!p.companyLogoUrl && p.companyLogoUrl !== this.DEFAULT_LOGO;
-    const pitchLen    = (p.tailoredPitch || '').trim().length;
-    const tech        = this.techStackScore;
+    const pitchLen = (p.tailoredPitch || '').trim().length;
+    const tech = this.techStackScore;
 
     // ── Base score (identical weights in both modes) ───────────────
     let pct = 0;
-    if (p.companyName?.trim())       pct += 10;
-    if (p.roleTitle?.trim())         pct += 10;
+    if (p.companyName?.trim()) pct += 10;
+    if (p.roleTitle?.trim()) pct += 10;
     pct += tech;                                // 0 / 10 / 15 / 20
-    if (p.companyWebsite?.trim())    pct += 10;
+    if (p.companyWebsite?.trim()) pct += 10;
     if (p.jobDescriptionUrl?.trim()) pct += 10;
-    if (hasRealLogo)                 pct += 10;
-    if (p.salaryExpectation)         pct += 10;
+    if (hasRealLogo) pct += 10;
+    if (p.salaryExpectation) pct += 10;
     // Pitch: 0 → 10 → 15 → 20%
     if (pitchLen > 0) pct += pitchLen <= 60 ? 10 : pitchLen <= 150 ? 15 : 20;
 
@@ -172,7 +179,7 @@ export class ProcessFormComponent implements OnInit, OnDestroy {
     if (p < 60) return 'Good progress, keep going!';
     if (p < 85) return 'Almost there!';
     if (p < 100) return 'Nearly complete!';
-    return 'All done — looking great!';
+    return 'All done - looking great!';
   }
 
   // ── Logo ──────────────────────────────────────────────────────────
@@ -191,11 +198,11 @@ export class ProcessFormComponent implements OnInit, OnDestroy {
     this.logoFetchState = 'fetching';
     const url = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
 
-    // Pre-check the image — Google returns a tiny 16x16 default when no favicon exists
+    // Pre-check the image - Google returns a tiny 16x16 default when no favicon exists
     const probe = new Image();
     probe.onload = () => {
       if (probe.naturalWidth <= 16 && probe.naturalHeight <= 16) {
-        // Generic fallback icon — treat as failure
+        // Generic fallback icon - treat as failure
         this.process.companyLogoUrl = null;
         this.showLogoFailed();
       } else {
@@ -270,7 +277,7 @@ export class ProcessFormComponent implements OnInit, OnDestroy {
     this.onSubmit.emit();
   }
 
-  /** Returns the logo to display — real logo → default asset, never empty */
+  /** Returns the logo to display - real logo → default asset, never empty */
   logoSrc(): string {
     return this.process.companyLogoUrl || this.DEFAULT_LOGO;
   }

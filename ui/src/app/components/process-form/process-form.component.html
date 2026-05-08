@@ -5,9 +5,7 @@
     <span class="progress-pct" [style.color]="progressColor">{{ completionPercent }}%</span>
   </div>
   <div class="progress-track">
-    <div class="progress-fill"
-         [style.width.%]="completionPercent"
-         [style.background]="progressColor">
+    <div class="progress-fill" [style.width.%]="completionPercent" [style.background]="progressColor">
     </div>
   </div>
   <div class="progress-steps">
@@ -44,7 +42,10 @@
       <section class="form-section anim-1">
         <div class="section-header">
           <div class="section-icon">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="7" width="20" height="14" rx="2" />
+              <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" />
+            </svg>
           </div>
           <div>
             <h2 class="section-title">Role Details</h2>
@@ -84,8 +85,11 @@
             <label class="field-label">
               Tech Stack
               <span class="field-info-wrap">
-                <svg class="field-info-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                <svg class="field-info-icon" width="13" height="13" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="12" y1="8" x2="12" y2="12" />
+                  <line x1="12" y1="16" x2="12.01" y2="16" />
                 </svg>
                 <span class="field-tooltip">
                   List the technologies separated by commas.<br>
@@ -107,17 +111,18 @@
             <div class="input-action-group">
               <input type="text" name="companyWebsite" [(ngModel)]="process.companyWebsite"
                 placeholder="e.g. stripe.com" class="field-input" (blur)="onWebsiteBlur()">
-              <button type="button" class="action-chip"
-                [class.fetching]="logoFetchState === 'fetching'"
-                [disabled]="!process.companyWebsite?.trim() || logoFetchState === 'fetching'"
-                (click)="fetchLogo()" title="Grab company logo">
+              <button type="button" class="action-chip" [class.fetching]="logoFetchState === 'fetching'"
+                [disabled]="!process.companyWebsite?.trim() || logoFetchState === 'fetching'" (click)="fetchLogo()"
+                title="Grab company logo">
                 <!-- Spinner while fetching -->
-                <svg *ngIf="logoFetchState === 'fetching'" class="spin" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                  <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+                <svg *ngIf="logoFetchState === 'fetching'" class="spin" width="13" height="13" viewBox="0 0 24 24"
+                  fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path d="M21 12a9 9 0 1 1-6.219-8.56" />
                 </svg>
                 <!-- Refresh icon normally -->
-                <svg *ngIf="logoFetchState !== 'fetching'" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 2.2"/>
+                <svg *ngIf="logoFetchState !== 'fetching'" width="13" height="13" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2">
+                  <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 2.2" />
                 </svg>
                 {{ logoFetchState === 'fetching' ? 'Fetching…' : 'Grab Logo' }}
               </button>
@@ -125,7 +130,9 @@
             <!-- Failure popup -->
             <div class="logo-fail-popup" [class.visible]="logoFetchState === 'failed'">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
               </svg>
               <span>Couldn't grab a logo from this website. You can still continue without one.</span>
             </div>
@@ -136,14 +143,13 @@
             <div class="input-action-group">
               <input type="text" name="jobDescriptionUrl" [(ngModel)]="process.jobDescriptionUrl"
                 placeholder="https://…" class="field-input">
-              <a [href]="formatUrl(process.jobDescriptionUrl)" target="_blank"
-                class="action-chip visit-chip"
+              <a [href]="formatUrl(process.jobDescriptionUrl)" target="_blank" class="action-chip visit-chip"
                 [class.disabled]="!process.jobDescriptionUrl"
                 (click)="!process.jobDescriptionUrl && $event.preventDefault()">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
-                  <polyline points="15 3 21 3 21 9"/>
-                  <line x1="10" y1="14" x2="21" y2="3"/>
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                  <polyline points="15 3 21 3 21 9" />
+                  <line x1="10" y1="14" x2="21" y2="3" />
                 </svg>
                 Visit
               </a>
@@ -156,7 +162,9 @@
       <section class="form-section highlight-section anim-2" *ngIf="shouldShowInteractionSection">
         <div class="section-header">
           <div class="section-icon accent">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            </svg>
           </div>
           <div>
             <h2 class="section-title">Initial Interaction</h2>
@@ -170,7 +178,10 @@
       <section class="form-section anim-2">
         <div class="section-header">
           <div class="section-icon">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+              <circle cx="12" cy="10" r="3" />
+            </svg>
           </div>
           <div>
             <h2 class="section-title">Location &amp; Logistics</h2>
@@ -182,9 +193,13 @@
         <div class="form-group">
           <label class="field-label">Country</label>
           <div class="country-from-settings">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+              <circle cx="12" cy="10" r="3" />
+            </svg>
             <span>{{ userCountry }}</span>
-            <button type="button" class="settings-hint" (click)="settingsService.openSettingsPanel()">Change in Settings</button>
+            <button type="button" class="settings-hint" (click)="settingsService.openSettingsPanel()">Change in
+              Settings</button>
           </div>
         </div>
 
@@ -192,7 +207,7 @@
         <div class="form-group">
           <label class="field-label">City / Town <span class="req">*</span></label>
           <select name="location" [(ngModel)]="process.location" class="field-input" required>
-            <option value="">— Select city —</option>
+            <option value="">-Select city —</option>
             <option *ngFor="let city of citiesForUserCountry" [value]="city">{{ city }}</option>
           </select>
         </div>
@@ -202,15 +217,18 @@
           <label class="field-label">Work Mode <span class="req">*</span></label>
           <div class="mode-chips">
             <label class="mode-chip" [class.active]="process.workMode === 'remote'">
-              <input type="radio" name="workMode" [(ngModel)]="process.workMode" value="remote" (change)="onWorkModeChange()">
+              <input type="radio" name="workMode" [(ngModel)]="process.workMode" value="remote"
+                (change)="onWorkModeChange()">
               🌐 Remote
             </label>
             <label class="mode-chip" [class.active]="process.workMode === 'hybrid'">
-              <input type="radio" name="workMode" [(ngModel)]="process.workMode" value="hybrid" (change)="onWorkModeChange()">
+              <input type="radio" name="workMode" [(ngModel)]="process.workMode" value="hybrid"
+                (change)="onWorkModeChange()">
               🔀 Hybrid
             </label>
             <label class="mode-chip" [class.active]="process.workMode === 'office'">
-              <input type="radio" name="workMode" [(ngModel)]="process.workMode" value="office" (change)="onWorkModeChange()">
+              <input type="radio" name="workMode" [(ngModel)]="process.workMode" value="office"
+                (change)="onWorkModeChange()">
               🏢 On-site
             </label>
           </div>
@@ -219,8 +237,8 @@
         <div class="form-row" *ngIf="process.workMode === 'hybrid'">
           <div class="form-group">
             <label class="field-label">Days in Office / Week</label>
-            <input type="number" name="daysFromOffice" [(ngModel)]="process.daysFromOffice"
-              placeholder="e.g. 2" class="field-input" min="1" max="5">
+            <input type="number" name="daysFromOffice" [(ngModel)]="process.daysFromOffice" placeholder="e.g. 2"
+              class="field-input" min="1" max="5">
           </div>
           <div class="form-group"></div>
         </div>
@@ -246,11 +264,14 @@
       <section class="form-section intel-section anim-3">
         <div class="section-header">
           <div class="section-icon gold">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon
+                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+            </svg>
           </div>
           <div>
             <h2 class="section-title">Career Intelligence</h2>
-            <p class="section-desc">Rate this role — these scores power your analytics</p>
+            <p class="section-desc">Rate this role -these scores power your analytics</p>
           </div>
         </div>
 
@@ -260,41 +281,37 @@
               <span class="score-name">🎯 Tech Match</span>
               <span class="score-stars">{{ scoreLabel(process.scoreTech || 0) }}</span>
             </div>
-            <input type="range" name="scoreTech" [(ngModel)]="process.scoreTech"
-              min="0" max="5" step="1" class="score-slider"
-              [style.--pct]="((process.scoreTech||0)/5*100)+'%'">
+            <input type="range" name="scoreTech" [(ngModel)]="process.scoreTech" min="0" max="5" step="1"
+              class="score-slider" [style.--pct]="((process.scoreTech||0)/5*100)+'%'">
           </div>
           <div class="score-card">
             <div class="score-top">
               <span class="score-name">🚀 Growth</span>
               <span class="score-stars">{{ scoreLabel(process.scoreGrowth || 0) }}</span>
             </div>
-            <input type="range" name="scoreGrowth" [(ngModel)]="process.scoreGrowth"
-              min="0" max="5" step="1" class="score-slider"
-              [style.--pct]="((process.scoreGrowth||0)/5*100)+'%'">
+            <input type="range" name="scoreGrowth" [(ngModel)]="process.scoreGrowth" min="0" max="5" step="1"
+              class="score-slider" [style.--pct]="((process.scoreGrowth||0)/5*100)+'%'">
           </div>
           <div class="score-card">
             <div class="score-top">
               <span class="score-name">⚖️ Work-Life</span>
               <span class="score-stars">{{ scoreLabel(process.scoreWLB || 0) }}</span>
             </div>
-            <input type="range" name="scoreWLB" [(ngModel)]="process.scoreWLB"
-              min="0" max="5" step="1" class="score-slider"
-              [style.--pct]="((process.scoreWLB||0)/5*100)+'%'">
+            <input type="range" name="scoreWLB" [(ngModel)]="process.scoreWLB" min="0" max="5" step="1"
+              class="score-slider" [style.--pct]="((process.scoreWLB||0)/5*100)+'%'">
           </div>
           <div class="score-card">
             <div class="score-top">
               <span class="score-name">✨ Company Vibe</span>
               <span class="score-stars">{{ scoreLabel(process.scoreVibe || 0) }}</span>
             </div>
-            <input type="range" name="scoreVibe" [(ngModel)]="process.scoreVibe"
-              min="0" max="5" step="1" class="score-slider"
-              [style.--pct]="((process.scoreVibe||0)/5*100)+'%'">
+            <input type="range" name="scoreVibe" [(ngModel)]="process.scoreVibe" min="0" max="5" step="1"
+              class="score-slider" [style.--pct]="((process.scoreVibe||0)/5*100)+'%'">
           </div>
         </div>
 
         <div class="form-group" style="margin-top: 8px;">
-          <label class="field-label">Your Tailored Pitch — Why you?</label>
+          <label class="field-label">Your Tailored Pitch -Why you?</label>
           <textarea name="tailoredPitch" [(ngModel)]="process.tailoredPitch"
             placeholder="Explain in detail why you're a great fit for this specific role. The more depth, the higher your application score…"
             class="field-input field-textarea" rows="3"></textarea>
@@ -312,7 +329,10 @@
             [class.ready]="completionPercent >= 60">
             <span *ngIf="!isSubmitting">{{ isEdit ? 'Save Changes' : 'Create Application' }}</span>
             <span *ngIf="isSubmitting" class="submitting-label">
-              <svg class="spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+              <svg class="spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2">
+                <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+              </svg>
               Saving…
             </span>
           </button>
@@ -346,7 +366,8 @@
       </div>
       <div class="aside-tip">
         <div class="tip-badge">Tip</div>
-        <div class="tip-text">Details are your superpower. The more you write about the role and tech, the better we can help you prepare.</div>
+        <div class="tip-text">Details are your superpower. The more you write about the role and tech, the better we can
+          help you prepare.</div>
       </div>
     </div>
   </aside>

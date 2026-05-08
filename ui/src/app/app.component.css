@@ -6,12 +6,13 @@
   background: var(--bg-secondary);
 }
 
-/* Main Content — sits below the 64px sticky top bar */
+/* Main Content -sits below the 64px sticky top bar */
 .app-main {
   flex: 1;
   min-height: 100vh;
   background: var(--bg-secondary);
-  padding-top: 64px; /* exact top-bar height */
+  padding-top: 64px;
+  /* exact top-bar height */
 }
 
 .app-main-no-sidebar {
@@ -26,12 +27,13 @@
   margin: 0 auto;
 }
 
-/* Mobile — smaller top bar + bottom tab bar */
+/* Mobile -smaller top bar + bottom tab bar */
 @media (max-width: 767px) {
   .app-main {
     padding-top: 56px;
     padding-bottom: calc(62px + env(safe-area-inset-bottom, 0px));
   }
+
   .content-wrapper {
     padding: 16px;
   }
@@ -58,15 +60,19 @@
   align-items: center;
   justify-content: center;
   color: #fff;
-  box-shadow: 0 4px 20px rgba(109,40,217,0.45);
+  box-shadow: 0 4px 20px rgba(109, 40, 217, 0.45);
   z-index: 990;
   transition: transform 0.2s, box-shadow 0.2s;
 }
+
 .cc-float-btn:hover {
   transform: scale(1.08);
-  box-shadow: 0 6px 28px rgba(109,40,217,0.6);
+  box-shadow: 0 6px 28px rgba(109, 40, 217, 0.6);
 }
-.cc-float-btn:active { transform: scale(0.96); }
+
+.cc-float-btn:active {
+  transform: scale(0.96);
+}
 
 @media (max-width: 480px) {
   .cc-float-btn {

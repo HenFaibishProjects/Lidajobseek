@@ -1,24 +1,32 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { InteractionsService } from '../../services/interactions.service';
 import { ProcessesService } from '../../services/processes.service';
-import { DateFormatPipe } from '../../pipes/date-format.pipe';
-import { DEFAULT_INTERVIEW_TYPE_ID, INTERVIEW_TYPES, getGroupedInterviewTypes, normalizeInterviewType } from '../../shared/interview-types';
+import { ReviewsService } from '../../services/reviews.service';
+import { DEFAULT_INTERVIEW_TYPE_ID, normalizeInterviewType } from '../../shared/interview-types';
+import { InteractionFormComponent } from '../../components/interaction-form/interaction-form.component';
 
 @Component({
     selector: 'app-interaction-create',
     standalone: true,
-    imports: [CommonModule, FormsModule, RouterModule],
-    templateUrl: './interaction-create.component.html',
-    styleUrl: './interaction-create.component.css'
+    imports: [CommonModule, InteractionFormComponent],
+    template: `
+        <app-interaction-form
+            mode="create"
+            [processId]="processId"
+            [interaction]="interaction"
+            [reflection]="reflection"
+            [existingContacts]="existingContacts"
+            [isSubmitting]="isSubmitting"
+            (submitted)="onSubmit()"
+        ></app-interaction-form>
+    `
 })
 export class InteractionCreateComponent implements OnInit {
     processId!: number;
     existingContacts: any[] = [];
     isSubmitting = false;
-    contactDropdownOpen = false;
 
     interaction: any = {
         date: '',
@@ -30,77 +38,64 @@ export class InteractionCreateComponent implements OnInit {
         notes: '',
     };
 
-    interviewTypes = INTERVIEW_TYPES;
-    groupedTypes = getGroupedInterviewTypes();
-    typeCategories = Object.keys(this.groupedTypes) as (keyof typeof this.groupedTypes)[];
-
-    availableRoles = ['HR', 'Recruiter', 'Hiring Manager', 'Tech Lead', 'Team Lead', 'Team Member', 'Manager', 'Director', 'VP', 'CTO', 'Architect', 'Group Leader', 'Peer'];
-
-    addParticipant() {
-        this.interaction.participants.push({ role: 'HR', name: '' });
-    }
-
-    addFromContact(contact: any) {
-        this.interaction.participants.push({ role: contact.role || 'HR', name: contact.name });
-        this.contactDropdownOpen = false;
-    }
-
-    removeParticipant(index: number) {
-        this.interaction.participants.splice(index, 1);
-    }
+    reflection: any = {
+        stage: '',
+        confidence: 0,
+        mood: '',
+        whatWentWell: '',
+        whatFailed: '',
+        gaps: '',
+        keyLearning: '',
+        nextActionPlan: '',
+    };
 
     constructor(
         private route: ActivatedRoute,
         private router: Router,
         private interactionsService: InteractionsService,
-        private processesService: ProcessesService
+        private processesService: ProcessesService,
+        private reviewsService: ReviewsService
     ) { }
-
-    datePart: string = '';
-    timePart: string = '';
 
     ngOnInit() {
         this.processId = Number(this.route.snapshot.paramMap.get('id'));
         this.interaction.interviewType = normalizeInterviewType(this.interaction.interviewType);
-
-        this.processesService.getById(this.processId).subscribe(process => {
-            this.existingContacts = process.contacts || [];
+        this.processesService.getById(this.processId).subscribe(p => {
+            this.existingContacts = p.contacts || [];
         });
-
-        const now = new Date();
-        const tzOffset = now.getTimezoneOffset() * 60000;
-        const localIso = new Date(now.getTime() - tzOffset).toISOString();
-        this.datePart = localIso.slice(0, 10);
-        this.timePart = localIso.slice(11, 16);
-        this.interaction.date = `${this.datePart}T${this.timePart}`;
     }
 
-    updateDateTime() {
-        if (this.datePart && this.timePart) {
-            this.interaction.date = `${this.datePart}T${this.timePart}`;
-        }
-    }
-
-    getSelectedTypeLabel(): string {
-        return this.interviewTypes.find(t => t.id === this.interaction.interviewType)?.label ?? '';
-    }
-
-    getSelectedTypeColor(): string {
-        return this.interviewTypes.find(t => t.id === this.interaction.interviewType)?.color ?? '#6b7280';
+    private hasReflectionContent(): boolean {
+        return !!(
+            this.reflection.whatWentWell || this.reflection.whatFailed ||
+            this.reflection.gaps || this.reflection.keyLearning ||
+            this.reflection.nextActionPlan || this.reflection.confidence > 0 ||
+            this.reflection.mood
+        );
     }
 
     onSubmit() {
         if (this.isSubmitting) return;
         this.isSubmitting = true;
-        const payload = {
-            ...this.interaction,
-            processId: this.processId,
-            date: new Date(this.interaction.date).toISOString()
-        };
+        const payload = { ...this.interaction, processId: this.processId };
         this.interactionsService.create(payload).subscribe({
-            next: () => this.router.navigate(['/process', this.processId]),
+            next: (saved: any) => {
+                if (this.hasReflectionContent()) {
+                    this.reviewsService.create({
+                        ...this.reflection,
+                        stage: this.reflection.stage || 'Interview',
+                        confidence: this.reflection.confidence || 3,
+                        processId: this.processId,
+                        interactionId: saved.id,
+                    }).subscribe({
+                        next: () => this.router.navigate(['/process', this.processId]),
+                        error: () => this.router.navigate(['/process', this.processId]),
+                    });
+                } else {
+                    this.router.navigate(['/process', this.processId]);
+                }
+            },
             error: () => { this.isSubmitting = false; }
         });
     }
 }
-

@@ -55,7 +55,7 @@ describe('LoginComponent', () => {
     expect(component.error).toBe('');
   });
 
-  describe('submit() — login mode', () => {
+  describe('submit() -login mode', () => {
     it('should show validation error if email or password is empty', () => {
       component.email = '';
       component.password = '';
@@ -122,7 +122,7 @@ describe('LoginComponent', () => {
     });
   });
 
-  describe('submit() — register mode', () => {
+  describe('submit() -register mode', () => {
     beforeEach(() => {
       component.isRegister = true;
     });
