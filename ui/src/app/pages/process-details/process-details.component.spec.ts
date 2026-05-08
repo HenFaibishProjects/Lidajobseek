@@ -7,7 +7,7 @@ import { ToastService } from '../../services/toast.service';
 import { SettingsService } from '../../services/settings.service';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { of, BehaviorSubject } from 'rxjs';
-import { LucideAngularModule, Briefcase, ExternalLink, Mail, Phone, Calendar, MapPin, Globe, Clock, Target, Rocket, Heart, Sparkles, Send, CheckCircle, Clock4, FileText, ChevronRight, X, MessageSquare, Plus, History, Lightbulb, Trash2, Edit2, AlertCircle, Pencil, Edit, CheckCircle2, Users, User } from 'lucide-angular';
+import { LucideAngularModule, Briefcase, ExternalLink, Mail, Phone, Calendar, MapPin, Globe, Clock, Target, Rocket, Heart, Sparkles, Send, CheckCircle, Check, Clock4, FileText, ChevronRight, X, MessageSquare, Plus, History, Lightbulb, Trash2, Edit2, AlertCircle, Pencil, Edit, CheckCircle2, Users, User, UserPlus, Link } from 'lucide-angular';
 
 describe('ProcessDetailsComponent', () => {
   let component: ProcessDetailsComponent;
@@ -38,7 +38,7 @@ describe('ProcessDetailsComponent', () => {
         ProcessDetailsComponent,
         HttpClientTestingModule,
         RouterTestingModule,
-        LucideAngularModule.pick({ Briefcase, ExternalLink, Mail, Phone, Calendar, MapPin, Globe, Clock, Target, Rocket, Heart, Sparkles, Send, CheckCircle, Clock4, FileText, ChevronRight, X, MessageSquare, Plus, History, Lightbulb, Trash2, Edit2, AlertCircle, Pencil, Edit, CheckCircle2, Users, User })
+        LucideAngularModule.pick({ Briefcase, ExternalLink, Mail, Phone, Calendar, MapPin, Globe, Clock, Target, Rocket, Heart, Sparkles, Send, CheckCircle, Check, Clock4, FileText, ChevronRight, X, MessageSquare, Plus, History, Lightbulb, Trash2, Edit2, AlertCircle, Pencil, Edit, CheckCircle2, Users, User, UserPlus, Link })
       ],
       providers: [
         {
