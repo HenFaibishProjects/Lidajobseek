@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ResourcesService } from '../../services/resources.service';
 import { ConfirmService } from '../../services/confirm.service';
 import { ToastService } from '../../services/toast.service';
+import { AuthService } from '../../services/auth.service';
 import { FilterPipe } from '../../pipes/filter.pipe';
 import { environment } from '../../../environments/environment';
 
@@ -61,7 +62,8 @@ export class CoachHubComponent implements OnInit {
     constructor(
         private resourcesService: ResourcesService,
         private confirmService: ConfirmService,
-        private toastService: ToastService
+        private toastService: ToastService,
+        private authService: AuthService
     ) { }
 
     ngOnInit() {
@@ -70,15 +72,34 @@ export class CoachHubComponent implements OnInit {
     }
 
     loadCategories() {
-        const saved = localStorage.getItem('coach-hub-categories');
-        if (saved) {
-            this.categories = JSON.parse(saved);
-        }
+        this.authService.getPreferences().subscribe(prefs => {
+            if (prefs.appSettings?.coachHubCategories) {
+                this.categories = prefs.appSettings.coachHubCategories;
+            } else {
+                // If no categories in DB, try localStorage migration
+                const saved = localStorage.getItem('coach-hub-categories');
+                if (saved) {
+                    this.categories = JSON.parse(saved);
+                    this.saveCategories(); // Save to DB
+                }
+            }
+        });
     }
 
     saveCategories() {
+        // Save locally for immediate UI update
         localStorage.setItem('coach-hub-categories', JSON.stringify(this.categories));
-        this.toastService.show('Categories updated', 'success');
+        
+        // Save to API
+        this.authService.getPreferences().subscribe(prefs => {
+            const currentSettings = prefs.appSettings || {};
+            currentSettings.coachHubCategories = this.categories;
+            
+            this.authService.updatePreferences({ appSettings: currentSettings }).subscribe({
+                next: () => this.toastService.show('Categories updated', 'success'),
+                error: () => this.toastService.show('Failed to save categories', 'error')
+            });
+        });
     }
 
     get enabledCategories() {

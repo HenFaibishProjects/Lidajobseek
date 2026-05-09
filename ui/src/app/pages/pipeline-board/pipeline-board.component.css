@@ -498,13 +498,17 @@ body.dark-theme .pb-col {
 }
 
 /* Per-column color indicators */
-.pb-col-indicator[data-col="applied"]     { background: #3b82f6; }
-.pb-col-indicator[data-col="screening"]   { background: #06b6d4; }
-.pb-col-indicator[data-col="interviewing"]{ background: #8b5cf6; }
-.pb-col-indicator[data-col="assessment"]  { background: #f59e0b; }
-.pb-col-indicator[data-col="final"]       { background: #10b981; }
-.pb-col-indicator[data-col="offer"]       { background: #22c55e; }
-.pb-col-indicator[data-col="closed"]      { background: #94a3b8; }
+.pb-col-indicator[data-col="applied"]    { background: #3b82f6; }
+.pb-col-indicator[data-col="in-process"] { background: #8b5cf6; }
+.pb-col-indicator[data-col="offer"]      { background: #f59e0b; }
+.pb-col-indicator[data-col="hired"]      { background: #22c55e; }
+.pb-col-indicator[data-col="closed"]     { background: #94a3b8; }
+
+/* Column icon emoji */
+.pb-col-icon {
+  font-size: 14px;
+  line-height: 1;
+}
 
 .pb-col-label {
   font-size: 12px;
@@ -849,13 +853,57 @@ body.dark-theme .pb-card-score.score-low  { background: rgba(239,68,68,0.18); co
 }
 
 /* ── Column accent borders on hover/dragover ───────────────────── */
-.pb-col[data-col="applied"].pb-col--drag-over     { box-shadow: 0 0 0 2.5px rgba(59,130,246,0.4), 0 8px 32px rgba(59,130,246,0.1); border-color: #3b82f6; }
-.pb-col[data-col="screening"].pb-col--drag-over   { box-shadow: 0 0 0 2.5px rgba(6,182,212,0.4), 0 8px 32px rgba(6,182,212,0.1); border-color: #06b6d4; }
-.pb-col[data-col="interviewing"].pb-col--drag-over{ box-shadow: 0 0 0 2.5px rgba(139,92,246,0.4), 0 8px 32px rgba(139,92,246,0.1); border-color: #8b5cf6; }
-.pb-col[data-col="assessment"].pb-col--drag-over  { box-shadow: 0 0 0 2.5px rgba(245,158,11,0.4), 0 8px 32px rgba(245,158,11,0.1); border-color: #f59e0b; }
-.pb-col[data-col="final"].pb-col--drag-over       { box-shadow: 0 0 0 2.5px rgba(16,185,129,0.4), 0 8px 32px rgba(16,185,129,0.1); border-color: #10b981; }
-.pb-col[data-col="offer"].pb-col--drag-over        { box-shadow: 0 0 0 2.5px rgba(34,197,94,0.4), 0 8px 32px rgba(34,197,94,0.1); border-color: #22c55e; }
+.pb-col[data-col="applied"].pb-col--drag-over    { box-shadow: 0 0 0 2.5px rgba(59,130,246,0.4), 0 8px 32px rgba(59,130,246,0.1); border-color: #3b82f6; }
+.pb-col[data-col="in-process"].pb-col--drag-over  { box-shadow: 0 0 0 2.5px rgba(139,92,246,0.4), 0 8px 32px rgba(139,92,246,0.1); border-color: #8b5cf6; }
+.pb-col[data-col="offer"].pb-col--drag-over       { box-shadow: 0 0 0 2.5px rgba(245,158,11,0.4), 0 8px 32px rgba(245,158,11,0.1); border-color: #f59e0b; }
+.pb-col[data-col="hired"].pb-col--drag-over       { box-shadow: 0 0 0 2.5px rgba(34,197,94,0.4), 0 8px 32px rgba(34,197,94,0.1); border-color: #22c55e; }
 .pb-col[data-col="closed"].pb-col--drag-over      { box-shadow: 0 0 0 2.5px rgba(148,163,184,0.4), 0 8px 32px rgba(148,163,184,0.08); border-color: #94a3b8; }
+
+/* ── Hired column celebration styling ──────────────────────────── */
+.pb-col[data-col="hired"] {
+  border-color: rgba(34, 197, 94, 0.25);
+  background: linear-gradient(180deg, rgba(34, 197, 94, 0.04) 0%, transparent 40%);
+}
+
+body.dark-theme .pb-col[data-col="hired"] {
+  border-color: rgba(34, 197, 94, 0.15);
+  background: linear-gradient(180deg, rgba(34, 197, 94, 0.08) 0%, #0d1526 40%);
+}
+
+/* ── Time-ago badge ────────────────────────────────────────────── */
+.pb-card-age {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+.age-fresh {
+  background: rgba(34, 197, 94, 0.1);
+  color: #16a34a;
+}
+
+.age-recent {
+  background: rgba(59, 130, 246, 0.1);
+  color: #2563eb;
+}
+
+.age-stale {
+  background: rgba(245, 158, 11, 0.12);
+  color: #d97706;
+}
+
+.age-overdue {
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+}
+
+body.dark-theme .age-fresh   { background: rgba(34,197,94,0.15);  color: #4ade80; }
+body.dark-theme .age-recent  { background: rgba(59,130,246,0.15); color: #93c5fd; }
+body.dark-theme .age-stale   { background: rgba(245,158,11,0.15); color: #fbbf24; }
+body.dark-theme .age-overdue { background: rgba(239,68,68,0.15);  color: #f87171; }
 
 /* ── Stage pill color overrides ────────────────────────────────── */
 .status-application-submitted,

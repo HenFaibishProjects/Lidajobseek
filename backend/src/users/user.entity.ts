@@ -38,6 +38,9 @@ export class User {
   @Property({ fieldName: 'has_seen_onboarding', nullable: true, default: true })
   hasSeenOnboarding?: boolean;
 
+  @Property({ fieldName: 'app_settings', type: 'json', nullable: true })
+  appSettings?: any;
+
   @Property({ fieldName: 'created_at', onCreate: () => new Date() })
   createdAt: Date = new Date();
 

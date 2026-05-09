@@ -106,6 +106,17 @@ describe('UsersService', () => {
       expect(em.flush).toHaveBeenCalled();
     });
 
+    it('should update appSettings preference', async () => {
+      const user = { id: 1, appSettings: {} } as any;
+      mockRepo.findOne.mockResolvedValue(user);
+
+      const newSettings = { someKey: 'someValue' };
+      await service.updatePreferences(1, { appSettings: newSettings });
+
+      expect(user.appSettings).toBe(newSettings);
+      expect(em.flush).toHaveBeenCalled();
+    });
+
     it('should return null if user not found for preference update', async () => {
       mockRepo.findOne.mockResolvedValue(null);
       const result = await service.updatePreferences(999, { themePreference: 'dark' });

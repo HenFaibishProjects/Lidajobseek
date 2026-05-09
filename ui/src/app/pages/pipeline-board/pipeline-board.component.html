@@ -141,6 +141,7 @@
         <!-- Column header -->
         <div class="pb-col-head">
           <div class="pb-col-indicator" [attr.data-col]="col.id"></div>
+          <span class="pb-col-icon">{{ col.icon }}</span>
           <span class="pb-col-label">{{ col.label }}</span>
           <span class="pb-col-count" [class.pb-col-count--zero]="getColumnCards(col.id).length === 0">
             {{ getColumnCards(col.id).length }}
@@ -194,6 +195,9 @@
             <!-- Footer -->
             <div class="pb-card-footer">
               <span class="pb-card-date">{{ p.updatedAt | dateFormat:'date' }}</span>
+              <span class="pb-card-age" [ngClass]="getAgeBadgeClass(p.updatedAt)" [title]="'Last updated ' + (p.updatedAt | dateFormat:'date')">
+                {{ getDaysAgo(p.updatedAt) }}
+              </span>
               <span class="pb-card-score" *ngIf="hasScore(p)" [ngClass]="scoreClass(avgScore(p))">
                 ★ {{ avgScore(p) }}/10
               </span>

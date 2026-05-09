@@ -16,6 +16,7 @@ export interface PreferencesResponse {
   avatarStyle: string;
   hasSeenOnboarding?: boolean;
   pricingPlan?: 'free' | 'premium' | 'enterprise';
+  appSettings?: any;
 }
 
 @Injectable({
@@ -115,6 +116,7 @@ export class AuthService {
           dateFormatPreference: prefs.dateFormat,
           timeFormatPreference: prefs.timeFormat,
           avatarStylePreference: prefs.avatarStyle,
+          appSettings: prefs.appSettings,
         });
       }),
     );
