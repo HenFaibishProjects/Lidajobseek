@@ -16,36 +16,26 @@ import { DateFormatPipe } from '../../pipes/date-format.pipe';
 import { Subscription } from 'rxjs';
 import { LucideAngularModule } from 'lucide-angular';
 
-// Kanban column definitions -ordered pipeline stages
-const BOARD_COLUMNS: { id: string; label: string; stages: string[] }[] = [
+// Kanban column definitions — simplified pipeline
+const BOARD_COLUMNS: { id: string; label: string; icon: string; stages: string[] }[] = [
   {
     id: 'applied',
     label: 'Applied',
+    icon: '📋',
     stages: ['Application Submitted', 'Resume Under Review'],
   },
   {
-    id: 'screening',
-    label: 'Screening',
-    stages: ['Initial Call Scheduled', 'Initial Call Completed'],
-  },
-  {
-    id: 'interviewing',
-    label: 'Interviewing',
+    id: 'in-process',
+    label: 'In Process',
+    icon: '🔄',
     stages: [
+      'Initial Call Scheduled',
+      'Initial Call Completed',
       'Interview Scheduled',
       'Waiting for Interview Feedback',
       'Awaiting Next Interview',
-    ],
-  },
-  {
-    id: 'assessment',
-    label: 'Assessment',
-    stages: ['Home Task Assigned', 'Home Task Submitted (Under Review)'],
-  },
-  {
-    id: 'final',
-    label: 'Final',
-    stages: [
+      'Home Task Assigned',
+      'Home Task Submitted (Under Review)',
       'Final Interview Scheduled',
       'References Requested',
       'Background Check in Progress',
@@ -54,23 +44,29 @@ const BOARD_COLUMNS: { id: string; label: string; stages: string[] }[] = [
   {
     id: 'offer',
     label: 'Offer',
-    stages: ['Offer Received', 'Offer in Negotiation', 'Offer Accepted', 'Offer Declined'],
+    icon: '🎁',
+    stages: ['Offer Received', 'Offer in Negotiation'],
+  },
+  {
+    id: 'hired',
+    label: 'Hired',
+    icon: '✅',
+    stages: ['Offer Accepted'],
   },
   {
     id: 'closed',
     label: 'Closed',
-    stages: ['Withdrawn', 'Rejected', 'Position Put On Hold', 'Ghosted / No Response'],
+    icon: '❌',
+    stages: ['Withdrawn', 'Rejected', 'Position Put On Hold', 'Ghosted / No Response', 'Offer Declined'],
   },
 ];
 
 // The default stage assigned when a card is dropped into a column
 const COLUMN_DEFAULT_STAGE: Record<string, string> = {
   applied: 'Application Submitted',
-  screening: 'Initial Call Scheduled',
-  interviewing: 'Interview Scheduled',
-  assessment: 'Home Task Assigned',
-  final: 'Final Interview Scheduled',
+  'in-process': 'Initial Call Scheduled',
   offer: 'Offer Received',
+  hired: 'Offer Accepted',
   closed: 'Rejected',
 };
 
@@ -285,5 +281,30 @@ export class PipelineBoardComponent implements OnInit, OnDestroy {
 
   dismissTip() {
     this.showTip = false;
+  }
+
+  // ─── Time-ago badge ──────────────────────────────────────────────────────
+
+  getDaysAgo(dateStr: string): string {
+    if (!dateStr) return '';
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    if (days === 0) return 'today';
+    if (days === 1) return '1d';
+    if (days < 7) return `${days}d`;
+    const weeks = Math.floor(days / 7);
+    if (weeks < 4) return `${weeks}w`;
+    const months = Math.floor(days / 30);
+    return `${months}mo`;
+  }
+
+  getAgeBadgeClass(dateStr: string): string {
+    if (!dateStr) return '';
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    if (days <= 3) return 'age-fresh';
+    if (days <= 7) return 'age-recent';
+    if (days <= 14) return 'age-stale';
+    return 'age-overdue';
   }
 }

@@ -27,7 +27,7 @@ export class UsersService {
 
   async updatePreferences(
     id: number,
-    data: Partial<Pick<User, 'themePreference' | 'countryPreference' | 'dateFormatPreference' | 'timeFormatPreference' | 'avatarStylePreference' | 'hasSeenOnboarding'>>,
+    data: Partial<Pick<User, 'themePreference' | 'countryPreference' | 'dateFormatPreference' | 'timeFormatPreference' | 'avatarStylePreference' | 'hasSeenOnboarding' | 'appSettings'>>,
   ): Promise<User | null> {
     const user = await this.userRepository.findOne({ id });
     if (!user) {
@@ -41,6 +41,7 @@ export class UsersService {
     if (data.timeFormatPreference !== undefined) user.timeFormatPreference = data.timeFormatPreference;
     if (data.avatarStylePreference !== undefined) user.avatarStylePreference = data.avatarStylePreference;
     if (data.hasSeenOnboarding !== undefined) user.hasSeenOnboarding = data.hasSeenOnboarding;
+    if (data.appSettings !== undefined) user.appSettings = data.appSettings;
 
     await this.em.flush();
     return user;

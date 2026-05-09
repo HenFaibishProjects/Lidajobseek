@@ -178,13 +178,13 @@ p {
   color: var(--text-secondary);
 }
 
-a {
+a:not(.btn) {
   color: var(--primary-blue);
   text-decoration: none;
   transition: color 0.15s ease;
 }
 
-a:hover {
+a:not(.btn):hover {
   color: var(--primary-blue-hover);
   text-decoration: none;
 }
@@ -192,22 +192,20 @@ a:hover {
 /* ===== BUTTONS ===== */
 button,
 .btn {
-  font-family: var(--font-family);
-  font-size: var(--font-size-base);
-  font-weight: 600;
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  transition: var(--transition);
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
-  line-height: 1.4;
-  position: relative;
-  overflow: hidden;
-  border: 1px solid transparent;
-  padding: 8px 16px;
-  min-height: 36px;
+  gap: 7px;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: 10px;
+  text-decoration: none;
+  box-shadow: 0 3px 10px rgba(99, 102, 241, 0.35);
+  transition: box-shadow 0.2s, transform 0.15s;
+  white-space: nowrap;
+  letter-spacing: 0.1px;
 }
 
 button:disabled,
@@ -1825,4 +1823,8 @@ kbd {
 /* ===== GLOBAL DARK MODE NATIVE CONTROLS FIX ===== */
 body.dark-theme {
   color-scheme: dark !important;
+}
+
+body.dark-theme .btn-secondary {
+  border-color: #3b82f6;
 }

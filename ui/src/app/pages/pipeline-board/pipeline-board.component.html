@@ -5,7 +5,7 @@
     <div class="pb-topbar-left">
       <div class="pb-brand">
         <div class="pb-brand-icon">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="4" height="18" rx="1.5"/><rect x="10" y="3" width="4" height="13" rx="1.5"/><rect x="17" y="3" width="4" height="8" rx="1.5"/></svg>
+          <img src="assets/icons/pipe.png" alt="Pipeline" width="88" height="88" />
         </div>
         <div>
           <h1 class="pb-title">Pipeline</h1>
@@ -15,9 +15,9 @@
     </div>
 
     <div class="pb-topbar-right">
-      <a routerLink="/new" class="pb-btn-add">
+      <a routerLink="/new" class="btn btn-primary">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        New Process
+        New Process Application
       </a>
     </div>
   </header>
@@ -141,6 +141,7 @@
         <!-- Column header -->
         <div class="pb-col-head">
           <div class="pb-col-indicator" [attr.data-col]="col.id"></div>
+          <span class="pb-col-icon">{{ col.icon }}</span>
           <span class="pb-col-label">{{ col.label }}</span>
           <span class="pb-col-count" [class.pb-col-count--zero]="getColumnCards(col.id).length === 0">
             {{ getColumnCards(col.id).length }}
@@ -194,6 +195,9 @@
             <!-- Footer -->
             <div class="pb-card-footer">
               <span class="pb-card-date">{{ p.updatedAt | dateFormat:'date' }}</span>
+              <span class="pb-card-age" [ngClass]="getAgeBadgeClass(p.updatedAt)" [title]="'Last updated ' + (p.updatedAt | dateFormat:'date')">
+                {{ getDaysAgo(p.updatedAt) }}
+              </span>
               <span class="pb-card-score" *ngIf="hasScore(p)" [ngClass]="scoreClass(avgScore(p))">
                 ★ {{ avgScore(p) }}/10
               </span>

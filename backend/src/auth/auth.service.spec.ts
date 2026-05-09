@@ -114,12 +114,13 @@ describe('AuthService', () => {
   });
 
   describe('getPreferences', () => {
-    it('should return user preferences including onboarding flag', async () => {
-      mockUsersService.findById.mockResolvedValue({ id: 1, themePreference: 'dark', avatarStylePreference: 'bottts', hasSeenOnboarding: true });
+    it('should return user preferences including onboarding flag and appSettings', async () => {
+      mockUsersService.findById.mockResolvedValue({ id: 1, themePreference: 'dark', avatarStylePreference: 'bottts', hasSeenOnboarding: true, appSettings: { customKey: 'val' } });
       const result = await service.getPreferences(1);
       expect(result.theme).toBe('dark');
       expect(result.avatarStyle).toBe('bottts');
       expect(result.hasSeenOnboarding).toBe(true);
+      expect(result.appSettings).toEqual({ customKey: 'val' });
     });
 
     it('should throw UnauthorizedException if user not found', async () => {
@@ -156,6 +157,16 @@ describe('AuthService', () => {
 
       expect(result.hasSeenOnboarding).toBe(true);
       expect(mockUsersService.updatePreferences).toHaveBeenCalledWith(1, { hasSeenOnboarding: true });
+    });
+
+    it('should update appSettings preference', async () => {
+      const dto = { appSettings: { customKey: 'val' } };
+      mockUsersService.updatePreferences.mockResolvedValue({ id: 1, appSettings: { customKey: 'val' } });
+
+      const result = await service.updatePreferences(1, dto);
+
+      expect(result.appSettings).toEqual({ customKey: 'val' });
+      expect(mockUsersService.updatePreferences).toHaveBeenCalledWith(1, { appSettings: { customKey: 'val' } });
     });
 
     it('should ignore invalid preference values', async () => {

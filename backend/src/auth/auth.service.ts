@@ -19,6 +19,7 @@ interface UpdatePreferencesDto {
   timeFormat?: TimeFormatPreference;
   avatarStyle?: string;
   hasSeenOnboarding?: boolean;
+  appSettings?: any;
 }
 
 @Injectable()
@@ -43,6 +44,7 @@ export class AuthService {
         timeFormatPreference: user.timeFormatPreference,
         avatarStylePreference: user.avatarStylePreference,
         hasSeenOnboarding: user.hasSeenOnboarding,
+        appSettings: user.appSettings || {},
         createdAt: user.createdAt,
         updatedAt: user.updatedAt
       };
@@ -69,6 +71,7 @@ export class AuthService {
         timeFormatPreference: user.timeFormatPreference || '24',
         avatarStylePreference: user.avatarStylePreference || 'avataaars',
         hasSeenOnboarding: user.hasSeenOnboarding ?? true,
+        appSettings: user.appSettings || {},
       }
     };
   }
@@ -132,6 +135,7 @@ export class AuthService {
       avatarStyle: user.avatarStylePreference || 'avataaars',
       hasSeenOnboarding: user.hasSeenOnboarding ?? true,
       pricingPlan: user.pricingPlan || 'free',
+      appSettings: user.appSettings || {},
     };
   }
 
@@ -143,6 +147,7 @@ export class AuthService {
       timeFormatPreference?: TimeFormatPreference;
       avatarStylePreference?: string;
       hasSeenOnboarding?: boolean;
+      appSettings?: any;
     } = {};
 
     if (dto.theme && ['light', 'dark', 'auto'].includes(dto.theme)) {
@@ -169,6 +174,10 @@ export class AuthService {
       patch.hasSeenOnboarding = dto.hasSeenOnboarding;
     }
 
+    if (dto.appSettings !== undefined) {
+      patch.appSettings = dto.appSettings;
+    }
+
     const updatedUser = await this.usersService.updatePreferences(userId, patch);
     if (!updatedUser) {
       throw new UnauthorizedException('User not found');
@@ -181,6 +190,7 @@ export class AuthService {
       timeFormat: updatedUser.timeFormatPreference || '24',
       avatarStyle: updatedUser.avatarStylePreference || 'avataaars',
       hasSeenOnboarding: updatedUser.hasSeenOnboarding ?? true,
+      appSettings: updatedUser.appSettings || {},
     };
   }
 }
