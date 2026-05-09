@@ -4,10 +4,15 @@
         <div class="hero-content">
             <div class="hero-text">
                 <h1 class="hero-title">
+                    <div class="hero-avatar-logo" *ngIf="settings">
+                        <img src="assets/icons/dashaboard.png" alt="Pipeline" width="95" height="95" />
+                    </div>
+
+
+                    <span class="gradient-text">{{ userDisplayName }} Processes</span>
                     <div class="hero-avatar" *ngIf="settings">
                         <img [src]="getAvatarUrl()" alt="User Avatar">
                     </div>
-                    <span class="gradient-text">{{ userDisplayName }} Processes</span>
                 </h1>
                 <p class="hero-subtitle">Track, manage, and succeed in your career journey</p>
                 <p class="hero-subtitle-secondary">
@@ -17,13 +22,13 @@
             </div>
             <div class="hero-actions">
 
-                <button class="btn-primary-gradient" routerLink="/new">
+                <button class="btn-primary" routerLink="/new">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                         stroke-width="2.5">
                         <line x1="12" y1="5" x2="12" y2="19"></line>
                         <line x1="5" y1="12" x2="19" y2="12"></line>
                     </svg>
-                    <span>New Application</span>
+                    <span>New Process Application</span>
                 </button>
             </div>
         </div>
@@ -550,13 +555,13 @@
                     <p>Try adjusting your filters, or create a new application to populate your board.</p>
                     <div class="empty-actions">
                         <button class="btn-secondary" (click)="clearFilters()">Clear filters</button>
-                        <button class="btn-primary-gradient" routerLink="/new">
+                        <button class="btn-primary" routerLink="/new">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2.5">
                                 <line x1="12" y1="5" x2="12" y2="19"></line>
                                 <line x1="5" y1="12" x2="19" y2="12"></line>
                             </svg>
-                            <span>New Application</span>
+                            <span>New Process Application</span>
                         </button>
                     </div>
                 </div>

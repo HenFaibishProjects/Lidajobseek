@@ -150,10 +150,10 @@ body:not(.dark-theme) .nav-divider {
   position: relative;
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 44px;
   padding: 6px 10px;
   border-radius: 9px;
-  font-size: 0.82rem;
+  font-size: 20px;
   font-weight: 600;
   color: rgba(241, 245, 249, 0.76);
   text-decoration: none;

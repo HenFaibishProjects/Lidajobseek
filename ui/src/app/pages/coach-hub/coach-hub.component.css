@@ -10,6 +10,12 @@
     margin-bottom: 32px;
 }
 
+.hub-logo-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
 .header-left h1 {
     margin: 0 0 8px 0;
     font-size: 28px;

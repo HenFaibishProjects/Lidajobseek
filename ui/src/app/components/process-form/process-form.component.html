@@ -26,9 +26,9 @@
           <img [src]="logoSrc()" alt="Company Logo" (error)="onLogoError()">
         </div>
         <div>
-          <div class="form-badge">{{ isEdit ? 'Editing Application' : 'New Application' }}</div>
+          <div class="form-badge">{{ isEdit ? 'Editing Process Application' : 'New Process Application' }}</div>
           <h1 class="hero-title">
-            {{ process.companyName || (isEdit ? 'Edit Application' : 'Add New Application') }}
+            {{ process.companyName || (isEdit ? 'Edit Process Appl ication' : 'Add New Process Application') }}
           </h1>
           <p class="hero-sub" *ngIf="process.roleTitle">{{ process.roleTitle }}</p>
           <p class="hero-sub muted" *ngIf="!process.roleTitle">Fill in the details to track this opportunity</p>

@@ -1,11 +1,19 @@
 <div class="hub-container">
     <header class="hub-header">
+        <div class = "hub-logo-wrapper">
+
+            <div class="hero-avatar-logo" >
+                    <img src="assets/icons/hub.png" alt="Pipeline" width="88" height="88" />
+                </div>
         <div class="header-left">
-            <h1>🧠 Interview Coach Hub</h1>
+            <h1>Interview Coach Hub  
+            </h1>
             <p class="subtitle">Your professional career assets library</p>
         </div>
+        </div>
+        
         <div class="header-actions">
-            <button class="btn-secondary btn-icon-text" (click)="showConfig = !showConfig">
+            <button class="btn-primary" (click)="showConfig = !showConfig">
                 <span class="icon">⚙️</span>
                 {{ showConfig ? 'Close' : 'Configure' }}
             </button>
