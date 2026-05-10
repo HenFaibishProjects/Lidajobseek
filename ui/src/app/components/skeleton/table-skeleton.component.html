@@ -1,0 +1,21 @@
+<div class="table-skeleton">
+  <div class="skeleton-table">
+    <!-- Header -->
+    <div class="skeleton-header">
+      <div *ngFor="let col of columns" class="skeleton-header-cell">
+        <app-skeleton type="text" [width]="col.width || '100%'" height="16px"></app-skeleton>
+      </div>
+    </div>
+
+    <!-- Rows -->
+    <div *ngFor="let row of rowsArray" class="skeleton-row">
+      <div *ngFor="let col of columns" class="skeleton-cell">
+        <app-skeleton
+          [type]="getSkeletonType(col.type)"
+          [width]="col.width || '100%'"
+          [height]="col.height || '16px'">
+        </app-skeleton>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,40 @@
+<div class="shortcuts-overlay" (click)="onClose()">
+  <div class="shortcuts-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div class="header-content">
+        <div class="header-icon">⌨️</div>
+        <div>
+          <h2>Keyboard Shortcuts</h2>
+          <p>Navigate faster with keyboard shortcuts</p>
+        </div>
+      </div>
+      <button class="close-btn" (click)="onClose()" aria-label="Close">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <div class="shortcuts-grid">
+        <div *ngFor="let shortcut of shortcuts" class="shortcut-item">
+          <span class="shortcut-description">{{ shortcut.description }}</span>
+          <div class="shortcut-keys">
+            <kbd *ngIf="shortcut.ctrl">Ctrl</kbd>
+            <span *ngIf="shortcut.ctrl" class="key-separator">+</span>
+            <kbd *ngIf="shortcut.alt">Alt</kbd>
+            <span *ngIf="shortcut.alt" class="key-separator">+</span>
+            <kbd *ngIf="shortcut.shift">Shift</kbd>
+            <span *ngIf="shortcut.shift" class="key-separator">+</span>
+            <kbd>{{ shortcut.key.toUpperCase() }}</kbd>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <p class="footer-hint">Press <kbd>?</kbd> anytime to view shortcuts</p>
+    </div>
+  </div>
+</div>

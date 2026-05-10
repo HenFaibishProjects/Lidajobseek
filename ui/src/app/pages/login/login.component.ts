@@ -11,19 +11,7 @@ import { SettingsService } from '../../services/settings.service';
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './login.component.html',
-  styleUrls: ['./login.component.css'],
-  styles: [`
-    .hint-text {
-      font-size: 13px;
-      color: var(--text-secondary);
-      margin-top: 8px;
-    }
-    .link-text {
-      color: var(--accent-color);
-      text-decoration: underline;
-      cursor: pointer;
-    }
-  `]
+  styleUrls: ['./login.component.css']
 })
 export class LoginComponent {
   email = '';

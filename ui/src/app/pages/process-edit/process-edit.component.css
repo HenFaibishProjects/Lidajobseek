@@ -1,0 +1,9 @@
+      .dashboard-wrapper {
+        min-height: 100vh;
+        background: var(--bg-secondary);
+      }
+      .loading-state {
+        text-align: center;
+        padding: 100px;
+        color: var(--text-secondary);
+      }

@@ -11,18 +11,7 @@ import { InteractionFormComponent } from '../../components/interaction-form/inte
     selector: 'app-interaction-edit',
     standalone: true,
     imports: [CommonModule, InteractionFormComponent],
-    template: `
-        <app-interaction-form
-            *ngIf="interaction"
-            mode="edit"
-            [processId]="processId"
-            [interaction]="interaction"
-            [reflection]="reflection"
-            [existingContacts]="existingContacts"
-            [isSubmitting]="isSubmitting"
-            (submitted)="onSubmit()"
-        ></app-interaction-form>
-    `
+    templateUrl: './interaction-edit.component.html'
 })
 export class InteractionEditComponent implements OnInit {
     processId!: number;

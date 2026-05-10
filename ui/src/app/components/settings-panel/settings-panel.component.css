@@ -851,3 +851,22 @@ body.dark-theme .theme-btn:hover:not(.active) {
 body.dark-theme .settings-content::-webkit-scrollbar-thumb {
   background: var(--gray-700);
 }
+
+.data-actions-row {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.data-btn {
+  flex: 1;
+  justify-content: center;
+  background: var(--bg-hover) !important;
+  border: 1px solid var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+.file-input-hidden {
+  display: none;
+}
+

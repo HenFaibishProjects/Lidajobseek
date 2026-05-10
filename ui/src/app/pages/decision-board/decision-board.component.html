@@ -13,7 +13,7 @@
                         <h3 class="company-name" [routerLink]="['/process', process.id]">{{process.companyName}}</h3>
                         <p class="role-title">{{process.roleTitle}}</p>
                     </div>
-                    <div class="fit-score" [ngClass]="getScoreClass(process.careerFitScore)">
+                    <div class="fit-score" [ngClass]="getScoreClass(process.careerFitScore)" title="Career Fit Score: A weighted percentage based on your priority settings and ratings for Tech Match, Work-Life Balance, Growth, and Company Vibe.">
                         {{process.careerFitScore}}%
                     </div>
                 </div>

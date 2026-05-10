@@ -198,7 +198,7 @@
               <span class="pb-card-age" [ngClass]="getAgeBadgeClass(p.updatedAt)" [title]="'Last updated ' + (p.updatedAt | dateFormat:'date')">
                 {{ getDaysAgo(p.updatedAt) }}
               </span>
-              <span class="pb-card-score" *ngIf="hasScore(p)" [ngClass]="scoreClass(avgScore(p))">
+              <span class="pb-card-score" *ngIf="hasScore(p)" [ngClass]="scoreClass(avgScore(p))" title="Insight Score: Represents the average of your ratings for Tech Match, Work-Life Balance, Growth, and Company Vibe.">
                 ★ {{ avgScore(p) }}/10
               </span>
             </div>

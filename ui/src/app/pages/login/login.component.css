@@ -205,6 +205,11 @@
   stroke: white;
 }
 
+.login-logo {
+  width: 50px;
+  height: auto;
+}
+
 @keyframes pulse {
   0%, 100% {
     transform: scale(1);

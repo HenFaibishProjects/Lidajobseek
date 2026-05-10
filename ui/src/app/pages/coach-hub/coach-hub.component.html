@@ -168,7 +168,7 @@
                 <div class="content-input-group">
                     <textarea [(ngModel)]="newResource.content" rows="6"
                         placeholder="Paste your content here or upload a file..." class="input-field"></textarea>
-                    <input type="file" #fileInput (change)="onFileSelected($event)" style="display: none">
+                    <input type="file" #fileInput (change)="onFileSelected($event)" class="file-input-hidden">
                     <button type="button" class="btn-secondary btn-upload" (click)="fileInput.click()">
                         📎 Attach File
                     </button>

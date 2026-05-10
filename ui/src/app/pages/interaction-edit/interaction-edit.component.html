@@ -1,1 +1,10 @@
-<!-- Template is inline in the component TS -->
+        <app-interaction-form
+            *ngIf="interaction"
+            mode="edit"
+            [processId]="processId"
+            [interaction]="interaction"
+            [reflection]="reflection"
+            [existingContacts]="existingContacts"
+            [isSubmitting]="isSubmitting"
+            (submitted)="onSubmit()"
+        ></app-interaction-form>

@@ -191,7 +191,10 @@
                             </div>
                             <div class="dl-content">
                                 <span class="dl-label">Location & Mode</span>
-                                <span class="dl-value">{{ process.location || 'N/A' }} • {{ process.workMode | titlecase }}</span>
+                                <span class="dl-value" *ngIf="process.location || process.workMode; else noLocMode">
+                                    {{ process.location || 'N/A' }}<ng-container *ngIf="process.workMode"> • {{ process.workMode | titlecase }}</ng-container>
+                                </span>
+                                <ng-template #noLocMode><span class="dl-value muted">Not specified</span></ng-template>
                                 <span class="dl-sub" *ngIf="process.workMode === 'hybrid'">{{ process.daysFromOffice }} days in office</span>
                             </div>
                         </div>
@@ -202,7 +205,8 @@
                             </div>
                             <div class="dl-content">
                                 <span class="dl-label">Tech Stack</span>
-                                <span class="dl-value">{{ process.techStack || '—' }}</span>
+                                <span class="dl-value" *ngIf="process.techStack; else noTech">{{ process.techStack }}</span>
+                                <ng-template #noTech><span class="dl-value muted">Not specified</span></ng-template>
                             </div>
                         </div>
                         
@@ -213,23 +217,24 @@
                             <div class="dl-content">
                                 <span class="dl-label">Salary Expectation</span>
                                 <span class="dl-value" *ngIf="process.salaryExpectation; else noSalarySide">
-                                    {{ process.salaryExpectation | number }} {{ process.salaryCurrency || 'ILS' }}
+                                    {{ process.salaryExpectation | number }} {{ process.salaryCurrency || 'dollars' }}
                                     <span class="dl-sub">/ {{ process.salaryPeriod }}</span>
                                 </span>
                                 <ng-template #noSalarySide><span class="dl-value muted">Not specified</span></ng-template>
                             </div>
                         </div>
                         
-                        <div class="dl-item" *ngIf="process.jobDescriptionUrl">
+                        <div class="dl-item">
                             <div class="dl-icon">
                                 <lucide-icon name="briefcase" [size]="16"></lucide-icon>
                             </div>
                             <div class="dl-content">
                                 <span class="dl-label">Job Posting</span>
-                                <a [href]="formatUrl(process.jobDescriptionUrl)" target="_blank" class="btn-visit-detail">
+                                <a *ngIf="process.jobDescriptionUrl; else noJob" [href]="formatUrl(process.jobDescriptionUrl)" target="_blank" class="btn-visit-detail">
                                     <span>Visit Original Post</span>
                                     <lucide-icon name="external-link" [size]="12"></lucide-icon>
                                 </a>
+                                <ng-template #noJob><span class="dl-value muted">Not specified</span></ng-template>
                             </div>
                         </div>
 
@@ -239,7 +244,8 @@
                             </div>
                             <div class="dl-content">
                                 <span class="dl-label">Source</span>
-                                <span class="dl-value">{{ process.source || '—' }}</span>
+                                <span class="dl-value" *ngIf="process.source; else noSource">{{ process.source }}</span>
+                                <ng-template #noSource><span class="dl-value muted">Not specified</span></ng-template>
                             </div>
                         </div>
                     </div>
@@ -415,7 +421,7 @@
                                         </div>
                                     </div>
                                     <div class="net-field">
-                                        <label class="net-label">LinkedIn URL</label>
+                                        <label class="net-label">LinkedIn URL</label>  
                                         <div class="net-input-wrap">
                                             <lucide-icon name="link" [size]="14" strokeWidth="2" class="net-input-icon"></lucide-icon>
                                             <input type="text" [(ngModel)]="editingContact.linkedIn" class="net-input">
