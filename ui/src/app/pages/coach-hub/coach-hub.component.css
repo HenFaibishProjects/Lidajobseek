@@ -689,3 +689,7 @@ body.dark-theme .empty-folder {
         flex-direction: column;
     }
 }
+
+.file-input-hidden {
+    display: none;
+}

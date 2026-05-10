@@ -5,67 +5,8 @@ import { CommonModule } from '@angular/common';
   selector: 'app-skeleton',
   standalone: true,
   imports: [CommonModule],
-  template: `
-    <div class="skeleton" [class]="'skeleton-' + type" [style.width]="width" [style.height]="height"></div>
-  `,
-  styles: [`
-    .skeleton {
-      background: linear-gradient(
-        90deg,
-        var(--gray-200) 0%,
-        var(--gray-100) 50%,
-        var(--gray-200) 100%
-      );
-      background-size: 200% 100%;
-      animation: shimmer 1.5s ease-in-out infinite;
-      border-radius: var(--radius-md);
-    }
-
-    .skeleton-text {
-      height: 16px;
-      margin-bottom: 8px;
-    }
-
-    .skeleton-title {
-      height: 24px;
-      margin-bottom: 12px;
-    }
-
-    .skeleton-avatar {
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-    }
-
-    .skeleton-button {
-      height: 36px;
-      width: 120px;
-      border-radius: var(--radius-lg);
-    }
-
-    .skeleton-card {
-      height: 200px;
-      width: 100%;
-    }
-
-    @keyframes shimmer {
-      0% {
-        background-position: -200% 0;
-      }
-      100% {
-        background-position: 200% 0;
-      }
-    }
-
-    body.dark-theme .skeleton {
-      background: linear-gradient(
-        90deg,
-        var(--gray-700) 0%,
-        var(--gray-600) 50%,
-        var(--gray-700) 100%
-      );
-    }
-  `]
+  templateUrl: './skeleton.component.html',
+  styleUrls: ['./skeleton.component.css']
 })
 export class SkeletonComponent {
   @Input() type: 'text' | 'title' | 'avatar' | 'button' | 'card' = 'text';

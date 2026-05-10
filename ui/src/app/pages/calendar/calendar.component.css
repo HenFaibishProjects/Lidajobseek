@@ -478,3 +478,8 @@
         flex: 1;
     }
 }
+
+.file-input-hidden {
+    display: none;
+}
+

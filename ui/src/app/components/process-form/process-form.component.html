@@ -218,17 +218,17 @@
           <div class="mode-chips">
             <label class="mode-chip" [class.active]="process.workMode === 'remote'">
               <input type="radio" name="workMode" [(ngModel)]="process.workMode" value="remote"
-                (change)="onWorkModeChange()">
+                (change)="onWorkModeChange()" required>
               🌐 Remote
             </label>
             <label class="mode-chip" [class.active]="process.workMode === 'hybrid'">
               <input type="radio" name="workMode" [(ngModel)]="process.workMode" value="hybrid"
-                (change)="onWorkModeChange()">
+                (change)="onWorkModeChange()" required>
               🔀 Hybrid
             </label>
             <label class="mode-chip" [class.active]="process.workMode === 'office'">
               <input type="radio" name="workMode" [(ngModel)]="process.workMode" value="office"
-                (change)="onWorkModeChange()">
+                (change)="onWorkModeChange()" required>
               🏢 On-site
             </label>
           </div>
@@ -310,7 +310,7 @@
           </div>
         </div>
 
-        <div class="form-group" style="margin-top: 8px;">
+        <div class="form-group mt-sm">
           <label class="field-label">Your Tailored Pitch -Why you?</label>
           <textarea name="tailoredPitch" [(ngModel)]="process.tailoredPitch"
             placeholder="Explain in detail why you're a great fit for this specific role. The more depth, the higher your application score…"
@@ -349,19 +349,19 @@
       <div class="aside-kpis">
         <div class="kpi">
           <div class="kpi-label">Company</div>
-          <div class="kpi-value">{{ process.companyName || '&#8212;' }}</div>
+          <div class="kpi-value">{{ process.companyName || '' }}</div>
         </div>
         <div class="kpi">
           <div class="kpi-label">Role</div>
-          <div class="kpi-value">{{ process.roleTitle || '&#8212;' }}</div>
+          <div class="kpi-value">{{ process.roleTitle || '' }}</div>
         </div>
         <div class="kpi">
           <div class="kpi-label">Stage</div>
-          <div class="kpi-value">{{ process.currentStage || '&#8212;' }}</div>
+          <div class="kpi-value">{{ process.currentStage || '' }}</div>
         </div>
         <div class="kpi">
           <div class="kpi-label">Work mode</div>
-          <div class="kpi-value">{{ process.workMode || '&#8212;' }}</div>
+          <div class="kpi-value">{{ process.workMode || '' }}</div>
         </div>
       </div>
       <div class="aside-tip">

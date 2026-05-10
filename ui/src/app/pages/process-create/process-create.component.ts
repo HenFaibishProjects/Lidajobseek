@@ -10,22 +10,8 @@ import { ProcessFormComponent } from '../../components/process-form/process-form
     selector: 'app-process-create',
     standalone: true,
     imports: [CommonModule, RouterModule, ProcessFormComponent],
-    template: `
-      <div class="page-wrapper">
-        <app-process-form
-          [process]="process"
-          [isSubmitting]="loading"
-          (onSubmit)="onSubmit()"
-          (onCancel)="onCancel()">
-        </app-process-form>
-      </div>
-    `,
-    styles: [`
-      .page-wrapper {
-        min-height: 100vh;
-        background: var(--bg-secondary);
-      }
-    `],
+    templateUrl: './process-create.component.html',
+    styleUrls: ['./process-create.component.css']
 })
 export class ProcessCreateComponent {
     loading: boolean = false;
@@ -35,7 +21,7 @@ export class ProcessCreateComponent {
         roleTitle: '',
         techStack: '',
         location: 'Israel',
-        workMode: 'remote',
+        workMode: '',
         daysFromOffice: null,
         source: '',
         salaryExpectation: '',

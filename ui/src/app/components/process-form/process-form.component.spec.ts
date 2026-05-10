@@ -65,7 +65,7 @@ describe('ProcessFormComponent', () => {
     component.process = {
       companyName: '', companyWebsite: '', companyLogoUrl: '',
       roleTitle: '', techStack: '', currentStage: component.stages[0],
-      workMode: 'remote', salaryExpectation: null, salaryCurrency: 'ILS',
+      workMode: '', salaryExpectation: null, salaryCurrency: 'ILS',
       salaryPeriod: 'Month', location: '', tailoredPitch: '', jobDescriptionUrl: ''
     };
     fixture.detectChanges();

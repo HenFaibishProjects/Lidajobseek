@@ -11,17 +11,7 @@ import { InteractionFormComponent } from '../../components/interaction-form/inte
     selector: 'app-interaction-create',
     standalone: true,
     imports: [CommonModule, InteractionFormComponent],
-    template: `
-        <app-interaction-form
-            mode="create"
-            [processId]="processId"
-            [interaction]="interaction"
-            [reflection]="reflection"
-            [existingContacts]="existingContacts"
-            [isSubmitting]="isSubmitting"
-            (submitted)="onSubmit()"
-        ></app-interaction-form>
-    `
+    templateUrl: './interaction-create.component.html'
 })
 export class InteractionCreateComponent implements OnInit {
     processId!: number;

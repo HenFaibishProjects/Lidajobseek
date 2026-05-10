@@ -1,0 +1,34 @@
+.info-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--primary-blue-light);
+  color: var(--primary-blue);
+  cursor: help;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.info-icon:hover {
+  background: var(--primary-blue);
+  color: white;
+  transform: scale(1.1);
+}
+
+.info-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+body.dark-theme .info-icon {
+  background: rgba(0, 134, 240, 0.2);
+  color: var(--primary-blue);
+}
+
+body.dark-theme .info-icon:hover {
+  background: var(--primary-blue);
+  color: white;
+}

@@ -1,0 +1,15 @@
+      <div class="dashboard-wrapper">
+        <div class="container py-5">
+          <app-process-form 
+            *ngIf="process"
+            [process]="process" 
+            [isEdit]="true"
+            [isSubmitting]="isSubmitting"
+            (onSubmit)="onSubmit()"
+            (onCancel)="onCancel()">
+          </app-process-form>
+          <div *ngIf="!process" class="loading-state">
+             <p>Loading application data...</p>
+          </div>
+        </div>
+      </div>

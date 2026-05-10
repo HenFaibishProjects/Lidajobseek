@@ -9,34 +9,8 @@ import { ProcessFormComponent } from '../../components/process-form/process-form
     selector: 'app-process-edit',
     standalone: true,
     imports: [CommonModule, RouterModule, ProcessFormComponent],
-    template: `
-      <div class="dashboard-wrapper">
-        <div class="container py-5">
-          <app-process-form 
-            *ngIf="process"
-            [process]="process" 
-            [isEdit]="true"
-            [isSubmitting]="isSubmitting"
-            (onSubmit)="onSubmit()"
-            (onCancel)="onCancel()">
-          </app-process-form>
-          <div *ngIf="!process" class="loading-state">
-             <p>Loading application data...</p>
-          </div>
-        </div>
-      </div>
-    `,
-    styles: [`
-      .dashboard-wrapper {
-        min-height: 100vh;
-        background: var(--bg-secondary);
-      }
-      .loading-state {
-        text-align: center;
-        padding: 100px;
-        color: var(--text-secondary);
-      }
-    `]
+    templateUrl: './process-edit.component.html',
+    styleUrls: ['./process-edit.component.css']
 })
 export class ProcessEditComponent implements OnInit {
     process: any;
