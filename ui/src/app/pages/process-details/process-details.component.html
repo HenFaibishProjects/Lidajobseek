@@ -217,7 +217,7 @@
                             <div class="dl-content">
                                 <span class="dl-label">Salary Expectation</span>
                                 <span class="dl-value" *ngIf="process.salaryExpectation; else noSalarySide">
-                                    {{ process.salaryExpectation | number }} {{ process.salaryCurrency || 'dollars' }}
+                                    {{ process.salaryExpectation | number }} {{ process.salaryCurrency || 'USD' }}
                                     <span class="dl-sub">/ {{ process.salaryPeriod }}</span>
                                 </span>
                                 <ng-template #noSalarySide><span class="dl-value muted">Not specified</span></ng-template>
