@@ -222,109 +222,119 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
   }
 
   async create(dto: CreateInteractionDto, user?: any): Promise<Interaction> {
+    this.logger.log(`Creating interaction for process ${dto.processId} and user ${user?.id || user?.userId}`);
+    
     try {
-      const process = await this.processRepository.findOne({ id: dto.processId, user: user?.userId });
-      if (!process) {
-        throw new NotFoundException(`Process with ID ${dto.processId} not found`);
+      const userId = Number(user?.id || user?.userId);
+      const processId = Number(dto.processId);
+
+      if (!userId) {
+        throw new Error('User identity is missing or invalid');
       }
 
-      const interaction = this.interactionRepository.create({
+      const process = await this.processRepository.findOne({ 
+        id: processId, 
+        user: userId 
+      });
+
+      if (!process) {
+        this.logger.warn(`Process ${processId} not found for user ${userId}`);
+        throw new NotFoundException(`Process with ID ${processId} not found`);
+      }
+
+      // 1. Create the Interaction entity
+      const interaction = this.em.create(Interaction, {
         date: new Date(dto.date),
         interviewType: dto.interviewType,
         participants: dto.participants,
         summary: dto.summary,
+        headsup: dto.headsup,
+        notes: dto.notes,
+        nextInviteDate: dto.nextInviteDate ? new Date(dto.nextInviteDate) : undefined,
         testsAssessment: dto.testsAssessment,
         roleInsights: dto.roleInsights,
-        notes: dto.notes,
-        headsup: dto.headsup,
         reminder: this.sanitizeReminder(dto.reminder, user),
-        nextInviteStatus: dto.nextInviteStatus,
-        nextInviteDate: dto.nextInviteDate ? new Date(dto.nextInviteDate) : undefined,
-        nextInviteLink: dto.nextInviteLink,
-        nextInviteType: dto.nextInviteType,
-        invitationExtended: dto.invitationExtended,
         process,
       } as any);
 
       this.em.persist(interaction);
 
-      // Auto-add network contacts
+      // 2. Handle Contacts Synchronization
       if (dto.participants && Array.isArray(dto.participants)) {
-        for (const p of dto.participants) {
-          const participant = p as any;
-          if (participant.name) {
-            // Check if this contact already exists for this process
-            const existingContact = await this.contactRepository.findOne({
-              process,
-              name: participant.name,
-            });
+        for (const participant of dto.participants) {
+          if (!participant || !participant.name) continue;
 
-            if (!existingContact) {
-              const contact = this.contactRepository.create({
-                name: participant.name,
-                role: participant.role || 'Interviewer',
-                email: participant.email,
-                phone: participant.phone,
-                linkedIn: participant.linkedIn,
-                socialHooks: participant.socialHooks,
-                process,
-              } as any);
-              this.em.persist(contact);
-            }
+          const existingContact = await this.contactRepository.findOne({
+            process: processId,
+            name: participant.name,
+          });
+
+          if (!existingContact) {
+            const contact = this.em.create(Contact, {
+              name: participant.name,
+              role: participant.role,
+              email: participant.email,
+              phone: participant.phone,
+              linkedIn: participant.linkedIn,
+              socialHooks: participant.socialHooks,
+              process,
+            } as any);
+            this.em.persist(contact);
+          } else {
+            // Optional: Update existing contact details if they are richer now
+            this.em.assign(existingContact, {
+              role: participant.role || existingContact.role,
+              email: participant.email || existingContact.email,
+              phone: participant.phone || existingContact.phone,
+              linkedIn: participant.linkedIn || existingContact.linkedIn,
+              socialHooks: participant.socialHooks || existingContact.socialHooks,
+            });
           }
         }
       }
 
+      // 3. Update the process's current stage and updatedAt
+      process.updatedAt = new Date();
+      // If this is a new interaction, it might imply a stage update? 
+      // For now we just ensure updatedAt is bumped.
+
       await this.em.flush();
+      this.logger.log(`Successfully created interaction ${interaction.id}`);
+      
       return interaction;
     } catch (error) {
-      this.logger.error(`Failed to create interaction: ${error.message}`, error.stack);
+      this.logger.error(`Failed to create interaction for process ${dto.processId}: ${error.message}`, error.stack);
       throw error;
     }
   }
 
-  async findAll(startDate?: string, endDate?: string, processId?: number, userId?: number): Promise<any[]> {
+  async findAll(params: {
+    processId?: number;
+    startDate?: string;
+    endDate?: string;
+    userId: number;
+  }): Promise<Interaction[]> {
     const where: any = {};
-
-    where.process = {};
-    if (userId) {
-      where.process.user = userId;
+    
+    if (params.processId) {
+      where.process = { id: Number(params.processId), user: params.userId };
+    } else {
+      where.process = { user: params.userId };
     }
 
-    if (processId) {
-      where.process.id = processId;
+    if (params.startDate) {
+      where.date = { $gte: new Date(params.startDate) };
     }
 
-    if (startDate && endDate) {
-      where.date = {
-        $gte: new Date(startDate),
-        $lte: new Date(endDate),
-      };
-    } else if (startDate) {
-      where.date = {
-        $gte: new Date(startDate),
-      };
-    } else if (endDate) {
-      where.date = {
-        $lte: new Date(endDate),
-      };
+    if (params.endDate) {
+      if (!where.date) where.date = {};
+      where.date.$lte = new Date(params.endDate);
     }
 
-    const interactions = await this.interactionRepository.find(where, {
+    return this.interactionRepository.find(where, {
       populate: ['process'],
       orderBy: { date: QueryOrder.ASC },
     });
-
-    // Format response to match expected structure
-    return interactions.map(interaction => ({
-      ...interaction,
-      process: {
-        id: interaction.process.id,
-        companyName: interaction.process.companyName,
-        roleTitle: interaction.process.roleTitle,
-      },
-      processId: interaction.process.id,
-    }));
   }
 
   async findByProcess(processId: number, userId: number): Promise<Interaction[]> {

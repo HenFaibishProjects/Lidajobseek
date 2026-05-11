@@ -31,12 +31,12 @@ export class InteractionsController {
   ) {
     // If startDate and endDate are provided, return interactions within date range
     // Otherwise return all interactions
-    return this.interactionsService.findAll(
+    return this.interactionsService.findAll({
       startDate,
       endDate,
-      processId ? parseInt(processId) : undefined,
-      req.user.userId
-    );
+      processId: processId ? parseInt(processId) : undefined,
+      userId: req.user.userId,
+    });
   }
 
   @Get('export')
