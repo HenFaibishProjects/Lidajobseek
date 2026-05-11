@@ -295,30 +295,28 @@
                 </a>
             </div>
         </div>
-        
-    
+        <!-- Drive Content -->
+        <div class="drive-content">
+            <div *ngIf="loadingDrive" class="drive-loading">
+                <p>Loading...</p>
+            </div>
 
-            <!-- Login Prompt -->
-          
+            <div *ngIf="!isGoogleAuthenticated && !loadingDrive" class="drive-auth-prompt">
+                <button class="btn-primary" (click)="loginWithGoogle()">Sign in with Google</button>
+            </div>
 
-            <!-- File List -->
             <div *ngIf="isGoogleAuthenticated && !loadingDrive" class="drive-file-list">
                 <div *ngFor="let file of driveFiles" class="drive-file-item">
                     <img [src]="file.iconLink" class="file-icon" alt="icon">
                     <div class="file-info">
                         <span class="file-name">{{ file.name }}</span>
-                        <span class="file-type">{{ file.mimeType.split('.').pop() }}</span>
                     </div>
                     <a [href]="file.webViewLink" target="_blank" class="btn-action">👁️</a>
-                </div>
-
-                <div *ngIf="driveFiles.length === 0" class="empty-drive">
-                    <p>No files found in this folder.</p>
                 </div>
             </div>
         </div>
         <p class="drive-hint">
-            {{ isGoogleAuthenticated ? 'Authenticated as Google User' : 'Authorization required for private folders' }}
+            {{ isGoogleAuthenticated ? 'Authenticated' : 'Not Authenticated' }}
         </p>
     </div>
 </div>
