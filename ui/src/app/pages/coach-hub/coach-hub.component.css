@@ -722,6 +722,21 @@ body.dark-theme .empty-folder {
     gap: 8px;
 }
 
+.cloud-input-row {
+    display: flex;
+    gap: 12px;
+    align-items: stretch;
+}
+
+.cloud-input-row .input-field {
+    flex: 1;
+}
+
+.cloud-input-row button {
+    white-space: nowrap;
+    padding: 0 24px;
+}
+
 .folder-card--cloud:hover {
     border-color: #4285F4;
     background: rgba(66, 133, 244, 0.03);
@@ -772,23 +787,116 @@ body.dark-theme .empty-folder {
     font-weight: 600;
 }
 
-.drive-iframe-container {
+.drive-content {
     flex: 1;
+    overflow-y: auto;
+    background: var(--bg-card);
     position: relative;
-    background: #fff;
+    min-height: 300px;
 }
 
-.drive-error {
-    position: absolute;
-    inset: 0;
+.drive-auth-prompt {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 16px;
+    padding: 60px 40px;
     text-align: center;
-    padding: 40px;
+    gap: 16px;
+    height: 100%;
+}
+
+.auth-icon {
+    font-size: 48px;
+    margin-bottom: 8px;
+}
+
+.drive-auth-prompt h3 {
+    margin: 0;
+    font-size: 20px;
+    color: var(--text-primary);
+}
+
+.drive-auth-prompt p {
+    margin: 0;
+    max-width: 340px;
     color: var(--text-secondary);
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.drive-file-list {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.drive-file-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: var(--bg-subtle);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    transition: all 0.2s;
+}
+
+.drive-file-item:hover {
+    background: var(--accent-light);
+    border-color: var(--accent-color);
+    transform: translateX(4px);
+}
+
+.file-icon {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+}
+
+.file-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.file-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.file-type {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+}
+
+.drive-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 60px;
+    gap: 16px;
+}
+
+.drive-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.empty-drive {
+    padding: 40px;
+    text-align: center;
+    color: var(--text-muted);
+    font-style: italic;
 }
 
 .drive-hint {

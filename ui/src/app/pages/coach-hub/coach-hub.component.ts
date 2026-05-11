@@ -8,6 +8,7 @@ import { AuthService } from '../../services/auth.service';
 import { FilterPipe } from '../../pipes/filter.pipe';
 import { environment } from '../../../environments/environment';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { GoogleDriveService } from '../../services/google-drive.service';
 
 interface Category {
     id: string;
@@ -34,8 +35,12 @@ export class CoachHubComponent implements OnInit {
     selectedFile: File | null = null;
     showAddCategory: boolean = false;
     googleDriveId: string = '';
+    googleClientId: string = '';
     showDriveViewer: boolean = false;
     safeDriveUrl: SafeResourceUrl | null = null;
+    isGoogleAuthenticated: boolean = false;
+    driveFiles: any[] = [];
+    loadingDrive: boolean = false;
 
     newResource: any = {
         title: '',
@@ -68,12 +73,20 @@ export class CoachHubComponent implements OnInit {
         private confirmService: ConfirmService,
         private toastService: ToastService,
         private authService: AuthService,
-        private sanitizer: DomSanitizer
+        private sanitizer: DomSanitizer,
+        private googleDriveService: GoogleDriveService
     ) { }
 
     ngOnInit() {
         this.loadCategories();
         this.loadResources();
+        
+        this.googleDriveService.accessToken$.subscribe(token => {
+            this.isGoogleAuthenticated = !!token;
+            if (this.isGoogleAuthenticated && this.showDriveViewer) {
+                this.loadDriveFiles();
+            }
+        });
     }
 
     loadCategories() {
@@ -93,6 +106,10 @@ export class CoachHubComponent implements OnInit {
                 this.googleDriveId = prefs.appSettings.googleDriveId;
                 this.updateDriveUrl();
             }
+
+            if (prefs.appSettings?.googleClientId) {
+                this.googleClientId = prefs.appSettings.googleClientId;
+            }
         });
     }
 
@@ -105,6 +122,7 @@ export class CoachHubComponent implements OnInit {
             const currentSettings = prefs.appSettings || {};
             currentSettings.coachHubCategories = this.categories;
             currentSettings.googleDriveId = this.googleDriveId;
+            currentSettings.googleClientId = this.googleClientId;
             
             this.authService.updatePreferences({ appSettings: currentSettings }).subscribe({
                 next: () => {
@@ -242,6 +260,48 @@ export class CoachHubComponent implements OnInit {
         this.showDriveViewer = true;
         this.selectedCategory = null;
         this.showForm = false;
+
+        if (this.isGoogleAuthenticated) {
+            this.loadDriveFiles();
+        }
+    }
+
+    loginWithGoogle() {
+        if (!this.googleClientId) {
+            this.showConfig = true;
+            this.toastService.show('Please set your Google Client ID in configuration', 'warning');
+            return;
+        }
+
+        this.googleDriveService.login(this.googleClientId).then(() => {
+            this.toastService.show('Connected to Google Drive', 'success');
+            this.loadDriveFiles();
+        }).catch(err => {
+            this.toastService.show('Failed to connect to Google', 'error');
+            console.error(err);
+        });
+    }
+
+    loadDriveFiles() {
+        if (!this.googleDriveId) return;
+        
+        this.loadingDrive = true;
+        this.googleDriveService.getFiles(this.googleDriveId).subscribe({
+            next: (res) => {
+                this.driveFiles = res.files;
+                this.loadingDrive = false;
+            },
+            error: (err) => {
+                this.toastService.show('Failed to load cloud files', 'error');
+                this.loadingDrive = false;
+            }
+        });
+    }
+
+    disconnectGoogle() {
+        this.googleDriveService.logout();
+        this.driveFiles = [];
+        this.toastService.show('Disconnected from Google', 'info');
     }
 
     // Category Management Methods
