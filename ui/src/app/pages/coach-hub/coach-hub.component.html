@@ -296,22 +296,10 @@
             </div>
         </div>
         
-        <div class="drive-content">
-            <!-- Loading State -->
-            <div *ngIf="loadingDrive" class="drive-loading">
-                <div class="pb-spinner"></div>
-                <p>Fetching your cloud files...</p>
-            </div>
+    
 
             <!-- Login Prompt -->
-            <div *ngIf="!isGoogleAuthenticated && !loadingDrive" class="drive-auth-prompt">
-                <div class="auth-icon">🔐</div>
-                <h3>Access Your Private Files</h3>
-                <p>Sign in with Google to securely view your private documents without making them public.</p>
-                <button class="btn-primary" (click)="loginWithGoogle()">
-                    Sign in with Google
-                </button>
-            </div>
+          
 
             <!-- File List -->
             <div *ngIf="isGoogleAuthenticated && !loadingDrive" class="drive-file-list">

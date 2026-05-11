@@ -13,6 +13,7 @@ type DateFormatPreference = 'MM/DD/YYYY' | 'DD/MM/YYYY' | 'YYYY-MM-DD';
 type TimeFormatPreference = '12' | '24';
 
 interface UpdatePreferencesDto {
+  displayName?: string;
   theme?: ThemePreference;
   country?: string;
   dateFormat?: DateFormatPreference;
@@ -128,6 +129,7 @@ export class AuthService {
     }
 
     return {
+      displayName: user.name || '',
       theme: user.themePreference || 'light',
       country: user.countryPreference || '',
       dateFormat: user.dateFormatPreference || 'DD/MM/YYYY',
@@ -149,6 +151,10 @@ export class AuthService {
       hasSeenOnboarding?: boolean;
       appSettings?: any;
     } = {};
+
+    if (typeof dto.displayName === 'string') {
+      (patch as any).name = dto.displayName.trim();
+    }
 
     if (dto.theme && ['light', 'dark', 'auto'].includes(dto.theme)) {
       patch.themePreference = dto.theme;
@@ -184,6 +190,7 @@ export class AuthService {
     }
 
     return {
+      displayName: updatedUser.name || '',
       theme: updatedUser.themePreference || 'light',
       country: updatedUser.countryPreference || '',
       dateFormat: updatedUser.dateFormatPreference || 'DD/MM/YYYY',

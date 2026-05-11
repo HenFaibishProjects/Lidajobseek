@@ -95,6 +95,12 @@ export class SettingsService {
           clockFormat: prefs.timeFormat,
           avatarStyle: prefs.avatarStyle || 'avataaars',
           hasSeenOnboarding: prefs.hasSeenOnboarding ?? this.settingsSubject.value.hasSeenOnboarding,
+          profile: {
+            ...this.settingsSubject.value.profile,
+            displayName: prefs.displayName || this.settingsSubject.value.profile?.displayName || '',
+            contactEmail: this.settingsSubject.value.profile?.contactEmail || '',
+            phoneNumber: this.settingsSubject.value.profile?.phoneNumber || '',
+          }
         } as UserSettings;
 
         this.settingsSubject.next(merged);
@@ -125,6 +131,7 @@ export class SettingsService {
 
     if (this.authService.isAuthenticated()) {
       this.authService.updatePreferences({
+        displayName: newSettings.profile?.displayName,
         theme: newSettings.theme,
         country: newSettings.country,
         dateFormat: newSettings.dateFormat,

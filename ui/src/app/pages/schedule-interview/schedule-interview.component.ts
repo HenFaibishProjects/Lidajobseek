@@ -60,6 +60,10 @@ export class ScheduleInterviewComponent implements OnInit {
   isPremiumUser = false;
   datePart: string = '';
   timePart: string = '';
+  
+  // NEW: State for participant selection
+  processContacts: any[] = [];
+  contactDropdownOpen = false;
 
   get selectedInterviewTypeLabel(): string {
     return getInterviewTypeLabel(this.interaction.interviewType);
@@ -109,6 +113,11 @@ export class ScheduleInterviewComponent implements OnInit {
    get reminderTimingLabel(): string {
     const option = this.reminderOptions.find((o) => o.value === Number(this.interaction?.reminder?.beforeMinutes));
     return option?.label ?? 'Custom';
+  }
+
+  get availableContacts() {
+    const participantNames = (this.interaction.participants || []).map((p: any) => p.name);
+    return this.processContacts.filter(c => !participantNames.includes(c.name));
   }
 
   get canSubmit(): boolean {
@@ -178,8 +187,13 @@ export class ScheduleInterviewComponent implements OnInit {
     });
   }
 
-  addParticipant() {
-    this.interaction.participants.push({ role: 'HR', name: '' });
+  addParticipantFromContact(contact: any) {
+    if (!this.interaction.participants) this.interaction.participants = [];
+    const alreadyExists = this.interaction.participants.some((p: any) => p.name === contact.name);
+    if (!alreadyExists) {
+      this.interaction.participants.push({ role: contact.role || 'HR', name: contact.name });
+    }
+    this.contactDropdownOpen = false;
   }
 
   removeParticipant(index: number) {
@@ -192,6 +206,20 @@ export class ScheduleInterviewComponent implements OnInit {
       return;
     }
     this.interaction.processId = Number(process?.id);
+    
+    // Clear current participants as they might not belong to the new process
+    this.interaction.participants = [];
+    
+    // Load contacts for this specific process
+    this.processesService.getById(this.interaction.processId).subscribe({
+      next: (data) => {
+        this.processContacts = data.contacts || [];
+      },
+      error: (err) => {
+        console.error('Failed to load process contacts', err);
+        this.processContacts = [];
+      }
+    });
   }
 
   onSubmit() {

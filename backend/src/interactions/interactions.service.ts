@@ -309,9 +309,11 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
     return interactions.map(interaction => ({
       ...interaction,
       process: {
+        id: interaction.process.id,
         companyName: interaction.process.companyName,
         roleTitle: interaction.process.roleTitle,
       },
+      processId: interaction.process.id,
     }));
   }
 
@@ -373,9 +375,11 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
     return interactions.map(interaction => ({
       ...interaction,
       process: {
+        id: interaction.process.id,
         companyName: interaction.process.companyName,
         roleTitle: interaction.process.roleTitle,
       },
+      processId: interaction.process.id,
     }));
   }
 

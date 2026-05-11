@@ -201,24 +201,43 @@
                         <div class="participants-wrap">
                             <div class="participants-title">
                                 <label>Interviewers & attendees</label>
-                                <button type="button" class="btn-chip" (click)="addParticipant()">+ Add
-                                    participant</button>
+                                <div class="network-selection-wrapper" *ngIf="selectedProcess">
+                                    <button type="button" class="btn-chip" 
+                                        [disabled]="availableContacts.length === 0"
+                                        (click)="contactDropdownOpen = !contactDropdownOpen">
+                                        {{ availableContacts.length === 0 ? 'All contacts added' : '+ Add from Network' }}
+                                        <svg class="chevron" [class.open]="contactDropdownOpen" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+                                    </button>
+                                    
+                                    <div class="contact-dropdown" *ngIf="contactDropdownOpen && availableContacts.length > 0">
+                                        <div *ngFor="let contact of availableContacts" class="contact-option" (click)="addParticipantFromContact(contact)">
+                                            <div class="contact-avatar">{{ contact.name?.charAt(0) | uppercase }}</div>
+                                            <div class="contact-info">
+                                                <strong>{{ contact.name }}</strong>
+                                                <span>{{ contact.role }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p *ngIf="!selectedProcess" class="selection-hint">Select a process first to add participants</p>
                             </div>
 
                             <div class="participants-list">
                                 <div *ngFor="let p of interaction.participants; let i = index" class="participant-row">
                                     <div class="participant-dot" aria-hidden="true">{{ (p.name ||
                                         'P').charAt(0).toUpperCase() }}</div>
-                                    <select [name]="'role' + i" [(ngModel)]="p.role" class="input-field">
+                                    <select [name]="'role' + i" [(ngModel)]="p.role" class="input-field role-select">
                                         <option *ngFor="let role of availableRoles" [value]="role">{{role}}</option>
                                     </select>
-                                    <input type="text" [name]="'name' + i" [(ngModel)]="p.name" placeholder="Full name"
-                                        class="input-field">
+                                    <div class="participant-name-display">
+                                        {{ p.name }}
+                                    </div>
                                     <button type="button" class="btn-remove" (click)="removeParticipant(i)"
                                         aria-label="Remove interviewer">&times;</button>
                                 </div>
-                                <p class="muted-hint" *ngIf="interaction.participants.length === 0">No participants yet.
-                                    Add people now if known.</p>
+                                <p class="muted-hint" *ngIf="interaction.participants.length === 0">
+                                    {{ selectedProcess && processContacts.length === 0 ? 'No contacts found in this process. Add them in the Process Details page first.' : 'No participants yet. Add people from your network above.' }}
+                                </p>
                             </div>
                         </div>
                     </section>

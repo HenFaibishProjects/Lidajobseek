@@ -9,6 +9,7 @@ export type DateFormatPreference = 'MM/DD/YYYY' | 'DD/MM/YYYY' | 'YYYY-MM-DD';
 export type TimeFormatPreference = '12' | '24';
 
 export interface PreferencesResponse {
+  displayName?: string;
   theme: ThemePreference;
   country: string;
   dateFormat: DateFormatPreference;
@@ -111,6 +112,7 @@ export class AuthService {
         const existing = this.getUser() || {};
         this.setUser({
           ...existing,
+          name: prefs.displayName || existing.name,
           themePreference: prefs.theme,
           countryPreference: prefs.country,
           dateFormatPreference: prefs.dateFormat,
