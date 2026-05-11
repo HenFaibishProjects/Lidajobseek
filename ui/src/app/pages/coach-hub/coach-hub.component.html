@@ -101,15 +101,33 @@
                 </label>
             </div>
         </div>
+
+        <!-- Cloud Storage Config -->
+        <div class="config-cloud">
+            <div class="cloud-header-box">
+                <h3>☁️ Cloud Storage</h3>
+                <p class="config-hint">Link your Google Drive for instant file mirroring</p>
+            </div>
+            <div class="cloud-form">
+                <div class="form-group">
+                    <label>Google Drive Folder ID or Link</label>
+                    <div class="cloud-input-wrap">
+                        <input type="text" [(ngModel)]="googleDriveId" 
+                            placeholder="Paste your folder link here..."
+                            class="input-field" (change)="saveCategories()">
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Breadcrumb Navigation -->
-    <div class="breadcrumb" *ngIf="selectedCategory">
+    <div class="breadcrumb" *ngIf="selectedCategory || showDriveViewer">
         <button class="breadcrumb-link" (click)="backToFolders()">
             <span class="icon">🏠</span> Home
         </button>
         <span class="breadcrumb-separator">/</span>
-        <span class="breadcrumb-current">{{ selectedCategoryData?.name }}</span>
+        <span class="breadcrumb-current">{{ showDriveViewer ? 'Google Drive' : selectedCategoryData?.name }}</span>
     </div>
 
     <!-- Folder View (Main Categories) -->
@@ -126,6 +144,18 @@
                         {{ (resources | filter: category.id).length }} item{{ (resources | filter: category.id).length
                         !== 1 ? 's' : '' }}
                     </p>
+                </div>
+            </div>
+
+            <!-- Google Drive Card -->
+            <div class="folder-card folder-card--cloud" (click)="openDriveViewer()"
+                style="--folder-color: #4285F4">
+                <div class="folder-icon-wrapper">
+                    <div class="folder-icon">☁️</div>
+                </div>
+                <div class="folder-info">
+                    <h3 class="folder-name">Google Drive</h3>
+                    <p class="folder-count">{{ googleDriveId ? 'Mirror Connected' : 'Connect Drive' }}</p>
                 </div>
             </div>
         </div>
@@ -227,5 +257,27 @@
             <p>Add your first item to get started</p>
             <button class="btn-primary" (click)="showForm = true">+ Add Item</button>
         </div>
+    </div>
+
+    <!-- Google Drive Viewer -->
+    <div *ngIf="showDriveViewer" class="drive-viewer">
+        <div class="drive-header">
+            <div class="drive-title">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/1/12/Google_Drive_icon_%282020%29.svg" width="20" height="20" alt="Drive">
+                <h3>My Personal Drive Mirror</h3>
+            </div>
+            <a [href]="'https://drive.google.com/drive/folders/' + googleDriveId" target="_blank" class="btn-secondary btn-sm">
+                Open in Google Drive ↗
+            </a>
+        </div>
+        
+        <div class="drive-iframe-container">
+            <iframe *ngIf="safeDriveUrl" [src]="safeDriveUrl" width="100%" height="100%" frameborder="0" allowfullscreen></iframe>
+            <div *ngIf="!safeDriveUrl" class="drive-error">
+                <p>Invalid Google Drive ID. Please check your configuration.</p>
+                <button class="btn-primary" (click)="showConfig = true">Configure Link</button>
+            </div>
+        </div>
+        <p class="drive-hint">Note: Ensure your folder sharing is set to "Anyone with the link can view" to see files here.</p>
     </div>
 </div>

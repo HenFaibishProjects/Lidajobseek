@@ -19,8 +19,8 @@ import { LucideAngularModule } from 'lucide-angular';
 // Kanban column definitions — simplified pipeline
 const BOARD_COLUMNS: { id: string; label: string; icon: string; stages: string[] }[] = [
   {
-    id: 'applied',
-    label: 'Applied',
+    id: 'first-conversation',
+    label: 'After First Conversation',
     icon: '📋',
     stages: ['Application Submitted', 'Resume Under Review'],
   },
@@ -63,7 +63,7 @@ const BOARD_COLUMNS: { id: string; label: string; icon: string; stages: string[]
 
 // The default stage assigned when a card is dropped into a column
 const COLUMN_DEFAULT_STAGE: Record<string, string> = {
-  applied: 'Application Submitted',
+  'first-conversation': 'Application Submitted',
   'in-process': 'Initial Call Scheduled',
   offer: 'Offer Received',
   hired: 'Offer Accepted',
@@ -76,7 +76,7 @@ function stageToColumnId(stage: string): string {
   for (const col of BOARD_COLUMNS) {
     if (col.stages.includes(stage)) return col.id;
   }
-  return 'applied';
+  return 'first-conversation';
 }
 
 @Component({

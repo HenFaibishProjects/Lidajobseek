@@ -7,6 +7,7 @@ import { ToastService } from '../../services/toast.service';
 import { AuthService } from '../../services/auth.service';
 import { FilterPipe } from '../../pipes/filter.pipe';
 import { environment } from '../../../environments/environment';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 interface Category {
     id: string;
@@ -32,6 +33,9 @@ export class CoachHubComponent implements OnInit {
     selectedFileName: string = '';
     selectedFile: File | null = null;
     showAddCategory: boolean = false;
+    googleDriveId: string = '';
+    showDriveViewer: boolean = false;
+    safeDriveUrl: SafeResourceUrl | null = null;
 
     newResource: any = {
         title: '',
@@ -63,7 +67,8 @@ export class CoachHubComponent implements OnInit {
         private resourcesService: ResourcesService,
         private confirmService: ConfirmService,
         private toastService: ToastService,
-        private authService: AuthService
+        private authService: AuthService,
+        private sanitizer: DomSanitizer
     ) { }
 
     ngOnInit() {
@@ -83,6 +88,11 @@ export class CoachHubComponent implements OnInit {
                     this.saveCategories(); // Save to DB
                 }
             }
+
+            if (prefs.appSettings?.googleDriveId) {
+                this.googleDriveId = prefs.appSettings.googleDriveId;
+                this.updateDriveUrl();
+            }
         });
     }
 
@@ -94,12 +104,35 @@ export class CoachHubComponent implements OnInit {
         this.authService.getPreferences().subscribe(prefs => {
             const currentSettings = prefs.appSettings || {};
             currentSettings.coachHubCategories = this.categories;
+            currentSettings.googleDriveId = this.googleDriveId;
             
             this.authService.updatePreferences({ appSettings: currentSettings }).subscribe({
-                next: () => this.toastService.show('Categories updated', 'success'),
-                error: () => this.toastService.show('Failed to save categories', 'error')
+                next: () => {
+                    this.toastService.show('Settings updated', 'success');
+                    this.updateDriveUrl();
+                },
+                error: () => this.toastService.show('Failed to save settings', 'error')
             });
         });
+    }
+
+    updateDriveUrl() {
+        if (!this.googleDriveId) {
+            this.safeDriveUrl = null;
+            return;
+        }
+
+        // Handle full URLs by extracting ID
+        let id = this.googleDriveId.trim();
+        const folderMatch = id.match(/folders\/([a-zA-Z0-9_-]+)/);
+        const idMatch = id.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+        
+        if (folderMatch) id = folderMatch[1];
+        else if (idMatch) id = idMatch[1];
+
+        this.safeDriveUrl = this.sanitizer.bypassSecurityTrustResourceUrl(
+            `https://drive.google.com/embeddedfolderview?id=${id}#list`
+        );
     }
 
     get enabledCategories() {
@@ -195,6 +228,18 @@ export class CoachHubComponent implements OnInit {
     }
 
     backToFolders() {
+        this.selectedCategory = null;
+        this.showForm = false;
+        this.showDriveViewer = false;
+    }
+
+    openDriveViewer() {
+        if (!this.googleDriveId) {
+            this.showConfig = true;
+            this.toastService.show('Please set your Google Drive ID first', 'info');
+            return;
+        }
+        this.showDriveViewer = true;
         this.selectedCategory = null;
         this.showForm = false;
     }

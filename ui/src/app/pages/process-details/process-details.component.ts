@@ -105,11 +105,25 @@ export class ProcessDetailsComponent implements OnInit {
         }
     }
 
+    isDeleting = false;
     async deleteProcess() {
         if (await this.confirmService.delete('this application')) {
-            this.processesService.delete(this.process.id).subscribe(() => {
-                this.toastService.show('Application removed from your pipeline', 'success');
-                this.router.navigate(['/']);
+            this.isDeleting = true;
+            this.processesService.delete(this.process.id).subscribe({
+                next: () => {
+                    this.toastService.show('Application removed from your pipeline', 'success');
+                    this.isDeleting = false;
+                    this.router.navigate(['/']);
+                },
+                error: (err) => {
+                    console.error('Failed to delete process', err);
+                    this.isDeleting = false;
+                    if (err.status === 401) {
+                        this.toastService.show('Session expired. Please log in again.', 'error');
+                    } else {
+                        this.toastService.show('Failed to remove application. It might take a moment, please refresh.', 'error');
+                    }
+                }
             });
         }
     }

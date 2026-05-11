@@ -1,4 +1,4 @@
-import { Entity, PrimaryKey, Property, ManyToOne } from '@mikro-orm/core';
+import { Entity, PrimaryKey, Property, ManyToOne, Index } from '@mikro-orm/core';
 import { Process } from '../processes/process.entity';
 
 @Entity({ schema: 'app' })
@@ -61,6 +61,7 @@ export class Interaction {
   @Property({ onCreate: () => new Date() })
   createdAt: Date = new Date();
 
+  @Index()
   @ManyToOne(() => Process)
   process!: Process;
 }

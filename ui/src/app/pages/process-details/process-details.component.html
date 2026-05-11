@@ -27,9 +27,10 @@
                     <lucide-icon name="pencil" [size]="14" strokeWidth="2"></lucide-icon>
                     <span>Edit</span>
                 </button>
-                <button class="btn-sleek danger" (click)="deleteProcess()">
-                    <lucide-icon name="trash-2" [size]="14" strokeWidth="2"></lucide-icon>
-                    <span>Delete</span>
+                <button class="btn-sleek danger" (click)="deleteProcess()" [disabled]="isDeleting">
+                    <lucide-icon name="trash-2" [size]="14" strokeWidth="2" *ngIf="!isDeleting"></lucide-icon>
+                    <span *ngIf="isDeleting">Deleting...</span>
+                    <span *ngIf="!isDeleting">Delete</span>
                 </button>
             </div>
         </div>

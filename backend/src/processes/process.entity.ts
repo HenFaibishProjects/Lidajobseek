@@ -1,4 +1,4 @@
-import { Entity, PrimaryKey, Property, ManyToOne, OneToMany, Collection } from '@mikro-orm/core';
+import { Entity, PrimaryKey, Property, ManyToOne, OneToMany, Collection, Index } from '@mikro-orm/core';
 import { User } from '../users/user.entity';
 import { Interaction } from '../interactions/interaction.entity';
 import { SelfReview } from '../reviews/self-review.entity';
@@ -57,6 +57,7 @@ export class Process {
   @Property({ onCreate: () => new Date() })
   createdAt: Date = new Date();
 
+  @Index()
   @Property({ onCreate: () => new Date(), onUpdate: () => new Date() })
   updatedAt: Date = new Date();
 
@@ -120,6 +121,7 @@ export class Process {
   @OneToMany(() => Contact, contact => contact.process, { orphanRemoval: true })
   contacts = new Collection<Contact>(this);
 
+  @Index()
   @ManyToOne(() => User)
   user!: User;
 }

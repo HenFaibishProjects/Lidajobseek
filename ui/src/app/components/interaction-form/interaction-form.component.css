@@ -551,6 +551,22 @@ body.dark-theme .ic-textarea--private {
   animation: ic-fade-up 0.15s ease-out;
 }
 
+.ic-participant-display {
+  flex: 1;
+  padding: 9px 14px;
+  background: var(--bg-primary);
+  border: 1.5px dashed var(--border-color);
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+}
+
+.ic-pname {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
 .ic-btn-remove {
   width: 32px;
   height: 32px;

@@ -1,4 +1,4 @@
-import { Entity, PrimaryKey, Property, ManyToOne } from '@mikro-orm/core';
+import { Entity, PrimaryKey, Property, ManyToOne, Index } from '@mikro-orm/core';
 import { Process } from '../processes/process.entity';
 
 @Entity({ schema: 'app' })
@@ -25,6 +25,7 @@ export class Contact {
   phone?: string;
 
 
+  @Index()
   @ManyToOne(() => Process)
   process!: Process;
 }

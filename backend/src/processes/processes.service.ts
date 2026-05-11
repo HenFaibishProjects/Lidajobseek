@@ -249,12 +249,27 @@ export class ProcessesService {
   }
 
   async remove(id: number, userId: number): Promise<Process> {
-    const process = await this.processRepository.findOne({ id, user: userId });
+    const start = Date.now();
+    this.logger.log(`Starting removal of process ${id} for user ${userId}`);
+    
+    const process = await this.processRepository.findOne(
+      { id, user: userId },
+      { populate: ['interactions', 'reviews', 'contacts'] }
+    );
+
     if (!process) {
       throw new NotFoundException(`Process with ID ${id} not found`);
     }
-    await this.em.removeAndFlush(process);
-    return process;
+
+    try {
+      await this.em.removeAndFlush(process);
+      const duration = Date.now() - start;
+      this.logger.log(`Successfully removed process ${id} in ${duration}ms`);
+      return process;
+    } catch (error) {
+      this.logger.error(`Failed to remove process ${id}:`, error instanceof Error ? error.stack : error);
+      throw error;
+    }
   }
 
   async exportData(userId: number): Promise<Process[]> {

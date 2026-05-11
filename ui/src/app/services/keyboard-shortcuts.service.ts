@@ -62,24 +62,6 @@ export class KeyboardShortcutsService implements OnDestroy {
     });
 
     this.registerShortcut({
-      key: 'f',
-      description: 'Go to Profile',
-      action: () => this.router.navigate(['/profile'])
-    });
-
-    this.registerShortcut({
-      key: 'g',
-      description: 'Go to Guide',
-      action: () => this.router.navigate(['/instructions'])
-    });
-
-    this.registerShortcut({
-      key: 'i',
-      description: 'Go to Pricing',
-      action: () => this.router.navigate(['/pricing'])
-    });
-
-    this.registerShortcut({
       key: '/',
       description: 'Focus Search',
       action: () => {

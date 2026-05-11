@@ -97,14 +97,16 @@
       </div>
 
       <div class="ic-participants-toolbar">
-        <div class="ic-network-wrapper" *ngIf="existingContacts.length > 0">
-          <button type="button" class="ic-btn-outline" (click)="contactDropdownOpen = !contactDropdownOpen">
+        <div class="ic-network-wrapper">
+          <button type="button" class="ic-btn-outline" 
+            [disabled]="availableContacts.length === 0"
+            (click)="contactDropdownOpen = !contactDropdownOpen">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-            From Network
-            <svg class="ic-chevron" [class.ic-chevron--open]="contactDropdownOpen" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+            {{ availableContacts.length === 0 ? 'All contacts added' : 'Add from Network' }}
+            <svg *ngIf="availableContacts.length > 0" class="ic-chevron" [class.ic-chevron--open]="contactDropdownOpen" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
           </button>
-          <div class="ic-dropdown" *ngIf="contactDropdownOpen">
-            <div *ngFor="let contact of existingContacts" class="ic-dropdown-item" (click)="addFromContact(contact)">
+          <div class="ic-dropdown" *ngIf="contactDropdownOpen && availableContacts.length > 0">
+            <div *ngFor="let contact of availableContacts" class="ic-dropdown-item" (click)="addFromContact(contact)">
               <div class="ic-contact-avatar">{{ contact.name?.charAt(0) | uppercase }}</div>
               <div class="ic-contact-info">
                 <span class="ic-contact-name">{{ contact.name }}</span>
@@ -114,10 +116,6 @@
           </div>
         </div>
 
-        <button type="button" class="ic-btn-ghost" (click)="addParticipant()">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Add participant
-        </button>
       </div>
 
       <div class="ic-participants-list">
@@ -125,15 +123,16 @@
           <select [name]="'role' + i" [(ngModel)]="p.role" class="ic-select ic-select--role">
             <option *ngFor="let role of availableRoles" [value]="role">{{ role }}</option>
           </select>
-          <input type="text" [name]="'pname' + i" [(ngModel)]="p.name"
-            placeholder="Full name" class="ic-input ic-input--grow" />
+          <div class="ic-participant-display">
+            <span class="ic-pname">{{ p.name }}</span>
+          </div>
           <button type="button" class="ic-btn-remove" (click)="removeParticipant(i)"
             title="Remove participant" aria-label="Remove participant">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
         </div>
         <p class="ic-empty-hint" *ngIf="!interaction.participants?.length">
-          No participants added yet. Tap "Add participant" or pick from your network.
+          No participants added yet. Pick from your network contacts above.
         </p>
       </div>
     </section>

@@ -45,6 +45,11 @@ export class InteractionFormComponent implements OnInit {
     get subtitle() { return this.mode === 'create' ? 'Capture what happened in this session' : 'Update the details of this session'; }
     get saveLabel(){ return this.mode === 'create' ? 'Save Interaction'         : 'Save Changes'; }
 
+    get availableContacts() {
+        const participantNames = (this.interaction.participants || []).map((p: any) => p.name);
+        return this.existingContacts.filter(c => !participantNames.includes(c.name));
+    }
+
     ngOnInit() {
         if (this.interaction?.date) {
             this._splitDate(new Date(this.interaction.date));
@@ -75,13 +80,13 @@ export class InteractionFormComponent implements OnInit {
         return this.interviewTypes.find(t => t.id === this.interaction?.interviewType)?.color ?? '#6b7280';
     }
 
-    addParticipant() {
-        if (!this.interaction.participants) this.interaction.participants = [];
-        this.interaction.participants.push({ role: 'HR', name: '' });
-    }
-
     addFromContact(contact: any) {
         if (!this.interaction.participants) this.interaction.participants = [];
+        
+        // Prevent adding the same contact twice
+        const alreadyExists = this.interaction.participants.some((p: any) => p.name === contact.name);
+        if (alreadyExists) return;
+
         this.interaction.participants.push({ role: contact.role || 'HR', name: contact.name });
         this.contactDropdownOpen = false;
     }
