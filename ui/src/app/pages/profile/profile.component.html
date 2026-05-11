@@ -142,7 +142,7 @@
                     <a *ngIf="profile.lastCvUrl && profile.lastCvGeneratedAt" class="last-cv-link"
                         [routerLink]="['/profile/cv']" [queryParams]="{ ai: profile.lastCvAi ? 'true' : 'false' }">
                         📋 View last generated CV ({{ profile.lastCvAi ? 'AI-Enhanced' : 'Template' }}) -
-                        Generated {{ profile.lastCvGeneratedAt | date: 'short' }}
+                        Generated {{ profile.lastCvGeneratedAt | dateFormat:'datetime' }}
                     </a>
                 </div>
 

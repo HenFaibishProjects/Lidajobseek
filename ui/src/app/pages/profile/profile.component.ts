@@ -5,10 +5,12 @@ import { RouterLink } from '@angular/router';
 import { ProfilesService } from '../../services/profiles.service';
 import { ToastService } from '../../services/toast.service';
 
+import { DateFormatPipe } from '../../pipes/date-format.pipe';
+
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, DateFormatPipe],
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.css']
 })

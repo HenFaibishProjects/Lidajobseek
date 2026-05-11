@@ -4,10 +4,12 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { ProfilesService } from '../../services/profiles.service';
 import { ToastService } from '../../services/toast.service';
 
+import { DateFormatPipe } from '../../pipes/date-format.pipe';
+
 @Component({
   selector: 'app-profile-cv',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, DateFormatPipe],
   templateUrl: './profile-cv.component.html',
   styleUrls: ['./profile-cv.component.css']
 })

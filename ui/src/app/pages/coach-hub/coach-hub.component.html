@@ -248,7 +248,7 @@
                 <div class="file-item-content">
                     <h4 class="file-title">{{ res.title }}</h4>
                     <div class="file-meta">
-                        <span class="file-date">{{ res.updatedAt | date:'dd/MM/yyyy' }}</span>
+                        <span class="file-date">{{ res.updatedAt | dateFormat:'date' }}</span>
                         <span *ngIf="res.tags" class="file-tags">
                             <span *ngFor="let tag of res.tags.split(',').slice(0, 3)" class="tag-badge">
                                 {{ tag.trim() }}

@@ -116,7 +116,7 @@
             </button>
         </div>
         <p class="cv-footer-note">
-            Generated {{ aiProfile?.lastCvGeneratedAt | date: 'medium' }} •
+            Generated {{ aiProfile?.lastCvGeneratedAt | dateFormat:'datetime' }} •
             {{ useAi ? 'AI-Enhanced' : 'Template' }} Version
         </p>
     </footer>

@@ -19,10 +19,12 @@ interface Category {
     isEditing?: boolean;
 }
 
+import { DateFormatPipe } from '../../pipes/date-format.pipe';
+
 @Component({
     selector: 'app-coach-hub',
     standalone: true,
-    imports: [CommonModule, FormsModule, FilterPipe],
+    imports: [CommonModule, FormsModule, FilterPipe, DateFormatPipe],
     templateUrl: './coach-hub.component.html',
     styleUrl: './coach-hub.component.css'
 })
