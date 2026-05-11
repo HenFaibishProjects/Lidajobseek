@@ -223,17 +223,40 @@
                             </div>
 
                             <div class="participants-list">
-                                <div *ngFor="let p of interaction.participants; let i = index" class="participant-row">
-                                    <div class="participant-dot" aria-hidden="true">{{ (p.name ||
-                                        'P').charAt(0).toUpperCase() }}</div>
-                                    <select [name]="'role' + i" [(ngModel)]="p.role" class="input-field role-select">
-                                        <option *ngFor="let role of availableRoles" [value]="role">{{role}}</option>
-                                    </select>
-                                    <div class="participant-name-display">
-                                        {{ p.name }}
+                                <div *ngFor="let p of interaction.participants; let i = index" class="participant-card">
+                                    <div class="participant-card-header">
+                                        <div class="participant-avatar">{{ p.name?.charAt(0) | uppercase }}</div>
+                                        <div class="participant-main-info">
+                                            <div class="participant-name">{{ p.name }}</div>
+                                            <div class="participant-role" *ngIf="p.role">{{ p.role }}</div>
+                                        </div>
+                                        <button type="button" class="btn-remove-alt" (click)="removeParticipant(i)"
+                                            aria-label="Remove interviewer">&times;</button>
                                     </div>
-                                    <button type="button" class="btn-remove" (click)="removeParticipant(i)"
-                                        aria-label="Remove interviewer">&times;</button>
+                                    
+                                    <div class="participant-card-details">
+                                        <div class="detail-item" *ngIf="p.email">
+                                            <span class="detail-icon">
+                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                                            </span>
+                                            <a [href]="'mailto:' + p.email" class="detail-link">{{ p.email }}</a>
+                                        </div>
+                                        <div class="detail-item" *ngIf="p.phone">
+                                            <span class="detail-icon">
+                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.61 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                                            </span>
+                                            <a [href]="'tel:' + p.phone" class="detail-link">{{ p.phone }}</a>
+                                        </div>
+                                        <div class="detail-item" *ngIf="p.linkedIn">
+                                            <span class="detail-icon">
+                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                                            </span>
+                                            <a [href]="p.linkedIn" target="_blank" class="detail-link">LinkedIn Profile</a>
+                                        </div>
+                                    </div>
+                                    <div class="participant-card-hooks" *ngIf="p.socialHooks">
+                                        <p class="hooks-text">{{ p.socialHooks }}</p>
+                                    </div>
                                 </div>
                                 <p class="muted-hint" *ngIf="interaction.participants.length === 0">
                                     {{ selectedProcess && processContacts.length === 0 ? 'No contacts found in this process. Add them in the Process Details page first.' : 'No participants yet. Add people from your network above.' }}

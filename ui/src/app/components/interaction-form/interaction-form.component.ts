@@ -29,12 +29,6 @@ export class InteractionFormComponent implements OnInit {
     groupedTypes = getGroupedInterviewTypes();
     typeCategories = Object.keys(this.groupedTypes) as (keyof typeof this.groupedTypes)[];
 
-    availableRoles = [
-        'HR', 'Recruiter', 'Hiring Manager', 'Tech Lead', 'Team Lead',
-        'Team Member', 'Manager', 'Director', 'VP', 'CTO', 'Architect',
-        'Group Leader', 'Peer'
-    ];
-
     contactDropdownOpen = false;
 
     // Split date/time for the date+time inputs
@@ -87,7 +81,14 @@ export class InteractionFormComponent implements OnInit {
         const alreadyExists = this.interaction.participants.some((p: any) => p.name === contact.name);
         if (alreadyExists) return;
 
-        this.interaction.participants.push({ role: contact.role || 'HR', name: contact.name });
+        this.interaction.participants.push({ 
+            name: contact.name,
+            role: contact.role,
+            email: contact.email,
+            phone: contact.phone,
+            linkedIn: contact.linkedIn,
+            socialHooks: contact.socialHooks
+        });
         this.contactDropdownOpen = false;
     }
 

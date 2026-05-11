@@ -46,7 +46,6 @@ export class ScheduleInterviewComponent implements OnInit {
     }
   };
 
-  availableRoles = ['HR', 'Tech Lead', 'Team Member', 'Team Lead', 'Manager', 'CTO', 'Director', 'Group Leader', 'Architect'];
   interviewTypes = INTERVIEW_TYPES;
     reminderOptions = [
     { value: 15, label: '15 minutes before' },
@@ -191,7 +190,14 @@ export class ScheduleInterviewComponent implements OnInit {
     if (!this.interaction.participants) this.interaction.participants = [];
     const alreadyExists = this.interaction.participants.some((p: any) => p.name === contact.name);
     if (!alreadyExists) {
-      this.interaction.participants.push({ role: contact.role || 'HR', name: contact.name });
+      this.interaction.participants.push({ 
+        name: contact.name,
+        role: contact.role,
+        email: contact.email,
+        phone: contact.phone,
+        linkedIn: contact.linkedIn,
+        socialHooks: contact.socialHooks
+      });
     }
     this.contactDropdownOpen = false;
   }
