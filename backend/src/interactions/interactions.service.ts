@@ -313,7 +313,7 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
     startDate?: string;
     endDate?: string;
     userId: number;
-  }): Promise<Interaction[]> {
+  }): Promise<any[]> {
     const where: any = {};
     
     if (params.processId) {
@@ -331,17 +331,27 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
       where.date.$lte = new Date(params.endDate);
     }
 
-    return this.interactionRepository.find(where, {
+    const interactions = await this.interactionRepository.find(where, {
       populate: ['process'],
       orderBy: { date: QueryOrder.ASC },
     });
+
+    return interactions.map(i => ({
+      ...i,
+      processId: i.process.id
+    }));
   }
 
-  async findByProcess(processId: number, userId: number): Promise<Interaction[]> {
-    return this.interactionRepository.find(
+  async findByProcess(processId: number, userId: number): Promise<any[]> {
+    const interactions = await this.interactionRepository.find(
       { process: { id: processId, user: userId } },
       { orderBy: { date: QueryOrder.DESC } },
     );
+
+    return interactions.map(i => ({
+      ...i,
+      processId: processId
+    }));
   }
 
   async update(id: number, dto: any, user?: any): Promise<Interaction> {

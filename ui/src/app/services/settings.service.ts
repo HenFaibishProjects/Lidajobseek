@@ -265,11 +265,10 @@ export class SettingsService {
 
   // Format time based on user preference
   formatTime(date: Date): string {
-    const settings = this.getSettings();
     return date.toLocaleTimeString('en-US', {
       hour: '2-digit',
       minute: '2-digit',
-      hour12: settings.clockFormat === '12'
+      hour12: false
     });
   }
 
