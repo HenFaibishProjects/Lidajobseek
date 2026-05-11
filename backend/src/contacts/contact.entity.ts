@@ -12,10 +12,10 @@ export class Contact {
   @Property({ nullable: true })
   role?: string;
 
-  @Property({ nullable: true })
+  @Property({ type: 'text', nullable: true })
   linkedIn?: string;
 
-  @Property({ nullable: true })
+  @Property({ type: 'text', nullable: true })
   socialHooks?: string;
 
   @Property({ nullable: true })

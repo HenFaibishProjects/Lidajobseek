@@ -15,19 +15,19 @@ export class Interaction {
   @Property({ type: 'json', nullable: true })
   participants?: any;
 
-  @Property()
+  @Property({ type: 'text' })
   summary!: string;
 
-  @Property({ nullable: true })
+  @Property({ type: 'text', nullable: true })
   testsAssessment?: string;
 
-  @Property({ nullable: true })
+  @Property({ type: 'text', nullable: true })
   roleInsights?: string;
 
-  @Property({ nullable: true })
+  @Property({ type: 'text', nullable: true })
   notes?: string;
 
-  @Property({ nullable: true })
+  @Property({ type: 'text', nullable: true })
   headsup?: string;
 
   @Property({ type: 'json', nullable: true })

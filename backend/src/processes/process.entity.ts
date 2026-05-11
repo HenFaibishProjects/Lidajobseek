@@ -51,7 +51,7 @@ export class Process {
   @Property()
   currentStage!: string;
 
-  @Property({ nullable: true })
+  @Property({ type: 'text', nullable: true })
   dataFromThePhoneCall?: string;
 
   @Property({ onCreate: () => new Date() })
@@ -74,7 +74,7 @@ export class Process {
   @Property({ nullable: true })
   firstContactChannel?: string;
 
-  @Property({ nullable: true })
+  @Property({ type: 'text', nullable: true })
   initialInviteContent?: string;
 
   // Offer Details
@@ -90,7 +90,7 @@ export class Process {
   @Property({ nullable: true })
   signingBonus?: number;
 
-  @Property({ nullable: true })
+  @Property({ type: 'text', nullable: true })
   benefits?: string;
 
   @Property({ nullable: true })
