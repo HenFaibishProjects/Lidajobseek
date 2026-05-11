@@ -44,13 +44,10 @@ export class CalendarComponent implements OnInit {
     this.loadProcesses();
     this.loadInterviews();
 
-    // Set default date range: today to next 30 days
+    // Default: Show from today onwards, no end date limit (show all upcoming)
     const today = new Date();
-    const nextMonth = new Date();
-    nextMonth.setDate(today.getDate() + 30);
-
     this.startDate = this.formatDateForInput(today);
-    this.endDate = this.formatDateForInput(nextMonth);
+    this.endDate = ''; 
   }
 
   formatDateForInput(date: Date): string {
@@ -76,24 +73,28 @@ export class CalendarComponent implements OnInit {
       params.processId = this.selectedProcessId;
     }
 
-    if (this.startDate) {
-      params.startDate = this.startDate + 'T00:00:00.000Z';
+    // Only apply date filters if we are NOT showing all interviews
+    // or if the user explicitly wants to filter a specific range while showing all.
+    // However, the requirement is "Show all" should see everything including past.
+    if (!this.showAllInterviews) {
+        if (this.startDate) {
+          params.startDate = this.startDate + 'T00:00:00.000Z';
+        }
+        if (this.endDate) {
+          params.endDate = this.endDate + 'T23:59:59.999Z';
+        }
     }
 
-    if (this.endDate) {
-      params.endDate = this.endDate + 'T23:59:59.999Z';
-    }
-
-        this.interactionsService.getAll(params).subscribe({
+    this.interactionsService.getAll(params).subscribe({
       next: (interviews) => {
-        // Filter interviews based on showAllInterviews checkbox
+        // Double check filtering on the frontend to ensure "Show All" behavior
         if (!this.showAllInterviews) {
           const today = new Date();
-          today.setHours(0, 0, 0, 0); // Start of today (midnight)
+          today.setHours(0, 0, 0, 0);
           interviews = interviews.filter((interview: any) => {
             const interviewDate = new Date(interview.date);
-            interviewDate.setHours(0, 0, 0, 0); // Compare dates without time
-            return interviewDate >= today; // Show interviews from today onward
+            interviewDate.setHours(0, 0, 0, 0);
+            return interviewDate >= today;
           });
         }
         this.interviews = interviews;
@@ -108,6 +109,24 @@ export class CalendarComponent implements OnInit {
 
   onFilterChange() {
     this.loadInterviews();
+  }
+
+  get nextInterview(): any | null {
+    if (!this.interviews || this.interviews.length === 0) return null;
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Find the first interview that is >= today
+    return [...this.interviews]
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+      .find(i => new Date(i.date) >= today) || null;
+  }
+
+  get otherInterviews(): any[] {
+    const next = this.nextInterview;
+    if (!next) return this.interviews;
+    return this.interviews.filter(i => i.id !== next.id);
   }
 
   getInterviewColor(interviewType: string): string {

@@ -222,55 +222,65 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
   }
 
   async create(dto: CreateInteractionDto, user?: any): Promise<Interaction> {
-    const process = await this.processRepository.findOne({ id: dto.processId, user: user?.userId });
-    if (!process) {
-      throw new NotFoundException(`Process with ID ${dto.processId} not found`);
-    }
+    try {
+      const process = await this.processRepository.findOne({ id: dto.processId, user: user?.userId });
+      if (!process) {
+        throw new NotFoundException(`Process with ID ${dto.processId} not found`);
+      }
 
-    const interaction = this.interactionRepository.create({
-      date: new Date(dto.date),
-      interviewType: dto.interviewType,
-      participants: dto.participants,
-      summary: dto.summary,
-      testsAssessment: dto.testsAssessment,
-      roleInsights: dto.roleInsights,
-      notes: dto.notes,
-      headsup: dto.headsup,
-      reminder: this.sanitizeReminder(dto.reminder, user),
-      nextInviteStatus: dto.nextInviteStatus,
-      nextInviteDate: dto.nextInviteDate ? new Date(dto.nextInviteDate) : undefined,
-      nextInviteLink: dto.nextInviteLink,
-      nextInviteType: dto.nextInviteType,
-      invitationExtended: dto.invitationExtended,
-      process,
-    } as any);
+      const interaction = this.interactionRepository.create({
+        date: new Date(dto.date),
+        interviewType: dto.interviewType,
+        participants: dto.participants,
+        summary: dto.summary,
+        testsAssessment: dto.testsAssessment,
+        roleInsights: dto.roleInsights,
+        notes: dto.notes,
+        headsup: dto.headsup,
+        reminder: this.sanitizeReminder(dto.reminder, user),
+        nextInviteStatus: dto.nextInviteStatus,
+        nextInviteDate: dto.nextInviteDate ? new Date(dto.nextInviteDate) : undefined,
+        nextInviteLink: dto.nextInviteLink,
+        nextInviteType: dto.nextInviteType,
+        invitationExtended: dto.invitationExtended,
+        process,
+      } as any);
 
-    await this.em.persistAndFlush(interaction);
+      this.em.persist(interaction);
 
-    // Auto-add network contacts
-    if (dto.participants && Array.isArray(dto.participants)) {
-      for (const p of dto.participants) {
-        const participant = p as any;
-        if (participant.name) {
-          // Check if this contact already exists for this process
-          const existingContact = await this.contactRepository.findOne({
-            process: dto.processId,
-            name: participant.name,
-          });
-
-          if (!existingContact) {
-            const contact = this.contactRepository.create({
-              name: participant.name,
-              role: participant.role || 'Interviewer',
+      // Auto-add network contacts
+      if (dto.participants && Array.isArray(dto.participants)) {
+        for (const p of dto.participants) {
+          const participant = p as any;
+          if (participant.name) {
+            // Check if this contact already exists for this process
+            const existingContact = await this.contactRepository.findOne({
               process,
-            } as any);
-            await this.em.persistAndFlush(contact);
+              name: participant.name,
+            });
+
+            if (!existingContact) {
+              const contact = this.contactRepository.create({
+                name: participant.name,
+                role: participant.role || 'Interviewer',
+                email: participant.email,
+                phone: participant.phone,
+                linkedIn: participant.linkedIn,
+                socialHooks: participant.socialHooks,
+                process,
+              } as any);
+              this.em.persist(contact);
+            }
           }
         }
       }
-    }
 
-    return interaction;
+      await this.em.flush();
+      return interaction;
+    } catch (error) {
+      this.logger.error(`Failed to create interaction: ${error.message}`, error.stack);
+      throw error;
+    }
   }
 
   async findAll(startDate?: string, endDate?: string, processId?: number, userId?: number): Promise<any[]> {

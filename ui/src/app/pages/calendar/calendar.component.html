@@ -49,7 +49,7 @@
                 type="text"
                 [(ngModel)]="processSearch"
                 (ngModelChange)="onProcessSearchChange()"
-                placeholder="Search process..."
+                placeholder="Filter by company or role..."
                 class="search-input"
             />
             <!-- Dropdown for process search results -->
@@ -63,15 +63,15 @@
         </div>
 
         <div class="filters-row">
-            <div class="date-range">
+            <div class="date-range" *ngIf="!showAllInterviews">
                 <input type="date" [(ngModel)]="startDate" (ngModelChange)="onFilterChange()" class="filter-input">
                 <span class="separator">to</span>
                 <input type="date" [(ngModel)]="endDate" (ngModelChange)="onFilterChange()" class="filter-input">
             </div>
 
-            <label class="checkbox-filter">
+            <label class="checkbox-filter" [class.active]="showAllInterviews">
                 <input type="checkbox" [(ngModel)]="showAllInterviews" (change)="onFilterChange()">
-                <span>Show All</span>
+                <span>Show All (Include Past)</span>
             </label>
 
             <button class="btn-icon-only" (click)="loadInterviews()" title="Refresh">
@@ -94,57 +94,118 @@
                     <line x1="3" y1="10" x2="21" y2="10"></line>
                 </svg>
             </div>
-            <h3>No interviews scheduled</h3>
-            <p>You don't have any interviews scheduled for this period.</p>
+            <h3>No interviews found</h3>
+            <p>{{ showAllInterviews ? 'You haven\'t recorded any interviews yet.' : 'You don\'t have any upcoming interviews scheduled.' }}</p>
             <button class="btn-primary" routerLink="/schedule-interview">Schedule Interview</button>
         </div>
 
-        <div *ngIf="!loading && interviews.length > 0" class="interviews-grid">
-            <div *ngFor="let interview of interviews | orderByDate" class="interview-card">
-                <div class="card-status-strip" [style.background-color]="getInterviewColor(interview.interviewType)"></div>
-
-                <div class="card-header">
-                    <div class="interview-meta">
-                        <span class="interview-type" [style.color]="getInterviewColor(interview.interviewType)">
-                            {{ getInterviewTypeLabel(interview.interviewType) }}
-                        </span>
-                        <span class="interview-date">
-                            {{formatDateTime(interview.date)}}
-                        </span>
+        <!-- Featured Next Interview -->
+        <div *ngIf="!loading && !showAllInterviews && nextInterview" class="featured-next-section">
+            <div class="section-badge">Next Interview</div>
+            <div class="featured-card">
+                <div class="featured-status-strip" [style.background-color]="getInterviewColor(nextInterview.interviewType)"></div>
+                
+                <div class="featured-content">
+                    <div class="featured-left">
+                        <div class="featured-date-box">
+                            <span class="month">{{ (nextInterview.date | date:'MMM') }}</span>
+                            <span class="day">{{ (nextInterview.date | date:'dd') }}</span>
+                        </div>
+                        <div class="featured-info">
+                            <span class="featured-type" [style.color]="getInterviewColor(nextInterview.interviewType)">
+                                {{ getInterviewTypeLabel(nextInterview.interviewType) }}
+                            </span>
+                            <h2 class="featured-company">{{nextInterview.process?.companyName}}</h2>
+                            <p class="featured-role">{{nextInterview.process?.roleTitle}}</p>
+                        </div>
                     </div>
-                    <div class="card-actions">
-                        <a [routerLink]="['/process', interview.processId, 'interaction', interview.id, 'edit']" class="action-link">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
+                    <div class="featured-center">
+                        <div class="featured-time-row">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                            </svg>
+                            <span>{{formatDateTime(nextInterview.date)}}</span>
+                        </div>
+                        <div class="featured-participants" *ngIf="nextInterview.participants?.length">
+                            <div class="featured-avatar-group">
+                                <div class="featured-avatar" *ngFor="let p of nextInterview.participants.slice(0, 3)" [title]="p.name">
+                                    {{p.name.charAt(0)}}
+                                </div>
+                                <div class="featured-avatar-more" *ngIf="nextInterview.participants.length > 3">
+                                    +{{nextInterview.participants.length - 3}}
+                                </div>
+                            </div>
+                            <span class="participants-text">{{formatParticipants(nextInterview.participants)}}</span>
+                        </div>
+                    </div>
+
+                    <div class="featured-right">
+                        <a [routerLink]="['/process', nextInterview.processId]" class="btn-featured-view">
+                            View Process
+                        </a>
+                        <a [routerLink]="['/process', nextInterview.processId, 'interaction', nextInterview.id, 'edit']" class="btn-featured-edit">
+                            Edit
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div *ngIf="!loading && interviews.length > 0" class="interviews-list-container">
+            <h2 class="list-section-title" *ngIf="!showAllInterviews && otherInterviews.length > 0">Following Interviews</h2>
+            <h2 class="list-section-title" *ngIf="showAllInterviews">All Interactions</h2>
+            
+            <div class="interviews-grid">
+                <div *ngFor="let interview of (showAllInterviews ? interviews : otherInterviews) | orderByDate" class="interview-card">
+                    <div class="card-status-strip" [style.background-color]="getInterviewColor(interview.interviewType)"></div>
+
+                    <div class="card-header">
+                        <div class="interview-meta">
+                            <span class="interview-type" [style.color]="getInterviewColor(interview.interviewType)">
+                                {{ getInterviewTypeLabel(interview.interviewType) }}
+                            </span>
+                            <span class="interview-date">
+                                {{formatDateTime(interview.date)}}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="company-info">
+                            <h3 class="company-name">{{interview.process?.companyName}}</h3>
+                            <p class="role-title">{{interview.process?.roleTitle}}</p>
+                        </div>
+
+                        <div class="participants-list" *ngIf="interview.participants && interview.participants.length > 0">
+                            <div class="participant" *ngFor="let p of interview.participants.slice(0, 2)">
+                                <div class="avatar">{{p.name.charAt(0)}}</div>
+                                <span class="name">{{p.name}}</span>
+                            </div>
+                            <div class="more-participants" *ngIf="interview.participants.length > 2">
+                                +{{interview.participants.length - 2}}
+                            </div>
+                        </div>
+
+                        <div class="notes-preview" *ngIf="interview.headsup">
+                            <span class="label">Heads up:</span> {{interview.headsup}}
+                        </div>
+                    </div>
+
+                    <div class="card-actions-cell">
+                        <a [routerLink]="['/process', interview.processId, 'interaction', interview.id, 'edit']" class="action-btn" title="Edit">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                                 <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                             </svg>
                         </a>
+                        <a [routerLink]="['/process', interview.processId]" class="action-btn" title="View Process">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M5 12h14M12 5l7 7-7 7"></path>
+                            </svg>
+                        </a>
                     </div>
-                </div>
-
-                <div class="card-body">
-                    <h3 class="company-name">{{interview.process?.companyName}}</h3>
-                    <p class="role-title">{{interview.process?.roleTitle}}</p>
-
-                    <div class="participants-list" *ngIf="interview.participants && interview.participants.length > 0">
-                        <div class="participant" *ngFor="let p of interview.participants.slice(0, 3)">
-                            <div class="avatar">{{p.name.charAt(0)}}</div>
-                            <span class="name">{{p.name}}</span>
-                        </div>
-                        <div class="more-participants" *ngIf="interview.participants.length > 3">
-                            +{{interview.participants.length - 3}}
-                        </div>
-                    </div>
-
-                    <div class="notes-preview" *ngIf="interview.headsup">
-                        <span class="label">Heads up:</span> {{interview.headsup}}
-                    </div>
-                </div>
-
-                <div class="card-footer">
-                    <a [routerLink]="['/process', interview.processId]" class="view-process-link">
-                        View Process →
-                    </a>
                 </div>
             </div>
         </div>
