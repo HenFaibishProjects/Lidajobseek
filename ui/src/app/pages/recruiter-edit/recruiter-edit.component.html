@@ -1,0 +1,278 @@
+<div *ngIf="isLoading" class="re-loading">Loading…</div>
+
+<div *ngIf="!isLoading && agency" class="re-page">
+
+  <div class="re-top-bar">
+    <a [routerLink]="['/recruiters', agencyId]" class="re-back">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+      Back to {{ agency.agencyName }}
+    </a>
+    <h1 class="re-title">Edit Agency</h1>
+  </div>
+
+  <!-- ── 1. Agency Details form ── -->
+  <div class="re-section-label">Agency Details</div>
+  <app-recruiter-form
+    [initialData]="agency"
+    [isSaving]="isSaving"
+    [showContacts]="true"
+    (save)="onSave($event)"
+    (cancel)="router.navigate(['/recruiters', agencyId])"
+  ></app-recruiter-form>
+
+  <!-- ── 2. Existing Contacts management ── -->
+  <div class="re-section-label re-section-label--mt">Existing Contacts</div>
+  <div class="re-card">
+
+    <div class="re-card-header">
+      <div class="re-header-left">
+        <span class="re-section-title">Contacts</span>
+        <span *ngIf="agency.contacts?.length" class="re-count-badge">{{ agency.contacts.length }}</span>
+      </div>
+      <a class="re-add-btn" (click)="showContactForm = !showContactForm; newContact = blankContact()"
+         [class.re-add-btn--cancel]="showContactForm" role="button" style="cursor:pointer">
+        {{ showContactForm ? '✕ Cancel' : '+ Add Contact' }}
+      </a>
+    </div>
+
+    <!-- Add contact form -->
+    <div class="re-collapse" [class.re-collapse--open]="showContactForm">
+      <div class="re-inline-form">
+        <p class="re-form-label">New contact</p>
+        <div class="re-form-row">
+          <div class="re-form-field"><label class="re-field-label">Name *</label>
+            <input class="re-field-input" type="text" placeholder="Full name" [(ngModel)]="newContact.fullName" /></div>
+          <div class="re-form-field"><label class="re-field-label">Role</label>
+            <input class="re-field-input" type="text" placeholder="e.g. Recruiter" [(ngModel)]="newContact.roleTitle" /></div>
+        </div>
+        <div class="re-form-row">
+          <div class="re-form-field"><label class="re-field-label">Email</label>
+            <input class="re-field-input" type="email" placeholder="email@agency.com" [(ngModel)]="newContact.email" /></div>
+          <div class="re-form-field"><label class="re-field-label">Phone</label>
+            <input class="re-field-input" type="tel" placeholder="+972 50 000 0000" [(ngModel)]="newContact.phoneNumber" /></div>
+        </div>
+        <div class="re-form-field">
+          <label class="re-field-label">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="#0077b5"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+            LinkedIn Profile
+          </label>
+          <div class="re-input-row">
+            <input class="re-field-input" type="url" placeholder="https://linkedin.com/in/username" [(ngModel)]="newContact.linkedinUrl" />
+            <a *ngIf="newContact.linkedinUrl" href="#" (click)="openUrl(newContact.linkedinUrl, $event)" class="re-open-link" title="Open">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+          </div>
+        </div>
+        <div class="re-form-field"><label class="re-field-label">Notes</label>
+          <textarea class="re-field-input re-field-textarea" rows="2" [(ngModel)]="newContact.notes"></textarea></div>
+        <label class="re-checkbox-label">
+          <input type="checkbox" [(ngModel)]="newContact.isPrimaryContact" /> Set as primary contact
+        </label>
+        <div class="re-form-actions">
+          <a class="re-save-btn" (click)="saveContact()" [class.re-save-btn--disabled]="!newContact.fullName.trim()" role="button" style="cursor:pointer">Save Contact</a>
+          <a class="re-cancel-sm-btn" (click)="cancelContact()" role="button" style="cursor:pointer">Cancel</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contacts list with edit/delete -->
+    <div class="re-contact-list" *ngIf="agency.contacts?.length > 0; else noContacts">
+      <div class="re-contact" *ngFor="let c of agency.contacts; let i = index">
+
+        <!-- VIEW mode -->
+        <ng-container *ngIf="editingContact?.id !== c.id">
+          <div class="re-contact-avatar" [ngClass]="'re-av-' + (i % 5)">{{ c.fullName.charAt(0).toUpperCase() }}</div>
+          <div class="re-contact-info">
+            <div class="re-contact-name">{{ c.fullName }}<span *ngIf="c.isPrimaryContact" class="re-primary-badge">★ Primary</span></div>
+            <div class="re-contact-role" *ngIf="c.roleTitle">{{ c.roleTitle }}</div>
+            <div class="re-contact-meta">
+              <span *ngIf="c.email">{{ c.email }}</span>
+              <span *ngIf="c.phoneNumber">{{ c.phoneNumber }}</span>
+              <a *ngIf="c.linkedinUrl" href="#" (click)="openUrl(c.linkedinUrl, $event)" class="re-linkedin-link">LinkedIn ↗</a>
+            </div>
+          </div>
+          <div class="re-contact-actions">
+            <a class="re-icon-btn" (click)="startEditContact(c)" title="Edit" role="button" style="cursor:pointer">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            </a>
+            <a class="re-icon-btn re-icon-btn--danger" (click)="deleteContact(c)" title="Delete" role="button" style="cursor:pointer">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+            </a>
+          </div>
+        </ng-container>
+
+        <!-- EDIT mode -->
+        <ng-container *ngIf="editingContact?.id === c.id">
+          <div class="re-inline-edit">
+            <div class="re-form-row">
+              <div class="re-form-field"><label class="re-field-label">Name *</label>
+                <input class="re-field-input" type="text" [(ngModel)]="editingContact.fullName" /></div>
+              <div class="re-form-field"><label class="re-field-label">Role</label>
+                <input class="re-field-input" type="text" [(ngModel)]="editingContact.roleTitle" /></div>
+            </div>
+            <div class="re-form-row">
+              <div class="re-form-field"><label class="re-field-label">Email</label>
+                <input class="re-field-input" type="email" [(ngModel)]="editingContact.email" /></div>
+              <div class="re-form-field"><label class="re-field-label">Phone</label>
+                <input class="re-field-input" type="tel" [(ngModel)]="editingContact.phoneNumber" /></div>
+            </div>
+            <div class="re-form-field">
+              <label class="re-field-label">LinkedIn Profile</label>
+              <div class="re-input-row">
+                <input class="re-field-input" type="url" [(ngModel)]="editingContact.linkedinUrl" />
+                <a *ngIf="editingContact.linkedinUrl" href="#" (click)="openUrl(editingContact.linkedinUrl, $event)" class="re-open-link" title="Open">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                </a>
+              </div>
+            </div>
+            <div class="re-form-field"><label class="re-field-label">Notes</label>
+              <textarea class="re-field-input re-field-textarea" rows="2" [(ngModel)]="editingContact.notes"></textarea></div>
+            <label class="re-checkbox-label">
+              <input type="checkbox" [(ngModel)]="editingContact.isPrimaryContact" /> Primary contact
+            </label>
+            <div class="re-form-actions">
+              <a class="re-save-btn re-save-btn--sm" (click)="saveEditContact()" role="button" style="cursor:pointer">Save</a>
+              <a class="re-cancel-sm-btn" (click)="cancelEditContact()" role="button" style="cursor:pointer">Cancel</a>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+
+    <ng-template #noContacts>
+      <div class="re-empty-state" *ngIf="!showContactForm">No contacts yet. Add one above.</div>
+    </ng-template>
+  </div>
+
+  <!-- ── 3. Interaction History management ── -->
+  <div class="re-section-label re-section-label--mt">Interaction History</div>
+  <div class="re-card re-card--mb">
+
+    <div class="re-card-header">
+      <div class="re-header-left">
+        <span class="re-section-title">Interactions</span>
+        <span *ngIf="agency.interactions?.length" class="re-count-badge">{{ agency.interactions.length }}</span>
+      </div>
+      <a class="re-add-btn" (click)="showInteractionForm = !showInteractionForm; newInteraction = blankInteraction()"
+         [class.re-add-btn--cancel]="showInteractionForm" role="button" style="cursor:pointer">
+        {{ showInteractionForm ? '✕ Cancel' : '+ Log Interaction' }}
+      </a>
+    </div>
+
+    <!-- Log interaction form -->
+    <div class="re-collapse" [class.re-collapse--open]="showInteractionForm">
+      <div class="re-inline-form">
+        <p class="re-form-label">Log an interaction</p>
+        <div class="re-form-field re-contact-picker">
+          <label class="re-field-label re-field-label--who">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            Who did you speak with? <span class="re-optional-tag">optional</span>
+          </label>
+          <select class="re-field-input re-contact-select" [(ngModel)]="newInteraction.contactId">
+            <option [ngValue]="null">— Select a contact —</option>
+            <option *ngFor="let c of agency.contacts" [ngValue]="c.id">{{ c.fullName }}{{ c.roleTitle ? ' · ' + c.roleTitle : '' }}</option>
+          </select>
+        </div>
+        <div class="re-form-row">
+          <div class="re-form-field"><label class="re-field-label">Date *</label>
+            <input class="re-field-input" type="date" [(ngModel)]="newInteraction.interactionDate" /></div>
+          <div class="re-form-field"><label class="re-field-label">How?</label>
+            <select class="re-field-input" [(ngModel)]="newInteraction.interactionType">
+              <option *ngFor="let t of INTERACTION_TYPES" [value]="t.value">{{ t.label }}</option>
+            </select>
+          </div>
+        </div>
+        <div class="re-form-field"><label class="re-field-label">Direction</label>
+          <select class="re-field-input" [(ngModel)]="newInteraction.direction">
+            <option *ngFor="let d of INTERACTION_DIRECTIONS" [value]="d.value">{{ d.label }}</option>
+          </select>
+        </div>
+        <div class="re-form-field"><label class="re-field-label">Summary *</label>
+          <textarea class="re-field-input re-field-textarea" rows="3" placeholder="What was discussed?" [(ngModel)]="newInteraction.summary"></textarea></div>
+        <div class="re-form-field"><label class="re-field-label">Notes</label>
+          <textarea class="re-field-input re-field-textarea" rows="2" placeholder="Additional notes…" [(ngModel)]="newInteraction.notes"></textarea></div>
+        <label class="re-checkbox-label"><input type="checkbox" [(ngModel)]="newInteraction.cvSent" /> CV was sent during this interaction</label>
+        <div class="re-form-actions">
+          <a class="re-save-btn" (click)="logInteraction()" [class.re-save-btn--disabled]="!newInteraction.summary.trim()" role="button" style="cursor:pointer">Log Interaction</a>
+          <a class="re-cancel-sm-btn" (click)="cancelInteraction()" role="button" style="cursor:pointer">Cancel</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Timeline with edit/delete -->
+    <div class="re-timeline" *ngIf="agency.interactions?.length > 0; else noInteractions">
+      <div class="re-timeline-item" *ngFor="let i of agency.interactions">
+
+        <!-- VIEW mode -->
+        <ng-container *ngIf="editingInteraction?.id !== i.id">
+          <div class="re-tl-dot"></div>
+          <div class="re-tl-content">
+            <div class="re-tl-header">
+              <div class="re-tl-meta">
+                <span class="re-tl-type">{{ interactionTypeLabel(i.interactionType) }}</span>
+                <span class="re-tl-dir" [class.re-tl-dir--in]="i.direction === 'INCOMING'">{{ directionLabel(i.direction) }}</span>
+                <span class="re-tl-date">{{ i.interactionDate | dateFormat:'date' }}</span>
+                <span *ngIf="i.contact" class="re-tl-contact">{{ i.contact.fullName }}</span>
+                <span *ngIf="i.cvSent" class="re-cv-badge">📄 CV Sent</span>
+              </div>
+              <div class="re-tl-actions">
+                <a class="re-icon-btn" (click)="startEditInteraction(i)" title="Edit" role="button" style="cursor:pointer">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                </a>
+                <a class="re-icon-btn re-icon-btn--danger" (click)="deleteInteraction(i)" title="Delete" role="button" style="cursor:pointer">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+                </a>
+              </div>
+            </div>
+            <p class="re-tl-summary">{{ i.summary }}</p>
+            <p class="re-tl-notes" *ngIf="i.notes">{{ i.notes }}</p>
+          </div>
+        </ng-container>
+
+        <!-- EDIT mode -->
+        <ng-container *ngIf="editingInteraction?.id === i.id">
+          <div class="re-tl-dot re-tl-dot--editing"></div>
+          <div class="re-inline-edit re-tl-edit">
+            <div class="re-form-row">
+              <div class="re-form-field"><label class="re-field-label">Date</label>
+                <input class="re-field-input" type="date" [(ngModel)]="editingInteraction.interactionDate" /></div>
+              <div class="re-form-field"><label class="re-field-label">Contact</label>
+                <select class="re-field-input" [(ngModel)]="editingInteraction.contactId">
+                  <option [ngValue]="null">— None —</option>
+                  <option *ngFor="let c of agency.contacts" [ngValue]="c.id">{{ c.fullName }}</option>
+                </select>
+              </div>
+            </div>
+            <div class="re-form-row">
+              <div class="re-form-field"><label class="re-field-label">Type</label>
+                <select class="re-field-input" [(ngModel)]="editingInteraction.interactionType">
+                  <option *ngFor="let t of INTERACTION_TYPES" [value]="t.value">{{ t.label }}</option>
+                </select>
+              </div>
+              <div class="re-form-field"><label class="re-field-label">Direction</label>
+                <select class="re-field-input" [(ngModel)]="editingInteraction.direction">
+                  <option *ngFor="let d of INTERACTION_DIRECTIONS" [value]="d.value">{{ d.label }}</option>
+                </select>
+              </div>
+            </div>
+            <div class="re-form-field"><label class="re-field-label">Summary</label>
+              <textarea class="re-field-input re-field-textarea" rows="3" [(ngModel)]="editingInteraction.summary"></textarea></div>
+            <div class="re-form-field"><label class="re-field-label">Notes</label>
+              <textarea class="re-field-input re-field-textarea" rows="2" [(ngModel)]="editingInteraction.notes"></textarea></div>
+            <label class="re-checkbox-label"><input type="checkbox" [(ngModel)]="editingInteraction.cvSent" /> CV was sent</label>
+            <div class="re-form-actions">
+              <a class="re-save-btn re-save-btn--sm" (click)="saveEditInteraction()" role="button" style="cursor:pointer">Save</a>
+              <a class="re-cancel-sm-btn" (click)="cancelEditInteraction()" role="button" style="cursor:pointer">Cancel</a>
+            </div>
+          </div>
+        </ng-container>
+
+      </div>
+    </div>
+
+    <ng-template #noInteractions>
+      <div class="re-empty-state" *ngIf="!showInteractionForm">No interactions yet. Log the first one above.</div>
+    </ng-template>
+  </div>
+
+</div>

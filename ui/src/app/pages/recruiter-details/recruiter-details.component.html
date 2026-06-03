@@ -1,0 +1,122 @@
+<div *ngIf="isLoading" class="rd-loading">Loading…</div>
+
+<div *ngIf="!isLoading && agency" class="rd-page">
+
+  <!-- Top bar -->
+  <div class="rd-top-bar">
+    <a routerLink="/recruiters" class="rd-back">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+      Recruitment Agencies
+    </a>
+    <div class="rd-actions">
+      <a [routerLink]="['/recruiters', agency.id, 'edit']" class="rd-btn rd-btn--secondary">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        Edit Agency
+      </a>
+      <button class="rd-btn rd-btn--danger" (click)="deleteAgency()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+        Delete
+      </button>
+    </div>
+  </div>
+
+  <!-- Agency info card -->
+  <div class="rd-card rd-info-card">
+    <div class="rd-info-main">
+      <div class="rd-agency-avatar">{{ agency.agencyName.charAt(0).toUpperCase() }}</div>
+      <div class="rd-info-body">
+        <div class="rd-agency-name-row">
+          <h1 class="rd-agency-name">{{ agency.agencyName }}</h1>
+        </div>
+        <a *ngIf="agency.website" href="#" (click)="openUrl(agency.website, $event)" class="rd-website">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          {{ agency.website }}
+        </a>
+        <p *ngIf="agency.notes" class="rd-notes">{{ agency.notes }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="rd-columns">
+
+    <!-- ── Contacts (view only) ── -->
+    <section class="rd-card">
+      <div class="rd-section-header">
+        <div class="rd-section-title-row">
+          <h2 class="rd-section-title">Contacts</h2>
+          <span *ngIf="agency.contacts?.length" class="rd-count-badge">{{ agency.contacts.length }}</span>
+        </div>
+      </div>
+
+      <div class="rd-contact-list" *ngIf="agency.contacts?.length > 0; else noContacts">
+        <div class="rd-contact" *ngFor="let c of agency.contacts; let i = index">
+          <div class="rd-contact-avatar" [ngClass]="'rd-av-' + (i % 5)">{{ c.fullName.charAt(0).toUpperCase() }}</div>
+          <div class="rd-contact-info">
+            <div class="rd-contact-name">
+              {{ c.fullName }}
+              <span *ngIf="c.isPrimaryContact" class="rd-primary-badge">★ Primary</span>
+            </div>
+            <div class="rd-contact-role" *ngIf="c.roleTitle">{{ c.roleTitle }}</div>
+            <div class="rd-contact-meta">
+              <span *ngIf="c.email">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                {{ c.email }}
+              </span>
+              <span *ngIf="c.phoneNumber">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                {{ c.phoneNumber }}
+              </span>
+              <a *ngIf="c.linkedinUrl" href="#" (click)="openUrl(c.linkedinUrl, $event)" class="rd-contact-linkedin">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+                LinkedIn
+              </a>
+            </div>
+            <p class="rd-contact-notes" *ngIf="c.notes">{{ c.notes }}</p>
+          </div>
+        </div>
+      </div>
+
+      <ng-template #noContacts>
+        <div class="rd-empty-state">
+          <p>No contacts yet. <a [routerLink]="['/recruiters', agency.id, 'edit']" class="rd-empty-link">Add contacts in Edit Agency →</a></p>
+        </div>
+      </ng-template>
+    </section>
+
+    <!-- ── Interaction History (view only) ── -->
+    <section class="rd-card">
+      <div class="rd-section-header">
+        <div class="rd-section-title-row">
+          <h2 class="rd-section-title">Interaction History</h2>
+          <span *ngIf="agency.interactions?.length" class="rd-count-badge">{{ agency.interactions.length }}</span>
+        </div>
+      </div>
+
+      <div class="rd-timeline" *ngIf="agency.interactions?.length > 0; else noInteractions">
+        <div class="rd-timeline-item" *ngFor="let i of agency.interactions">
+          <div class="rd-tl-dot"></div>
+          <div class="rd-tl-content">
+            <div class="rd-tl-header">
+              <div class="rd-tl-meta">
+                <span class="rd-tl-type">{{ interactionTypeLabel(i.interactionType) }}</span>
+                <span class="rd-tl-dir" [class.rd-tl-dir--in]="i.direction === 'INCOMING'">{{ directionLabel(i.direction) }}</span>
+                <span class="rd-tl-date">{{ i.interactionDate | dateFormat:'date' }}</span>
+                <span *ngIf="i.contact" class="rd-tl-contact">{{ i.contact.fullName }}</span>
+                <span *ngIf="i.cvSent" class="rd-cv-badge">📄 CV Sent</span>
+              </div>
+            </div>
+            <p class="rd-tl-summary">{{ i.summary }}</p>
+            <p class="rd-tl-notes" *ngIf="i.notes">{{ i.notes }}</p>
+          </div>
+        </div>
+      </div>
+
+      <ng-template #noInteractions>
+        <div class="rd-empty-state">
+          <p>No interactions yet. <a [routerLink]="['/recruiters', agency.id, 'edit']" class="rd-empty-link">Log one in Edit Agency →</a></p>
+        </div>
+      </ng-template>
+    </section>
+
+  </div>
+</div>

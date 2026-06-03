@@ -1,0 +1,158 @@
+<div class="rf-card">
+  <div class="rf-fields">
+
+    <div class="rf-field rf-field--full">
+      <label class="rf-label">Agency / Recruiter Name <span class="rf-required">*</span></label>
+      <input
+        class="rf-input"
+        type="text"
+        placeholder="e.g. GotFriends, Aman Group, or a recruiter's name…"
+        [(ngModel)]="form.agencyName"
+        required
+      />
+    </div>
+
+    <div class="rf-field rf-field--full">
+      <label class="rf-label">Website</label>
+      <input
+        class="rf-input"
+        type="text"
+        placeholder="https://agency.com"
+        [(ngModel)]="form.website"
+      />
+    </div>
+
+    <div class="rf-field rf-field--full">
+      <label class="rf-label">Notes</label>
+      <textarea
+        class="rf-input rf-textarea"
+        rows="3"
+        placeholder="Anything you want to remember about this agency or recruiter…"
+        [(ngModel)]="form.notes"
+      ></textarea>
+    </div>
+
+  </div>
+
+  <!-- ── Contacts section (create flow only) ─────────────────────────────── -->
+  <div *ngIf="showContacts" class="rf-contacts-section">
+
+    <div class="rf-contacts-header">
+      <div class="rf-contacts-title-row">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+        <span class="rf-contacts-title">Contacts</span>
+        <span *ngIf="contacts.length" class="rf-contacts-count">{{ contacts.length }}</span>
+      </div>
+      <button
+        type="button"
+        class="rf-add-contact-btn"
+        (click)="showContactForm ? cancelContactForm() : openContactForm()"
+        [class.rf-add-contact-btn--cancel]="showContactForm"
+      >
+        {{ showContactForm ? '✕ Cancel' : '+ Add Contact' }}
+      </button>
+    </div>
+
+    <!-- Draft contact form -->
+    <div class="rf-contact-form-wrap" [class.rf-contact-form-wrap--open]="showContactForm">
+      <div class="rf-contact-form">
+        <div class="rf-cf-row">
+          <div class="rf-cf-field">
+            <label class="rf-cf-label">Name <span class="rf-required">*</span></label>
+            <input class="rf-input rf-input--sm" type="text" placeholder="Full name" [(ngModel)]="draftContact.fullName" />
+          </div>
+          <div class="rf-cf-field">
+            <label class="rf-cf-label">Role</label>
+            <input class="rf-input rf-input--sm" type="text" placeholder="e.g. Recruiter" [(ngModel)]="draftContact.roleTitle" />
+          </div>
+        </div>
+        <div class="rf-cf-row">
+          <div class="rf-cf-field">
+            <label class="rf-cf-label">Email</label>
+            <input class="rf-input rf-input--sm" type="email" placeholder="email@agency.com" [(ngModel)]="draftContact.email" />
+          </div>
+          <div class="rf-cf-field">
+            <label class="rf-cf-label">Phone</label>
+            <input class="rf-input rf-input--sm" type="tel" placeholder="+972 50 000 0000" [(ngModel)]="draftContact.phoneNumber" />
+          </div>
+        </div>
+        <div class="rf-cf-field">
+          <label class="rf-cf-label">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+            LinkedIn Profile
+          </label>
+          <div class="rf-input-row">
+            <input class="rf-input rf-input--sm" type="url" placeholder="https://linkedin.com/in/username" [(ngModel)]="draftContact.linkedinUrl" />
+            <a *ngIf="draftContact.linkedinUrl"
+               href="#"
+               (click)="openUrl(draftContact.linkedinUrl, $event)"
+               class="rf-open-link" title="Open LinkedIn profile">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+          </div>
+        </div>
+        <div class="rf-cf-actions">
+          <button type="button" class="rf-cf-save" (click)="addContact()" [disabled]="!draftContact.fullName.trim()">
+            Add Contact
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Saved contacts list -->
+    <div *ngIf="contacts.length" class="rf-contact-list">
+      <div class="rf-contact-item" *ngFor="let c of contacts; let i = index">
+        <div class="rf-contact-avatar">{{ c.fullName.charAt(0).toUpperCase() }}</div>
+        <div class="rf-contact-info">
+          <span class="rf-contact-name">{{ c.fullName }}</span>
+          <span *ngIf="c.roleTitle" class="rf-contact-role">{{ c.roleTitle }}</span>
+          <span *ngIf="c.email" class="rf-contact-meta">{{ c.email }}</span>
+          <span *ngIf="c.phoneNumber" class="rf-contact-meta">{{ c.phoneNumber }}</span>
+          <a *ngIf="c.linkedinUrl" [href]="c.linkedinUrl" target="_blank" rel="noopener" class="rf-contact-linkedin">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+            LinkedIn
+          </a>
+        </div>
+        <div class="rf-contact-item-actions">
+          <button
+            type="button"
+            class="rf-primary-toggle"
+            [class.rf-primary-toggle--on]="c.isPrimaryContact"
+            (click)="setPrimary(i)"
+            title="{{ c.isPrimaryContact ? 'Primary contact' : 'Set as primary' }}"
+          >
+            {{ c.isPrimaryContact ? '★ Primary' : '☆ Set Primary' }}
+          </button>
+          <a class="rf-remove-btn" (click)="removeContact(i)" title="Remove" role="button" style="cursor:pointer">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <p *ngIf="!contacts.length && !showContactForm" class="rf-contacts-hint">
+      You can add contacts now or after the agency is created.
+    </p>
+
+    <!-- Optional Interaction -->
+    <div *ngIf="contacts.length > 0" class="rf-interaction-option">
+      <label class="rf-checkbox-label">
+        <input type="checkbox" [(ngModel)]="addInteraction" />
+        Log an interaction with this agency's contact(s) right after creation
+      </label>
+    </div>
+  </div>
+
+  <div class="rf-actions">
+    <button class="rf-save-btn" (click)="submit()" [disabled]="isSaving || !form.agencyName.trim()">
+      {{ isSaving ? 'Saving…' : 'Save' }}
+    </button>
+    <button class="rf-cancel-btn" type="button" (click)="cancel.emit()">Cancel</button>
+  </div>
+</div>

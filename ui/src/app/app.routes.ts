@@ -18,6 +18,10 @@ import { AuthGuard } from './guards/auth.guard';
 import { ProfileComponent } from './pages/profile/profile.component';
 import { ProfileCvComponent } from './pages/profile-cv/profile-cv.component';
 import { PipelineBoardComponent } from './pages/pipeline-board/pipeline-board.component';
+import { RecruiterListComponent } from './pages/recruiter-list/recruiter-list.component';
+import { RecruiterCreateComponent } from './pages/recruiter-create/recruiter-create.component';
+import { RecruiterEditComponent } from './pages/recruiter-edit/recruiter-edit.component';
+import { RecruiterDetailsComponent } from './pages/recruiter-details/recruiter-details.component';
 
 export const routes: Routes = [
     { path: 'login', component: LoginComponent },
@@ -35,6 +39,10 @@ export const routes: Routes = [
             { path: 'pipeline', component: PipelineBoardComponent },
             { path: 'profile', component: ProfileComponent },
             { path: 'profile/cv', component: ProfileCvComponent },
+            { path: 'recruiters', component: RecruiterListComponent },
+            { path: 'recruiters/new', component: RecruiterCreateComponent },
+            { path: 'recruiters/:id', component: RecruiterDetailsComponent },
+            { path: 'recruiters/:id/edit', component: RecruiterEditComponent },
             {
                 path: 'instructions',
                 loadComponent: () => import('./pages/instructions/instructions.component').then(m => m.InstructionsComponent)

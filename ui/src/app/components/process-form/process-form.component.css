@@ -622,10 +622,10 @@ textarea.field-input {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: var(--surf-3);
+  
   border: 1.5px solid var(--line);
   border-radius: var(--r-sm);
-  padding: 10px 14px;
+  padding: 1px 14px;
   font-size: 14px;
   font-weight: 600;
   color: var(--ink-2);

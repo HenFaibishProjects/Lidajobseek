@@ -1,0 +1,111 @@
+.rl-page { max-width: 1200px; margin: 0 auto; padding: 32px 32px 64px; }
+
+/* Header */
+.rl-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }
+.rl-title { font-size: 26px; font-weight: 800; color: var(--text-primary); margin: 0 0 4px; }
+.rl-subtitle { font-size: 13px; color: var(--text-tertiary); }
+.rl-title-block { display: flex; flex-direction: column; }
+.rl-add-btn {
+  display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px;
+  background: linear-gradient(135deg, #4f46e5, #6366f1); color: #fff;
+  border-radius: 10px; font-size: 13px; font-weight: 700; text-decoration: none;
+  border: none; cursor: pointer; box-shadow: 0 4px 14px rgba(79,70,229,0.3);
+  transition: transform 0.15s, box-shadow 0.15s; white-space: nowrap;
+}
+.rl-add-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(79,70,229,0.4); }
+
+/* Search */
+.rl-filters { margin-bottom: 20px; }
+.rl-search-wrap { position: relative; max-width: 420px; }
+.rl-search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-tertiary); pointer-events: none; }
+.rl-search {
+  width: 100%; box-sizing: border-box; padding: 10px 36px 10px 36px;
+  border: 1px solid var(--border-dark); border-radius: 8px; font-size: 13px;
+  background: var(--bg-primary); color: var(--text-primary); min-height: 40px;
+}
+.rl-search:focus { outline: none; border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.1); }
+.rl-search-clear {
+  position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+  border: none; background: none; color: var(--text-tertiary); cursor: pointer;
+  font-size: 13px; padding: 2px 4px; border-radius: 4px;
+}
+.rl-search-clear:hover { color: var(--text-primary); background: var(--bg-hover); }
+
+/* Loading / empty */
+.rl-loading { text-align: center; padding: 48px; color: var(--text-tertiary); font-size: 14px; }
+.rl-empty { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 64px 24px; gap: 10px; }
+.rl-empty-icon {
+  width: 60px; height: 60px; background: linear-gradient(135deg, rgba(99,102,241,0.08), rgba(139,92,246,0.08));
+  border: 1px dashed rgba(99,102,241,0.25); border-radius: 18px;
+  display: flex; align-items: center; justify-content: center; color: #6366f1; margin-bottom: 8px;
+}
+.rl-empty-title { font-size: 16px; font-weight: 700; color: var(--text-primary); margin: 0; }
+.rl-empty-sub { font-size: 13px; color: var(--text-tertiary); margin: 0; }
+.rl-clear-btn { padding: 8px 16px; border: 1px solid var(--border-dark); border-radius: 8px; background: var(--bg-secondary); color: var(--text-secondary); font-size: 13px; cursor: pointer; }
+
+/* Table */
+.rl-table-wrap { background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 14px; overflow: hidden; box-shadow: var(--shadow-sm); }
+.rl-table { width: 100%; border-collapse: collapse; }
+.rl-table thead { background: var(--bg-secondary); }
+.rl-table thead th { padding: 12px 16px; font-size: 11px; font-weight: 700; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border-color); }
+.rl-th-center { text-align: center; }
+.rl-th-actions { text-align: right; }
+.rl-row { border-bottom: 1px solid var(--border-color); transition: background 0.15s; }
+.rl-row:last-child { border-bottom: none; }
+.rl-row:hover { background: var(--bg-secondary); }
+.rl-row td { padding: 14px 16px; font-size: 13px; color: var(--text-secondary); vertical-align: middle; }
+
+/* Agency name cell */
+.rl-cell-name { display: flex; align-items: center; gap: 6px; }
+.rl-agency-link { font-weight: 700; color: var(--text-primary); text-decoration: none; font-size: 14px; }
+.rl-agency-link:hover { color: #6366f1; }
+.rl-website-icon { color: var(--text-tertiary); display: flex; }
+.rl-website-icon:hover { color: #6366f1; }
+
+/* Contacts cell */
+.rl-contacts-info { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.rl-primary-contact { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-primary); font-weight: 600; }
+.rl-primary-contact svg { color: #6366f1; flex-shrink: 0; }
+.rl-no-contact { font-size: 12px; color: var(--text-tertiary); font-style: italic; }
+.rl-count-badge {
+  display: inline-flex; align-items: center; justify-content: center; padding: 1px 7px;
+  background: #eef2ff; color: #4f46e5; border-radius: 20px; font-size: 11px; font-weight: 800;
+}
+body.dark-theme .rl-count-badge { background: rgba(79,70,229,0.18); color: #818cf8; }
+
+/* Checkpoint cell */
+.rl-cell-checkpoint { max-width: 340px; }
+.rl-checkpoint { display: flex; flex-direction: column; gap: 3px; }
+.rl-checkpoint-top { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+.rl-checkpoint-type { font-size: 11px; font-weight: 700; color: #6366f1; }
+.rl-checkpoint-dot { color: var(--text-tertiary); font-size: 11px; }
+.rl-checkpoint-date { font-size: 11px; color: var(--text-tertiary); white-space: nowrap; }
+.rl-checkpoint-who { font-size: 11px; font-weight: 600; color: var(--text-secondary); }
+.rl-checkpoint-summary { margin: 0; font-size: 12px; color: var(--text-secondary); line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 300px; }
+.rl-no-activity { font-size: 12px; color: var(--text-tertiary); font-style: italic; }
+
+.rl-cell-center { text-align: center; }
+.rl-cv-badge { font-size: 11px; font-weight: 700; color: #059669; background: rgba(16,185,129,0.1); padding: 2px 8px; border-radius: 6px; white-space: nowrap; }
+.rl-cv-no { color: var(--text-tertiary); }
+
+/* Row actions */
+.rl-cell-actions { display: flex; gap: 4px; justify-content: flex-end; }
+.rl-action-btn {
+  width: 30px; height: 30px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  display: inline-flex; align-items: center; justify-content: center;
+  color: var(--text-secondary);
+  cursor: pointer; text-decoration: none;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  flex-shrink: 0;
+}
+.rl-action-btn:hover { background: var(--bg-hover); color: var(--text-primary); border-color: var(--border-dark); }
+.rl-delete-btn:hover { background: rgba(239,68,68,0.08); color: #ef4444; border-color: rgba(239,68,68,0.25); }
+
+@media (max-width: 768px) {
+  .rl-page { padding: 16px; }
+  .rl-table-wrap { overflow-x: auto; }
+  .rl-cell-checkpoint { min-width: 200px; }
+}
