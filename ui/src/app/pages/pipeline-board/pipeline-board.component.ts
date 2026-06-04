@@ -17,21 +17,39 @@ import { Subscription } from 'rxjs';
 import { LucideAngularModule } from 'lucide-angular';
 
 // Kanban column definitions — simplified pipeline
-const BOARD_COLUMNS: { id: string; label: string; icon: string; stages: string[] }[] = [
+const BOARD_COLUMNS: { id: string; label: string; icon: string; tooltip: string; stages: string[] }[] = [
+  {
+    id: 'initial-scheduled',
+    label: 'Initial Conversation Scheduled',
+    icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
+    tooltip: 'Applications you\'ve submitted or are awaiting an initial call — your pipeline is warming up.',
+    stages: ['Application Submitted', 'Resume Under Review', 'Initial Call Scheduled'],
+  },
   {
     id: 'first-conversation',
     label: 'After First Conversation',
-    icon: '📋',
-    stages: ['Application Submitted', 'Resume Under Review'],
+    icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
+    tooltip: 'You\'ve had the first conversation. Now waiting for the next step or an interview to be scheduled.',
+    stages: [
+      'Initial Call Completed',
+      'Interview Scheduled',
+    ],
+  },
+  {
+    id: 'first-interview-scheduled',
+    label: 'First Interview Scheduled',
+    icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+    tooltip: 'Your first formal interview is booked. Time to prepare!',
+    stages: [
+      'Interview Scheduled',
+    ],
   },
   {
     id: 'in-process',
     label: 'In Process',
-    icon: '🔄',
+    icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>',
+    tooltip: 'Actively progressing — interviews happening, tasks submitted, or awaiting further decisions.',
     stages: [
-      'Initial Call Scheduled',
-      'Initial Call Completed',
-      'Interview Scheduled',
       'Waiting for Interview Feedback',
       'Awaiting Next Interview',
       'Home Task Assigned',
@@ -44,30 +62,51 @@ const BOARD_COLUMNS: { id: string; label: string; icon: string; stages: string[]
   {
     id: 'offer',
     label: 'Offer',
-    icon: '🎁',
+    icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>',
+    tooltip: 'You\'ve received an offer! Review the terms, negotiate if needed.',
     stages: ['Offer Received', 'Offer in Negotiation'],
+  },
+  {
+    id: 'withdrew',
+    label: 'Withdrew',
+    icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>',
+    tooltip: 'You chose to step back from this opportunity — your call, your reasons.',
+    stages: ['Withdrawn', 'Offer Declined'],
+  },
+  {
+    id: 'rejected',
+    label: 'Rejected',
+    icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>',
+    tooltip: 'Not selected or put on hold. Keep your head up — every no gets you closer to the right yes.',
+    stages: ['Rejected', 'Position Put On Hold'],
+  },
+  {
+    id: 'ghosted',
+    label: 'Ghosted',
+    icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 17.5 22 22"/><path d="M2 12C2 6.5 6.5 2 12 2a10 10 0 0 1 8 4"/><path d="M5 4.5 22 22"/><path d="M11.5 14.5a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1Z"/><path d="M16 14.5a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1Z"/><path d="M12 22v-3"/><path d="M9 20.5c.5.5 1 1 3 1s2.5-.5 3-1"/></svg>',
+    tooltip: 'No response after following up. It happens — log it and move forward.',
+    stages: ['Ghosted / No Response'],
   },
   {
     id: 'hired',
     label: 'Hired',
-    icon: '✅',
+    icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
+    tooltip: 'Congratulations! Offer accepted. Your journey here is complete. 🎉',
     stages: ['Offer Accepted'],
-  },
-  {
-    id: 'closed',
-    label: 'Closed',
-    icon: '❌',
-    stages: ['Withdrawn', 'Rejected', 'Position Put On Hold', 'Ghosted / No Response', 'Offer Declined'],
   },
 ];
 
 // The default stage assigned when a card is dropped into a column
 const COLUMN_DEFAULT_STAGE: Record<string, string> = {
-  'first-conversation': 'Application Submitted',
-  'in-process': 'Initial Call Scheduled',
+  'initial-scheduled': 'Application Submitted',
+  'first-conversation': 'Initial Call Completed',
+  'first-interview-scheduled': 'Interview Scheduled',
+  'in-process': 'Waiting for Interview Feedback',
   offer: 'Offer Received',
+  withdrew: 'Withdrawn',
+  rejected: 'Rejected',
+  ghosted: 'Ghosted / No Response',
   hired: 'Offer Accepted',
-  closed: 'Rejected',
 };
 
 const CLOSED_STAGES = new Set(['Withdrawn', 'Rejected', 'Position Put On Hold', 'Ghosted / No Response', 'Offer Declined']);

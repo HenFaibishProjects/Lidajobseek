@@ -1,17 +1,18 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { ProcessesService } from '../../services/processes.service';
 import { InteractionsService } from '../../services/interactions.service';
 import { ReviewsService } from '../../services/reviews.service';
 import { ContactsService } from '../../services/contacts.service';
-import { FormsModule } from '@angular/forms';
 import { ConfirmService } from '../../services/confirm.service';
 import { ToastService } from '../../services/toast.service';
 import { DateFormatPipe } from '../../pipes/date-format.pipe';
 import { getInterviewTypeLabel as resolveInterviewTypeLabel } from '../../shared/interview-types';
 import { LucideAngularModule } from 'lucide-angular';
 import { AiAssistantPanelComponent } from '../../components/ai-assistant-panel/ai-assistant-panel.component';
+import { PROCESS_STAGES } from '../../shared/process-stages';
 
 @Component({
     selector: 'app-process-details',
@@ -25,6 +26,8 @@ export class ProcessDetailsComponent implements OnInit {
     showContactForm = false;
     showAiPanel = false;
     activeInteractionId: number | null = null;
+    isUpdatingStage = false;
+    readonly stages = PROCESS_STAGES;
     newContact: any = {
         name: '',
         role: '',
@@ -128,6 +131,24 @@ export class ProcessDetailsComponent implements OnInit {
         }
     }
 
+    updateStage(newStage: string) {
+        if (!newStage || newStage === this.process.currentStage) return;
+        const previous = this.process.currentStage;
+        this.process.currentStage = newStage; // optimistic
+        this.isUpdatingStage = true;
+        this.processesService.update(this.process.id, { currentStage: newStage }).subscribe({
+            next: () => {
+                this.toastService.show(`Stage updated to "${newStage}"`, 'success');
+                this.isUpdatingStage = false;
+            },
+            error: () => {
+                this.process.currentStage = previous; // roll back
+                this.toastService.show('Failed to update stage', 'error');
+                this.isUpdatingStage = false;
+            }
+        });
+    }
+
     async deleteInteraction(id: number) {
         if (await this.confirmService.delete('this interaction round')) {
             this.interactionsService.delete(id).subscribe(() => {
@@ -158,6 +179,9 @@ export class ProcessDetailsComponent implements OnInit {
         return map[key] || '';
     }
 
+    scoreLabel(val: number): string {
+        return ['—', '⭐', '⭐⭐', '⭐⭐⭐', '⭐⭐⭐⭐', '⭐⭐⭐⭐⭐'][val] || '—';
+    }
 
     addContact() {
         if (!this.newContact.name) return;

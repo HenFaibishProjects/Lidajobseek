@@ -141,11 +141,17 @@
         <!-- Column header -->
         <div class="pb-col-head">
           <div class="pb-col-indicator" [attr.data-col]="col.id"></div>
-          <span class="pb-col-icon">{{ col.icon }}</span>
+          <span class="pb-col-icon" [innerHTML]="col.icon"></span>
           <span class="pb-col-label">{{ col.label }}</span>
           <span class="pb-col-count" [class.pb-col-count--zero]="getColumnCards(col.id).length === 0">
             {{ getColumnCards(col.id).length }}
           </span>
+          <div class="pb-col-tooltip-wrap" *ngIf="col.tooltip">
+            <button class="pb-col-tooltip-btn" type="button" aria-label="Column info">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            </button>
+            <div class="pb-col-tooltip">{{ col.tooltip }}</div>
+          </div>
         </div>
 
         <!-- Drop progress bar (shown on drag-over) -->

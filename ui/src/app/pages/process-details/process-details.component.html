@@ -14,10 +14,20 @@
                 <div class="title-block">
                     <div class="title-row">
                         <h1>{{ process.companyName }}</h1>
-                        <span class="status-pill" [ngClass]="getStatusClass(process.currentStage)">
+                        <div class="stage-select-wrap" [ngClass]="getStatusClass(process.currentStage)" [class.stage-updating]="isUpdatingStage">
                             <span class="status-dot"></span>
-                            {{ process.currentStage }}
-                        </span>
+                            <select
+                                class="stage-select"
+                                [ngModel]="process.currentStage"
+                                (ngModelChange)="updateStage($event)"
+                                [disabled]="isUpdatingStage"
+                                title="Change current stage"
+                            >
+                                <option *ngFor="let s of stages" [value]="s">{{ s }}</option>
+                            </select>
+                            <svg *ngIf="isUpdatingStage" class="stage-spinner" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                            <svg *ngIf="!isUpdatingStage" class="stage-chevron" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                        </div>
                     </div>
                     <p class="subtitle">{{ process.roleTitle }}</p>
                 </div>
@@ -254,6 +264,48 @@
                     <div class="notes-box" *ngIf="process.dataFromThePhoneCall">
                         <span class="box-label">Initial Insights</span>
                         <p>{{ process.dataFromThePhoneCall }}</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Career Intelligence -->
+            <section class="premium-card intel-card">
+                <div class="card-header intel-header">
+                    <div class="header-title">
+                        <div class="intel-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                            </svg>
+                        </div>
+                        <h3>Career Intelligence</h3>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="intel-grid">
+                        <div class="intel-stat">
+                            <span class="intel-label">🎯 Tech Match</span>
+                            <span class="intel-value">{{ scoreLabel(process.scoreTech || 0) }}</span>
+                        </div>
+                        <div class="intel-stat">
+                            <span class="intel-label">🚀 Growth</span>
+                            <span class="intel-value">{{ scoreLabel(process.scoreGrowth || 0) }}</span>
+                        </div>
+                        <div class="intel-stat">
+                            <span class="intel-label">⚖️ Work-Life</span>
+                            <span class="intel-value">{{ scoreLabel(process.scoreWLB || 0) }}</span>
+                        </div>
+                        <div class="intel-stat">
+                            <span class="intel-label">✨ Company Vibe</span>
+                            <span class="intel-value">{{ scoreLabel(process.scoreVibe || 0) }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="pitch-box" *ngIf="process.tailoredPitch">
+                        <span class="box-label">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                            Thoughts on Position
+                        </span>
+                        <p>{{ process.tailoredPitch }}</p>
                     </div>
                 </div>
             </section>
@@ -640,12 +692,103 @@
         width: 8px; height: 8px;
         border-radius: 50%;
         background: #94a3b8;
+        flex-shrink: 0;
     }
 
-    /* Dynamic Status Dot Colors */
-    .status-pill.status-active .status-dot { background: #3b82f6; box-shadow: 0 0 8px #3b82f6; }
-    .status-pill.status-offer .status-dot { background: #10b981; box-shadow: 0 0 8px #10b981; }
-    .status-pill.status-rejected .status-dot { background: #ef4444; }
+    /* Dynamic Status Dot — inherits color from wrapper */
+    .status-dot {
+        width: 8px; height: 8px;
+        border-radius: 50%;
+        background: currentColor;
+        flex-shrink: 0;
+        opacity: 0.85;
+    }
+
+    /* ── Stage quick-change dropdown ─────────────────────────────── */
+    .stage-select-wrap {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 5px 10px 5px 12px;
+        border-radius: 999px;
+        border: 1.5px solid transparent;
+        cursor: pointer;
+        transition: filter 0.15s, box-shadow 0.15s, background 0.2s;
+        position: relative;
+    }
+
+    .stage-select-wrap:hover { filter: brightness(0.93); box-shadow: 0 0 0 3px rgba(206, 191, 191, 0.06); }
+    .stage-select-wrap.stage-updating { opacity: 0.7; pointer-events: none; }
+
+    /* ── Per-stage wrapper: solid dark background, always white text ─ */
+    .stage-select-wrap {
+        color: #000000;
+    }
+    .stage-select-wrap.status-application-submitted,
+    .stage-select-wrap.status-resume-under-review {
+        background: #1e40af; border-color: #1d4ed8;
+    }
+    .stage-select-wrap.status-initial-call-scheduled,
+    .stage-select-wrap.status-initial-call-completed {
+        background: #0e7490; border-color: #0891b2;
+    }
+    .stage-select-wrap.status-interview-scheduled,
+    .stage-select-wrap.status-waiting-for-interview-feedback,
+    .stage-select-wrap.status-awaiting-next-interview {
+        background: #5b21b6; border-color: #6d28d9;
+    }
+    .stage-select-wrap.status-home-task-assigned,
+    .stage-select-wrap.status-home-task-submitted-under-review {
+        background: #92400e; border-color: #b45309;
+    }
+    .stage-select-wrap.status-final-interview-scheduled,
+    .stage-select-wrap.status-references-requested,
+    .stage-select-wrap.status-background-check-in-progress {
+        background: #065f46; border-color: #047857;
+    }
+    .stage-select-wrap.status-offer-received,
+    .stage-select-wrap.status-offer-in-negotiation {
+        background: #166534; border-color: #15803d;
+    }
+    .stage-select-wrap.status-offer-accepted {
+        background: #14532d; border-color: #166534; font-weight: 800;
+    }
+    .stage-select-wrap.status-offer-declined,
+    .stage-select-wrap.status-withdrawn,
+    .stage-select-wrap.status-rejected,
+    .stage-select-wrap.status-ghosted-no-response {
+        background: #991b1b; border-color: #b91c1c;
+    }
+    .stage-select-wrap.status-position-put-on-hold {
+        background: #374151; border-color: #4b5563;
+    }
+
+    /* The select itself is transparent — it inherits wrapper color */
+    .stage-select {
+        appearance: none;
+        -webkit-appearance: none;
+        background: black;
+        border: none;
+        outline: none;
+        font-size: 12px;
+        font-weight: 700;
+        font-family: inherit;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: white;
+        cursor: pointer;
+        padding: 0;
+    }
+
+    .stage-chevron, .stage-spinner {
+        color: currentColor;
+        opacity: 0.6;
+        flex-shrink: 0;
+        pointer-events: none;
+    }
+
+    .stage-spinner { animation: stage-spin 0.7s linear infinite; }
+    @keyframes stage-spin { to { transform: rotate(360deg); } }
 
     .header-actions {
         display: flex;
@@ -1825,4 +1968,75 @@
         transition: opacity 0.15s;
     }
     .rp-del-btn:hover { opacity: 0.75; }
+
+    /* Career Intelligence */
+    .pitch-box {
+        margin-top: var(--space-xl);
+        background: rgba(245, 158, 11, 0.03);
+        border: 1px solid rgba(245, 158, 11, 0.2);
+        border-radius: 12px;
+        padding: var(--space-lg);
+    }
+    
+    .dark-theme .pitch-box {
+        background: rgba(245, 158, 11, 0.05);
+        border-color: rgba(245, 158, 11, 0.15);
+    }
+
+    .box-label svg {
+        margin-right: 6px;
+        color: #f59e0b;
+    }
+
+    .pitch-box p {
+        margin: 0;
+        font-size: 14px;
+        line-height: 1.6;
+        color: var(--text-secondary);
+        white-space: pre-wrap;
+    }
+
+    /* Intel specific */
+    .intel-header {
+        background: linear-gradient(to right, rgba(245, 158, 11, 0.05), transparent);
+        border-bottom: 1px solid rgba(245, 158, 11, 0.15);
+    }
+
+    .intel-icon {
+        color: #f59e0b;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .intel-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--space-md);
+    }
+
+    .intel-stat {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        padding: var(--space-md) var(--space-lg);
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .intel-label {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text-tertiary);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .intel-value {
+        font-size: 15px;
+        font-weight: 500;
+        color: var(--text-primary);
+        letter-spacing: 2px;
+    }
 </style>
