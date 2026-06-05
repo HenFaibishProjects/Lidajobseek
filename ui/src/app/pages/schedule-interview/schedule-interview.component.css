@@ -4,14 +4,6 @@
   padding: var(--space-xl) var(--space-lg) var(--space-2xl);
 }
 
-.reminder-toggle-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-md);
-  padding: var(--space-sm) var(--space-md);
-}
-
 .reminder-chip {
   display: inline-flex;
   align-items: center;
@@ -21,6 +13,113 @@
   color: #1e3a8a;
   background: rgba(59, 130, 246, 0.16);
   font-weight: 700;
+  white-space: nowrap;
+}
+
+/* ── Multi-reminder list ── */
+.reminders-list {
+  display: grid;
+  gap: 12px;
+}
+
+.reminder-card {
+  border: 1px solid rgba(59, 130, 246, 0.22);
+  border-radius: 16px;
+  background: rgba(59, 130, 246, 0.04);
+  overflow: hidden;
+  transition: box-shadow 0.2s ease;
+}
+
+.reminder-card:hover {
+  box-shadow: 0 6px 18px rgba(59, 130, 246, 0.12);
+}
+
+.reminder-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: rgba(59, 130, 246, 0.07);
+  border-bottom: 1px solid rgba(59, 130, 246, 0.14);
+}
+
+.reminder-index {
+  font-size: 12px;
+  font-weight: 800;
+  color: #1d4ed8;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  flex: 1;
+}
+
+.btn-remove-reminder {
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  background: rgba(239, 68, 68, 0.08);
+  color: #dc2626;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.btn-remove-reminder:hover {
+  background: rgba(239, 68, 68, 0.18);
+  transform: scale(1.08);
+}
+
+.reminder-card-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-md);
+  padding: 14px;
+}
+
+.reminder-empty {
+  padding: 12px 0 4px;
+  text-align: center;
+}
+
+.btn-add-reminder {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 10px 18px;
+  border-radius: 12px;
+  border: 1.5px dashed rgba(59, 130, 246, 0.5);
+  background: transparent;
+  color: #2563eb;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.btn-add-reminder:hover:not(:disabled) {
+  background: rgba(59, 130, 246, 0.07);
+  border-style: solid;
+}
+
+.btn-add-reminder:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Legacy rule kept for compatibility */
+.reminder-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding: var(--space-sm) var(--space-md);
 }
 
 .reminder-panel {
@@ -31,8 +130,6 @@
   display: grid;
   gap: var(--space-md);
 }
-
-
 
 
 .schedule-shell {
@@ -297,6 +394,68 @@
 
 .required {
   color: var(--error);
+}
+
+.optional-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #0f766e;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+/* ── Mode toggle ── */
+.mode-toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.mode-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 2px solid rgba(148, 163, 184, 0.3);
+  background: var(--bg-primary);
+  color: var(--text-secondary);
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mode-btn:hover {
+  border-color: rgba(59, 130, 246, 0.45);
+  color: var(--text-primary);
+}
+
+.mode-btn.active {
+  border-color: #2563eb;
+  background: rgba(37, 99, 235, 0.1);
+  color: #1d4ed8;
+  font-weight: 700;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.16);
+}
+
+.mode-btn svg {
+  flex-shrink: 0;
+}
+
+
+.recruiter-select-group {
+  border-radius: 15px;
+  padding: 14px;
+  border: 1px solid rgba(124, 58, 237, 0.22);
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.06), rgba(59, 130, 246, 0.05));
 }
 
 .search-box {
@@ -728,7 +887,8 @@ select.input-field {
 
   .process-results,
   .fields-3,
-  .fields-2 {
+  .fields-2,
+  .reminder-card-body {
     grid-template-columns: 1fr;
   }
 

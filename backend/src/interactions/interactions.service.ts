@@ -10,7 +10,7 @@ import { EntityRepository, EntityManager, QueryOrder } from '@mikro-orm/postgres
 import { Interaction } from './interaction.entity';
 import { Process } from '../processes/process.entity';
 import { Contact } from '../contacts/contact.entity';
-import { CreateInteractionDto } from './dto/create-interaction.dto';
+import { CreateInteractionDto, ReminderItemDto } from './dto/create-interaction.dto';
 import { MailService } from '../mail/mail.service';
 
 @Injectable()
@@ -86,9 +86,63 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
     };
   }
 
-  private buildReminderEmail(interaction: Interaction) {
+  /**
+   * Sanitize and normalize a reminders[] array.
+   * Each entry gets its own beforeMinutes + channels object.
+   * Delivery state (emailSentAt) is preserved when config is unchanged.
+   */
+  private sanitizeRemindersArray(
+    reminders: ReminderItemDto[],
+    user: any,
+    existingReminders?: any[],
+    resetDeliveryState = false,
+  ): Interaction['reminders'] {
+    if (!Array.isArray(reminders) || reminders.length === 0) return [];
+
+    const pricingPlan = user?.pricingPlan || 'free';
+    const isPremium = pricingPlan === 'premium' || pricingPlan === 'enterprise';
+
+    const seen = new Set<number>();
+    const result: Interaction['reminders'] = [];
+
+    for (const r of reminders) {
+      const beforeMinutesRaw = Number(r.beforeMinutes);
+      if (!Number.isFinite(beforeMinutesRaw) || beforeMinutesRaw <= 0) continue;
+      if (seen.has(beforeMinutesRaw)) continue; // deduplicate
+      seen.add(beforeMinutesRaw);
+
+      const email = r.channels?.email !== false;
+      const sms = isPremium ? r.channels?.sms === true : false;
+      const channels = email || sms ? { email, sms } : { email: true, sms: false };
+
+      // Try to find matching existing entry to preserve delivery state
+      const existing = existingReminders?.find(
+        (e: any) => Number(e.beforeMinutes) === beforeMinutesRaw,
+      );
+      const sameConfig =
+        existing?.channels?.email === channels.email &&
+        existing?.channels?.sms === channels.sms;
+
+      result.push({
+        beforeMinutes: beforeMinutesRaw,
+        channels,
+        emailSentAt: sameConfig && !resetDeliveryState ? existing?.emailSentAt : undefined,
+        smsSentAt: sameConfig && !resetDeliveryState ? existing?.smsSentAt : undefined,
+      });
+    }
+
+    return result;
+  }
+
+  private buildReminderEmail(interaction: Interaction, beforeMinutes: number) {
     const interviewDate = new Date(interaction.date);
-    const subject = `Interview reminder: ${interaction.process.companyName} -${interaction.process.roleTitle}`;
+
+    let subject: string;
+    if (interaction.process) {
+      subject = `Interview reminder: ${interaction.process.companyName} - ${interaction.process.roleTitle}`;
+    } else {
+      subject = `Interview reminder: ${interaction.interviewType}`;
+    }
 
     const dateText = interviewDate.toLocaleString('en-GB', {
       dateStyle: 'medium',
@@ -97,26 +151,29 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
 
     const summary = interaction.summary || 'Interview';
     const interviewType = interaction.interviewType || 'interview';
+    const minutesLabel = beforeMinutes >= 60
+      ? `${beforeMinutes / 60} hour(s)`
+      : `${beforeMinutes} minute(s)`;
 
     const text = [
       `Hi,`,
       '',
-      `This is your reminder for an upcoming ${interviewType} interview.`,
-      `Company: ${interaction.process.companyName}`,
-      `Role: ${interaction.process.roleTitle}`,
+      `This is your reminder for an upcoming ${interviewType} interview in ${minutesLabel}.`,
+      interaction.process ? `Company: ${interaction.process.companyName}` : '',
+      interaction.process ? `Role: ${interaction.process.roleTitle}` : '',
       `When: ${dateText}`,
       `Summary: ${summary}`,
       '',
       'Good luck! 🚀',
-    ].join('\n');
+    ].filter(Boolean).join('\n');
 
     const html = `
       <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #111827;">
         <p>Hi,</p>
-        <p>This is your reminder for an upcoming <strong>${interviewType}</strong> interview.</p>
+        <p>This is your reminder for an upcoming <strong>${interviewType}</strong> interview in <strong>${minutesLabel}</strong>.</p>
         <ul>
-          <li><strong>Company:</strong> ${interaction.process.companyName}</li>
-          <li><strong>Role:</strong> ${interaction.process.roleTitle}</li>
+          ${interaction.process ? `<li><strong>Company:</strong> ${interaction.process.companyName}</li>` : ''}
+          ${interaction.process ? `<li><strong>Role:</strong> ${interaction.process.roleTitle}</li>` : ''}
           <li><strong>When:</strong> ${dateText}</li>
           <li><strong>Summary:</strong> ${summary}</li>
         </ul>
@@ -128,15 +185,16 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
   }
 
   private async processDueEmailReminders() {
-    if (this.isProcessingReminders || !this.mailService.isConfigured()) {
+    if (this.isProcessingReminders) {
+      this.logger.debug('Reminder job already running, skipping.');
+      return;
+    }
+    if (!this.mailService.isConfigured()) {
+      this.logger.warn('Mail not configured — reminder emails disabled.');
       return;
     }
 
     this.isProcessingReminders = true;
-
-    // Fork a dedicated EM for this background job so connections are
-    // properly released back to the pool when we are done (MikroORM
-    // requires a separate context for every non-request operation).
     const em = this.em.fork({ clear: true, useContext: false });
 
     try {
@@ -146,67 +204,123 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
       const upcomingInteractions = await em
         .getRepository(Interaction)
         .find(
-          {
-            date: {
-              $gte: now,
-              $lte: horizon,
-            },
-          },
-          {
-            populate: ['process'],
-            orderBy: { date: QueryOrder.ASC },
-          },
+          { date: { $gte: now, $lte: horizon } },
+          { populate: ['process'], orderBy: { date: QueryOrder.ASC } },
         );
+
+      this.logger.debug(
+        `Reminder tick: ${upcomingInteractions.length} upcoming interaction(s) in next 7 days.`,
+      );
 
       let hasChanges = false;
 
       for (const interaction of upcomingInteractions) {
+        // ── NEW: iterate reminders[] array ──────────────────────────
+        const remindersArr = Array.isArray((interaction as any).reminders)
+          ? [...(interaction as any).reminders]
+          : [];
+
+        this.logger.debug(
+          `Interaction #${interaction.id} date=${interaction.date.toISOString()} ` +
+          `reminders[]:${remindersArr.length} legacy:${!!(interaction.reminder as any)?.enabled}`,
+        );
+
+        let remindersChanged = false;
+        for (let idx = 0; idx < remindersArr.length; idx++) {
+          const r = remindersArr[idx] as any;
+
+          if (r?.emailSentAt) {
+            this.logger.debug(`  [${idx}] beforeMinutes=${r.beforeMinutes} — already sent at ${r.emailSentAt}`);
+            continue;
+          }
+          if (!r?.channels?.email) {
+            this.logger.debug(`  [${idx}] beforeMinutes=${r.beforeMinutes} — email channel disabled`);
+            continue;
+          }
+
+          const beforeMinutes = Number(r.beforeMinutes);
+          if (!Number.isFinite(beforeMinutes) || beforeMinutes <= 0) {
+            this.logger.debug(`  [${idx}] invalid beforeMinutes: ${r.beforeMinutes}`);
+            continue;
+          }
+
+          const reminderTime = new Date(interaction.date.getTime() - beforeMinutes * 60 * 1000);
+          this.logger.debug(
+            `  [${idx}] beforeMinutes=${beforeMinutes} reminderTime=${reminderTime.toISOString()} now=${now.toISOString()} due=${reminderTime <= now}`,
+          );
+
+          if (reminderTime > now) continue;
+
+          // Resolve user for recipient email
+          const processRef = interaction.process as any;
+          if (!processRef?.user) {
+            this.logger.warn(`  [${idx}] No user on process — skipping.`);
+            continue;
+          }
+          const userId = processRef.user?.id ?? processRef.user;
+          const user = await em.findOne('User' as any, { id: userId }) as any;
+          const recipientEmail = user?.email;
+          if (!recipientEmail) {
+            this.logger.warn(`  [${idx}] Could not resolve email for user id=${userId}`);
+            continue;
+          }
+
+          this.logger.log(`  [${idx}] Sending reminder email to ${recipientEmail} for interaction #${interaction.id}`);
+          const mail = this.buildReminderEmail(interaction, beforeMinutes);
+          const sent = await this.mailService.sendMail({
+            to: recipientEmail,
+            subject: mail.subject,
+            text: mail.text,
+            html: mail.html,
+          });
+
+          if (sent) {
+            this.logger.log(`  [${idx}] ✓ Reminder email sent successfully to ${recipientEmail}`);
+            remindersArr[idx] = { ...r, emailSentAt: now.toISOString() };
+            remindersChanged = true;
+          } else {
+            this.logger.error(`  [${idx}] ✗ mailService.sendMail returned false for ${recipientEmail}`);
+          }
+        }
+
+        if (remindersChanged) {
+          (interaction as any).reminders = remindersArr;
+          hasChanges = true;
+        }
+
+        // ── LEGACY: single reminder object ──────────────────────────
         const reminder = interaction.reminder as any;
-        if (!reminder?.enabled || !reminder?.channels?.email || reminder?.emailSentAt) {
-          continue;
+        if (reminder?.enabled && reminder?.channels?.email && !reminder?.emailSentAt) {
+          const beforeMinutes = Number(reminder.beforeMinutes);
+          if (Number.isFinite(beforeMinutes) && beforeMinutes > 0) {
+            const reminderTime = new Date(interaction.date.getTime() - beforeMinutes * 60 * 1000);
+            this.logger.debug(
+              `  [legacy] beforeMinutes=${beforeMinutes} reminderTime=${reminderTime.toISOString()} due=${reminderTime <= now}`,
+            );
+            if (reminderTime <= now) {
+              const processRef = interaction.process as any;
+              if (processRef?.user) {
+                const userId = processRef.user?.id ?? processRef.user;
+                const user = await em.findOne('User' as any, { id: userId }) as any;
+                const recipientEmail = user?.email;
+                if (recipientEmail) {
+                  const mail = this.buildReminderEmail(interaction, beforeMinutes);
+                  const sent = await this.mailService.sendMail({
+                    to: recipientEmail,
+                    subject: mail.subject,
+                    text: mail.text,
+                    html: mail.html,
+                  });
+                  if (sent) {
+                    this.logger.log(`  [legacy] ✓ Reminder email sent to ${recipientEmail}`);
+                    interaction.reminder = { ...reminder, emailSentAt: now.toISOString() };
+                    hasChanges = true;
+                  }
+                }
+              }
+            }
+          }
         }
-
-        const beforeMinutes = Number(reminder.beforeMinutes);
-        if (!Number.isFinite(beforeMinutes) || beforeMinutes <= 0) {
-          continue;
-        }
-
-        const reminderTime = new Date(interaction.date.getTime() - beforeMinutes * 60 * 1000);
-        if (reminderTime > now) {
-          continue;
-        }
-
-        const processStr = interaction.process as any;
-        if (!processStr || !processStr.user) {
-          continue;
-        }
-
-        const user = await em.findOne('User' as any, {
-          id: processStr.user.id ?? processStr.user,
-        }) as any;
-
-        const recipientEmail = user?.email;
-        if (!recipientEmail) {
-          continue;
-        }
-
-        const mail = this.buildReminderEmail(interaction);
-        const sent = await this.mailService.sendMail({
-          to: recipientEmail,
-          subject: mail.subject,
-          text: mail.text,
-          html: mail.html,
-        });
-
-        if (!sent) {
-          continue;
-        }
-
-        interaction.reminder = {
-          ...reminder,
-          emailSentAt: now.toISOString(),
-        };
-        hasChanges = true;
       }
 
       if (hasChanges) {
@@ -215,9 +329,81 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
     } catch (error) {
       this.logger.error('Failed to process reminder emails', error as any);
     } finally {
-      // Always release connections back to the pool
       em.clear();
       this.isProcessingReminders = false;
+    }
+  }
+
+  /** Debug endpoint: returns status of all upcoming reminders and can force-send due ones */
+  async debugReminders(forceAll = false): Promise<any> {
+    const now = new Date();
+    const horizon = new Date(now.getTime() + 1000 * 60 * 60 * 24 * 14);
+    const em = this.em.fork({ clear: true, useContext: false });
+
+    try {
+      const interactions = await em
+        .getRepository(Interaction)
+        .find(
+          { date: { $gte: new Date(now.getTime() - 1000 * 60 * 60 * 24), $lte: horizon } },
+          { populate: ['process'], orderBy: { date: QueryOrder.ASC } },
+        );
+
+      const report: any[] = [];
+      const smtpOk = this.mailService.isConfigured();
+
+      for (const interaction of interactions) {
+        const remindersArr = Array.isArray((interaction as any).reminders)
+          ? (interaction as any).reminders
+          : [];
+
+        const processRef = interaction.process as any;
+        const userId = processRef?.user?.id ?? processRef?.user;
+        const user = userId ? (await em.findOne('User' as any, { id: userId }) as any) : null;
+        const recipientEmail = user?.email ?? null;
+
+        const reminderStatuses = remindersArr.map((r: any, idx: number) => {
+          const reminderTime = new Date(interaction.date.getTime() - Number(r.beforeMinutes) * 60 * 1000);
+          return {
+            index: idx,
+            beforeMinutes: r.beforeMinutes,
+            channels: r.channels,
+            reminderFiresAt: reminderTime.toISOString(),
+            isDue: reminderTime <= now,
+            alreadySent: !!r.emailSentAt,
+            emailSentAt: r.emailSentAt ?? null,
+          };
+        });
+
+        report.push({
+          interactionId: interaction.id,
+          interviewDate: interaction.date.toISOString(),
+          recipientEmail,
+          smtpConfigured: smtpOk,
+          reminders: reminderStatuses,
+        });
+
+        // Force-send any due, unsent reminders if requested
+        if (forceAll && smtpOk && recipientEmail) {
+          for (let idx = 0; idx < remindersArr.length; idx++) {
+            const r = remindersArr[idx] as any;
+            if (r.emailSentAt) continue;
+            const reminderTime = new Date(interaction.date.getTime() - Number(r.beforeMinutes) * 60 * 1000);
+            if (reminderTime > now) continue;
+            const mail = this.buildReminderEmail(interaction, r.beforeMinutes);
+            const sent = await this.mailService.sendMail({ to: recipientEmail, ...mail });
+            reminderStatuses[idx].forceSentNow = sent;
+            if (sent) {
+              remindersArr[idx] = { ...r, emailSentAt: now.toISOString() };
+              (interaction as any).reminders = remindersArr;
+            }
+          }
+          await em.flush();
+        }
+      }
+
+      return { now: now.toISOString(), smtpConfigured: smtpOk, interactions: report };
+    } finally {
+      em.clear();
     }
   }
 
@@ -253,7 +439,12 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
         nextInviteDate: dto.nextInviteDate ? new Date(dto.nextInviteDate) : undefined,
         testsAssessment: dto.testsAssessment,
         roleInsights: dto.roleInsights,
+        // Legacy single reminder
         reminder: this.sanitizeReminder(dto.reminder, user),
+        // New: reminders[] array (takes priority if provided)
+        reminders: dto.reminders?.length
+          ? this.sanitizeRemindersArray(dto.reminders, user)
+          : undefined,
         process,
       } as any);
 
@@ -379,6 +570,17 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
         interaction.reminder,
         !!dto.date,
       );
+    }
+
+    if (Object.prototype.hasOwnProperty.call(dto, 'reminders')) {
+      data.reminders = Array.isArray(dto.reminders) && dto.reminders.length
+        ? this.sanitizeRemindersArray(
+            dto.reminders,
+            user,
+            (interaction as any).reminders,
+            !!dto.date,
+          )
+        : [];
     }
 
     Object.assign(interaction, data);

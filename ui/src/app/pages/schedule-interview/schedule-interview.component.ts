@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { InteractionsService } from '../../services/interactions.service';
 import { ProcessesService } from '../../services/processes.service';
+import { RecruitmentAgenciesService } from '../../services/recruitment-agencies.service';
 import { ToastService } from '../../services/toast.service';
 import { AuthService } from '../../services/auth.service';
 import { DateFormatPipe } from '../../pipes/date-format.pipe';
@@ -23,11 +24,16 @@ import {
 })
 export class ScheduleInterviewComponent implements OnInit {
   processes: any[] = [];
+  agencies: any[] = [];
   loading = false;
   processSearch = '';
 
+  /** 'process' = linked to a job process | 'recruiter' = meeting with a recruiter/agency */
+  meetingMode: 'process' | 'recruiter' = 'process';
+
   interaction: any = {
     processId: null,
+    agencyId: null,
     date: '',
     interviewType: DEFAULT_INTERVIEW_TYPE_ID,
     participants: [],
@@ -36,14 +42,7 @@ export class ScheduleInterviewComponent implements OnInit {
     notes: '',
     testsAssessment: '',
     roleInsights: '',
-     reminder: {
-      enabled: false,
-      beforeMinutes: 60,
-      channels: {
-        email: true,
-        sms: false,
-      }
-    }
+    reminders: [] as Array<{ beforeMinutes: number; channels: { email: boolean; sms: boolean } }>
   };
 
   interviewTypes = INTERVIEW_TYPES;
@@ -60,9 +59,15 @@ export class ScheduleInterviewComponent implements OnInit {
   datePart: string = '';
   timePart: string = '';
   
-  // NEW: State for participant selection
+  // State for participant selection
   processContacts: any[] = [];
   contactDropdownOpen = false;
+
+  get selectedAgency(): any | null {
+    const id = Number(this.interaction.agencyId);
+    if (!id) return null;
+    return this.agencies.find(a => Number(a.id) === id) ?? null;
+  }
 
   get selectedInterviewTypeLabel(): string {
     return getInterviewTypeLabel(this.interaction.interviewType);
@@ -100,18 +105,41 @@ export class ScheduleInterviewComponent implements OnInit {
   }
 
   get completionPercent(): number {
-    const requiredCount = 4; // processId, date, interviewType, summary
+    const requiredCount = 4;
     let filled = 0;
-    if (this.selectedProcess) filled += 1;
+    const linkedOk = this.meetingMode === 'process' ? !!this.selectedProcess : !!this.interaction.agencyId;
+    if (linkedOk) filled += 1;
     if (this.interaction.date) filled += 1;
     if (this.interaction.interviewType) filled += 1;
     if (this.interaction.summary?.trim?.().length) filled += 1;
     return Math.round((filled / requiredCount) * 100);
   }
 
-   get reminderTimingLabel(): string {
-    const option = this.reminderOptions.find((o) => o.value === Number(this.interaction?.reminder?.beforeMinutes));
+  get reminderTimingLabel(): string {
+    // Legacy getter kept for snapshot card
+    const r = this.interaction.reminders?.[0];
+    if (!r) return 'None';
+    const option = this.reminderOptions.find((o) => o.value === Number(r.beforeMinutes));
     return option?.label ?? 'Custom';
+  }
+
+  /** Add a new default reminder (avoids duplicates by beforeMinutes) */
+  addReminder() {
+    const used = new Set((this.interaction.reminders || []).map((r: any) => r.beforeMinutes));
+    const next = this.reminderOptions.find(o => !used.has(o.value));
+    if (!next) return; // all slots used
+    this.interaction.reminders = [
+      ...(this.interaction.reminders || []),
+      { beforeMinutes: next.value, channels: { email: true, sms: false } }
+    ];
+  }
+
+  removeReminder(index: number) {
+    this.interaction.reminders = (this.interaction.reminders || []).filter((_: any, i: number) => i !== index);
+  }
+
+  getReminderLabel(beforeMinutes: number): string {
+    return this.reminderOptions.find(o => o.value === Number(beforeMinutes))?.label ?? 'Custom';
   }
 
   get availableContacts() {
@@ -120,8 +148,11 @@ export class ScheduleInterviewComponent implements OnInit {
   }
 
   get canSubmit(): boolean {
+    const linkedOk = this.meetingMode === 'process'
+      ? !!this.selectedProcess
+      : !!this.interaction.agencyId;
     return !!(
-      this.selectedProcess &&
+      linkedOk &&
       this.datePart &&
       this.timePart &&
       this.interaction.interviewType &&
@@ -129,9 +160,24 @@ export class ScheduleInterviewComponent implements OnInit {
     );
   }
 
+  switchMode(mode: 'process' | 'recruiter') {
+    if (this.meetingMode === mode) return;
+    this.meetingMode = mode;
+    // Clear the opposite field
+    if (mode === 'process') {
+      this.interaction.agencyId = null;
+    } else {
+      this.interaction.processId = null;
+      this.processSearch = '';
+      this.processContacts = [];
+      this.interaction.participants = [];
+    }
+  }
+
   constructor(
     private processesService: ProcessesService,
     private interactionsService: InteractionsService,
+    private agenciesService: RecruitmentAgenciesService,
     private router: Router,
     private toastService: ToastService,
     private authService: AuthService
@@ -139,6 +185,7 @@ export class ScheduleInterviewComponent implements OnInit {
 
   ngOnInit() {
     this.loadProcesses();
+    this.loadAgencies();
     this.interaction.interviewType = normalizeInterviewType(this.interaction.interviewType);
     this.isPremiumUser = this.authService.isPremiumUser();
 
@@ -151,20 +198,21 @@ export class ScheduleInterviewComponent implements OnInit {
     this.interaction.date = `${this.datePart}T${this.timePart}`;
   }
 
-  
-  onReminderEnabledChange() {
-    if (!this.interaction.reminder.enabled) {
-      this.interaction.reminder.channels.sms = false;
-      return;
-    }
-
-    if (!this.isPremiumUser) {
-      this.interaction.reminder.channels.sms = false;
-    }
+  loadAgencies() {
+    this.agenciesService.getAll().subscribe({
+      next: (data) => { this.agencies = data; },
+      error: (err) => { console.error('Failed to load agencies', err); }
+    });
   }
 
-  onSmsReminderChange() {
-    if (!this.isPremiumUser) {
+  
+  onReminderEnabledChange() {
+    // No-op - kept for compatibility, logic moved to addReminder/removeReminder
+  }
+
+  onSmsReminderChange(reminder?: any) {
+    if (reminder && !this.isPremiumUser) reminder.channels.sms = false;
+    if (!reminder && !this.isPremiumUser && this.interaction?.reminder?.channels) {
       this.interaction.reminder.channels.sms = false;
     }
   }
@@ -229,42 +277,50 @@ export class ScheduleInterviewComponent implements OnInit {
   }
 
   onSubmit() {
-    if (!this.selectedProcess) {
-      this.toastService.show('Please select an open process', 'warning');
+    const linkedOk = this.meetingMode === 'process' ? !!this.selectedProcess : !!this.interaction.agencyId;
+    if (!linkedOk) {
+      const msg = this.meetingMode === 'process'
+        ? 'Please select an open process'
+        : 'Please select a recruiter / agency';
+      this.toastService.show(msg, 'warning');
       return;
     }
 
     this.loading = true;
 
-    // Prepare the payload with only the fields we want to send
+    // Build payload based on mode — only one of processId / agencyId is set
     const payload: any = {
-      processId: Number(this.selectedProcess.id),
       date: new Date(this.interaction.date).toISOString(),
       interviewType: this.interaction.interviewType,
-      participants: this.interaction.participants,
-      summary: this.interaction.summary
+      summary: this.interaction.summary,
     };
+
+    if (this.meetingMode === 'process') {
+      payload.processId = Number(this.selectedProcess.id);
+      payload.participants = this.interaction.participants;
+    } else {
+      payload.agencyId = Number(this.interaction.agencyId);
+    }
 
     // Add optional fields only if they have values
     if (this.interaction.headsup) payload.headsup = this.interaction.headsup;
     if (this.interaction.notes) payload.notes = this.interaction.notes;
     if (this.interaction.testsAssessment) payload.testsAssessment = this.interaction.testsAssessment;
     if (this.interaction.roleInsights) payload.roleInsights = this.interaction.roleInsights;
-     if (this.interaction?.reminder?.enabled) {
-      const channels = {
-        email: !!this.interaction.reminder.channels.email,
-        sms: this.isPremiumUser && !!this.interaction.reminder.channels.sms,
-      };
 
-      // Reminders are optional. If no channel is selected, continue without reminder payload.
-      if (channels.email || channels.sms) {
-        payload.reminder = {
-          enabled: true,
-          beforeMinutes: Number(this.interaction.reminder.beforeMinutes) || 60,
-          channels,
-        };
+    // Build reminders array — filter out any with no channels selected
+    const validReminders = (this.interaction.reminders || []).filter((r: any) => {
+      const hasEmail = !!r.channels?.email;
+      const hasSms = this.isPremiumUser && !!r.channels?.sms;
+      return hasEmail || hasSms;
+    }).map((r: any) => ({
+      beforeMinutes: Number(r.beforeMinutes) || 60,
+      channels: {
+        email: !!r.channels?.email,
+        sms: this.isPremiumUser && !!r.channels?.sms,
       }
-    }
+    }));
+    if (validReminders.length > 0) payload.reminders = validReminders;
 
     this.interactionsService.create(payload).subscribe({
       next: () => {

@@ -42,6 +42,15 @@ export class Interaction {
     smsSentAt?: string;
   };
 
+  /** Multiple reminders support — each entry is independent */
+  @Property({ type: 'json', nullable: true })
+  reminders?: Array<{
+    beforeMinutes: number;
+    channels: { email: boolean; sms: boolean };
+    emailSentAt?: string;
+    smsSentAt?: string;
+  }>;
+
   // Next Interview Invitation Tracking
   @Property({ nullable: true })
   nextInviteStatus?: string;

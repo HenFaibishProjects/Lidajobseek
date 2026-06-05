@@ -12,10 +12,26 @@ import {
 } from '@nestjs/common';
 import { InteractionsService } from './interactions.service';
 import { CreateInteractionDto } from './dto/create-interaction.dto';
+import { Public } from '../auth/public.decorator';
 
 @Controller('interactions')
 export class InteractionsController {
   constructor(private readonly interactionsService: InteractionsService) {}
+
+  /** Debug: show status of all upcoming reminders */
+  @Public()
+  @Get('debug-reminders')
+  debugReminders() {
+    return this.interactionsService.debugReminders(false);
+  }
+
+  /** Debug: force-send any due reminders immediately (for testing) */
+  @Public()
+  @Post('debug-reminders/force-send')
+  forceReminders() {
+    return this.interactionsService.debugReminders(true);
+  }
+
 
   @Post()
   create(@Body() dto: CreateInteractionDto, @Req() req: any) {

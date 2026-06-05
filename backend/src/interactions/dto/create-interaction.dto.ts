@@ -11,20 +11,30 @@ export type ReminderDto = {
   smsSentAt?: string;
 };
 
+/** Single entry in the multi-reminder array sent by the UI */
+export type ReminderItemDto = {
+  beforeMinutes: number;
+  channels: ReminderChannelsDto;
+};
+
 export class CreateInteractionDto {
-  processId: number;
+  processId?: number;
+  agencyId?: number;
   date: string;
   interviewType: string;
   participants?: any;
   summary: string;
-  testsAssessment?: string; // Tests or technical assessments during interview
-  roleInsights?: string; // What was learned about the role
+  testsAssessment?: string;
+  roleInsights?: string;
   notes?: string;
-  headsup?: string; // Heads-up information for scheduled interview
+  headsup?: string;
+  /** Legacy single-reminder (kept for backward compat) */
   reminder?: ReminderDto;
+  /** New: array of independent reminders */
+  reminders?: ReminderItemDto[];
   nextInviteStatus?: string;
   nextInviteDate?: string;
   nextInviteLink?: string;
   nextInviteType?: string;
-  invitationExtended?: string; // 'yes', 'later', or 'no'
+  invitationExtended?: string;
 }
