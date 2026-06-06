@@ -6,10 +6,13 @@ import { Interaction } from './interaction.entity';
 import { Contact } from '../contacts/contact.entity';
 import { Process } from '../processes/process.entity';
 import { MailModule } from '../mail/mail.module';
+import { WhatsAppReminderService } from './whatsapp-reminder.service';
 
 @Module({
   imports: [MikroOrmModule.forFeature([Interaction, Contact, Process]), MailModule],
   controllers: [InteractionsController],
-  providers: [InteractionsService],
+  providers: [InteractionsService, WhatsAppReminderService],
+  exports: [InteractionsService, WhatsAppReminderService],
 })
 export class InteractionsModule {}
+

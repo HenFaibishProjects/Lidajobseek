@@ -204,16 +204,11 @@
                                                 <input type="checkbox" [name]="'reminderEmail_' + i" [(ngModel)]="reminder.channels.email">
                                                 📧 Email
                                             </label>
-                                            <label class="checkbox-label sms-channel-label" [class.disabled]="!isPremiumUser">
-                                                <input type="checkbox" [name]="'reminderSms_' + i"
-                                                    [(ngModel)]="reminder.channels.sms"
-                                                    [disabled]="!isPremiumUser"
-                                                    (change)="onSmsReminderChange(reminder)">
-                                                <span class="sms-channel-text">📱 SMS</span>
-                                                <span class="premium-badge" *ngIf="!isPremiumUser">Premium</span>
+                                            <label class="checkbox-label">
+                                                <input type="checkbox" [name]="'reminderWhatsapp_' + i" [(ngModel)]="reminder.sendWhatsAppReminder">
+                                                <span>🟢 WhatsApp</span>
                                             </label>
                                         </div>
-                                        <p class="muted-hint" *ngIf="!isPremiumUser">Upgrade to premium to unlock SMS reminders.</p>
                                     </div>
                                 </div>
                             </div>

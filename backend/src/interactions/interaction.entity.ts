@@ -36,20 +36,22 @@ export class Interaction {
     beforeMinutes: number;
     channels: {
       email: boolean;
-      sms: boolean;
     };
+    sendWhatsAppReminder?: boolean;
     emailSentAt?: string;
-    smsSentAt?: string;
+    whatsAppSentAt?: string;
   };
 
   /** Multiple reminders support — each entry is independent */
   @Property({ type: 'json', nullable: true })
   reminders?: Array<{
     beforeMinutes: number;
-    channels: { email: boolean; sms: boolean };
+    channels: { email: boolean };
+    sendWhatsAppReminder?: boolean;
     emailSentAt?: string;
-    smsSentAt?: string;
+    whatsAppSentAt?: string;
   }>;
+
 
   // Next Interview Invitation Tracking
   @Property({ nullable: true })

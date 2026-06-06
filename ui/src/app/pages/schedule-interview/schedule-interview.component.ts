@@ -130,7 +130,7 @@ export class ScheduleInterviewComponent implements OnInit {
     if (!next) return; // all slots used
     this.interaction.reminders = [
       ...(this.interaction.reminders || []),
-      { beforeMinutes: next.value, channels: { email: true, sms: false } }
+      { beforeMinutes: next.value, channels: { email: true }, sendWhatsAppReminder: false }
     ];
   }
 
@@ -210,12 +210,7 @@ export class ScheduleInterviewComponent implements OnInit {
     // No-op - kept for compatibility, logic moved to addReminder/removeReminder
   }
 
-  onSmsReminderChange(reminder?: any) {
-    if (reminder && !this.isPremiumUser) reminder.channels.sms = false;
-    if (!reminder && !this.isPremiumUser && this.interaction?.reminder?.channels) {
-      this.interaction.reminder.channels.sms = false;
-    }
-  }
+
 
   updateDateTime() {
     if (this.datePart && this.timePart) {
@@ -311,16 +306,17 @@ export class ScheduleInterviewComponent implements OnInit {
     // Build reminders array — filter out any with no channels selected
     const validReminders = (this.interaction.reminders || []).filter((r: any) => {
       const hasEmail = !!r.channels?.email;
-      const hasSms = this.isPremiumUser && !!r.channels?.sms;
-      return hasEmail || hasSms;
+      const hasWhatsapp = !!r.sendWhatsAppReminder;
+      return hasEmail || hasWhatsapp;
     }).map((r: any) => ({
       beforeMinutes: Number(r.beforeMinutes) || 60,
       channels: {
         email: !!r.channels?.email,
-        sms: this.isPremiumUser && !!r.channels?.sms,
-      }
+      },
+      sendWhatsAppReminder: !!r.sendWhatsAppReminder
     }));
     if (validReminders.length > 0) payload.reminders = validReminders;
+
 
     this.interactionsService.create(payload).subscribe({
       next: () => {

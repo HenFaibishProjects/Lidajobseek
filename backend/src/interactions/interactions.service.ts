@@ -12,6 +12,7 @@ import { Process } from '../processes/process.entity';
 import { Contact } from '../contacts/contact.entity';
 import { CreateInteractionDto, ReminderItemDto } from './dto/create-interaction.dto';
 import { MailService } from '../mail/mail.service';
+import { WhatsAppReminderService } from './whatsapp-reminder.service';
 
 @Injectable()
 export class InteractionsService implements OnModuleInit, OnModuleDestroy {
@@ -28,7 +29,9 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
     private readonly processRepository: EntityRepository<Process>,
     private readonly em: EntityManager,
     private readonly mailService: MailService,
+    private readonly whatsappReminderService: WhatsAppReminderService,
   ) { }
+
 
   onModuleInit() {
     this.reminderTimer = setInterval(() => {
@@ -43,7 +46,6 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
       clearInterval(this.reminderTimer);
     }
   }
-
   private sanitizeReminder(
     reminder: any,
     user: any,
@@ -59,21 +61,15 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
       ? beforeMinutesRaw
       : 60;
 
-    const pricingPlan = user?.pricingPlan || 'free';
-    const isPremium = pricingPlan === 'premium' || pricingPlan === 'enterprise';
-
     const email = reminder?.channels?.email !== false;
-    const smsRequested = reminder?.channels?.sms === true;
-    const sms = isPremium ? smsRequested : false;
+    const normalizedChannels = { email };
 
-    const normalizedChannels = email || sms
-      ? { email, sms }
-      : { email: true, sms: false };
+    const sendWhatsAppReminder = reminder.sendWhatsAppReminder === true;
 
     const sameConfigAsExisting =
       existingReminder?.beforeMinutes === beforeMinutes &&
       existingReminder?.channels?.email === normalizedChannels.email &&
-      existingReminder?.channels?.sms === normalizedChannels.sms;
+      existingReminder?.sendWhatsAppReminder === sendWhatsAppReminder;
 
     const preserveDeliveryState = sameConfigAsExisting && !resetDeliveryState;
 
@@ -81,8 +77,9 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
       enabled: true,
       beforeMinutes,
       channels: normalizedChannels,
+      sendWhatsAppReminder,
       emailSentAt: preserveDeliveryState ? existingReminder?.emailSentAt : undefined,
-      smsSentAt: preserveDeliveryState ? existingReminder?.smsSentAt : undefined,
+      whatsAppSentAt: preserveDeliveryState ? existingReminder?.whatsAppSentAt : undefined,
     };
   }
 
@@ -99,9 +96,6 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
   ): Interaction['reminders'] {
     if (!Array.isArray(reminders) || reminders.length === 0) return [];
 
-    const pricingPlan = user?.pricingPlan || 'free';
-    const isPremium = pricingPlan === 'premium' || pricingPlan === 'enterprise';
-
     const seen = new Set<number>();
     const result: Interaction['reminders'] = [];
 
@@ -112,8 +106,8 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
       seen.add(beforeMinutesRaw);
 
       const email = r.channels?.email !== false;
-      const sms = isPremium ? r.channels?.sms === true : false;
-      const channels = email || sms ? { email, sms } : { email: true, sms: false };
+      const channels = { email };
+      const sendWhatsAppReminder = (r as any).sendWhatsAppReminder === true;
 
       // Try to find matching existing entry to preserve delivery state
       const existing = existingReminders?.find(
@@ -121,13 +115,14 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
       );
       const sameConfig =
         existing?.channels?.email === channels.email &&
-        existing?.channels?.sms === channels.sms;
+        existing?.sendWhatsAppReminder === sendWhatsAppReminder;
 
       result.push({
         beforeMinutes: beforeMinutesRaw,
         channels,
+        sendWhatsAppReminder,
         emailSentAt: sameConfig && !resetDeliveryState ? existing?.emailSentAt : undefined,
-        smsSentAt: sameConfig && !resetDeliveryState ? existing?.smsSentAt : undefined,
+        whatsAppSentAt: sameConfig && !resetDeliveryState ? existing?.whatsAppSentAt : undefined,
       });
     }
 
@@ -189,8 +184,11 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
       this.logger.debug('Reminder job already running, skipping.');
       return;
     }
-    if (!this.mailService.isConfigured()) {
-      this.logger.warn('Mail not configured — reminder emails disabled.');
+    const smtpOk = this.mailService.isConfigured();
+    const greenApiOk = this.whatsappReminderService.isConfigured();
+
+    if (!smtpOk && !greenApiOk) {
+      this.logger.warn('Neither Mail nor GREEN-API WhatsApp is configured — reminders disabled.');
       return;
     }
 
@@ -229,15 +227,6 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
         for (let idx = 0; idx < remindersArr.length; idx++) {
           const r = remindersArr[idx] as any;
 
-          if (r?.emailSentAt) {
-            this.logger.debug(`  [${idx}] beforeMinutes=${r.beforeMinutes} — already sent at ${r.emailSentAt}`);
-            continue;
-          }
-          if (!r?.channels?.email) {
-            this.logger.debug(`  [${idx}] beforeMinutes=${r.beforeMinutes} — email channel disabled`);
-            continue;
-          }
-
           const beforeMinutes = Number(r.beforeMinutes);
           if (!Number.isFinite(beforeMinutes) || beforeMinutes <= 0) {
             this.logger.debug(`  [${idx}] invalid beforeMinutes: ${r.beforeMinutes}`);
@@ -245,41 +234,55 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
           }
 
           const reminderTime = new Date(interaction.date.getTime() - beforeMinutes * 60 * 1000);
-          this.logger.debug(
-            `  [${idx}] beforeMinutes=${beforeMinutes} reminderTime=${reminderTime.toISOString()} now=${now.toISOString()} due=${reminderTime <= now}`,
-          );
-
           if (reminderTime > now) continue;
 
-          // Resolve user for recipient email
-          const processRef = interaction.process as any;
-          if (!processRef?.user) {
-            this.logger.warn(`  [${idx}] No user on process — skipping.`);
-            continue;
-          }
-          const userId = processRef.user?.id ?? processRef.user;
-          const user = await em.findOne('User' as any, { id: userId }) as any;
-          const recipientEmail = user?.email;
-          if (!recipientEmail) {
-            this.logger.warn(`  [${idx}] Could not resolve email for user id=${userId}`);
-            continue;
+          // --- 1. Process Email Channel ---
+          if (r.channels?.email && !r.emailSentAt) {
+            if (smtpOk) {
+              const processRef = interaction.process as any;
+              if (processRef?.user) {
+                const userId = processRef.user?.id ?? processRef.user;
+                const user = await em.findOne('User' as any, { id: userId }) as any;
+                const recipientEmail = user?.email;
+                if (recipientEmail) {
+                  this.logger.log(`  [${idx}] Sending reminder email to ${recipientEmail} for interaction #${interaction.id}`);
+                  const mail = this.buildReminderEmail(interaction, beforeMinutes);
+                  const sent = await this.mailService.sendMail({
+                    to: recipientEmail,
+                    subject: mail.subject,
+                    text: mail.text,
+                    html: mail.html,
+                  });
+
+                  if (sent) {
+                    this.logger.log(`  [${idx}] ✓ Reminder email sent successfully to ${recipientEmail}`);
+                    r.emailSentAt = now.toISOString();
+                    remindersChanged = true;
+                  } else {
+                    this.logger.error(`  [${idx}] ✗ mailService.sendMail returned false for ${recipientEmail}`);
+                  }
+                } else {
+                  this.logger.warn(`  [${idx}] Could not resolve email for user id=${userId}`);
+                }
+              } else {
+                this.logger.warn(`  [${idx}] No user on process — skipping email.`);
+              }
+            } else {
+              this.logger.warn(`  [${idx}] Mail not configured — skipping email reminder.`);
+            }
           }
 
-          this.logger.log(`  [${idx}] Sending reminder email to ${recipientEmail} for interaction #${interaction.id}`);
-          const mail = this.buildReminderEmail(interaction, beforeMinutes);
-          const sent = await this.mailService.sendMail({
-            to: recipientEmail,
-            subject: mail.subject,
-            text: mail.text,
-            html: mail.html,
-          });
-
-          if (sent) {
-            this.logger.log(`  [${idx}] ✓ Reminder email sent successfully to ${recipientEmail}`);
-            remindersArr[idx] = { ...r, emailSentAt: now.toISOString() };
-            remindersChanged = true;
-          } else {
-            this.logger.error(`  [${idx}] ✗ mailService.sendMail returned false for ${recipientEmail}`);
+          // --- 2. Process WhatsApp Channel ---
+          if (r.sendWhatsAppReminder && !r.whatsAppSentAt) {
+            if (greenApiOk) {
+              this.logger.log(`  [${idx}] Sending WhatsApp reminder via GREEN-API for interaction #${interaction.id}`);
+              const text = this.whatsappReminderService.buildReminderWhatsAppText(interaction);
+              await this.whatsappReminderService.sendInterviewReminder(text);
+              r.whatsAppSentAt = now.toISOString();
+              remindersChanged = true;
+            } else {
+              this.logger.warn(`  [${idx}] GREEN-API not configured — skipping WhatsApp reminder.`);
+            }
           }
         }
 
@@ -290,33 +293,58 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
 
         // ── LEGACY: single reminder object ──────────────────────────
         const reminder = interaction.reminder as any;
-        if (reminder?.enabled && reminder?.channels?.email && !reminder?.emailSentAt) {
+        if (reminder?.enabled) {
           const beforeMinutes = Number(reminder.beforeMinutes);
           if (Number.isFinite(beforeMinutes) && beforeMinutes > 0) {
             const reminderTime = new Date(interaction.date.getTime() - beforeMinutes * 60 * 1000);
-            this.logger.debug(
-              `  [legacy] beforeMinutes=${beforeMinutes} reminderTime=${reminderTime.toISOString()} due=${reminderTime <= now}`,
-            );
             if (reminderTime <= now) {
-              const processRef = interaction.process as any;
-              if (processRef?.user) {
-                const userId = processRef.user?.id ?? processRef.user;
-                const user = await em.findOne('User' as any, { id: userId }) as any;
-                const recipientEmail = user?.email;
-                if (recipientEmail) {
-                  const mail = this.buildReminderEmail(interaction, beforeMinutes);
-                  const sent = await this.mailService.sendMail({
-                    to: recipientEmail,
-                    subject: mail.subject,
-                    text: mail.text,
-                    html: mail.html,
-                  });
-                  if (sent) {
-                    this.logger.log(`  [legacy] ✓ Reminder email sent to ${recipientEmail}`);
-                    interaction.reminder = { ...reminder, emailSentAt: now.toISOString() };
-                    hasChanges = true;
+              let legacyChanged = false;
+              const newReminderState = { ...reminder };
+
+              // --- 1. Process Email ---
+              if (reminder.channels?.email && !reminder.emailSentAt) {
+                if (smtpOk) {
+                  const processRef = interaction.process as any;
+                  if (processRef?.user) {
+                    const userId = processRef.user?.id ?? processRef.user;
+                    const user = await em.findOne('User' as any, { id: userId }) as any;
+                    const recipientEmail = user?.email;
+                    if (recipientEmail) {
+                      const mail = this.buildReminderEmail(interaction, beforeMinutes);
+                      const sent = await this.mailService.sendMail({
+                        to: recipientEmail,
+                        subject: mail.subject,
+                        text: mail.text,
+                        html: mail.html,
+                      });
+                      if (sent) {
+                        this.logger.log(`  [legacy] ✓ Reminder email sent to ${recipientEmail}`);
+                        newReminderState.emailSentAt = now.toISOString();
+                        legacyChanged = true;
+                      }
+                    }
                   }
+                } else {
+                  this.logger.warn(`  [legacy] Mail not configured — skipping email reminder.`);
                 }
+              }
+
+              // --- 2. Process WhatsApp ---
+              if (reminder.sendWhatsAppReminder && !reminder.whatsAppSentAt) {
+                if (greenApiOk) {
+                  this.logger.log(`  [legacy] Sending WhatsApp reminder via GREEN-API for interaction #${interaction.id}`);
+                  const text = this.whatsappReminderService.buildReminderWhatsAppText(interaction);
+                  await this.whatsappReminderService.sendInterviewReminder(text);
+                  newReminderState.whatsAppSentAt = now.toISOString();
+                  legacyChanged = true;
+                } else {
+                  this.logger.warn(`  [legacy] GREEN-API not configured — skipping WhatsApp reminder.`);
+                }
+              }
+
+              if (legacyChanged) {
+                interaction.reminder = newReminderState;
+                hasChanges = true;
               }
             }
           }
@@ -327,7 +355,7 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
         await em.flush();
       }
     } catch (error) {
-      this.logger.error('Failed to process reminder emails', error as any);
+      this.logger.error('Failed to process reminder emails/whatsapps', error as any);
     } finally {
       em.clear();
       this.isProcessingReminders = false;
@@ -350,6 +378,7 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
 
       const report: any[] = [];
       const smtpOk = this.mailService.isConfigured();
+      const greenApiOk = this.whatsappReminderService.isConfigured();
 
       for (const interaction of interactions) {
         const remindersArr = Array.isArray((interaction as any).reminders)
@@ -367,10 +396,12 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
             index: idx,
             beforeMinutes: r.beforeMinutes,
             channels: r.channels,
+            sendWhatsAppReminder: r.sendWhatsAppReminder ?? false,
             reminderFiresAt: reminderTime.toISOString(),
             isDue: reminderTime <= now,
             alreadySent: !!r.emailSentAt,
             emailSentAt: r.emailSentAt ?? null,
+            whatsAppSentAt: r.whatsAppSentAt ?? null,
           };
         });
 
@@ -379,29 +410,49 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
           interviewDate: interaction.date.toISOString(),
           recipientEmail,
           smtpConfigured: smtpOk,
+          greenApiConfigured: greenApiOk,
           reminders: reminderStatuses,
         });
 
         // Force-send any due, unsent reminders if requested
-        if (forceAll && smtpOk && recipientEmail) {
+        if (forceAll) {
+          let remindersChanged = false;
           for (let idx = 0; idx < remindersArr.length; idx++) {
             const r = remindersArr[idx] as any;
-            if (r.emailSentAt) continue;
             const reminderTime = new Date(interaction.date.getTime() - Number(r.beforeMinutes) * 60 * 1000);
             if (reminderTime > now) continue;
-            const mail = this.buildReminderEmail(interaction, r.beforeMinutes);
-            const sent = await this.mailService.sendMail({ to: recipientEmail, ...mail });
-            reminderStatuses[idx].forceSentNow = sent;
-            if (sent) {
-              remindersArr[idx] = { ...r, emailSentAt: now.toISOString() };
-              (interaction as any).reminders = remindersArr;
+
+            if (r.channels?.email && !r.emailSentAt && smtpOk && recipientEmail) {
+              const mail = this.buildReminderEmail(interaction, r.beforeMinutes);
+              const sent = await this.mailService.sendMail({ to: recipientEmail, ...mail });
+              if (sent) {
+                remindersArr[idx] = { ...remindersArr[idx], emailSentAt: now.toISOString() };
+                reminderStatuses[idx].emailSentAt = now.toISOString();
+                remindersChanged = true;
+              }
+            }
+
+            if (r.sendWhatsAppReminder && !r.whatsAppSentAt && greenApiOk) {
+              const text = this.whatsappReminderService.buildReminderWhatsAppText(interaction);
+              await this.whatsappReminderService.sendInterviewReminder(text);
+              remindersArr[idx] = { ...remindersArr[idx], whatsAppSentAt: now.toISOString() };
+              reminderStatuses[idx].whatsAppSentAt = now.toISOString();
+              remindersChanged = true;
             }
           }
-          await em.flush();
+          if (remindersChanged) {
+            (interaction as any).reminders = remindersArr;
+            await em.flush();
+          }
         }
       }
 
-      return { now: now.toISOString(), smtpConfigured: smtpOk, interactions: report };
+      return {
+        now: now.toISOString(),
+        smtpConfigured: smtpOk,
+        greenApiConfigured: greenApiOk,
+        interactions: report,
+      };
     } finally {
       em.clear();
     }
