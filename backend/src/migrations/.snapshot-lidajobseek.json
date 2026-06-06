@@ -899,7 +899,39 @@
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
-          "nullable": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": 32,
+          "scale": 0,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
+        "reminders": {
+          "name": "reminders",
+          "type": "jsonb",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "json"
+        },
+        "agency_id": {
+          "name": "agency_id",
+          "type": "int4",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
           "unique": false,
           "length": null,
           "precision": 32,
@@ -913,6 +945,16 @@
       "name": "interaction",
       "schema": "app",
       "indexes": [
+        {
+          "columnNames": [
+            "agency_id"
+          ],
+          "composite": false,
+          "constraint": false,
+          "keyName": "interaction_agency_id_index",
+          "unique": false,
+          "primary": false
+        },
         {
           "columnNames": [
             "id"
@@ -936,6 +978,19 @@
       ],
       "checks": [],
       "foreignKeys": {
+        "interaction_agency_id_foreign": {
+          "columnNames": [
+            "agency_id"
+          ],
+          "constraintName": "interaction_agency_id_foreign",
+          "localTableName": "app.interaction",
+          "referencedTableName": "app.recruitment_agency",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "updateRule": "cascade",
+          "deleteRule": "set null"
+        },
         "interaction_process_id_foreign": {
           "columnNames": [
             "process_id"
@@ -947,7 +1002,7 @@
             "id"
           ],
           "updateRule": "cascade",
-          "deleteRule": "no action"
+          "deleteRule": "set null"
         }
       },
       "nativeEnums": {},
@@ -2463,6 +2518,158 @@
           "constraintName": "self_review_process_id_foreign",
           "localTableName": "app.self_review",
           "referencedTableName": "app.process",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "updateRule": "cascade",
+          "deleteRule": "no action"
+        }
+      },
+      "nativeEnums": {},
+      "comment": null
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int4",
+          "unsigned": true,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": 32,
+          "scale": 0,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": 255,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "string"
+        },
+        "versions": {
+          "name": "versions",
+          "type": "json",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": "'[]'",
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "json"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "int4",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": 32,
+          "scale": 0,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        }
+      },
+      "name": "template",
+      "schema": "app",
+      "indexes": [
+        {
+          "columnNames": [
+            "id"
+          ],
+          "composite": false,
+          "constraint": false,
+          "keyName": "template_pkey",
+          "unique": true,
+          "primary": true
+        },
+        {
+          "columnNames": [
+            "updated_at"
+          ],
+          "composite": false,
+          "constraint": false,
+          "keyName": "template_updated_at_index",
+          "unique": false,
+          "primary": false
+        },
+        {
+          "columnNames": [
+            "user_id"
+          ],
+          "composite": false,
+          "constraint": false,
+          "keyName": "template_user_id_index",
+          "unique": false,
+          "primary": false
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "template_user_id_foreign": {
+          "columnNames": [
+            "user_id"
+          ],
+          "constraintName": "template_user_id_foreign",
+          "localTableName": "app.template",
+          "referencedTableName": "app.user",
           "referencedColumnNames": [
             "id"
           ],

@@ -14,6 +14,7 @@ import { Profile } from './src/profiles/profile.entity';
 import { RecruitmentAgency } from './src/recruitment-agencies/recruitment-agency.entity';
 import { AgencyContact } from './src/recruitment-agencies/agency-contact.entity';
 import { AgencyInteraction } from './src/recruitment-agencies/agency-interaction.entity';
+import { Template } from './src/templates/template.entity';
 
 const envPath = existsSync(join(process.cwd(), 'backend', '.env'))
   ? join(process.cwd(), 'backend', '.env')
@@ -68,6 +69,7 @@ const config: MikroOrmModuleOptions = {
     RecruitmentAgency,
     AgencyContact,
     AgencyInteraction,
+    Template,
   ],
 
   allowGlobalContext: true,

@@ -22,6 +22,7 @@ import { RecruiterListComponent } from './pages/recruiter-list/recruiter-list.co
 import { RecruiterCreateComponent } from './pages/recruiter-create/recruiter-create.component';
 import { RecruiterEditComponent } from './pages/recruiter-edit/recruiter-edit.component';
 import { RecruiterDetailsComponent } from './pages/recruiter-details/recruiter-details.component';
+import { TemplatesComponent } from './pages/templates/templates.component';
 
 export const routes: Routes = [
     { path: 'login', component: LoginComponent },
@@ -43,6 +44,7 @@ export const routes: Routes = [
             { path: 'recruiters/new', component: RecruiterCreateComponent },
             { path: 'recruiters/:id', component: RecruiterDetailsComponent },
             { path: 'recruiters/:id/edit', component: RecruiterEditComponent },
+            { path: 'templates', component: TemplatesComponent },
             {
                 path: 'instructions',
                 loadComponent: () => import('./pages/instructions/instructions.component').then(m => m.InstructionsComponent)
@@ -59,3 +61,4 @@ export const routes: Routes = [
         ]
     }
 ];
+
