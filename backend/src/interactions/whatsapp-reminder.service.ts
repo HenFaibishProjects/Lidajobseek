@@ -28,13 +28,20 @@ export class WhatsAppReminderService {
     const interviewDate = new Date(interaction.date);
     const dateText = interviewDate.toLocaleDateString('en-GB', { dateStyle: 'medium' });
     const timeText = interviewDate.toLocaleTimeString('en-GB', { timeStyle: 'short' });
-    const companyName = interaction.process?.companyName || 'N/A';
-    const positionName = interaction.process?.roleTitle || 'N/A';
 
-    return `Interview reminder:
+    if (interaction.process) {
+      const companyName = interaction.process.companyName || 'N/A';
+      const positionName = interaction.process.roleTitle || 'N/A';
+      return `Interview reminder:
 You have an interview scheduled for ${dateText} at ${timeText}.
 Company: ${companyName}
 Position: ${positionName}`;
+    } else {
+      const agencyName = (interaction as any).agency?.agencyName || 'N/A';
+      return `Interview reminder:
+You have a recruiter/agency meeting scheduled for ${dateText} at ${timeText}.
+Agency: ${agencyName}`;
+    }
   }
 
   async sendInterviewReminder(message: string): Promise<void> {

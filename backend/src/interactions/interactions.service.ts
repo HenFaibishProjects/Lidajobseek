@@ -10,6 +10,7 @@ import { EntityRepository, EntityManager, QueryOrder } from '@mikro-orm/postgres
 import { Interaction } from './interaction.entity';
 import { Process } from '../processes/process.entity';
 import { Contact } from '../contacts/contact.entity';
+import { RecruitmentAgency } from '../recruitment-agencies/recruitment-agency.entity';
 import { CreateInteractionDto, ReminderItemDto } from './dto/create-interaction.dto';
 import { MailService } from '../mail/mail.service';
 import { WhatsAppReminderService } from './whatsapp-reminder.service';
@@ -135,6 +136,8 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
     let subject: string;
     if (interaction.process) {
       subject = `Interview reminder: ${interaction.process.companyName} - ${interaction.process.roleTitle}`;
+    } else if ((interaction as any).agency) {
+      subject = `Meeting reminder: ${(interaction as any).agency.agencyName}`;
     } else {
       subject = `Interview reminder: ${interaction.interviewType}`;
     }
@@ -156,6 +159,7 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
       `This is your reminder for an upcoming ${interviewType} interview in ${minutesLabel}.`,
       interaction.process ? `Company: ${interaction.process.companyName}` : '',
       interaction.process ? `Role: ${interaction.process.roleTitle}` : '',
+      (interaction as any).agency ? `Recruiter / Agency: ${(interaction as any).agency.agencyName}` : '',
       `When: ${dateText}`,
       `Summary: ${summary}`,
       '',
@@ -169,6 +173,7 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
         <ul>
           ${interaction.process ? `<li><strong>Company:</strong> ${interaction.process.companyName}</li>` : ''}
           ${interaction.process ? `<li><strong>Role:</strong> ${interaction.process.roleTitle}</li>` : ''}
+          ${(interaction as any).agency ? `<li><strong>Recruiter / Agency:</strong> ${(interaction as any).agency.agencyName}</li>` : ''}
           <li><strong>When:</strong> ${dateText}</li>
           <li><strong>Summary:</strong> ${summary}</li>
         </ul>
@@ -203,7 +208,7 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
         .getRepository(Interaction)
         .find(
           { date: { $gte: now, $lte: horizon } },
-          { populate: ['process'], orderBy: { date: QueryOrder.ASC } },
+          { populate: ['process', 'agency'], orderBy: { date: QueryOrder.ASC } },
         );
 
       this.logger.debug(
@@ -239,9 +244,9 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
           // --- 1. Process Email Channel ---
           if (r.channels?.email && !r.emailSentAt) {
             if (smtpOk) {
-              const processRef = interaction.process as any;
-              if (processRef?.user) {
-                const userId = processRef.user?.id ?? processRef.user;
+              const ownerRef = (interaction.process || (interaction as any).agency) as any;
+              if (ownerRef?.user) {
+                const userId = ownerRef.user?.id ?? ownerRef.user;
                 const user = await em.findOne('User' as any, { id: userId }) as any;
                 const recipientEmail = user?.email;
                 if (recipientEmail) {
@@ -265,7 +270,7 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
                   this.logger.warn(`  [${idx}] Could not resolve email for user id=${userId}`);
                 }
               } else {
-                this.logger.warn(`  [${idx}] No user on process — skipping email.`);
+                this.logger.warn(`  [${idx}] No user on process or agency — skipping email.`);
               }
             } else {
               this.logger.warn(`  [${idx}] Mail not configured — skipping email reminder.`);
@@ -304,9 +309,9 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
               // --- 1. Process Email ---
               if (reminder.channels?.email && !reminder.emailSentAt) {
                 if (smtpOk) {
-                  const processRef = interaction.process as any;
-                  if (processRef?.user) {
-                    const userId = processRef.user?.id ?? processRef.user;
+                  const ownerRef = (interaction.process || (interaction as any).agency) as any;
+                  if (ownerRef?.user) {
+                    const userId = ownerRef.user?.id ?? ownerRef.user;
                     const user = await em.findOne('User' as any, { id: userId }) as any;
                     const recipientEmail = user?.email;
                     if (recipientEmail) {
@@ -373,7 +378,7 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
         .getRepository(Interaction)
         .find(
           { date: { $gte: new Date(now.getTime() - 1000 * 60 * 60 * 24), $lte: horizon } },
-          { populate: ['process'], orderBy: { date: QueryOrder.ASC } },
+          { populate: ['process', 'agency'], orderBy: { date: QueryOrder.ASC } },
         );
 
       const report: any[] = [];
@@ -385,8 +390,8 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
           ? (interaction as any).reminders
           : [];
 
-        const processRef = interaction.process as any;
-        const userId = processRef?.user?.id ?? processRef?.user;
+        const ownerRef = (interaction.process || (interaction as any).agency) as any;
+        const userId = ownerRef?.user?.id ?? ownerRef?.user;
         const user = userId ? (await em.findOne('User' as any, { id: userId }) as any) : null;
         const recipientEmail = user?.email ?? null;
 
@@ -459,28 +464,49 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
   }
 
   async create(dto: CreateInteractionDto, user?: any): Promise<Interaction> {
-    this.logger.log(`Creating interaction for process ${dto.processId} and user ${user?.id || user?.userId}`);
+    this.logger.log(`Creating interaction for process/agency. Process: ${dto.processId}, Agency: ${dto.agencyId}, User: ${user?.id || user?.userId}`);
     
     try {
       const userId = Number(user?.id || user?.userId);
-      const processId = Number(dto.processId);
 
       if (!userId) {
         throw new Error('User identity is missing or invalid');
       }
 
-      const process = await this.processRepository.findOne({ 
-        id: processId, 
-        user: userId 
-      });
+      let process: Process | undefined;
+      if (dto.processId && !Number.isNaN(Number(dto.processId))) {
+        const processId = Number(dto.processId);
+        process = await this.processRepository.findOne({ 
+          id: processId, 
+          user: userId 
+        }) || undefined;
 
-      if (!process) {
-        this.logger.warn(`Process ${processId} not found for user ${userId}`);
-        throw new NotFoundException(`Process with ID ${processId} not found`);
+        if (!process) {
+          this.logger.warn(`Process ${processId} not found for user ${userId}`);
+          throw new NotFoundException(`Process with ID ${processId} not found`);
+        }
+      }
+
+      let agency: any;
+      if (dto.agencyId && !Number.isNaN(Number(dto.agencyId))) {
+        const agencyId = Number(dto.agencyId);
+        agency = await this.em.findOne(RecruitmentAgency, {
+          id: agencyId,
+          user: userId
+        }) || undefined;
+
+        if (!agency) {
+          this.logger.warn(`Agency ${agencyId} not found for user ${userId}`);
+          throw new NotFoundException(`Agency with ID ${agencyId} not found`);
+        }
+      }
+
+      if (!process && !agency) {
+        throw new Error('Either processId or agencyId must be provided and valid');
       }
 
       // 1. Create the Interaction entity
-      const interaction = this.em.create(Interaction, {
+      const interaction = this.interactionRepository.create({
         date: new Date(dto.date),
         interviewType: dto.interviewType,
         participants: dto.participants,
@@ -497,22 +523,23 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
           ? this.sanitizeRemindersArray(dto.reminders, user)
           : undefined,
         process,
+        agency,
       } as any);
 
       this.em.persist(interaction);
 
-      // 2. Handle Contacts Synchronization
-      if (dto.participants && Array.isArray(dto.participants)) {
+      // 2. Handle Contacts Synchronization (only if linked to a process)
+      if (process && dto.participants && Array.isArray(dto.participants)) {
         for (const participant of dto.participants) {
           if (!participant || !participant.name) continue;
 
           const existingContact = await this.contactRepository.findOne({
-            process: processId,
+            process: process.id,
             name: participant.name,
           });
 
           if (!existingContact) {
-            const contact = this.em.create(Contact, {
+            const contact = this.contactRepository.create({
               name: participant.name,
               role: participant.role,
               email: participant.email,
@@ -535,17 +562,17 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
         }
       }
 
-      // 3. Update the process's current stage and updatedAt
-      process.updatedAt = new Date();
-      // If this is a new interaction, it might imply a stage update? 
-      // For now we just ensure updatedAt is bumped.
+      // 3. Update the process's current stage and updatedAt (only if process is set)
+      if (process) {
+        process.updatedAt = new Date();
+      }
 
       await this.em.flush();
       this.logger.log(`Successfully created interaction ${interaction.id}`);
       
       return interaction;
     } catch (error) {
-      this.logger.error(`Failed to create interaction for process ${dto.processId}: ${error.message}`, error.stack);
+      this.logger.error(`Failed to create interaction: ${error.message}`, error.stack);
       throw error;
     }
   }
@@ -561,7 +588,10 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
     if (params.processId) {
       where.process = { id: Number(params.processId), user: params.userId };
     } else {
-      where.process = { user: params.userId };
+      where.$or = [
+        { process: { user: params.userId } },
+        { agency: { user: params.userId } }
+      ];
     }
 
     if (params.startDate) {
@@ -574,13 +604,14 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
     }
 
     const interactions = await this.interactionRepository.find(where, {
-      populate: ['process'],
+      populate: ['process', 'agency'],
       orderBy: { date: QueryOrder.ASC },
     });
 
     return interactions.map(i => ({
       ...i,
-      processId: i.process.id
+      processId: i.process?.id || null,
+      agencyId: i.agency?.id || null
     }));
   }
 
@@ -597,7 +628,14 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
   }
 
   async update(id: number, dto: any, user?: any): Promise<Interaction> {
-    const interaction = await this.interactionRepository.findOne({ id, process: { user: user?.userId } });
+    const userId = user?.userId ?? user?.id;
+    const interaction = await this.interactionRepository.findOne({
+      id,
+      $or: [
+        { process: { user: userId } },
+        { agency: { user: userId } }
+      ]
+    });
     if (!interaction) {
       throw new NotFoundException(`Interaction with ID ${id} not found`);
     }
@@ -640,7 +678,13 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
   }
 
   async remove(id: number, userId: number): Promise<Interaction> {
-    const interaction = await this.interactionRepository.findOne({ id, process: { user: userId } });
+    const interaction = await this.interactionRepository.findOne({
+      id,
+      $or: [
+        { process: { user: userId } },
+        { agency: { user: userId } }
+      ]
+    });
     if (!interaction) {
       throw new NotFoundException(`Interaction with ID ${id} not found`);
     }
@@ -650,31 +694,44 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
 
   async exportData(userId: number): Promise<any[]> {
     const interactions = await this.interactionRepository.find({
-      process: { user: userId }
+      $or: [
+        { process: { user: userId } },
+        { agency: { user: userId } }
+      ]
     }, {
-      populate: ['process'],
+      populate: ['process', 'agency'],
     });
 
     return interactions.map(interaction => ({
       ...interaction,
-      process: {
+      process: interaction.process ? {
         id: interaction.process.id,
         companyName: interaction.process.companyName,
         roleTitle: interaction.process.roleTitle,
-      },
-      processId: interaction.process.id,
+      } : undefined,
+      processId: interaction.process?.id || null,
+      agency: (interaction as any).agency ? {
+        id: (interaction as any).agency.id,
+        agencyName: (interaction as any).agency.agencyName,
+      } : undefined,
+      agencyId: (interaction as any).agency?.id || null,
     }));
   }
 
   async importData(interactions: any[], mode: 'overwrite' | 'append', userId: number): Promise<{ count: number }> {
     if (mode === 'overwrite') {
-      const allInteractions = await this.interactionRepository.find({ process: { user: userId } });
+      const allInteractions = await this.interactionRepository.find({
+        $or: [
+          { process: { user: userId } },
+          { agency: { user: userId } }
+        ]
+      });
       await this.em.removeAndFlush(allInteractions);
     }
 
     let count = 0;
     for (const i of interactions) {
-      const { id, process, ...interactionData } = i;
+      const { id, process, agency, ...interactionData } = i;
 
       // Convert date strings to Date objects
       if (interactionData.date) interactionData.date = new Date(interactionData.date);
@@ -682,11 +739,24 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
       if (interactionData.createdAt) interactionData.createdAt = new Date(interactionData.createdAt);
 
       // Check if process exists and belongs to user
-      const processExists = await this.processRepository.findOne({ id: interactionData.processId, user: userId });
+      let processExists = null;
+      if (interactionData.processId) {
+        processExists = await this.processRepository.findOne({ id: interactionData.processId, user: userId });
+      }
 
-      if (processExists) {
-        const { processId, ...data } = interactionData;
-        const interaction = this.interactionRepository.create({ ...data, process: processExists } as any);
+      // Check if agency exists and belongs to user
+      let agencyExists = null;
+      if (interactionData.agencyId) {
+        agencyExists = await this.em.findOne(RecruitmentAgency, { id: interactionData.agencyId, user: userId });
+      }
+
+      if (processExists || agencyExists) {
+        const { processId, agencyId, ...data } = interactionData;
+        const interaction = this.interactionRepository.create({
+          ...data,
+          process: processExists || undefined,
+          agency: agencyExists || undefined,
+        } as any);
         this.em.persist(interaction);
         count++;
       }

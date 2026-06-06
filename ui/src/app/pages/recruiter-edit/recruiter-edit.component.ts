@@ -50,12 +50,16 @@ export class RecruiterEditComponent implements OnInit {
   ) {}
 
   shouldLogInteraction = false;
+  editInteractionId: number | null = null;
 
   ngOnInit() {
     this.agencyId = Number(this.route.snapshot.paramMap.get('id'));
     this.route.queryParams.subscribe(params => {
       if (params['logInteraction'] === 'true') {
         this.shouldLogInteraction = true;
+      }
+      if (params['editInteractionId']) {
+        this.editInteractionId = Number(params['editInteractionId']);
       }
     });
     this.load();
@@ -73,6 +77,13 @@ export class RecruiterEditComponent implements OnInit {
           const contactId = primaryContact ? primaryContact.id : (this.agency.contacts?.[0]?.id ?? null);
           this.newInteraction = { ...this.blankInteraction(), contactId };
           this.shouldLogInteraction = false;
+        }
+        if (this.editInteractionId) {
+          const interactionToEdit = this.agency.interactions?.find((i: any) => i.id === this.editInteractionId);
+          if (interactionToEdit) {
+            this.startEditInteraction(interactionToEdit);
+          }
+          this.editInteractionId = null;
         }
       },
       error: () => { this.toastService.show('Failed to load agency', 'error'); this.isLoading = false; },

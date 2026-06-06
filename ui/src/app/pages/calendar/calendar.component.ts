@@ -10,7 +10,8 @@ import { ConfirmService } from '../../services/confirm.service';
 import { SettingsService } from '../../services/settings.service';
 import {
   getInterviewTypeColor as resolveInterviewTypeColor,
-  getInterviewTypeLabel as resolveInterviewTypeLabel
+  getInterviewTypeLabel as resolveInterviewTypeLabel,
+  normalizeInterviewType
 } from '../../shared/interview-types';
 
 @Component({
@@ -31,6 +32,15 @@ export class CalendarComponent implements OnInit {
   startDate: string = '';
   endDate: string = '';
   showAllInterviews = false; // Default unchecked = show only upcoming
+
+  // Calendar Grid Mode properties
+  viewMode: 'month' | 'week' | 'list' = 'month';
+  currentMonthDate: Date = new Date();
+  currentWeekDate: Date = new Date();
+  calendarDays: any[] = [];
+  weekDays: any[] = [];
+  selectedDay: any = null;
+  weekDaysHeader = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
   constructor(
     private interactionsService: InteractionsService,
@@ -98,6 +108,7 @@ export class CalendarComponent implements OnInit {
           });
         }
         this.interviews = interviews;
+        this.generateCalendar();
         this.loading = false;
       },
       error: (err) => {
@@ -130,7 +141,16 @@ export class CalendarComponent implements OnInit {
   }
 
   getInterviewColor(interviewType: string): string {
-    return resolveInterviewTypeColor(interviewType);
+    const normalized = normalizeInterviewType(interviewType);
+    if (normalized === 'phone_screen') {
+      return '#3b82f6'; // Phone: Blue
+    } else if (normalized === 'virtual_video' || normalized === 'async_video') {
+      return '#8b5cf6'; // Video: Violet
+    } else if (normalized === 'onsite') {
+      return '#10b981'; // In Person: Emerald
+    } else {
+      return '#ffffff'; // Other: White
+    }
   }
 
   getInterviewTypeLabel(interviewType: string): string {
@@ -239,5 +259,153 @@ export class CalendarComponent implements OnInit {
       event.target.value = '';
     };
     reader.readAsText(file);
+  }
+
+  generateCalendar() {
+    this.generateMonthDays();
+    this.generateWeekDays();
+    this.updateSelectedDayInterviews();
+  }
+
+  generateMonthDays() {
+    const year = this.currentMonthDate.getFullYear();
+    const month = this.currentMonthDate.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const startDayOfWeek = firstDay.getDay(); // 0 = Sun
+    
+    // We want to fill a 6-week grid (42 days)
+    const startDate = new Date(year, month, 1 - startDayOfWeek);
+    const tempDate = new Date(startDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const days = [];
+    for (let i = 0; i < 42; i++) {
+      const dayDate = new Date(tempDate);
+      dayDate.setHours(0, 0, 0, 0);
+
+      // Find interviews on this day
+      const dayInterviews = this.interviews.filter(item => {
+        const itemDate = new Date(item.date);
+        itemDate.setHours(0, 0, 0, 0);
+        return itemDate.getTime() === dayDate.getTime();
+      });
+
+      days.push({
+        date: new Date(tempDate),
+        isCurrentMonth: tempDate.getMonth() === month,
+        isToday: dayDate.getTime() === today.getTime(),
+        interviews: dayInterviews
+      });
+
+      tempDate.setDate(tempDate.getDate() + 1);
+    }
+    this.calendarDays = days;
+  }
+
+  generateWeekDays() {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const dayOfWeek = this.currentWeekDate.getDay();
+    const startOfWeek = new Date(this.currentWeekDate);
+    startOfWeek.setDate(startOfWeek.getDate() - dayOfWeek);
+    startOfWeek.setHours(0, 0, 0, 0);
+
+    const days = [];
+    for (let i = 0; i < 7; i++) {
+      const tempDate = new Date(startOfWeek);
+      tempDate.setDate(startOfWeek.getDate() + i);
+      const dayDate = new Date(tempDate);
+      dayDate.setHours(0, 0, 0, 0);
+
+      const dayInterviews = this.interviews.filter(item => {
+        const itemDate = new Date(item.date);
+        itemDate.setHours(0, 0, 0, 0);
+        return itemDate.getTime() === dayDate.getTime();
+      });
+
+      days.push({
+        date: tempDate,
+        isToday: dayDate.getTime() === today.getTime(),
+        interviews: dayInterviews
+      });
+    }
+    this.weekDays = days;
+  }
+
+  updateSelectedDayInterviews() {
+    if (!this.selectedDay) {
+      // Find today in calendarDays
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      this.selectedDay = this.calendarDays.find(d => {
+        const dDate = new Date(d.date);
+        dDate.setHours(0, 0, 0, 0);
+        return dDate.getTime() === today.getTime();
+      }) || this.calendarDays[0];
+    } else {
+      // Refresh the selected day interviews from current list
+      const selDate = new Date(this.selectedDay.date);
+      selDate.setHours(0, 0, 0, 0);
+      
+      const refreshedInterviews = this.interviews.filter(item => {
+        const itemDate = new Date(item.date);
+        itemDate.setHours(0, 0, 0, 0);
+        return itemDate.getTime() === selDate.getTime();
+      });
+      
+      this.selectedDay = {
+        ...this.selectedDay,
+        interviews: refreshedInterviews
+      };
+    }
+  }
+
+  selectDay(day: any) {
+    this.selectedDay = day;
+  }
+
+  // Month navigation
+  prevMonth() {
+    this.currentMonthDate = new Date(
+      this.currentMonthDate.getFullYear(),
+      this.currentMonthDate.getMonth() - 1,
+      1
+    );
+    this.generateCalendar();
+  }
+
+  nextMonth() {
+    this.currentMonthDate = new Date(
+      this.currentMonthDate.getFullYear(),
+      this.currentMonthDate.getMonth() + 1,
+      1
+    );
+    this.generateCalendar();
+  }
+
+  todayMonth() {
+    this.currentMonthDate = new Date();
+    this.generateCalendar();
+  }
+
+  // Week navigation
+  prevWeek() {
+    const nextDate = new Date(this.currentWeekDate);
+    nextDate.setDate(nextDate.getDate() - 7);
+    this.currentWeekDate = nextDate;
+    this.generateCalendar();
+  }
+
+  nextWeek() {
+    const nextDate = new Date(this.currentWeekDate);
+    nextDate.setDate(nextDate.getDate() + 7);
+    this.currentWeekDate = nextDate;
+    this.generateCalendar();
+  }
+
+  todayWeek() {
+    this.currentWeekDate = new Date();
+    this.generateCalendar();
   }
 }

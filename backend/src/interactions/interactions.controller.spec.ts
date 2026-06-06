@@ -41,12 +41,22 @@ describe('InteractionsController', () => {
   describe('findAll', () => {
     it('should parse processId query parameter to integer', async () => {
       await controller.findAll(mockReq, '2026-01-01', '2026-01-31', '50');
-      expect(service.findAll).toHaveBeenCalledWith('2026-01-01', '2026-01-31', 50, 1);
+      expect(service.findAll).toHaveBeenCalledWith({
+        startDate: '2026-01-01',
+        endDate: '2026-01-31',
+        processId: 50,
+        userId: 1,
+      });
     });
 
     it('should handle missing processId', async () => {
       await controller.findAll(mockReq, '2026-01-01', '2026-01-31', undefined);
-      expect(service.findAll).toHaveBeenCalledWith('2026-01-01', '2026-01-31', undefined, 1);
+      expect(service.findAll).toHaveBeenCalledWith({
+        startDate: '2026-01-01',
+        endDate: '2026-01-31',
+        processId: undefined,
+        userId: 1,
+      });
     });
   });
 

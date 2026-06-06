@@ -2,7 +2,13 @@
     <div class="dashboard-header">
         <div class="calendar-brand">
             <div class="calendar-brand-icon">
-                <img src="assets/icons/calender.png" alt="calendar" width="88" height="88" />
+                <svg class="header-calendar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                    <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01" stroke-linecap="round" stroke-linejoin="round"></path>
+                </svg>
             </div>
             <div>
                 <h1>Interview Calendar</h1>
@@ -40,6 +46,12 @@
 
     <!-- Toolbar / Filters -->
     <div class="toolbar">
+        <div class="view-mode-tabs">
+            <button class="view-tab" [class.active]="viewMode === 'month'" (click)="viewMode = 'month'">Month Grid</button>
+            <button class="view-tab" [class.active]="viewMode === 'week'" (click)="viewMode = 'week'">Week Grid</button>
+            <button class="view-tab" [class.active]="viewMode === 'list'" (click)="viewMode = 'list'">List View</button>
+        </div>
+
         <div class="search-wrapper">
             <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <circle cx="11" cy="11" r="8"></circle>
@@ -57,7 +69,7 @@
                 <div *ngFor="let process of filteredProcesses"
                      class="search-option"
                      (click)="selectProcess(process)">
-                    {{process.companyName}} - {{process.roleTitle}}
+                     {{process.companyName}} - {{process.roleTitle}}
                 </div>
             </div>
         </div>
@@ -80,131 +92,365 @@
         </div>
     </div>
 
+    <!-- Calendar Color Legend -->
+    <div class="calendar-legend" *ngIf="!loading && viewMode !== 'list'">
+        <div class="legend-item">
+            <span class="legend-dot" style="background-color: #3b82f6;"></span>
+            <span class="legend-label">Phone Interview</span>
+        </div>
+        <div class="legend-item">
+            <span class="legend-dot" style="background-color: #8b5cf6;"></span>
+            <span class="legend-label">Video Interview</span>
+        </div>
+        <div class="legend-item">
+            <span class="legend-dot" style="background-color: #10b981;"></span>
+            <span class="legend-label">On-Site Interview</span>
+        </div>
+        <div class="legend-item">
+            <span class="legend-dot" style="background-color: #ffffff;"></span>
+            <span class="legend-label">Other Interactions</span>
+        </div>
+    </div>
+
     <div class="calendar-content">
         <div *ngIf="loading" class="loading-state">
             <div class="spinner"></div>
         </div>
 
-        <div *ngIf="!loading && interviews.length === 0" class="empty-state">
-            <div class="empty-icon">
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
-                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                    <line x1="16" y1="2" x2="16" y2="6"></line>
-                    <line x1="8" y1="2" x2="8" y2="6"></line>
-                    <line x1="3" y1="10" x2="21" y2="10"></line>
-                </svg>
-            </div>
-            <h3>No interviews found</h3>
-            <p>{{ showAllInterviews ? 'You haven\'t recorded any interviews yet.' : 'You don\'t have any upcoming interviews scheduled.' }}</p>
-            <button class="btn-primary" routerLink="/schedule-interview">Schedule Interview</button>
-        </div>
+        <div *ngIf="!loading">
+            <!-- Month Calendar Grid View -->
+            <div *ngIf="viewMode === 'month'" class="month-calendar-view">
+                <div class="calendar-nav-header">
+                    <button class="btn-nav" (click)="prevMonth()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="15 18 9 12 15 6"></polyline>
+                        </svg>
+                    </button>
+                    <h3 class="current-period-label">{{ currentMonthDate | date:'MMMM yyyy' }}</h3>
+                    <button class="btn-nav" (click)="nextMonth()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </button>
+                    <button class="btn-today-nav" (click)="todayMonth()">Today</button>
+                </div>
 
-        <!-- Featured Next Interview -->
-        <div *ngIf="!loading && !showAllInterviews && nextInterview" class="featured-next-section">
-            <div class="section-badge">Next Interview</div>
-            <div class="featured-card">
-                <div class="featured-status-strip" [style.background-color]="getInterviewColor(nextInterview.interviewType)"></div>
-                
-                <div class="featured-content">
-                    <div class="featured-left">
-                        <div class="featured-date-box">
-                            <span class="month">{{ (nextInterview.date | date:'MMM') }}</span>
-                            <span class="day">{{ (nextInterview.date | date:'dd') }}</span>
-                        </div>
-                        <div class="featured-info">
-                            <span class="featured-type" [style.color]="getInterviewColor(nextInterview.interviewType)">
-                                {{ getInterviewTypeLabel(nextInterview.interviewType) }}
+                <div class="month-grid">
+                    <div class="day-name-header" *ngFor="let dayName of weekDaysHeader">
+                        {{ dayName }}
+                    </div>
+                    <div class="calendar-day-cell" 
+                         *ngFor="let day of calendarDays" 
+                         [class.outside-month]="!day.isCurrentMonth"
+                         [class.today]="day.isToday"
+                         [class.selected]="selectedDay && (selectedDay.date | date:'yyyy-MM-dd') === (day.date | date:'yyyy-MM-dd')"
+                         [class.has-events]="day.interviews.length > 0"
+                         (click)="selectDay(day)">
+                        <span class="day-number">{{ day.date | date:'d' }}</span>
+                        <div class="day-events-indicators" *ngIf="day.interviews.length > 0">
+                            <span class="event-dot" 
+                                  *ngFor="let item of day.interviews.slice(0, 8)" 
+                                  [style.background-color]="getInterviewColor(item.interviewType)"
+                                  [title]="(item.process ? item.process.companyName : item.agency?.agencyName) + ' - ' + getInterviewTypeLabel(item.interviewType)">
                             </span>
-                            <h2 class="featured-company">{{nextInterview.process?.companyName}}</h2>
-                            <p class="featured-role">{{nextInterview.process?.roleTitle}}</p>
+                            <span class="more-events-indicator" *ngIf="day.interviews.length > 8">
+                                +{{ day.interviews.length - 8 }}
+                            </span>
                         </div>
-                    </div>
-
-                    <div class="featured-center">
-                        <div class="featured-time-row">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <circle cx="12" cy="12" r="10"></circle>
-                                <polyline points="12 6 12 12 16 14"></polyline>
-                            </svg>
-                            <span>{{formatDateTime(nextInterview.date)}}</span>
-                        </div>
-                        <div class="featured-participants" *ngIf="nextInterview.participants?.length">
-                            <div class="featured-avatar-group">
-                                <div class="featured-avatar" *ngFor="let p of nextInterview.participants.slice(0, 3)" [title]="p.name">
-                                    {{p.name.charAt(0)}}
-                                </div>
-                                <div class="featured-avatar-more" *ngIf="nextInterview.participants.length > 3">
-                                    +{{nextInterview.participants.length - 3}}
-                                </div>
-                            </div>
-                            <span class="participants-text">{{formatParticipants(nextInterview.participants)}}</span>
-                        </div>
-                    </div>
-
-                    <div class="featured-right">
-                        <a [routerLink]="['/process', nextInterview.processId]" class="btn-featured-view">
-                            View Process
-                        </a>
-                        <a [routerLink]="['/process', nextInterview.processId, 'interaction', nextInterview.id, 'edit']" class="btn-featured-edit">
-                            Edit
-                        </a>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div *ngIf="!loading && interviews.length > 0" class="interviews-list-container">
-            <h2 class="list-section-title" *ngIf="!showAllInterviews && otherInterviews.length > 0">Following Interviews</h2>
-            <h2 class="list-section-title" *ngIf="showAllInterviews">All Interactions</h2>
-            
-            <div class="interviews-grid">
-                <div *ngFor="let interview of (showAllInterviews ? interviews : otherInterviews) | orderByDate" class="interview-card">
-                    <div class="card-status-strip" [style.background-color]="getInterviewColor(interview.interviewType)"></div>
+            <!-- Week Calendar Grid View -->
+            <div *ngIf="viewMode === 'week'" class="week-calendar-view">
+                <div class="calendar-nav-header">
+                    <button class="btn-nav" (click)="prevWeek()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="15 18 9 12 15 6"></polyline>
+                        </svg>
+                    </button>
+                    <h3 class="current-period-label">Week of {{ weekDays[0]?.date | date:'MMM d, yyyy' }}</h3>
+                    <button class="btn-nav" (click)="nextWeek()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </button>
+                    <button class="btn-today-nav" (click)="todayWeek()">Today</button>
+                </div>
 
-                    <div class="card-header">
-                        <div class="interview-meta">
-                            <span class="interview-type" [style.color]="getInterviewColor(interview.interviewType)">
+                <div class="week-grid">
+                    <div class="week-day-column" 
+                         *ngFor="let day of weekDays"
+                         [class.today]="day.isToday"
+                         [class.selected]="selectedDay && (selectedDay.date | date:'yyyy-MM-dd') === (day.date | date:'yyyy-MM-dd')"
+                         (click)="selectDay(day)">
+                        <div class="week-day-header">
+                            <span class="week-day-name">{{ day.date | date:'EEE' }}</span>
+                            <span class="week-day-num">{{ day.date | date:'d' }}</span>
+                        </div>
+                        
+                        <div class="week-day-events">
+                            <div class="week-event-card" 
+                                 *ngFor="let item of day.interviews"
+                                 [style.border-left-color]="getInterviewColor(item.interviewType)">
+                                <div class="week-event-time">{{ item.date | date:'HH:mm' }}</div>
+                                <div class="week-event-title" [title]="item.process ? item.process.companyName : item.agency?.agencyName">
+                                    {{ item.process ? item.process.companyName : item.agency?.agencyName }}
+                                </div>
+                                <div class="week-event-subtitle">{{ getInterviewTypeLabel(item.interviewType) }}</div>
+                            </div>
+                            <div class="week-no-events" *ngIf="day.interviews.length === 0">
+                                No events
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Details Section for Selected Day (for month and week views) -->
+            <div *ngIf="viewMode !== 'list' && selectedDay" class="selected-day-details-section">
+                <div class="details-section-header">
+                    <h3 class="details-title">
+                        Interviews on {{ selectedDay.date | date:'EEEE, MMMM d, yyyy' }}
+                        <span class="today-marker" *ngIf="selectedDay.isToday">Today</span>
+                    </h3>
+                    <a [routerLink]="['/schedule-interview']" 
+                       [queryParams]="{ date: formatDateForInput(selectedDay.date) }"
+                       class="btn-schedule-shortcut">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="plus-icon">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        Schedule on this day
+                    </a>
+                </div>
+
+                <div *ngIf="selectedDay.interviews.length === 0" class="empty-day-state">
+                    <p>No interviews scheduled for this day.</p>
+                </div>
+
+                <div class="day-interviews-list" *ngIf="selectedDay.interviews.length > 0">
+                    <div *ngFor="let interview of selectedDay.interviews" class="interview-card card-grid-layout">
+                        <div class="card-status-strip" [style.background-color]="getInterviewColor(interview.interviewType)"></div>
+
+                        <div class="card-date-cell">
+                            <div class="date-badge">
+                                <span class="month">{{ (interview.date | date:'MMM') }}</span>
+                                <span class="day">{{ (interview.date | date:'dd') }}</span>
+                            </div>
+                            <div class="time-label">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <polyline points="12 6 12 12 16 14"></polyline>
+                                </svg>
+                                <span>{{ interview.date | date:'HH:mm' }}</span>
+                            </div>
+                        </div>
+
+                        <div class="card-info-cell">
+                            <span class="type-badge" [style.color]="getInterviewColor(interview.interviewType)">
                                 {{ getInterviewTypeLabel(interview.interviewType) }}
                             </span>
-                            <span class="interview-date">
-                                {{formatDateTime(interview.date)}}
+                            <h3 class="company-name" [title]="interview.process ? interview.process.companyName : interview.agency?.agencyName">
+                                {{ interview.process ? interview.process.companyName : interview.agency?.agencyName }}
+                            </h3>
+                            <p class="role-title" [title]="interview.process ? interview.process.roleTitle : 'Recruiter / Agency Meeting'">
+                                {{ interview.process ? interview.process.roleTitle : 'Recruiter / Agency Meeting' }}
+                            </p>
+                        </div>
+
+                        <div class="card-details-cell">
+                            <div class="participants-list" *ngIf="interview.participants && interview.participants.length > 0">
+                                <div class="avatar-group">
+                                    <div class="avatar" *ngFor="let p of interview.participants.slice(0, 3)" [title]="p.name">
+                                        {{p.name.charAt(0)}}
+                                    </div>
+                                    <div class="avatar-more" *ngIf="interview.participants.length > 3">
+                                        +{{interview.participants.length - 3}}
+                                    </div>
+                                </div>
+                                <span class="participants-text">{{formatParticipants(interview.participants)}}</span>
+                            </div>
+                            <div class="notes-preview" *ngIf="interview.headsup" [title]="interview.headsup">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="notes-icon">
+                                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                                </svg>
+                                <span class="notes-text">{{interview.headsup}}</span>
+                            </div>
+                        </div>
+
+                        <div class="card-actions-cell">
+                            <a *ngIf="interview.processId" [routerLink]="['/process', interview.processId]" class="btn-action btn-primary-action">
+                                View Process
+                            </a>
+                            <a *ngIf="!interview.processId && interview.agencyId" [routerLink]="['/recruiters', interview.agencyId]" class="btn-action btn-primary-action">
+                                View Recruiter
+                            </a>
+                            <a *ngIf="interview.processId" [routerLink]="['/process', interview.processId, 'interaction', interview.id, 'edit']" class="btn-action btn-secondary-action">
+                                Edit
+                            </a>
+                            <a *ngIf="!interview.processId && interview.agencyId" [routerLink]="['/recruiters', interview.agencyId, 'edit']" [queryParams]="{ editInteractionId: interview.id }" class="btn-action btn-secondary-action">
+                                Edit
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- List View -->
+            <div *ngIf="viewMode === 'list'">
+                <div *ngIf="interviews.length === 0" class="empty-state">
+                    <div class="empty-icon">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                    </div>
+                    <h3>No interviews found</h3>
+                    <p>{{ showAllInterviews ? 'You haven\'t recorded any interviews yet.' : 'You don\'t have any upcoming interviews scheduled.' }}</p>
+                    <button class="btn-primary" routerLink="/schedule-interview">Schedule Interview</button>
+                </div>
+
+                <!-- Featured Next Interview -->
+                <div *ngIf="!showAllInterviews && nextInterview" class="featured-next-section">
+                    <div class="section-badge">Next Interview</div>
+                    <div class="featured-card card-grid-layout">
+                        <div class="featured-status-strip card-status-strip" [style.background-color]="getInterviewColor(nextInterview.interviewType)"></div>
+                        
+                        <div class="card-date-cell">
+                            <div class="date-badge">
+                                <span class="month">{{ (nextInterview.date | date:'MMM') }}</span>
+                                <span class="day">{{ (nextInterview.date | date:'dd') }}</span>
+                            </div>
+                            <div class="time-label">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <polyline points="12 6 12 12 16 14"></polyline>
+                                </svg>
+                                <span>{{ nextInterview.date | date:'HH:mm' }}</span>
+                            </div>
+                        </div>
+
+                        <div class="card-info-cell">
+                            <span class="type-badge" [style.color]="getInterviewColor(nextInterview.interviewType)">
+                                {{ getInterviewTypeLabel(nextInterview.interviewType) }}
                             </span>
+                            <h3 class="company-name" [title]="nextInterview.process ? nextInterview.process.companyName : nextInterview.agency?.agencyName">
+                                {{ nextInterview.process ? nextInterview.process.companyName : nextInterview.agency?.agencyName }}
+                            </h3>
+                            <p class="role-title" [title]="nextInterview.process ? nextInterview.process.roleTitle : 'Recruiter / Agency Meeting'">
+                                {{ nextInterview.process ? nextInterview.process.roleTitle : 'Recruiter / Agency Meeting' }}
+                            </p>
+                        </div>
+
+                        <div class="card-details-cell">
+                            <div class="participants-list" *ngIf="nextInterview.participants?.length">
+                                <div class="avatar-group">
+                                    <div class="avatar" *ngFor="let p of nextInterview.participants.slice(0, 3)" [title]="p.name">
+                                        {{p.name.charAt(0)}}
+                                    </div>
+                                    <div class="avatar-more" *ngIf="nextInterview.participants.length > 3">
+                                        +{{nextInterview.participants.length - 3}}
+                                    </div>
+                                </div>
+                                <span class="participants-text">{{formatParticipants(nextInterview.participants)}}</span>
+                            </div>
+                            <div class="notes-preview" *ngIf="nextInterview.headsup" [title]="nextInterview.headsup">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="notes-icon">
+                                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                                </svg>
+                                <span class="notes-text">{{nextInterview.headsup}}</span>
+                            </div>
+                        </div>
+
+                        <div class="card-actions-cell">
+                            <a *ngIf="nextInterview.processId" [routerLink]="['/process', nextInterview.processId]" class="btn-action btn-primary-action">
+                                View Process
+                            </a>
+                            <a *ngIf="!nextInterview.processId && nextInterview.agencyId" [routerLink]="['/recruiters', nextInterview.agencyId]" class="btn-action btn-primary-action">
+                                View Recruiter
+                            </a>
+                            <a *ngIf="nextInterview.processId" [routerLink]="['/process', nextInterview.processId, 'interaction', nextInterview.id, 'edit']" class="btn-action btn-secondary-action">
+                                Edit
+                            </a>
+                            <a *ngIf="!nextInterview.processId && nextInterview.agencyId" [routerLink]="['/recruiters', nextInterview.agencyId, 'edit']" [queryParams]="{ editInteractionId: nextInterview.id }" class="btn-action btn-secondary-action">
+                                Edit
+                            </a>
                         </div>
                     </div>
+                </div>
 
-                    <div class="card-body">
-                        <div class="company-info">
-                            <h3 class="company-name">{{interview.process?.companyName}}</h3>
-                            <p class="role-title">{{interview.process?.roleTitle}}</p>
-                        </div>
+                <div *ngIf="interviews.length > 0" class="interviews-list-container">
+                    <h2 class="list-section-title" *ngIf="!showAllInterviews && otherInterviews.length > 0">Following Interviews</h2>
+                    <h2 class="list-section-title" *ngIf="showAllInterviews">All Interactions</h2>
+                    
+                    <div class="interviews-grid">
+                        <div *ngFor="let interview of (showAllInterviews ? interviews : otherInterviews) | orderByDate" class="interview-card card-grid-layout">
+                            <div class="card-status-strip" [style.background-color]="getInterviewColor(interview.interviewType)"></div>
 
-                        <div class="participants-list" *ngIf="interview.participants && interview.participants.length > 0">
-                            <div class="participant" *ngFor="let p of interview.participants.slice(0, 2)">
-                                <div class="avatar">{{p.name.charAt(0)}}</div>
-                                <span class="name">{{p.name}}</span>
+                            <div class="card-date-cell">
+                                <div class="date-badge">
+                                    <span class="month">{{ (interview.date | date:'MMM') }}</span>
+                                    <span class="day">{{ (interview.date | date:'dd') }}</span>
+                                </div>
+                                <div class="time-label">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <polyline points="12 6 12 12 16 14"></polyline>
+                                    </svg>
+                                    <span>{{ interview.date | date:'HH:mm' }}</span>
+                                </div>
                             </div>
-                            <div class="more-participants" *ngIf="interview.participants.length > 2">
-                                +{{interview.participants.length - 2}}
+
+                            <div class="card-info-cell">
+                                <span class="type-badge" [style.color]="getInterviewColor(interview.interviewType)">
+                                    {{ getInterviewTypeLabel(interview.interviewType) }}
+                                </span>
+                                <h3 class="company-name" [title]="interview.process ? interview.process.companyName : interview.agency?.agencyName">
+                                    {{ interview.process ? interview.process.companyName : interview.agency?.agencyName }}
+                                </h3>
+                                <p class="role-title" [title]="interview.process ? interview.process.roleTitle : 'Recruiter / Agency Meeting'">
+                                    {{ interview.process ? interview.process.roleTitle : 'Recruiter / Agency Meeting' }}
+                                </p>
+                            </div>
+
+                            <div class="card-details-cell">
+                                <div class="participants-list" *ngIf="interview.participants && interview.participants.length > 0">
+                                    <div class="avatar-group">
+                                        <div class="avatar" *ngFor="let p of interview.participants.slice(0, 3)" [title]="p.name">
+                                            {{p.name.charAt(0)}}
+                                        </div>
+                                        <div class="avatar-more" *ngIf="interview.participants.length > 3">
+                                            +{{interview.participants.length - 3}}
+                                        </div>
+                                    </div>
+                                    <span class="participants-text">{{formatParticipants(interview.participants)}}</span>
+                                </div>
+                                <div class="notes-preview" *ngIf="interview.headsup" [title]="interview.headsup">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="notes-icon">
+                                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                                    </svg>
+                                    <span class="notes-text">{{interview.headsup}}</span>
+                                </div>
+                            </div>
+
+                            <div class="card-actions-cell">
+                                <a *ngIf="interview.processId" [routerLink]="['/process', interview.processId]" class="btn-action btn-primary-action">
+                                    View Process
+                                </a>
+                                <a *ngIf="!interview.processId && interview.agencyId" [routerLink]="['/recruiters', interview.agencyId]" class="btn-action btn-primary-action">
+                                    View Recruiter
+                                </a>
+                                <a *ngIf="interview.processId" [routerLink]="['/process', interview.processId, 'interaction', interview.id, 'edit']" class="btn-action btn-secondary-action">
+                                    Edit
+                                </a>
+                                <a *ngIf="!interview.processId && interview.agencyId" [routerLink]="['/recruiters', interview.agencyId, 'edit']" [queryParams]="{ editInteractionId: interview.id }" class="btn-action btn-secondary-action">
+                                    Edit
+                                </a>
                             </div>
                         </div>
-
-                        <div class="notes-preview" *ngIf="interview.headsup">
-                            <span class="label">Heads up:</span> {{interview.headsup}}
-                        </div>
-                    </div>
-
-                    <div class="card-actions-cell">
-                        <a [routerLink]="['/process', interview.processId, 'interaction', interview.id, 'edit']" class="action-btn" title="Edit">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                            </svg>
-                        </a>
-                        <a [routerLink]="['/process', interview.processId]" class="action-btn" title="View Process">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M5 12h14M12 5l7 7-7 7"></path>
-                            </svg>
-                        </a>
                     </div>
                 </div>
             </div>

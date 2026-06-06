@@ -6,6 +6,7 @@ import { Process } from '../processes/process.entity';
 import { Contact } from '../contacts/contact.entity';
 import { EntityManager, EntityRepository } from '@mikro-orm/postgresql';
 import { MailService } from '../mail/mail.service';
+import { WhatsAppReminderService } from './whatsapp-reminder.service';
 import { NotFoundException } from '@nestjs/common';
 
 describe('InteractionsService', () => {
@@ -39,11 +40,20 @@ describe('InteractionsService', () => {
     fork: jest.fn().mockReturnThis(),
     getRepository: jest.fn().mockReturnThis(),
     clear: jest.fn(),
+    findOne: jest.fn(),
+    create: jest.fn().mockImplementation((entity, data) => data),
+    assign: jest.fn().mockImplementation((entity, data) => Object.assign(entity, data)),
   };
 
   const mockMailService = {
     isConfigured: jest.fn(),
     sendMail: jest.fn(),
+  };
+
+  const mockWhatsAppReminderService = {
+    isConfigured: jest.fn(),
+    buildReminderWhatsAppText: jest.fn(),
+    sendInterviewReminder: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -55,6 +65,7 @@ describe('InteractionsService', () => {
         { provide: getRepositoryToken(Process), useValue: mockProcessRepo },
         { provide: EntityManager, useValue: mockEm },
         { provide: MailService, useValue: mockMailService },
+        { provide: WhatsAppReminderService, useValue: mockWhatsAppReminderService },
       ],
     }).compile();
 
@@ -89,7 +100,8 @@ describe('InteractionsService', () => {
 
       expect(mockInteractionRepo.create).toHaveBeenCalled();
       expect(mockContactRepo.create).toHaveBeenCalledWith(expect.objectContaining({ name: 'Recruiter A' }));
-      expect(em.persistAndFlush).toHaveBeenCalled();
+      expect(em.persist).toHaveBeenCalled();
+      expect(em.flush).toHaveBeenCalled();
     });
 
     it('should throw NotFoundException if process not found', async () => {
@@ -114,7 +126,11 @@ describe('InteractionsService', () => {
       const interactions = [{ id: 1, process: { companyName: 'A' } }];
       mockInteractionRepo.find.mockResolvedValue(interactions);
 
-      const result = await service.findAll('2026-01-01', '2026-01-31', undefined, 1);
+      const result = await service.findAll({
+        startDate: '2026-01-01',
+        endDate: '2026-01-31',
+        userId: 1
+      });
 
       expect(mockInteractionRepo.find).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -126,7 +142,10 @@ describe('InteractionsService', () => {
     });
 
     it('should filter only by startDate if endDate is missing', async () => {
-      await service.findAll('2026-01-01', undefined, undefined, 1);
+      await service.findAll({
+        startDate: '2026-01-01',
+        userId: 1
+      });
       expect(mockInteractionRepo.find).toHaveBeenCalledWith(
         expect.objectContaining({ date: { $gte: expect.any(Date) } }),
         expect.anything()

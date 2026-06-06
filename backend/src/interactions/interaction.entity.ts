@@ -1,5 +1,6 @@
 import { Entity, PrimaryKey, Property, ManyToOne, Index } from '@mikro-orm/core';
 import { Process } from '../processes/process.entity';
+import { RecruitmentAgency } from '../recruitment-agencies/recruitment-agency.entity';
 
 @Entity({ schema: 'app' })
 export class Interaction {
@@ -73,6 +74,10 @@ export class Interaction {
   createdAt: Date = new Date();
 
   @Index()
-  @ManyToOne(() => Process)
-  process!: Process;
+  @ManyToOne(() => Process, { nullable: true })
+  process?: Process;
+
+  @Index()
+  @ManyToOne(() => RecruitmentAgency, { nullable: true })
+  agency?: RecruitmentAgency;
 }

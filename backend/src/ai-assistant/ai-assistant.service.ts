@@ -134,7 +134,7 @@ export class AiAssistantService {
       { populate: ['process', 'process.user', 'process.reviews'] },
     );
 
-    if (!interaction || (interaction.process.user as any).id !== userId) {
+    if (!interaction || !interaction.process || (interaction.process.user as any).id !== userId) {
       throw new NotFoundException(
         `Interaction with ID ${dto.interactionId} not found.`,
       );

@@ -816,6 +816,9 @@ select.input-field {
 }
 
 .btn-secondary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border: 1px solid rgba(148, 163, 184, 0.4);
   background: var(--bg-primary);
   color: var(--text-primary);

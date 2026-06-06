@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { InteractionsService } from '../../services/interactions.service';
 import { ProcessesService } from '../../services/processes.service';
 import { RecruitmentAgenciesService } from '../../services/recruitment-agencies.service';
@@ -179,6 +179,7 @@ export class ScheduleInterviewComponent implements OnInit {
     private interactionsService: InteractionsService,
     private agenciesService: RecruitmentAgenciesService,
     private router: Router,
+    private route: ActivatedRoute,
     private toastService: ToastService,
     private authService: AuthService
   ) {}
@@ -195,6 +196,14 @@ export class ScheduleInterviewComponent implements OnInit {
     const localIso = new Date(now.getTime() - tzOffset).toISOString();
     this.datePart = localIso.slice(0, 10);
     this.timePart = localIso.slice(11, 16);
+
+    // Check for query parameters to prefill date
+    this.route.queryParams.subscribe(params => {
+      if (params['date']) {
+        this.datePart = params['date'];
+      }
+    });
+
     this.interaction.date = `${this.datePart}T${this.timePart}`;
   }
 

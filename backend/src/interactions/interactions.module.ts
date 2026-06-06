@@ -5,11 +5,12 @@ import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { Interaction } from './interaction.entity';
 import { Contact } from '../contacts/contact.entity';
 import { Process } from '../processes/process.entity';
+import { RecruitmentAgency } from '../recruitment-agencies/recruitment-agency.entity';
 import { MailModule } from '../mail/mail.module';
 import { WhatsAppReminderService } from './whatsapp-reminder.service';
 
 @Module({
-  imports: [MikroOrmModule.forFeature([Interaction, Contact, Process]), MailModule],
+  imports: [MikroOrmModule.forFeature([Interaction, Contact, Process, RecruitmentAgency]), MailModule],
   controllers: [InteractionsController],
   providers: [InteractionsService, WhatsAppReminderService],
   exports: [InteractionsService, WhatsAppReminderService],
