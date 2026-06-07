@@ -37,6 +37,13 @@ export class ProcessFormComponent implements OnInit, OnDestroy {
   private _cachedCities: string[] = [];
   private _lastCountry: string = '';
 
+  // Company Research JSON paste
+  companyResearchRaw: string = '';
+  companyResearchState: 'idle' | 'valid' | 'invalid' = 'idle';
+  companyResearchExpanded: boolean = false;
+  promptCopied: boolean = false;
+  private promptCopiedTimer: any;
+
   readonly CURRENCIES = [
 
     { code: 'USD', symbol: '$', label: 'USD - US Dollar' },
@@ -108,12 +115,21 @@ export class ProcessFormComponent implements OnInit, OnDestroy {
     if (this.process?.companyWebsite && !this.process?.companyLogoUrl) {
       setTimeout(() => this.fetchLogo(), 300);
     }
+    // Restore raw textarea if editing an existing process that already has research
+    if (this.process?.companyResearch) {
+      this.companyResearchRaw = JSON.stringify(this.process.companyResearch, null, 2);
+      this.companyResearchState = 'valid';
+      this.companyResearchExpanded = true;
+    }
   }
 
 
   ngOnDestroy(): void {
     if (this.logoFailedTimer) {
       clearTimeout(this.logoFailedTimer);
+    }
+    if (this.promptCopiedTimer) {
+      clearTimeout(this.promptCopiedTimer);
     }
   }
 
@@ -316,5 +332,59 @@ export class ProcessFormComponent implements OnInit, OnDestroy {
 
   scoreLabel(val: number): string {
     return ['—', '⭐', '⭐⭐', '⭐⭐⭐', '⭐⭐⭐⭐', '⭐⭐⭐⭐⭐'][val] || '—';
+  }
+
+  // ── Company Research JSON ─────────────────────────────────────────
+  onCompanyResearchChange() {
+    const raw = this.companyResearchRaw.trim();
+    if (!raw) {
+      this.companyResearchState = 'idle';
+      this.process.companyResearch = null;
+      return;
+    }
+    try {
+      this.process.companyResearch = JSON.parse(raw);
+      this.companyResearchState = 'valid';
+    } catch {
+      this.process.companyResearch = null;
+      this.companyResearchState = 'invalid';
+    }
+  }
+
+  toggleCompanyResearch() {
+    this.companyResearchExpanded = !this.companyResearchExpanded;
+  }
+
+  copyResearchPrompt(event: Event) {
+    event.stopPropagation(); // prevent toggling the section
+    const companyName = this.process.companyName?.trim() || 'Unknown Company';
+    const prompt =
+`Research the following company as a potential employer. Company name: ${companyName}
+ Country or location: israel 
+Use web search and public sources only. Return a concise JSON overview for a job seeker. Rules: 1. Verify that you found the correct company and do not mix it with similarly named companies. 2. Prefer official sources, LinkedIn, career pages, reputable news sites, and employee review sites. 3. Do not guess. Use null when reliable information is unavailable. 4. Keep the response short: - Maximum 1-2 sentences per summary - Maximum 3 items in each list - Maximum 3 recent news items 5. Do not repeat the same fact in multiple sections. 6. Focus on information relevant to someone considering working at the company. 7. Return valid JSON only, without markdown or extra text. 8. Write summaries in Hebrew. Keep JSON keys and enum values in English. Return exactly this structure: { "company": { "name": null, "website": null, "location": null, "industry": null, "summary": null, "employee_range": null, "growth_trend": "growing | stable | shrinking | unknown" }, "workplace": { "work_model": "remote | hybrid | onsite | mixed | unknown", "review_rating": null, "review_count": null, "reviews_summary": null }, "hiring": { "is_hiring": null, "open_roles_summary": null }, "recent_news": [ { "date": null, "title": null, "summary": null, "source_url": null } ], "job_seeker_summary": { "overall_impression": null, "positive_signals": [], "concerns": [], "missing_information": [] } }
+please give the answer in json canvas , ready to copy for a code`;
+
+    navigator.clipboard.writeText(prompt).then(() => {
+      clearTimeout(this.promptCopiedTimer);
+      this.promptCopied = true;
+      this.promptCopiedTimer = setTimeout(() => {
+        this.promptCopied = false;
+        this.cdr.detectChanges();
+      }, 2500);
+      this.cdr.detectChanges();
+    }).catch(() => {
+      // Fallback for environments without clipboard API
+      const ta = document.createElement('textarea');
+      ta.value = prompt;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      this.promptCopied = true;
+      this.promptCopiedTimer = setTimeout(() => { this.promptCopied = false; this.cdr.detectChanges(); }, 2500);
+      this.cdr.detectChanges();
+    });
   }
 }

@@ -327,6 +327,75 @@
         </div>
       </section>
 
+      <!-- ── SECTION 4: Company Research (optional JSON) ──────── -->
+      <section class="form-section research-section anim-4">
+        <div class="section-header research-toggle" (click)="toggleCompanyResearch()">
+          <div class="section-icon research-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/>
+              <path d="m21 21-4.35-4.35"/>
+              <path d="M11 8v6M8 11h6"/>
+            </svg>
+          </div>
+          <div class="research-header-text">
+            <h2 class="section-title">מחקר על החברה <span class="optional-badge">אופציונלי</span></h2>
+            <p class="section-desc">הדבק JSON עם מידע שחקרת על החברה — יוצג בדף הפרטים כקריאה בלבד</p>
+          </div>
+          <div class="research-toggle-icons">
+            <span class="json-state-badge" *ngIf="companyResearchState === 'valid'">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              JSON תקין
+            </span>
+            <span class="json-state-badge json-state-badge--err" *ngIf="companyResearchState === 'invalid'">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              JSON שגוי
+            </span>
+            <svg class="chevron-toggle" [class.open]="companyResearchExpanded" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+        </div>
+
+        <div class="research-body" [class.research-body--open]="companyResearchExpanded">
+          <div class="form-group">
+            <div class="research-field-header">
+              <label class="field-label">הדבק JSON כאן</label>
+              <button
+                type="button"
+                class="copy-prompt-btn"
+                [class.copy-prompt-btn--copied]="promptCopied"
+                (click)="copyResearchPrompt($event)"
+                [title]="promptCopied ? 'הועתק!' : 'העתק פרומפט ל-AI'"
+              >
+                <svg *ngIf="!promptCopied" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                </svg>
+                <svg *ngIf="promptCopied" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                {{ promptCopied ? 'הועתק!' : 'העתק פרומפט ל-AI' }}
+              </button>
+            </div>
+            <textarea
+              name="companyResearchRaw"
+              [(ngModel)]="companyResearchRaw"
+              (ngModelChange)="onCompanyResearchChange()"
+              class="field-input field-textarea research-textarea"
+              rows="6"
+              dir="ltr"
+              placeholder='{"company":{"name":"..."},"workplace":{...},...}'>
+            </textarea>
+            <p class="field-hint research-hint" *ngIf="companyResearchState === 'invalid'">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              הטקסט שהודבק אינו JSON תקין. ודא שהפורמט נכון.
+            </p>
+            <p class="field-hint research-hint research-hint--ok" *ngIf="companyResearchState === 'valid'">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              המידע ינוסח ויוצג בדף הפרטים.
+            </p>
+          </div>
+        </div>
+      </section>
+
       <!-- ── Actions ─────────────────────────────────────────────── -->
       <div class="form-actions">
         <button type="button" class="btn-ghost" (click)="cancel()">Discard</button>

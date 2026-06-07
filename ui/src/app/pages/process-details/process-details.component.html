@@ -26,7 +26,6 @@
                                 <option *ngFor="let s of stages" [value]="s">{{ s }}</option>
                             </select>
                             <svg *ngIf="isUpdatingStage" class="stage-spinner" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
-                            <svg *ngIf="!isUpdatingStage" class="stage-chevron" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
                         </div>
                     </div>
                     <p class="subtitle">{{ process.roleTitle }}</p>
@@ -178,6 +177,246 @@
                             <span class="empty-sub">Keep track of your interview rounds and communications here.</span>
                         </div>
                     </ng-template>
+                </div>
+            </section>
+
+            <!-- ── Company Research (read-only) ──────────────────── -->
+            <section class="premium-card company-research-card" *ngIf="process.companyResearch">
+                <div class="card-header">
+                    <div class="header-title">
+                        <div class="cr-header-icon">
+                            <lucide-icon name="search" [size]="16" strokeWidth="2"></lucide-icon>
+                        </div>
+                        <h3>מידע על החברה</h3>
+                    </div>
+                </div>
+
+                <div class="card-body cr-body">
+
+                    <!-- ── Group: פרטי החברה ── -->
+                    <div class="cr-group"
+                         *ngIf="process.companyResearch.company &&
+                                (process.companyResearch.company.name ||
+                                 process.companyResearch.company.website ||
+                                 process.companyResearch.company.location ||
+                                 process.companyResearch.company.industry ||
+                                 process.companyResearch.company.summary ||
+                                 process.companyResearch.company.employee_range ||
+                                 process.companyResearch.company.growth_trend)">
+                        <div class="cr-group-title">🏢 פרטי החברה</div>
+                        <div class="cr-items">
+                            <div class="cr-item" *ngIf="process.companyResearch.company.name">
+                                <span class="cr-label">שם החברה</span>
+                                <span class="cr-value">{{ process.companyResearch.company.name }}</span>
+                            </div>
+                            <div class="cr-item" *ngIf="process.companyResearch.company.website">
+                                <span class="cr-label">אתר החברה</span>
+                                <a class="cr-link" [href]="formatUrl(process.companyResearch.company.website)" target="_blank" rel="noopener noreferrer">
+                                    {{ process.companyResearch.company.website }}
+                                    <lucide-icon name="external-link" [size]="11"></lucide-icon>
+                                </a>
+                            </div>
+                            <div class="cr-item" *ngIf="process.companyResearch.company.location">
+                                <span class="cr-label">מיקום</span>
+                                <span class="cr-value">{{ process.companyResearch.company.location }}</span>
+                            </div>
+                            <div class="cr-item" *ngIf="process.companyResearch.company.industry">
+                                <span class="cr-label">תחום פעילות</span>
+                                <span class="cr-value">{{ process.companyResearch.company.industry }}</span>
+                            </div>
+                            <div class="cr-item cr-item--full" *ngIf="process.companyResearch.company.summary">
+                                <span class="cr-label">תיאור קצר</span>
+                                <span class="cr-value cr-value--wrap">{{ process.companyResearch.company.summary }}</span>
+                            </div>
+                            <div class="cr-item" *ngIf="process.companyResearch.company.employee_range">
+                                <span class="cr-label">מספר עובדים</span>
+                                <span class="cr-value">{{ process.companyResearch.company.employee_range }}</span>
+                            </div>
+                            <div class="cr-item" *ngIf="process.companyResearch.company.growth_trend">
+                                <span class="cr-label">מגמת גידול</span>
+                                <span class="cr-badge" [ngClass]="'cr-trend-' + process.companyResearch.company.growth_trend">
+                                    {{ process.companyResearch.company.growth_trend }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ── Group: סביבת עבודה ── -->
+                    <div class="cr-group"
+                         *ngIf="process.companyResearch.workplace &&
+                                (process.companyResearch.workplace.work_model ||
+                                 process.companyResearch.workplace.review_rating ||
+                                 process.companyResearch.workplace.review_count ||
+                                 process.companyResearch.workplace.reviews_summary)">
+                        <div class="cr-group-title">💼 סביבת עבודה</div>
+                        <div class="cr-items">
+                            <div class="cr-item" *ngIf="process.companyResearch.workplace.work_model">
+                                <span class="cr-label">מודל עבודה</span>
+                                <span class="cr-badge cr-badge--blue">{{ process.companyResearch.workplace.work_model }}</span>
+                            </div>
+                            <div class="cr-item" *ngIf="process.companyResearch.workplace.review_rating">
+                                <span class="cr-label">דירוג עובדים</span>
+                                <span class="cr-value">⭐ {{ process.companyResearch.workplace.review_rating }}</span>
+                            </div>
+                            <div class="cr-item" *ngIf="process.companyResearch.workplace.review_count">
+                                <span class="cr-label">מספר ביקורות</span>
+                                <span class="cr-value">{{ process.companyResearch.workplace.review_count }}</span>
+                            </div>
+                            <div class="cr-item cr-item--full" *ngIf="process.companyResearch.workplace.reviews_summary">
+                                <span class="cr-label">סיכום ביקורות</span>
+                                <span class="cr-value cr-value--wrap">{{ process.companyResearch.workplace.reviews_summary }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ── Group: גיוסים ── -->
+                    <div class="cr-group"
+                         *ngIf="process.companyResearch.hiring &&
+                                (process.companyResearch.hiring.is_hiring != null ||
+                                 process.companyResearch.hiring.open_roles_summary)">
+                        <div class="cr-group-title">📋 גיוסים</div>
+                        <div class="cr-items">
+                            <div class="cr-item" *ngIf="process.companyResearch.hiring.is_hiring != null">
+                                <span class="cr-label">האם החברה מגייסת</span>
+                                <span class="cr-badge" [ngClass]="process.companyResearch.hiring.is_hiring ? 'cr-badge--green' : 'cr-badge--red'">
+                                    {{ process.companyResearch.hiring.is_hiring ? 'כן' : 'לא' }}
+                                </span>
+                            </div>
+                            <div class="cr-item cr-item--full" *ngIf="process.companyResearch.hiring.open_roles_summary">
+                                <span class="cr-label">סיכום משרות פתוחות</span>
+                                <span class="cr-value cr-value--wrap">{{ process.companyResearch.hiring.open_roles_summary }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ── Group: חדשות אחרונות ── -->
+                    <div class="cr-group"
+                         *ngIf="process.companyResearch.recent_news && process.companyResearch.recent_news.length > 0">
+                        <div class="cr-group-title">📰 חדשות אחרונות</div>
+                        <div class="cr-news-list">
+                            <div class="cr-news-item" *ngFor="let news of process.companyResearch.recent_news">
+                                <div class="cr-news-meta">
+                                    <span class="cr-news-date" *ngIf="news.date">{{ news.date }}</span>
+                                </div>
+                                <div class="cr-news-title" *ngIf="news.title">{{ news.title }}</div>
+                                <div class="cr-news-summary" *ngIf="news.summary">{{ news.summary }}</div>
+                                <a class="cr-news-link" *ngIf="news.source_url" [href]="news.source_url" target="_blank" rel="noopener noreferrer">
+                                    קישור למקור
+                                    <lucide-icon name="external-link" [size]="11"></lucide-icon>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ── Group: סיכום למחפש עבודה ── -->
+                    <div class="cr-group"
+                         *ngIf="process.companyResearch.job_seeker_summary &&
+                                (process.companyResearch.job_seeker_summary.overall_impression ||
+                                 (process.companyResearch.job_seeker_summary.positive_signals && process.companyResearch.job_seeker_summary.positive_signals.length > 0) ||
+                                 (process.companyResearch.job_seeker_summary.concerns && process.companyResearch.job_seeker_summary.concerns.length > 0) ||
+                                 (process.companyResearch.job_seeker_summary.missing_information && process.companyResearch.job_seeker_summary.missing_information.length > 0))">
+                        <div class="cr-group-title">🎯 סיכום למחפש עבודה</div>
+                        <div class="cr-items">
+                            <div class="cr-item cr-item--full" *ngIf="process.companyResearch.job_seeker_summary.overall_impression">
+                                <span class="cr-label">התרשמות כללית</span>
+                                <span class="cr-value cr-value--wrap">{{ process.companyResearch.job_seeker_summary.overall_impression }}</span>
+                            </div>
+                        </div>
+                        <div class="cr-signal-cols">
+                            <div class="cr-signal cr-signal--green"
+                                 *ngIf="process.companyResearch.job_seeker_summary.positive_signals && process.companyResearch.job_seeker_summary.positive_signals.length > 0">
+                                <div class="cr-signal-title">✅ נקודות חיוביות</div>
+                                <ul class="cr-signal-list">
+                                    <li *ngFor="let s of process.companyResearch.job_seeker_summary.positive_signals">{{ s }}</li>
+                                </ul>
+                            </div>
+                            <div class="cr-signal cr-signal--yellow"
+                                 *ngIf="process.companyResearch.job_seeker_summary.concerns && process.companyResearch.job_seeker_summary.concerns.length > 0">
+                                <div class="cr-signal-title">⚠️ נקודות לבדיקה</div>
+                                <ul class="cr-signal-list">
+                                    <li *ngFor="let c of process.companyResearch.job_seeker_summary.concerns">{{ c }}</li>
+                                </ul>
+                            </div>
+                            <div class="cr-signal cr-signal--gray"
+                                 *ngIf="process.companyResearch.job_seeker_summary.missing_information && process.companyResearch.job_seeker_summary.missing_information.length > 0">
+                                <div class="cr-signal-title">❓ מידע חסר</div>
+                                <ul class="cr-signal-list">
+                                    <li *ngFor="let m of process.companyResearch.job_seeker_summary.missing_information">{{ m }}</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ── Group: מקורות ── -->
+                    <div class="cr-group"
+                         *ngIf="process.companyResearch.sources && process.companyResearch.sources.length > 0">
+                        <div class="cr-group-title">🔗 מקורות</div>
+                        <div class="cr-sources">
+                            <a class="cr-source-link"
+                               *ngFor="let src of process.companyResearch.sources"
+                               [href]="src.url"
+                               target="_blank"
+                               rel="noopener noreferrer">
+                                <lucide-icon name="link" [size]="12"></lucide-icon>
+                                {{ src.title || src.url }}
+                            </a>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- ── Company Research Empty/Add State ──────────────── -->
+            <section class="premium-card company-research-card" *ngIf="process && !process.companyResearch">
+                <div class="card-header">
+                    <div class="header-title">
+                        <div class="cr-header-icon">
+                            <lucide-icon name="search" [size]="16" strokeWidth="2"></lucide-icon>
+                        </div>
+                        <h3>מידע על החברה</h3>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <div class="cr-empty-state">
+                        <p class="cr-empty-desc">לא נמצא מידע מחקר על החברה. באפשרותך לבצע מחקר בעזרת בינה מלאכותית ולהוסיף אותו כאן.</p>
+                        
+                        <div class="cr-empty-actions">
+                            <button class="copy-prompt-btn" (click)="copyResearchPrompt($event)">
+                                <lucide-icon name="copy" [size]="12"></lucide-icon>
+                                <span>{{ promptCopied ? 'הועתק! ✓' : 'העתק פרומפט ל-AI' }}</span>
+                            </button>
+                            
+                            <button class="btn-sleek secondary" *ngIf="!showDetailsAddForm" (click)="showDetailsAddForm = true">
+                                <lucide-icon name="plus" [size]="14"></lucide-icon>
+                                <span>הוסף מידע מחקר (JSON)</span>
+                            </button>
+                        </div>
+
+                        <!-- Add form -->
+                        <div class="cr-add-form" *ngIf="showDetailsAddForm">
+                            <div class="cr-form-header">
+                                <label class="cr-label-paste">הדבק את ה-JSON שהתקבל מהמחקר:</label>
+                                <span class="json-state-badge" [ngClass]="companyResearchState">
+                                    {{ companyResearchState === 'idle' ? 'ממתין לקלט' : companyResearchState === 'valid' ? 'JSON תקין ✓' : 'JSON לא תקין ✗' }}
+                                </span>
+                            </div>
+                            <textarea 
+                                [(ngModel)]="companyResearchRaw" 
+                                (ngModelChange)="onCompanyResearchChange()"
+                                placeholder='{ "company": { ... } }'
+                                class="cr-textarea-input"
+                                rows="6"
+                            ></textarea>
+                            <div class="cr-form-footer">
+                                <button class="btn-sleek secondary" (click)="cancelDetailsAdd()">ביטול</button>
+                                <button class="btn-sleek primary" [disabled]="companyResearchState !== 'valid' || isSavingResearch" (click)="saveCompanyResearch()">
+                                    <span *ngIf="!isSavingResearch">שמור מידע</span>
+                                    <span *ngIf="isSavingResearch">שומר...</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </section>
 
@@ -722,11 +961,11 @@
 
     /* ── Per-stage wrapper: solid dark background, always white text ─ */
     .stage-select-wrap {
-        color: #000000;
+        color: #ffffff;
     }
     .stage-select-wrap.status-application-submitted,
     .stage-select-wrap.status-resume-under-review {
-        background: #1e40af; border-color: #1d4ed8;
+        background: #565962; border-color: #565962;
     }
     .stage-select-wrap.status-initial-call-scheduled,
     .stage-select-wrap.status-initial-call-completed {
@@ -767,7 +1006,7 @@
     .stage-select {
         appearance: none;
         -webkit-appearance: none;
-        background: black;
+        background: transparent;
         border: none;
         outline: none;
         font-size: 12px;
@@ -775,9 +1014,15 @@
         font-family: inherit;
         text-transform: uppercase;
         letter-spacing: 0.05em;
-        color: white;
+        color: inherit;
         cursor: pointer;
-        padding: 0;
+        padding: 0 4px;
+        line-height: 1.2;
+    }
+
+    .stage-select option {
+        color: #1f2937;
+        background-color: #ffffff;
     }
 
     .stage-chevron, .stage-spinner {
@@ -2038,5 +2283,397 @@
         font-weight: 500;
         color: var(--text-primary);
         letter-spacing: 2px;
+    }
+
+    /* ═══════════════════════════════════════════════════
+       COMPANY RESEARCH CARD  — full redesign
+       ═══════════════════════════════════════════════════ */
+    .company-research-card {
+        border-color: rgba(16, 185, 129, 0.25);
+    }
+
+    .cr-header-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 10px;
+        background: rgba(16, 185, 129, 0.15);
+        color: #059669;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    /* ── Card body ── */
+    .cr-body {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    /* ── Group ── */
+    .cr-group {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 14px;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .cr-group-title {
+        font-size: 13px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--text-tertiary);
+        padding-bottom: 10px;
+        border-bottom: 1px solid var(--border-color);
+        margin-bottom: 2px;
+    }
+
+    /* ── Items grid — two columns on wide, stack on narrow ── */
+    .cr-items {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px 20px;
+    }
+
+    .cr-item {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .cr-item--full {
+        grid-column: 1 / -1;  /* span both columns */
+    }
+
+    .cr-label {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--text-tertiary);
+    }
+
+    .cr-value {
+        font-size: 15px;
+        font-weight: 500;
+        color: var(--text-primary);
+        line-height: 1.4;
+    }
+
+    .cr-value--wrap {
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 1.6;
+        color: var(--text-secondary);
+    }
+
+    .cr-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--primary-blue);
+        text-decoration: none;
+        word-break: break-all;
+        line-height: 1.4;
+    }
+
+    .cr-link:hover { text-decoration: underline; }
+
+    /* ── Badges ── */
+    .cr-badge {
+        display: inline-flex;
+        align-items: center;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding: 4px 12px;
+        border-radius: 999px;
+        background: var(--bg-tertiary);
+        color: var(--text-secondary);
+        border: 1px solid var(--border-color);
+        width: fit-content;
+    }
+
+    .cr-badge--blue {
+        background: rgba(37, 99, 235, 0.12);
+        color: var(--primary-blue);
+        border-color: rgba(37, 99, 235, 0.25);
+    }
+
+    .cr-badge--green {
+        background: rgba(16, 185, 129, 0.12);
+        color: #059669;
+        border-color: rgba(16, 185, 129, 0.3);
+    }
+
+    .cr-badge--red {
+        background: rgba(239, 68, 68, 0.1);
+        color: #dc2626;
+        border-color: rgba(239, 68, 68, 0.25);
+    }
+
+    /* Dark-mode badge text fixes */
+    body.dark-theme .cr-badge--green { color: #34d399; }
+    body.dark-theme .cr-badge--red   { color: #f87171; }
+    body.dark-theme .cr-badge--blue  { color: #60a5fa; }
+
+    .cr-trend-growing  { background: rgba(16,185,129,0.12); color: #059669; border-color: rgba(16,185,129,0.3); }
+    .cr-trend-stable   { background: rgba(37,99,235,0.12);  color: var(--primary-blue); border-color: rgba(37,99,235,0.25); }
+    .cr-trend-shrinking{ background: rgba(239,68,68,0.1);   color: #dc2626; border-color: rgba(239,68,68,0.25); }
+    .cr-trend-unknown  { background: var(--bg-tertiary);    color: var(--text-tertiary); border-color: var(--border-color); }
+
+    body.dark-theme .cr-trend-growing  { color: #34d399; }
+    body.dark-theme .cr-trend-stable   { color: #60a5fa; }
+    body.dark-theme .cr-trend-shrinking{ color: #f87171; }
+
+    /* ── Signal columns ── */
+    .cr-signal-cols {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .cr-signal {
+        border-radius: 10px;
+        padding: 14px 16px;
+        border: 1px solid;
+    }
+
+    .cr-signal--green {
+        background: rgba(16, 185, 129, 0.07);
+        border-color: rgba(16, 185, 129, 0.22);
+    }
+
+    .cr-signal--yellow {
+        background: rgba(245, 158, 11, 0.07);
+        border-color: rgba(245, 158, 11, 0.22);
+    }
+
+    .cr-signal--gray {
+        background: var(--bg-tertiary);
+        border-color: var(--border-color);
+    }
+
+    .cr-signal-title {
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--text-secondary);
+        margin-bottom: 8px;
+    }
+
+    .cr-signal-list {
+        margin: 0;
+        padding-inline-start: 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .cr-signal-list li {
+        font-size: 14px;
+        color: var(--text-primary);
+        line-height: 1.55;
+    }
+
+    /* ── News cards ── */
+    .cr-news-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .cr-news-item {
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 14px 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .cr-news-meta {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+
+    .cr-news-date {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-tertiary);
+        background: var(--bg-secondary);
+        padding: 3px 10px;
+        border-radius: 999px;
+        border: 1px solid var(--border-color);
+        width: fit-content;
+    }
+
+    .cr-news-title {
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--text-primary);
+        line-height: 1.4;
+    }
+
+    .cr-news-summary {
+        font-size: 13.5px;
+        color: var(--text-secondary);
+        line-height: 1.6;
+    }
+
+    .cr-news-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--primary-blue);
+        text-decoration: none;
+        margin-top: 4px;
+        width: fit-content;
+        transition: opacity 0.15s;
+    }
+
+    .cr-news-link:hover { text-decoration: underline; opacity: 0.85; }
+
+    /* ── Sources ── */
+    .cr-sources {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .cr-source-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--primary-blue);
+        background: rgba(37, 99, 235, 0.07);
+        border: 1px solid rgba(37, 99, 235, 0.2);
+        border-radius: 999px;
+        padding: 6px 14px;
+        text-decoration: none;
+        transition: background 0.15s, border-color 0.15s;
+        word-break: break-all;
+    }
+
+    .cr-source-link:hover {
+        background: rgba(37, 99, 235, 0.14);
+        border-color: rgba(37, 99, 235, 0.35);
+    }
+
+    /* ── Company Research Empty/Add State ── */
+    .cr-empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 24px;
+        gap: 16px;
+    }
+
+    .cr-empty-desc {
+        font-size: 15px;
+        color: var(--text-secondary);
+        line-height: 1.6;
+        max-width: 500px;
+        margin: 0;
+    }
+
+    .cr-empty-actions {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .copy-prompt-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 9px 18px;
+        background: #10b981;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 13.5px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.2s, transform 0.1s;
+    }
+
+    .copy-prompt-btn:hover {
+        background-color: #059669;
+    }
+
+    .copy-prompt-btn:active {
+        transform: translateY(1px);
+    }
+
+    .cr-add-form {
+        width: 100%;
+        max-width: 700px;
+        margin-top: 16px;
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        text-align: right;
+    }
+
+    .cr-form-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .cr-label-paste {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .cr-textarea-input {
+        width: 100%;
+        min-height: 120px;
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        color: var(--text-primary);
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 13px;
+        padding: 12px;
+        resize: vertical;
+        outline: none;
+    }
+
+    .cr-textarea-input:focus {
+        border-color: var(--primary-blue);
+    }
+
+    .cr-form-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
     }
 </style>

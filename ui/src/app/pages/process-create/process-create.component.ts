@@ -35,7 +35,8 @@ export class ProcessCreateComponent {
         scoreGrowth: 3,
         scoreWLB: 3,
         scoreVibe: 3,
-        tailoredPitch: ''
+        tailoredPitch: '',
+        companyResearch: null
     };
 
     constructor(

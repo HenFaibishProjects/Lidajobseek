@@ -29,4 +29,5 @@ export class CreateProcessDto {
   cvVersion?: string;
   submissionLink?: string;
   jobDescriptionUrl?: string;
+  companyResearch?: object;
 }

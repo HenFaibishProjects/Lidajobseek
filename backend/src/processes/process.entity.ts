@@ -99,6 +99,10 @@ export class Process {
   @Property({ nullable: true })
   nextFollowUp?: Date;
 
+  // Company Research (optional JSON blob pasted by user)
+  @Property({ type: 'json', nullable: true })
+  companyResearch?: object;
+
   // Decision Matrix
   @Property({ default: 0 })
   scoreTech: number = 0;

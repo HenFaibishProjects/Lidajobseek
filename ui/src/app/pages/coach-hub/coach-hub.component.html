@@ -301,10 +301,6 @@
                 <p>Loading...</p>
             </div>
 
-            <div *ngIf="!isGoogleAuthenticated && !loadingDrive" class="drive-auth-prompt">
-                <button class="btn-primary" (click)="loginWithGoogle()">Sign in with Google</button>
-            </div>
-
             <div *ngIf="isGoogleAuthenticated && !loadingDrive" class="drive-file-list">
                 <div *ngFor="let file of driveFiles" class="drive-file-item">
                     <img [src]="file.iconLink" class="file-icon" alt="icon">

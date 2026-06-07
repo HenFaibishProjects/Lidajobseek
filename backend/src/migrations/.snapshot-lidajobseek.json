@@ -1569,6 +1569,22 @@
           "comment": null,
           "enumItems": [],
           "mappedType": "string"
+        },
+        "company_research": {
+          "name": "company_research",
+          "type": "json",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "json"
         }
       },
       "name": "process",
@@ -2564,7 +2580,7 @@
         },
         "versions": {
           "name": "versions",
-          "type": "json",
+          "type": "jsonb",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
@@ -2573,7 +2589,7 @@
           "length": null,
           "precision": null,
           "scale": null,
-          "default": "'[]'",
+          "default": null,
           "comment": null,
           "enumItems": [],
           "mappedType": "json"

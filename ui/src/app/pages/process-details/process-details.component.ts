@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -20,7 +20,7 @@ import { PROCESS_STAGES } from '../../shared/process-stages';
     imports: [CommonModule, RouterModule, FormsModule, DateFormatPipe, LucideAngularModule, AiAssistantPanelComponent],
     templateUrl: './process-details.component.html'
 })
-export class ProcessDetailsComponent implements OnInit {
+export class ProcessDetailsComponent implements OnInit, OnDestroy {
     process: any;
     logoLoadError = false;
     showContactForm = false;
@@ -37,6 +37,14 @@ export class ProcessDetailsComponent implements OnInit {
         socialHooks: ''
     };
     editingContact: any = null;
+
+    // Inline Company Research Add fields
+    showDetailsAddForm = false;
+    companyResearchRaw = '';
+    companyResearchState: 'idle' | 'valid' | 'invalid' = 'idle';
+    isSavingResearch = false;
+    promptCopied = false;
+    private promptCopiedTimer: any;
 
     get completionPercent(): number {
         if (!this.process) return 0;
@@ -82,7 +90,8 @@ export class ProcessDetailsComponent implements OnInit {
         private reviewsService: ReviewsService,
         private contactsService: ContactsService,
         private confirmService: ConfirmService,
-        private toastService: ToastService
+        private toastService: ToastService,
+        private cdr: ChangeDetectorRef
     ) { }
 
     formatUrl(url: string | undefined): string {
@@ -243,5 +252,95 @@ export class ProcessDetailsComponent implements OnInit {
     openInteractionAiPanel(interactionId: number) {
         this.activeInteractionId = interactionId;
         this.showAiPanel = true;
+    }
+
+    ngOnDestroy() {
+        if (this.promptCopiedTimer) {
+            clearTimeout(this.promptCopiedTimer);
+        }
+    }
+
+    // ── Inline Company Research Logic ─────────────────────────────────
+    onCompanyResearchChange() {
+        const raw = this.companyResearchRaw.trim();
+        if (!raw) {
+            this.companyResearchState = 'idle';
+            return;
+        }
+        try {
+            JSON.parse(raw);
+            this.companyResearchState = 'valid';
+        } catch {
+            this.companyResearchState = 'invalid';
+        }
+    }
+
+    cancelDetailsAdd() {
+        this.showDetailsAddForm = false;
+        this.companyResearchRaw = '';
+        this.companyResearchState = 'idle';
+    }
+
+    saveCompanyResearch() {
+        if (this.companyResearchState !== 'valid') return;
+        this.isSavingResearch = true;
+        
+        let parsedResearch: any;
+        try {
+            parsedResearch = JSON.parse(this.companyResearchRaw);
+        } catch {
+            this.toastService.show('Failed to parse JSON. Please verify it is valid.', 'error');
+            this.isSavingResearch = false;
+            return;
+        }
+
+        this.processesService.update(this.process.id, { companyResearch: parsedResearch }).subscribe({
+            next: () => {
+                this.toastService.show('מידע מחקר על החברה נשמר בהצלחה', 'success');
+                this.isSavingResearch = false;
+                this.showDetailsAddForm = false;
+                this.companyResearchRaw = '';
+                this.companyResearchState = 'idle';
+                this.loadProcess();
+            },
+            error: (err) => {
+                console.error(err);
+                this.toastService.show('שגיאה בשמירת המחקר', 'error');
+                this.isSavingResearch = false;
+            }
+        });
+    }
+
+    copyResearchPrompt(event: Event) {
+        event.stopPropagation();
+        const companyName = this.process.companyName?.trim() || 'Unknown Company';
+        const prompt =
+`Research the following company as a potential employer. Company name: ${companyName}
+ Country or location: israel 
+Use web search and public sources only. Return a concise JSON overview for a job seeker. Rules: 1. Verify that you found the correct company and do not mix it with similarly named companies. 2. Prefer official sources, LinkedIn, career pages, reputable news sites, and employee review sites. 3. Do not guess. Use null when reliable information is unavailable. 4. Keep the response short: - Maximum 1-2 sentences per summary - Maximum 3 items in each list - Maximum 3 recent news items 5. Do not repeat the same fact in multiple sections. 6. Focus on information relevant to someone considering working at the company. 7. Return valid JSON only, without markdown or extra text. 8. Write summaries in Hebrew. Keep JSON keys and enum values in English. Return exactly this structure: { "company": { "name": null, "website": null, "location": null, "industry": null, "summary": null, "employee_range": null, "growth_trend": "growing | stable | shrinking | unknown" }, "workplace": { "work_model": "remote | hybrid | onsite | mixed | unknown", "review_rating": null, "review_count": null, "reviews_summary": null }, "hiring": { "is_hiring": null, "open_roles_summary": null }, "recent_news": [ { "date": null, "title": null, "summary": null, "source_url": null } ], "job_seeker_summary": { "overall_impression": null, "positive_signals": [], "concerns": [], "missing_information": [] } }
+please give the answer in json canvas , ready to copy for a code`;
+
+        navigator.clipboard.writeText(prompt).then(() => {
+            clearTimeout(this.promptCopiedTimer);
+            this.promptCopied = true;
+            this.promptCopiedTimer = setTimeout(() => {
+                this.promptCopied = false;
+                this.cdr.detectChanges();
+            }, 2500);
+            this.cdr.detectChanges();
+        }).catch(() => {
+            // Fallback for environments without clipboard API
+            const ta = document.createElement('textarea');
+            ta.value = prompt;
+            ta.style.position = 'fixed';
+            ta.style.opacity = '0';
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+            this.promptCopied = true;
+            this.promptCopiedTimer = setTimeout(() => { this.promptCopied = false; this.cdr.detectChanges(); }, 2500);
+            this.cdr.detectChanges();
+        });
     }
 }
