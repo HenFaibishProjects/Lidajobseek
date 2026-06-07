@@ -488,6 +488,19 @@
                             </div>
                         </div>
 
+                        <div class="dl-item" *ngIf="process.companyName">
+                            <div class="dl-icon">
+                                <lucide-icon name="external-link" [size]="16"></lucide-icon>
+                            </div>
+                            <div class="dl-content">
+                                <span class="dl-label">Glassdoor</span>
+                                <button class="btn-visit-detail glassdoor-search-btn" (click)="searchGlassdoor(process.companyName)">
+                                    <span>Search interview questions on Glassdoor</span>
+                                    <lucide-icon name="external-link" [size]="12"></lucide-icon>
+                                </button>
+                            </div>
+                        </div>
+
                         <div class="dl-item">
                             <div class="dl-icon">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
@@ -1383,6 +1396,7 @@
         display: flex;
         flex-direction: column;
         gap: var(--space-2xl);
+        width: 150%;
     }
 
 
@@ -2675,5 +2689,16 @@
         display: flex;
         justify-content: flex-end;
         gap: 12px;
+    }
+
+    .glassdoor-search-btn {
+        background: #185e49 !important;
+        box-shadow: 0 4px 12px rgba(24, 94, 73, 0.2) !important;
+        border: none;
+        cursor: pointer;
+    }
+    .glassdoor-search-btn:hover {
+        background: #207a5f !important;
+        box-shadow: 0 6px 16px rgba(24, 94, 73, 0.3) !important;
     }
 </style>

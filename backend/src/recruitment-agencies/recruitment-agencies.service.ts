@@ -52,6 +52,24 @@ export class RecruitmentAgenciesService {
         lastInteractionContact: last?.contact?.fullName ?? null,
         lastInteractionSummary: last?.summary ?? null,
         cvEverSent: interactions.some((i) => i.cvSent),
+        contacts: contacts.map(c => ({
+          id: c.id,
+          fullName: c.fullName,
+          roleTitle: c.roleTitle,
+          email: c.email,
+          phoneNumber: c.phoneNumber,
+          linkedinUrl: c.linkedinUrl
+        })),
+        interactions: sorted.map(i => ({
+          id: i.id,
+          interactionDate: i.interactionDate,
+          interactionType: i.interactionType,
+          direction: i.direction,
+          summary: i.summary,
+          cvSent: i.cvSent,
+          notes: i.notes,
+          contactId: i.contact?.id ?? null
+        }))
       };
     });
   }

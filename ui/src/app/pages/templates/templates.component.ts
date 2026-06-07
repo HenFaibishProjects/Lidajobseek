@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { forkJoin } from 'rxjs';
 import { TemplatesService, Template, TemplateVersion } from '../../services/templates.service';
 import { ToastService } from '../../services/toast.service';
 import { ConfirmService } from '../../services/confirm.service';
@@ -144,6 +145,72 @@ export class TemplatesComponent implements OnInit {
       this.copiedKey = `${templateId}`;
       this.toastService.show('Copied to clipboard!', 'success');
       setTimeout(() => { this.copiedKey = null; }, 2000);
+    });
+  }
+
+  exportTemplates() {
+    if (this.templates.length === 0) return;
+    const cleanTemplates = this.templates.map(t => ({
+      name: t.name,
+      versions: t.versions.map(v => ({ label: v.label, content: v.content }))
+    }));
+
+    const dataStr = JSON.stringify(cleanTemplates, null, 2);
+    const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+    const exportFileDefaultName = `jobseek_templates_${new Date().toISOString().split('T')[0]}.json`;
+
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', exportFileDefaultName);
+    linkElement.click();
+    this.toastService.show('Templates exported successfully', 'success');
+  }
+
+  onImportSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) return;
+
+    const file = input.files[0];
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const data = JSON.parse(reader.result as string);
+        if (!Array.isArray(data)) {
+          this.toastService.show('Invalid file format. Must be a JSON array.', 'error');
+          return;
+        }
+
+        const isValid = data.every(t => 
+          t && typeof t.name === 'string' && Array.isArray(t.versions) &&
+          t.versions.every((v: any) => v && typeof v.label === 'string' && typeof v.content === 'string')
+        );
+
+        if (!isValid) {
+          this.toastService.show('Invalid templates format. Missing name or versions.', 'error');
+          return;
+        }
+
+        this.importTemplatesList(data);
+      } catch (e) {
+        this.toastService.show('Failed to parse JSON file.', 'error');
+      }
+    };
+    reader.readAsText(file);
+    input.value = '';
+  }
+
+  private importTemplatesList(list: any[]) {
+    this.isLoading = true;
+    const requests = list.map(t => this.templatesService.create({ name: t.name, versions: t.versions }));
+    forkJoin(requests).subscribe({
+      next: () => {
+        this.toastService.show(`Successfully imported ${list.length} templates!`, 'success');
+        this.load();
+      },
+      error: () => {
+        this.toastService.show('Failed to import some templates', 'error');
+        this.load();
+      }
     });
   }
 }

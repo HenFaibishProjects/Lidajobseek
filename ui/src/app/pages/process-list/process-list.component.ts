@@ -530,4 +530,15 @@ export class ProcessListComponent implements OnInit, OnDestroy, AfterViewChecked
     getOfferCount(): number {
         return this.kpiProcesses.filter(p => OFFER_STAGES.has(p.currentStage)).length;
     }
+
+    searchGlassdoor(companyName: string, event?: Event) {
+        if (event) {
+            event.stopPropagation();
+            event.preventDefault();
+        }
+        if (!companyName) return;
+        const query = `site:glassdoor.com/Interview ${companyName} interview questions`;
+        const url = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
+        window.open(url, '_blank', 'noopener,noreferrer');
+    }
 }

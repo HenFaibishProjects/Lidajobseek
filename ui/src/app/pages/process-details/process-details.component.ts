@@ -103,6 +103,17 @@ export class ProcessDetailsComponent implements OnInit, OnDestroy {
         return cleanUrl;
     }
 
+    searchGlassdoor(companyName: string, event?: Event) {
+        if (event) {
+            event.stopPropagation();
+            event.preventDefault();
+        }
+        if (!companyName) return;
+        const query = `site:glassdoor.com/Interview ${companyName} interview questions`;
+        const url = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
+        window.open(url, '_blank', 'noopener,noreferrer');
+    }
+
     ngOnInit() {
         this.loadProcess();
     }

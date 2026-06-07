@@ -53,6 +53,100 @@
         </div>
     </div>
 
+    <!-- Funnel and insights grid -->
+    <div class="funnel-insights-container">
+        <!-- Conversion Funnel Card -->
+        <div class="chart-card funnel-card">
+            <div class="card-header">
+                <h3>Application Funnel</h3>
+                <span class="premium-badge">Stage Conversion</span>
+            </div>
+            <div class="funnel-body">
+                <div class="funnel-step">
+                    <div class="step-info">
+                        <span class="step-name">Applied</span>
+                        <span class="step-value">{{ funnelStats.applied }} Roles</span>
+                    </div>
+                    <div class="step-progress-bg">
+                        <div class="step-progress-fill bg-indigo" style="width: 100%"></div>
+                    </div>
+                </div>
+
+                <div class="funnel-divider">
+                    <span class="divider-text">↓↓ Screen Rate: {{ funnelStats.applyToScreenRate }}%</span>
+                </div>
+
+                <div class="funnel-step">
+                    <div class="step-info">
+                        <span class="step-name">Screening / Call</span>
+                        <span class="step-value">{{ funnelStats.screened }} Roles</span>
+                    </div>
+                    <div class="step-progress-bg">
+                        <div class="step-progress-fill bg-blue" [style.width.%]="funnelStats.applyToScreenRate"></div>
+                    </div>
+                </div>
+
+                <div class="funnel-divider">
+                    <span class="divider-text">↓↓ Interview Rate: {{ funnelStats.screenToInterviewRate }}%</span>
+                </div>
+
+                <div class="funnel-step">
+                    <div class="step-info">
+                        <span class="step-name">Interviews</span>
+                        <span class="step-value">{{ funnelStats.interviewed }} Roles</span>
+                    </div>
+                    <div class="step-progress-bg">
+                        <div class="step-progress-fill bg-purple" [style.width.%]="(funnelStats.applyToScreenRate * funnelStats.screenToInterviewRate) / 100"></div>
+                    </div>
+                </div>
+
+                <div class="funnel-divider">
+                    <span class="divider-text">↓↓ Offer Rate: {{ funnelStats.interviewToOfferRate }}%</span>
+                </div>
+
+                <div class="funnel-step">
+                    <div class="step-info">
+                        <span class="step-name">Offers</span>
+                        <span class="step-value">{{ funnelStats.offered }} Offers</span>
+                    </div>
+                    <div class="step-progress-bg">
+                        <div class="step-progress-fill bg-emerald" [style.width.%]="(funnelStats.applyToScreenRate * funnelStats.screenToInterviewRate * funnelStats.interviewToOfferRate) / 10000"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Smart Insights & Velocity Card -->
+        <div class="chart-card insights-card">
+            <div class="card-header">
+                <h3>Smart Insights & Velocity</h3>
+                <span class="premium-badge AI-badge">AI Assistant</span>
+            </div>
+            
+            <!-- Velocity progress -->
+            <div class="velocity-box">
+                <div class="velocity-header">
+                    <span class="velocity-label">Weekly Velocity Target</span>
+                    <span class="velocity-value">{{ velocity.thisWeekCount }} / {{ velocity.target }} roles</span>
+                </div>
+                <div class="velocity-progress-bg">
+                    <div class="velocity-progress-fill" [style.width.%]="velocity.percentage" [class.completed]="velocity.percentage >= 100"></div>
+                </div>
+            </div>
+
+            <!-- Insights list -->
+            <div class="insights-list">
+                <div class="insight-item" *ngFor="let insight of insights" [ngClass]="insight.type">
+                    <span class="insight-icon">{{ insight.icon }}</span>
+                    <div class="insight-content">
+                        <span class="insight-title">{{ insight.title }}</span>
+                        <p class="insight-desc">{{ insight.description }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Main Charts Grid -->
     <div class="charts-grid">
         <!-- Interaction Trends -->
@@ -75,6 +169,9 @@
         <div class="chart-card">
             <div class="card-header">
                 <h3>Pipeline Status</h3>
+                <button class="toggle-btn" (click)="toggleActiveStages()">
+                    {{ showActiveOnly ? 'Show All' : 'Show Active Only' }}
+                </button>
             </div>
             <div class="chart-canvas-container">
                 <canvas #statusChart></canvas>
@@ -99,6 +196,105 @@
             <div class="chart-canvas-container">
                 <canvas #sourceChart></canvas>
             </div>
+        </div>
+    </div>
+
+    <!-- Strategic Activity & Recruiter Insights Section -->
+    <div class="dashboard-section-header">
+        <h2>Strategic Activity & Recruiter Insights</h2>
+        <div class="filter-controls">
+            <label for="periodFilter" class="filter-label">Filter Period:</label>
+            <select id="periodFilter" [(ngModel)]="periodDays" (change)="onPeriodChange()" class="chart-select period-select">
+                <option [ngValue]="7">1 Week</option>
+                <option [ngValue]="14">2 Weeks</option>
+                <option [ngValue]="21">3 Weeks</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Period Stats Row -->
+    <div class="stats-grid period-stats-grid">
+        <div class="stat-card period-card">
+            <div class="stat-icon icon-blue">💬</div>
+            <div class="stat-content">
+                <span class="stat-label">Total Interactions</span>
+                <span class="stat-value">{{ periodStats.totalInteractions }}</span>
+            </div>
+        </div>
+        <div class="stat-card period-card">
+            <div class="stat-icon icon-green">📞</div>
+            <div class="stat-content">
+                <span class="stat-label">Calls</span>
+                <span class="stat-value">{{ periodStats.callsCount }}</span>
+            </div>
+        </div>
+        <div class="stat-card period-card">
+            <div class="stat-icon icon-purple">👥</div>
+            <div class="stat-content">
+                <span class="stat-label">Interviews</span>
+                <span class="stat-value">{{ periodStats.interviewsCount }}</span>
+            </div>
+        </div>
+        <div class="stat-card period-card">
+            <div class="stat-icon icon-orange">📝</div>
+            <div class="stat-content">
+                <span class="stat-label">Assessments</span>
+                <span class="stat-value">{{ periodStats.assessmentsCount }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recruiter Insights Card -->
+    <div class="recruiter-insights-card">
+        <div class="card-header">
+            <h3>Recruiter Activity & Last Spoken Date</h3>
+        </div>
+        <div class="recruiter-table-wrapper">
+            <table class="recruiter-table" *ngIf="periodStats.recruitersList.length > 0; else noRecruiters">
+                <thead>
+                    <tr>
+                        <th>Recruiter</th>
+                        <th>Agency</th>
+                        <th class="text-center">Interactions in Period</th>
+                        <th>Last Spoke Date</th>
+                        <th>Last Summary</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let r of periodStats.recruitersList">
+                        <td>
+                            <div class="recruiter-name-wrap">
+                                <span class="recruiter-name">{{ r.fullName }}</span>
+                                <span class="recruiter-role">{{ r.roleTitle }}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="agency-badge">{{ r.agencyName }}</span>
+                        </td>
+                        <td class="text-center">
+                            <span class="interaction-count-badge" [class.has-activity]="r.periodCount > 0">
+                                {{ r.periodCount }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="date-text" *ngIf="r.lastSpokenDate; else neverSpoke">
+                                {{ r.lastSpokenDate | dateFormat: 'date' }}
+                            </span>
+                            <ng-template #neverSpoke>
+                                <span class="never-text">Never</span>
+                            </ng-template>
+                        </td>
+                        <td class="summary-cell" [title]="r.lastSpokenSummary || ''">
+                            {{ r.lastSpokenSummary || '-' }}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <ng-template #noRecruiters>
+                <div class="no-data-state">
+                    <p>No recruiters or contacts registered. Go to "Recruiters & Agencies" to add them!</p>
+                </div>
+            </ng-template>
         </div>
     </div>
 </div>

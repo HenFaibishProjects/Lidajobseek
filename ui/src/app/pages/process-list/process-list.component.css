@@ -1928,3 +1928,39 @@ body.dark-theme .list-row {
 .skeleton-w-80px { width: 80px; }
 .skeleton-w-60px { width: 60px; }
 
+.card-glassdoor-wrap {
+    margin-top: 12px;
+    position: relative;
+    z-index: 10;
+}
+.process-card-glassdoor-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 12px;
+    background: rgba(102, 126, 234, 0.08);
+    border: 1px solid rgba(102, 126, 234, 0.2);
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: var(--font-family);
+    width: 100%;
+}
+.process-card-glassdoor-btn:hover {
+    background: rgba(102, 126, 234, 0.15);
+    border-color: rgba(102, 126, 234, 0.45);
+    color: #667eea;
+}
+body.dark-theme .process-card-glassdoor-btn {
+    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+body.dark-theme .process-card-glassdoor-btn:hover {
+    background: rgba(102, 126, 234, 0.2);
+    color: #a3b8ff;
+}
+
