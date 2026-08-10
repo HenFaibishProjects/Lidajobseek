@@ -148,13 +148,15 @@
                          (click)="selectDay(day)">
                         <span class="day-number">{{ day.date | date:'d' }}</span>
                         <div class="day-events-indicators" *ngIf="day.interviews.length > 0">
-                            <span class="event-dot" 
-                                  *ngFor="let item of day.interviews.slice(0, 8)" 
-                                  [style.background-color]="getInterviewColor(item.interviewType)"
+                            <div class="month-event-pill" 
+                                  *ngFor="let item of day.interviews.slice(0, 5)" 
                                   [title]="(item.process ? item.process.companyName : item.agency?.agencyName) + ' - ' + getInterviewTypeLabel(item.interviewType)">
-                            </span>
-                            <span class="more-events-indicator" *ngIf="day.interviews.length > 8">
-                                +{{ day.interviews.length - 8 }}
+                                <span class="event-dot" [style.background-color]="getInterviewColor(item.interviewType)"></span>
+                                <span class="event-time">{{ item.date | date:'HH:mm' }}</span>
+                                <span class="event-company">{{ item.process ? item.process.companyName : item.agency?.agencyName }}</span>
+                            </div>
+                            <span class="more-events-indicator" *ngIf="day.interviews.length > 5">
+                                +{{ day.interviews.length - 5 }} more
                             </span>
                         </div>
                     </div>
@@ -280,21 +282,26 @@
                         </div>
 
                         <div class="card-actions-cell">
-                            <a *ngIf="interview.processId" [routerLink]="['/process', interview.processId]" class="btn-action btn-primary-action">
-                                View Process
-                            </a>
-                            <a *ngIf="!interview.processId && interview.agencyId" [routerLink]="['/recruiters', interview.agencyId]" class="btn-action btn-primary-action">
-                                View Recruiter
-                            </a>
+                            <div class="primary-action-row">
+                                <a *ngIf="interview.processId" [routerLink]="['/process', interview.processId]" class="btn-action btn-primary-action">
+                                    View Process
+                                </a>
+                                <a *ngIf="!interview.processId && interview.agencyId" [routerLink]="['/recruiters', interview.agencyId]" class="btn-action btn-primary-action">
+                                    View Recruiter
+                                </a>
+                                <button class="btn-icon-danger" (click)="deleteInterview(interview.id)" title="Delete">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="3 6 5 6 21 6"></polyline>
+                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                    </svg>
+                                </button>
+                            </div>
                             <a *ngIf="interview.processId" [routerLink]="['/process', interview.processId, 'interaction', interview.id, 'edit']" class="btn-action btn-secondary-action">
                                 Edit
                             </a>
                             <a *ngIf="!interview.processId && interview.agencyId" [routerLink]="['/recruiters', interview.agencyId, 'edit']" [queryParams]="{ editInteractionId: interview.id }" class="btn-action btn-secondary-action">
                                 Edit
                             </a>
-                            <button class="btn-action btn-danger-action" (click)="deleteInterview(interview.id)">
-                                Delete
-                            </button>
                         </div>
                     </div>
                 </div>
@@ -369,21 +376,26 @@
                         </div>
 
                         <div class="card-actions-cell">
-                            <a *ngIf="nextInterview.processId" [routerLink]="['/process', nextInterview.processId]" class="btn-action btn-primary-action">
-                                View Process
-                            </a>
-                            <a *ngIf="!nextInterview.processId && nextInterview.agencyId" [routerLink]="['/recruiters', nextInterview.agencyId]" class="btn-action btn-primary-action">
-                                View Recruiter
-                            </a>
+                            <div class="primary-action-row">
+                                <a *ngIf="nextInterview.processId" [routerLink]="['/process', nextInterview.processId]" class="btn-action btn-primary-action">
+                                    View Process
+                                </a>
+                                <a *ngIf="!nextInterview.processId && nextInterview.agencyId" [routerLink]="['/recruiters', nextInterview.agencyId]" class="btn-action btn-primary-action">
+                                    View Recruiter
+                                </a>
+                                <button class="btn-icon-danger" (click)="deleteInterview(nextInterview.id)" title="Delete">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="3 6 5 6 21 6"></polyline>
+                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                    </svg>
+                                </button>
+                            </div>
                             <a *ngIf="nextInterview.processId" [routerLink]="['/process', nextInterview.processId, 'interaction', nextInterview.id, 'edit']" class="btn-action btn-secondary-action">
                                 Edit
                             </a>
                             <a *ngIf="!nextInterview.processId && nextInterview.agencyId" [routerLink]="['/recruiters', nextInterview.agencyId, 'edit']" [queryParams]="{ editInteractionId: nextInterview.id }" class="btn-action btn-secondary-action">
                                 Edit
                             </a>
-                            <button class="btn-action btn-danger-action" (click)="deleteInterview(nextInterview.id)">
-                                Delete
-                            </button>
                         </div>
                     </div>
                 </div>
@@ -443,21 +455,26 @@
                             </div>
 
                             <div class="card-actions-cell">
-                                <a *ngIf="interview.processId" [routerLink]="['/process', interview.processId]" class="btn-action btn-primary-action">
-                                    View Process
-                                </a>
-                                <a *ngIf="!interview.processId && interview.agencyId" [routerLink]="['/recruiters', interview.agencyId]" class="btn-action btn-primary-action">
-                                    View Recruiter
-                                </a>
+                                <div class="primary-action-row">
+                                    <a *ngIf="interview.processId" [routerLink]="['/process', interview.processId]" class="btn-action btn-primary-action">
+                                        View Process
+                                    </a>
+                                    <a *ngIf="!interview.processId && interview.agencyId" [routerLink]="['/recruiters', interview.agencyId]" class="btn-action btn-primary-action">
+                                        View Recruiter
+                                    </a>
+                                    <button class="btn-icon-danger" (click)="deleteInterview(interview.id)" title="Delete">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <polyline points="3 6 5 6 21 6"></polyline>
+                                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                        </svg>
+                                    </button>
+                                </div>
                                 <a *ngIf="interview.processId" [routerLink]="['/process', interview.processId, 'interaction', interview.id, 'edit']" class="btn-action btn-secondary-action">
                                     Edit
                                 </a>
                                 <a *ngIf="!interview.processId && interview.agencyId" [routerLink]="['/recruiters', interview.agencyId, 'edit']" [queryParams]="{ editInteractionId: interview.id }" class="btn-action btn-secondary-action">
                                     Edit
                                 </a>
-                                <button class="btn-action btn-danger-action" (click)="deleteInterview(interview.id)">
-                                    Delete
-                                </button>
                             </div>
                         </div>
                     </div>
