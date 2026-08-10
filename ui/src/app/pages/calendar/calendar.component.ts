@@ -408,4 +408,24 @@ export class CalendarComponent implements OnInit {
     this.currentWeekDate = new Date();
     this.generateCalendar();
   }
+
+  async deleteInterview(id: number) {
+    const confirmed = await this.confirmService.confirm(
+      'Are you sure you want to delete this interview?',
+      'Delete Interview'
+    );
+
+    if (confirmed) {
+      this.interactionsService.delete(id).subscribe({
+        next: () => {
+          this.toastService.show('Interview deleted successfully', 'success');
+          this.loadInterviews();
+        },
+        error: (err) => {
+          console.error('Failed to delete interview', err);
+          this.toastService.show('Failed to delete interview', 'error');
+        }
+      });
+    }
+  }
 }

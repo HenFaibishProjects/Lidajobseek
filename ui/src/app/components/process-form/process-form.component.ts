@@ -253,6 +253,7 @@ export class ProcessFormComponent implements OnInit, OnDestroy {
 
   // ── Stage logic ───────────────────────────────────────────────────
   get shouldShowInteractionSection(): boolean {
+    if (!this.isEdit) return false;
     if (!this.process?.currentStage) return false;
     return this.process.currentStage !== this.stages[0] && this.process.currentStage !== this.stages[1];
   }

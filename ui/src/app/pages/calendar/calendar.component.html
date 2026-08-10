@@ -292,6 +292,9 @@
                             <a *ngIf="!interview.processId && interview.agencyId" [routerLink]="['/recruiters', interview.agencyId, 'edit']" [queryParams]="{ editInteractionId: interview.id }" class="btn-action btn-secondary-action">
                                 Edit
                             </a>
+                            <button class="btn-action btn-danger-action" (click)="deleteInterview(interview.id)">
+                                Delete
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -378,6 +381,9 @@
                             <a *ngIf="!nextInterview.processId && nextInterview.agencyId" [routerLink]="['/recruiters', nextInterview.agencyId, 'edit']" [queryParams]="{ editInteractionId: nextInterview.id }" class="btn-action btn-secondary-action">
                                 Edit
                             </a>
+                            <button class="btn-action btn-danger-action" (click)="deleteInterview(nextInterview.id)">
+                                Delete
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -449,6 +455,9 @@
                                 <a *ngIf="!interview.processId && interview.agencyId" [routerLink]="['/recruiters', interview.agencyId, 'edit']" [queryParams]="{ editInteractionId: interview.id }" class="btn-action btn-secondary-action">
                                     Edit
                                 </a>
+                                <button class="btn-action btn-danger-action" (click)="deleteInterview(interview.id)">
+                                    Delete
+                                </button>
                             </div>
                         </div>
                     </div>
