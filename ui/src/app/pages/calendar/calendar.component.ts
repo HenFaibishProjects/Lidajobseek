@@ -34,7 +34,7 @@ export class CalendarComponent implements OnInit {
   showAllInterviews = false; // Default unchecked = show only upcoming
 
   // Calendar Grid Mode properties
-  viewMode: 'month' | 'week' | 'list' = 'month';
+  viewMode: 'month' | 'week' | 'list' = 'list';
   currentMonthDate: Date = new Date();
   currentWeekDate: Date = new Date();
   calendarDays: any[] = [];

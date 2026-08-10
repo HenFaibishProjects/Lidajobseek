@@ -240,6 +240,11 @@
                 (change)="onWorkModeChange()" required>
               🏢 On-site
             </label>
+            <label class="mode-chip" [class.active]="process.workMode === 'unknown'">
+              <input type="radio" name="workMode" [(ngModel)]="process.workMode" value="unknown"
+                (change)="onWorkModeChange()" required>
+              ❓ Unknown
+            </label>
           </div>
         </div>
 
