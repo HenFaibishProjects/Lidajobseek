@@ -7,12 +7,12 @@ export interface InterviewTypeOption {
   color: string;
 }
 
-export const DEFAULT_INTERVIEW_TYPE_ID = 'virtual_video';
+export const DEFAULT_INTERVIEW_TYPE_ID = 'video_interview';
 
 export const INTERVIEW_TYPES: InterviewTypeOption[] = [
   // Standard Formats
   { id: 'phone_screen', label: 'Phone Screen', category: 'Format', color: '#3b82f6' }, // blue-500
-  { id: 'virtual_video', label: 'Virtual Interview', category: 'Format', color: '#8b5cf6' }, // violet-500
+  { id: 'video_interview', label: 'Video Interview', category: 'Format', color: '#8b5cf6' }, // violet-500
   { id: 'onsite', label: 'On-site Interview', category: 'Format', color: '#10b981' }, // emerald-500
   { id: 'panel', label: 'Panel Interview', category: 'Format', color: '#6366f1' }, // indigo-500
   { id: 'async_video', label: 'One-Way / Async Video', category: 'Format', color: '#64748b' }, // slate-500
