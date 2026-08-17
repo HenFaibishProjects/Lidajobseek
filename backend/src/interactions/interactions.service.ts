@@ -555,6 +555,8 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
         nextInviteDate: dto.nextInviteDate ? new Date(dto.nextInviteDate) : undefined,
         testsAssessment: dto.testsAssessment,
         roleInsights: dto.roleInsights,
+        videoLink: dto.videoLink,
+        durationMinutes: dto.durationMinutes,
         // Legacy single reminder
         reminder: this.sanitizeReminder(dto.reminder, user),
         // New: reminders[] array (takes priority if provided)

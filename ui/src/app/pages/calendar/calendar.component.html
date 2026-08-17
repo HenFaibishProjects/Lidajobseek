@@ -152,7 +152,10 @@
                                   *ngFor="let item of day.interviews.slice(0, 5)" 
                                   [title]="(item.process ? item.process.companyName : item.agency?.agencyName) + ' - ' + getInterviewTypeLabel(item.interviewType)">
                                 <span class="event-dot" [style.background-color]="getInterviewColor(item.interviewType)"></span>
-                                <span class="event-time">{{ item.date | date:'HH:mm' }}</span>
+                                <span class="event-time">
+                                    {{ item.date | date:'HH:mm' }}
+                                    <ng-container *ngIf="item.durationMinutes">-{{ getEndTime(item.date, item.durationMinutes) | date:'HH:mm' }}</ng-container>
+                                </span>
                                 <span class="event-company">{{ item.process ? item.process.companyName : item.agency?.agencyName }}</span>
                             </div>
                             <span class="more-events-indicator" *ngIf="day.interviews.length > 5">
@@ -195,7 +198,10 @@
                             <div class="week-event-card" 
                                  *ngFor="let item of day.interviews"
                                  [style.border-left-color]="getInterviewColor(item.interviewType)">
-                                <div class="week-event-time">{{ item.date | date:'HH:mm' }}</div>
+                                <div class="week-event-time">
+                                    {{ item.date | date:'HH:mm' }}
+                                    <ng-container *ngIf="item.durationMinutes"> - {{ getEndTime(item.date, item.durationMinutes) | date:'HH:mm' }} ({{item.durationMinutes}}m)</ng-container>
+                                </div>
                                 <div class="week-event-title" [title]="item.process ? item.process.companyName : item.agency?.agencyName">
                                     {{ item.process ? item.process.companyName : item.agency?.agencyName }}
                                 </div>
@@ -245,7 +251,10 @@
                                     <circle cx="12" cy="12" r="10"></circle>
                                     <polyline points="12 6 12 12 16 14"></polyline>
                                 </svg>
-                                <span>{{ interview.date | date:'HH:mm' }}</span>
+                                <span>
+                                    {{ interview.date | date:'HH:mm' }}
+                                    <ng-container *ngIf="interview.durationMinutes"> - {{ getEndTime(interview.date, interview.durationMinutes) | date:'HH:mm' }} ({{interview.durationMinutes}}m)</ng-container>
+                                </span>
                             </div>
                         </div>
 
@@ -279,6 +288,12 @@
                                 </svg>
                                 <span class="notes-text">{{interview.headsup}}</span>
                             </div>
+                            <div class="notes-preview" *ngIf="interview.videoLink" [title]="interview.videoLink">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="notes-icon" style="color: #3b82f6;">
+                                    <path d="M15.6 11.6L22 7v10l-6.4-4.5v-1zM4 5h9a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7c0-1.1.9-2 2-2z"></path>
+                                </svg>
+                                <a [href]="interview.videoLink" target="_blank" class="notes-text" style="color: #3b82f6; text-decoration: none; word-break: break-all;">Join Video Meeting</a>
+                            </div>
                         </div>
 
                         <div class="card-actions-cell">
@@ -296,12 +311,20 @@
                                     </svg>
                                 </button>
                             </div>
-                            <a *ngIf="interview.processId" [routerLink]="['/process', interview.processId, 'interaction', interview.id, 'edit']" class="btn-action btn-secondary-action">
-                                Edit
-                            </a>
-                            <a *ngIf="!interview.processId && interview.agencyId" [routerLink]="['/recruiters', interview.agencyId, 'edit']" [queryParams]="{ editInteractionId: interview.id }" class="btn-action btn-secondary-action">
-                                Edit
-                            </a>
+                            <div style="display: flex; gap: 8px; margin-top: 8px;">
+                                <a *ngIf="interview.processId" [routerLink]="['/process', interview.processId]" [fragment]="'interaction-' + interview.id" class="btn-action btn-secondary-action" style="flex: 1; justify-content: center; text-align: center;">
+                                    View Interview
+                                </a>
+                                <a *ngIf="!interview.processId && interview.agencyId" [routerLink]="['/recruiters', interview.agencyId]" [fragment]="'interaction-' + interview.id" class="btn-action btn-secondary-action" style="flex: 1; justify-content: center; text-align: center;">
+                                    View Interview
+                                </a>
+                                <a *ngIf="interview.processId" [routerLink]="['/process', interview.processId, 'interaction', interview.id, 'edit']" class="btn-action btn-secondary-action" style="flex: 1; justify-content: center; text-align: center;">
+                                    Edit
+                                </a>
+                                <a *ngIf="!interview.processId && interview.agencyId" [routerLink]="['/recruiters', interview.agencyId, 'edit']" [queryParams]="{ editInteractionId: interview.id }" class="btn-action btn-secondary-action" style="flex: 1; justify-content: center; text-align: center;">
+                                    Edit
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -339,7 +362,10 @@
                                     <circle cx="12" cy="12" r="10"></circle>
                                     <polyline points="12 6 12 12 16 14"></polyline>
                                 </svg>
-                                <span>{{ nextInterview.date | date:'HH:mm' }}</span>
+                                <span>
+                                    {{ nextInterview.date | date:'HH:mm' }}
+                                    <ng-container *ngIf="nextInterview.durationMinutes"> - {{ getEndTime(nextInterview.date, nextInterview.durationMinutes) | date:'HH:mm' }} ({{nextInterview.durationMinutes}}m)</ng-container>
+                                </span>
                             </div>
                         </div>
 
@@ -373,6 +399,12 @@
                                 </svg>
                                 <span class="notes-text">{{nextInterview.headsup}}</span>
                             </div>
+                            <div class="notes-preview" *ngIf="nextInterview.videoLink" [title]="nextInterview.videoLink">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="notes-icon" style="color: #3b82f6;">
+                                    <path d="M15.6 11.6L22 7v10l-6.4-4.5v-1zM4 5h9a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7c0-1.1.9-2 2-2z"></path>
+                                </svg>
+                                <a [href]="nextInterview.videoLink" target="_blank" class="notes-text" style="color: #3b82f6; text-decoration: none; word-break: break-all;">Join Video Meeting</a>
+                            </div>
                         </div>
 
                         <div class="card-actions-cell">
@@ -390,12 +422,20 @@
                                     </svg>
                                 </button>
                             </div>
-                            <a *ngIf="nextInterview.processId" [routerLink]="['/process', nextInterview.processId, 'interaction', nextInterview.id, 'edit']" class="btn-action btn-secondary-action">
-                                Edit
-                            </a>
-                            <a *ngIf="!nextInterview.processId && nextInterview.agencyId" [routerLink]="['/recruiters', nextInterview.agencyId, 'edit']" [queryParams]="{ editInteractionId: nextInterview.id }" class="btn-action btn-secondary-action">
-                                Edit
-                            </a>
+                            <div style="display: flex; gap: 8px; margin-top: 8px;">
+                                <a *ngIf="nextInterview.processId" [routerLink]="['/process', nextInterview.processId]" [fragment]="'interaction-' + nextInterview.id" class="btn-action btn-secondary-action" style="flex: 1; justify-content: center; text-align: center;">
+                                    View Interview
+                                </a>
+                                <a *ngIf="!nextInterview.processId && nextInterview.agencyId" [routerLink]="['/recruiters', nextInterview.agencyId]" [fragment]="'interaction-' + nextInterview.id" class="btn-action btn-secondary-action" style="flex: 1; justify-content: center; text-align: center;">
+                                    View Interview
+                                </a>
+                                <a *ngIf="nextInterview.processId" [routerLink]="['/process', nextInterview.processId, 'interaction', nextInterview.id, 'edit']" class="btn-action btn-secondary-action" style="flex: 1; justify-content: center; text-align: center;">
+                                    Edit
+                                </a>
+                                <a *ngIf="!nextInterview.processId && nextInterview.agencyId" [routerLink]="['/recruiters', nextInterview.agencyId, 'edit']" [queryParams]="{ editInteractionId: nextInterview.id }" class="btn-action btn-secondary-action" style="flex: 1; justify-content: center; text-align: center;">
+                                    Edit
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -418,7 +458,10 @@
                                         <circle cx="12" cy="12" r="10"></circle>
                                         <polyline points="12 6 12 12 16 14"></polyline>
                                     </svg>
-                                    <span>{{ interview.date | date:'HH:mm' }}</span>
+                                    <span>
+                                        {{ interview.date | date:'HH:mm' }}
+                                        <ng-container *ngIf="interview.durationMinutes"> - {{ getEndTime(interview.date, interview.durationMinutes) | date:'HH:mm' }} ({{interview.durationMinutes}}m)</ng-container>
+                                    </span>
                                 </div>
                             </div>
 
@@ -452,6 +495,12 @@
                                     </svg>
                                     <span class="notes-text">{{interview.headsup}}</span>
                                 </div>
+                                <div class="notes-preview" *ngIf="interview.videoLink" [title]="interview.videoLink">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="notes-icon" style="color: #3b82f6;">
+                                        <path d="M15.6 11.6L22 7v10l-6.4-4.5v-1zM4 5h9a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7c0-1.1.9-2 2-2z"></path>
+                                    </svg>
+                                    <a [href]="interview.videoLink" target="_blank" class="notes-text" style="color: #3b82f6; text-decoration: none; word-break: break-all;">Join Video Meeting</a>
+                                </div>
                             </div>
 
                             <div class="card-actions-cell">
@@ -469,12 +518,20 @@
                                         </svg>
                                     </button>
                                 </div>
-                                <a *ngIf="interview.processId" [routerLink]="['/process', interview.processId, 'interaction', interview.id, 'edit']" class="btn-action btn-secondary-action">
-                                    Edit
-                                </a>
-                                <a *ngIf="!interview.processId && interview.agencyId" [routerLink]="['/recruiters', interview.agencyId, 'edit']" [queryParams]="{ editInteractionId: interview.id }" class="btn-action btn-secondary-action">
-                                    Edit
-                                </a>
+                                <div style="display: flex; gap: 8px; margin-top: 8px;">
+                                    <a *ngIf="interview.processId" [routerLink]="['/process', interview.processId]" [fragment]="'interaction-' + interview.id" class="btn-action btn-secondary-action" style="flex: 1; justify-content: center; text-align: center;">
+                                        View Interview
+                                    </a>
+                                    <a *ngIf="!interview.processId && interview.agencyId" [routerLink]="['/recruiters', interview.agencyId]" [fragment]="'interaction-' + interview.id" class="btn-action btn-secondary-action" style="flex: 1; justify-content: center; text-align: center;">
+                                        View Interview
+                                    </a>
+                                    <a *ngIf="interview.processId" [routerLink]="['/process', interview.processId, 'interaction', interview.id, 'edit']" class="btn-action btn-secondary-action" style="flex: 1; justify-content: center; text-align: center;">
+                                        Edit
+                                    </a>
+                                    <a *ngIf="!interview.processId && interview.agencyId" [routerLink]="['/recruiters', interview.agencyId, 'edit']" [queryParams]="{ editInteractionId: interview.id }" class="btn-action btn-secondary-action" style="flex: 1; justify-content: center; text-align: center;">
+                                        Edit
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>

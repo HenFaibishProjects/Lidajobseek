@@ -70,6 +70,12 @@ export class Interaction {
   @Property({ nullable: true })
   invitationExtended?: string;
 
+  @Property({ nullable: true })
+  videoLink?: string;
+
+  @Property({ nullable: true })
+  durationMinutes?: number;
+
   @Property({ onCreate: () => new Date() })
   createdAt: Date = new Date();
 

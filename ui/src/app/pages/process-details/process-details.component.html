@@ -67,7 +67,7 @@
 
                 <div class="card-body">
                     <div class="sleek-timeline" *ngIf="process.interactions?.length > 0; else noInteractions">
-                        <div class="timeline-node" *ngFor="let inter of process.interactions">
+                        <div class="timeline-node" *ngFor="let inter of process.interactions" [id]="'interaction-' + inter.id">
                             <div class="node-marker"></div>
                             <div class="node-content glass-panel">
                                 <div class="node-header">

@@ -42,6 +42,8 @@ export class ScheduleInterviewComponent implements OnInit {
     notes: '',
     testsAssessment: '',
     roleInsights: '',
+    videoLink: '',
+    durationMinutes: 60,
     reminders: [] as Array<{ beforeMinutes: number; channels: { email: boolean; sms: boolean } }>
   };
 
@@ -311,6 +313,8 @@ export class ScheduleInterviewComponent implements OnInit {
     if (this.interaction.notes) payload.notes = this.interaction.notes;
     if (this.interaction.testsAssessment) payload.testsAssessment = this.interaction.testsAssessment;
     if (this.interaction.roleInsights) payload.roleInsights = this.interaction.roleInsights;
+    if (this.interaction.videoLink) payload.videoLink = this.interaction.videoLink;
+    if (this.interaction.durationMinutes) payload.durationMinutes = this.interaction.durationMinutes;
 
     // Build reminders array — filter out any with no channels selected
     const validReminders = (this.interaction.reminders || []).filter((r: any) => {

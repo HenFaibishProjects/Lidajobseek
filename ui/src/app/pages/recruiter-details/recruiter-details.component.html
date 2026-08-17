@@ -93,7 +93,7 @@
       </div>
 
       <div class="rd-timeline" *ngIf="agency.interactions?.length > 0; else noInteractions">
-        <div class="rd-timeline-item" *ngFor="let i of agency.interactions">
+        <div class="rd-timeline-item" *ngFor="let i of agency.interactions" [id]="'interaction-' + i.id">
           <div class="rd-tl-dot"></div>
           <div class="rd-tl-content">
             <div class="rd-tl-header">

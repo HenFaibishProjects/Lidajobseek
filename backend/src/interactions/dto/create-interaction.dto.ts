@@ -40,4 +40,6 @@ export class CreateInteractionDto {
   nextInviteLink?: string;
   nextInviteType?: string;
   invitationExtended?: string;
+  videoLink?: string;
+  durationMinutes?: number;
 }

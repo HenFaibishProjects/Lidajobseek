@@ -49,6 +49,20 @@
             class="ic-input" required />
         </div>
       </div>
+
+      <div class="ic-date-row" style="margin-top: 1rem;">
+        <div class="ic-field">
+          <label class="ic-label" for="durationMinutes">Duration (Minutes)</label>
+          <input id="durationMinutes" type="number" name="durationMinutes" [(ngModel)]="interaction.durationMinutes" class="ic-input" min="1" required />
+        </div>
+        <div class="ic-field">
+          <label class="ic-label" for="videoLink">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15.6 11.6L22 7v10l-6.4-4.5v-1zM4 5h9a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7c0-1.1.9-2 2-2z"/></svg>
+            Video Link (Optional)
+          </label>
+          <input id="videoLink" type="url" name="videoLink" [(ngModel)]="interaction.videoLink" class="ic-input" placeholder="e.g. Zoom, Google Meet, Teams link" />
+        </div>
+      </div>
     </section>
 
     <!-- Section 2: Interaction Type -->

@@ -25,6 +25,8 @@ export class InteractionCreateComponent implements OnInit {
         summary: '',
         testsAssessment: '',
         roleInsights: '',
+        videoLink: '',
+        durationMinutes: 60,
         notes: '',
     };
 

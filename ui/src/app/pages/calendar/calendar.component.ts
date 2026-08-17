@@ -165,6 +165,13 @@ export class CalendarComponent implements OnInit {
     return `${weekday}, ${this.settingsService.formatDate(date)} ${this.settingsService.formatTime(date)}`;
   }
 
+  getEndTime(dateString: string, durationMinutes?: number): Date | null {
+    if (!durationMinutes) return null;
+    const date = new Date(dateString);
+    if (Number.isNaN(date.getTime())) return null;
+    return new Date(date.getTime() + durationMinutes * 60000);
+  }
+
   formatParticipants(participants: any[]): string {
     if (!participants || participants.length === 0) return 'No participants';
     return participants.map(p => p.name || p.role).join(', ');
