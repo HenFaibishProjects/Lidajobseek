@@ -54,6 +54,9 @@ export class Process {
   @Property({ type: 'text', nullable: true })
   dataFromThePhoneCall?: string;
 
+  @Property({ type: 'text', nullable: true })
+  withdrawReason?: string;
+
   @Property({ onCreate: () => new Date() })
   createdAt: Date = new Date();
 

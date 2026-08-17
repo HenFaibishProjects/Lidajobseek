@@ -15,6 +15,27 @@ import { CreateInteractionDto, ReminderItemDto } from './dto/create-interaction.
 import { MailService } from '../mail/mail.service';
 import { WhatsAppReminderService } from './whatsapp-reminder.service';
 
+function getCountryTimeZone(country?: string): string {
+  if (!country) return 'UTC';
+  const mapping: Record<string, string> = {
+    'Israel': 'Asia/Jerusalem',
+    'United States': 'America/New_York',
+    'United Kingdom': 'Europe/London',
+    'India': 'Asia/Kolkata',
+    'Germany': 'Europe/Berlin',
+    'France': 'Europe/Paris',
+    'Australia': 'Australia/Sydney',
+    'Canada': 'America/Toronto',
+    'Brazil': 'America/Sao_Paulo',
+    'Japan': 'Asia/Tokyo',
+    'Netherlands': 'Europe/Amsterdam',
+    'Spain': 'Europe/Madrid',
+    'Italy': 'Europe/Rome',
+    'Romania': 'Europe/Bucharest',
+  };
+  return mapping[country] || 'UTC';
+}
+
 @Injectable()
 export class InteractionsService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(InteractionsService.name);
@@ -130,7 +151,7 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
     return result;
   }
 
-  private buildReminderEmail(interaction: Interaction, beforeMinutes: number) {
+  private buildReminderEmail(interaction: Interaction, beforeMinutes: number, userTimeZone: string = 'UTC') {
     const interviewDate = new Date(interaction.date);
 
     let subject: string;
@@ -145,6 +166,7 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
     const dateText = interviewDate.toLocaleString('en-GB', {
       dateStyle: 'medium',
       timeStyle: 'short',
+      timeZone: userTimeZone,
     });
 
     const summary = interaction.summary || 'Interview';
@@ -249,9 +271,10 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
                 const userId = ownerRef.user?.id ?? ownerRef.user;
                 const user = await em.findOne('User' as any, { id: userId }) as any;
                 const recipientEmail = user?.email;
+                const userTimeZone = getCountryTimeZone(user?.countryPreference);
                 if (recipientEmail) {
                   this.logger.log(`  [${idx}] Sending reminder email to ${recipientEmail} for interaction #${interaction.id}`);
-                  const mail = this.buildReminderEmail(interaction, beforeMinutes);
+                  const mail = this.buildReminderEmail(interaction, beforeMinutes, userTimeZone);
                   const sent = await this.mailService.sendMail({
                     to: recipientEmail,
                     subject: mail.subject,
@@ -280,8 +303,15 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
           // --- 2. Process WhatsApp Channel ---
           if (r.sendWhatsAppReminder && !r.whatsAppSentAt) {
             if (greenApiOk) {
+              const ownerRef = (interaction.process || (interaction as any).agency) as any;
+              let userTimeZone = 'UTC';
+              if (ownerRef?.user) {
+                const userId = ownerRef.user?.id ?? ownerRef.user;
+                const user = await em.findOne('User' as any, { id: userId }) as any;
+                userTimeZone = getCountryTimeZone(user?.countryPreference);
+              }
               this.logger.log(`  [${idx}] Sending WhatsApp reminder via GREEN-API for interaction #${interaction.id}`);
-              const text = this.whatsappReminderService.buildReminderWhatsAppText(interaction);
+              const text = this.whatsappReminderService.buildReminderWhatsAppText(interaction, userTimeZone);
               await this.whatsappReminderService.sendInterviewReminder(text);
               r.whatsAppSentAt = now.toISOString();
               remindersChanged = true;
@@ -314,8 +344,9 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
                     const userId = ownerRef.user?.id ?? ownerRef.user;
                     const user = await em.findOne('User' as any, { id: userId }) as any;
                     const recipientEmail = user?.email;
+                    const userTimeZone = getCountryTimeZone(user?.countryPreference);
                     if (recipientEmail) {
-                      const mail = this.buildReminderEmail(interaction, beforeMinutes);
+                      const mail = this.buildReminderEmail(interaction, beforeMinutes, userTimeZone);
                       const sent = await this.mailService.sendMail({
                         to: recipientEmail,
                         subject: mail.subject,
@@ -337,8 +368,15 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
               // --- 2. Process WhatsApp ---
               if (reminder.sendWhatsAppReminder && !reminder.whatsAppSentAt) {
                 if (greenApiOk) {
+                  const ownerRef = (interaction.process || (interaction as any).agency) as any;
+                  let userTimeZone = 'UTC';
+                  if (ownerRef?.user) {
+                    const userId = ownerRef.user?.id ?? ownerRef.user;
+                    const user = await em.findOne('User' as any, { id: userId }) as any;
+                    userTimeZone = getCountryTimeZone(user?.countryPreference);
+                  }
                   this.logger.log(`  [legacy] Sending WhatsApp reminder via GREEN-API for interaction #${interaction.id}`);
-                  const text = this.whatsappReminderService.buildReminderWhatsAppText(interaction);
+                  const text = this.whatsappReminderService.buildReminderWhatsAppText(interaction, userTimeZone);
                   await this.whatsappReminderService.sendInterviewReminder(text);
                   newReminderState.whatsAppSentAt = now.toISOString();
                   legacyChanged = true;
@@ -422,13 +460,14 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
         // Force-send any due, unsent reminders if requested
         if (forceAll) {
           let remindersChanged = false;
+          const userTimeZone = getCountryTimeZone(user?.countryPreference);
           for (let idx = 0; idx < remindersArr.length; idx++) {
             const r = remindersArr[idx] as any;
             const reminderTime = new Date(interaction.date.getTime() - Number(r.beforeMinutes) * 60 * 1000);
             if (reminderTime > now) continue;
 
             if (r.channels?.email && !r.emailSentAt && smtpOk && recipientEmail) {
-              const mail = this.buildReminderEmail(interaction, r.beforeMinutes);
+              const mail = this.buildReminderEmail(interaction, r.beforeMinutes, userTimeZone);
               const sent = await this.mailService.sendMail({ to: recipientEmail, ...mail });
               if (sent) {
                 remindersArr[idx] = { ...remindersArr[idx], emailSentAt: now.toISOString() };
@@ -438,7 +477,7 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
             }
 
             if (r.sendWhatsAppReminder && !r.whatsAppSentAt && greenApiOk) {
-              const text = this.whatsappReminderService.buildReminderWhatsAppText(interaction);
+              const text = this.whatsappReminderService.buildReminderWhatsAppText(interaction, userTimeZone);
               await this.whatsappReminderService.sendInterviewReminder(text);
               remindersArr[idx] = { ...remindersArr[idx], whatsAppSentAt: now.toISOString() };
               reminderStatuses[idx].whatsAppSentAt = now.toISOString();

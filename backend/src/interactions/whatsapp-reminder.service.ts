@@ -24,10 +24,10 @@ export class WhatsAppReminderService {
     return !!(this.idInstance && this.apiTokenInstance && this.recipientPhone);
   }
 
-  buildReminderWhatsAppText(interaction: Interaction): string {
+  buildReminderWhatsAppText(interaction: Interaction, userTimeZone: string = 'UTC'): string {
     const interviewDate = new Date(interaction.date);
-    const dateText = interviewDate.toLocaleDateString('en-GB', { dateStyle: 'medium' });
-    const timeText = interviewDate.toLocaleTimeString('en-GB', { timeStyle: 'short' });
+    const dateText = interviewDate.toLocaleDateString('en-GB', { dateStyle: 'medium', timeZone: userTimeZone });
+    const timeText = interviewDate.toLocaleTimeString('en-GB', { timeStyle: 'short', timeZone: userTimeZone });
 
     if (interaction.process) {
       const companyName = interaction.process.companyName || 'N/A';

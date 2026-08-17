@@ -12,6 +12,7 @@ export class CreateProcessDto {
   currentStage: string;
   dataFromThePhoneCall?: string;
   nextFollowUp?: string;
+  withdrawReason?: string;
 
   // Initial Interaction Details
   initialInviteDate?: string;

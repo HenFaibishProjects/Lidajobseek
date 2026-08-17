@@ -193,6 +193,7 @@ export class ProcessesService {
       scoreVibe,
       jobDescriptionUrl,
       companyResearch,
+      withdrawReason,
     } = dto;
 
     const data: any = {};
@@ -238,6 +239,7 @@ export class ProcessesService {
     if (scoreGrowth !== undefined) data.scoreGrowth = scoreGrowth;
     if (scoreVibe !== undefined) data.scoreVibe = scoreVibe;
     if (companyResearch !== undefined) data.companyResearch = companyResearch;
+    if (withdrawReason !== undefined) data.withdrawReason = withdrawReason;
 
     Object.assign(process, data);
     await this.em.flush();

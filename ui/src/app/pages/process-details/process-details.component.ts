@@ -153,10 +153,34 @@ export class ProcessDetailsComponent implements OnInit, OnDestroy {
 
     updateStage(newStage: string) {
         if (!newStage || newStage === this.process.currentStage) return;
+
+        let withdrawReason: string | undefined = undefined;
+        if (newStage === 'Withdrawn') {
+            const reason = window.prompt("Please provide a reason for withdrawing from this application:");
+            if (reason === null) {
+                // User cancelled the prompt, revert the select value by triggering CDR or just reassigning
+                const prev = this.process.currentStage;
+                this.process.currentStage = '';
+                setTimeout(() => this.process.currentStage = prev, 0);
+                return;
+            }
+            withdrawReason = reason;
+        }
+
         const previous = this.process.currentStage;
         this.process.currentStage = newStage; // optimistic
+        if (withdrawReason !== undefined) {
+            this.process.withdrawReason = withdrawReason;
+        }
+        
         this.isUpdatingStage = true;
-        this.processesService.update(this.process.id, { currentStage: newStage }).subscribe({
+        
+        const updatePayload: any = { currentStage: newStage };
+        if (withdrawReason !== undefined) {
+            updatePayload.withdrawReason = withdrawReason;
+        }
+
+        this.processesService.update(this.process.id, updatePayload).subscribe({
             next: () => {
                 this.toastService.show(`Stage updated to "${newStage}"`, 'success');
                 this.isUpdatingStage = false;

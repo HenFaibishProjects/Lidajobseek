@@ -99,12 +99,10 @@ export class CalendarComponent implements OnInit {
       next: (interviews) => {
         // Double check filtering on the frontend to ensure "Show All" behavior
         if (!this.showAllInterviews) {
-          const today = new Date();
-          today.setHours(0, 0, 0, 0);
+          const now = new Date();
           interviews = interviews.filter((interview: any) => {
             const interviewDate = new Date(interview.date);
-            interviewDate.setHours(0, 0, 0, 0);
-            return interviewDate >= today;
+            return interviewDate >= now;
           });
         }
         this.interviews = interviews;
@@ -125,13 +123,12 @@ export class CalendarComponent implements OnInit {
   get nextInterview(): any | null {
     if (!this.interviews || this.interviews.length === 0) return null;
     
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const now = new Date();
 
-    // Find the first interview that is >= today
+    // Find the first interview that is >= now
     return [...this.interviews]
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-      .find(i => new Date(i.date) >= today) || null;
+      .find(i => new Date(i.date) >= now) || null;
   }
 
   get otherInterviews(): any[] {

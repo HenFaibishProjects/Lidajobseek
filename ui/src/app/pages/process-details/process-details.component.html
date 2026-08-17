@@ -517,6 +517,11 @@
                         <span class="box-label">Initial Insights</span>
                         <p>{{ process.dataFromThePhoneCall }}</p>
                     </div>
+
+                    <div class="notes-box" *ngIf="process.withdrawReason && process.currentStage === 'Withdrawn'">
+                        <span class="box-label" style="color: var(--danger-color, #ef4444);">Reason for Withdrawal</span>
+                        <p>{{ process.withdrawReason }}</p>
+                    </div>
                 </div>
             </section>
 

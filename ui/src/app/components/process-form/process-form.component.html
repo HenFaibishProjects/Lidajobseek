@@ -81,6 +81,37 @@
             </select>
           </div>
 
+          <div class="form-group" *ngIf="process.currentStage !== 'Withdrawn'">
+            <label class="field-label">
+              Tech Stack
+              <span class="field-info-wrap">
+                <svg class="field-info-icon" width="13" height="13" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="12" y1="8" x2="12" y2="12" />
+                  <line x1="12" y1="16" x2="12.01" y2="16" />
+                </svg>
+                <span class="field-tooltip">
+                  List the technologies separated by commas.<br>
+                  <strong>1–2 terms</strong> → +10% &nbsp;·&nbsp;
+                  <strong>3–5 terms</strong> → +15%<br>
+                  <strong>6+ terms</strong> → +20% &nbsp;
+                  <em>(currently +{{ techStackScore }}%)</em>
+                </span>
+              </span>
+            </label>
+            <input type="text" name="techStack" [(ngModel)]="process.techStack"
+              placeholder="e.g. React, Node.js, PostgreSQL, Docker…" class="field-input">
+          </div>
+
+          <div class="form-group" *ngIf="process.currentStage === 'Withdrawn'">
+            <label class="field-label" style="color: var(--danger-color, #ef4444);">Reason for Withdrawal</label>
+            <input type="text" name="withdrawReason" [(ngModel)]="process.withdrawReason"
+              placeholder="e.g. Salary too low, found another job..." class="field-input">
+          </div>
+        </div>
+
+        <div class="form-row" *ngIf="process.currentStage === 'Withdrawn'">
           <div class="form-group">
             <label class="field-label">
               Tech Stack
@@ -103,6 +134,7 @@
             <input type="text" name="techStack" [(ngModel)]="process.techStack"
               placeholder="e.g. React, Node.js, PostgreSQL, Docker…" class="field-input">
           </div>
+          <div class="form-group"></div>
         </div>
 
         <div class="form-row">
