@@ -206,6 +206,16 @@
               </button>
             </div>
 
+            <!-- Withdrawal Reason Preview -->
+            <div class="pb-card-notes-preview" *ngIf="p.currentStage === 'Withdrawn' && p.withdrawReason" [title]="p.withdrawReason">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink: 0; margin-right: 4px; opacity: 0.6; display: inline-block; vertical-align: middle;">
+                    <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path>
+                </svg>
+                <span style="font-size: 0.75rem; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-block; vertical-align: middle; max-width: calc(100% - 20px);">
+                  {{p.withdrawReason}}
+                </span>
+            </div>
+
             <!-- Footer -->
             <div class="pb-card-footer">
               <span class="pb-card-date">{{ p.updatedAt | dateFormat:'date' }}</span>
