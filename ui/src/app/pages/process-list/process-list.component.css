@@ -1964,3 +1964,454 @@ body.dark-theme .process-card-glassdoor-btn:hover {
     color: #a3b8ff;
 }
 
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Interaction History Button (Grid Card)
+══════════════════════════════════════════════════════════════════════════════ */
+.process-card-history-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10px;
+    font-weight: 600;
+    color: #818cf8;
+    background: rgba(99, 102, 241, 0.08);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: 8px;
+    padding: 4px 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    white-space: nowrap;
+    margin-top: 4px;
+    width: 100%;
+    justify-content: center;
+}
+
+.process-card-history-btn:hover {
+    background: rgba(99, 102, 241, 0.18);
+    border-color: rgba(99, 102, 241, 0.45);
+    color: #a5b4fc;
+    transform: translateY(-1px);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Interaction History Column (List View)
+══════════════════════════════════════════════════════════════════════════════ */
+.list-col-history {
+    min-width: 90px;
+    max-width: 110px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.list-header-row .list-col-history {
+    font-size: 11px;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.list-history-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #818cf8;
+    background: rgba(99, 102, 241, 0.08);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: 8px;
+    padding: 5px 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.list-history-btn:hover {
+    background: rgba(99, 102, 241, 0.18);
+    border-color: rgba(99, 102, 241, 0.45);
+    color: #a5b4fc;
+    transform: translateY(-1px);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Interaction History Drawer — Overlay
+══════════════════════════════════════════════════════════════════════════════ */
+.history-drawer-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0);
+    z-index: 900;
+    pointer-events: none;
+    transition: background 0.35s ease;
+}
+
+.history-drawer-overlay.open {
+    background: rgba(0, 0, 0, 0.55);
+    pointer-events: all;
+    backdrop-filter: blur(3px);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Interaction History Drawer — Panel
+══════════════════════════════════════════════════════════════════════════════ */
+.history-drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 100vh;
+    width: min(740px, 95vw);
+    background: linear-gradient(160deg, #0f172a 0%, #1a2236 60%, #0f172a 100%);
+    border-left: 1px solid rgba(99, 102, 241, 0.2);
+    box-shadow: -20px 0 60px rgba(0, 0, 0, 0.5), -4px 0 20px rgba(99, 102, 241, 0.08);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    transform: translateX(100%);
+    transition: transform 0.38s cubic-bezier(0.16, 1, 0.3, 1);
+    overflow: hidden;
+}
+
+.history-drawer.open {
+    transform: translateX(0);
+}
+
+/* ─── Drawer Header ────────────────────────────────────────────────────────── */
+.drawer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px 28px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    flex-shrink: 0;
+    gap: 16px;
+}
+
+.drawer-title-block {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-width: 0;
+}
+
+.drawer-company-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(59, 130, 246, 0.2));
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: 800;
+    color: #a5b4fc;
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.drawer-logo-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: 4px;
+}
+
+.drawer-title {
+    margin: 0 0 2px;
+    font-size: 18px;
+    font-weight: 800;
+    color: #ffffff;
+    background: linear-gradient(135deg, #ffffff 30%, #a5b4fc 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.drawer-subtitle {
+    margin: 0;
+    font-size: 12px;
+    color: #64748b;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 360px;
+}
+
+.drawer-header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.drawer-view-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #a5b4fc;
+    background: rgba(99, 102, 241, 0.1);
+    border: 1px solid rgba(99, 102, 241, 0.25);
+    border-radius: 10px;
+    padding: 7px 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.drawer-view-btn:hover {
+    background: rgba(99, 102, 241, 0.2);
+    border-color: rgba(99, 102, 241, 0.5);
+    transform: translateY(-1px);
+}
+
+.drawer-close-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.drawer-close-btn:hover {
+    background: rgba(239, 68, 68, 0.12);
+    border-color: rgba(239, 68, 68, 0.3);
+    color: #f87171;
+}
+
+/* ─── Summary Stats Bar ──────────────────────────────────────────────────── */
+.drawer-summary-bar {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    flex-shrink: 0;
+}
+
+.drawer-summary-stat {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 16px 12px;
+    border-right: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.drawer-summary-stat:last-child {
+    border-right: none;
+}
+
+.drawer-stat-value {
+    font-size: 20px;
+    font-weight: 800;
+    color: #a5b4fc;
+    line-height: 1.1;
+}
+
+.drawer-stat-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-top: 4px;
+}
+
+/* ─── Loading State ────────────────────────────────────────────────────────── */
+.drawer-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    flex: 1;
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.drawer-spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid rgba(99, 102, 241, 0.15);
+    border-top-color: #818cf8;
+    border-radius: 50%;
+    animation: drawerSpin 0.7s linear infinite;
+}
+
+@keyframes drawerSpin {
+    to { transform: rotate(360deg); }
+}
+
+/* ─── Empty State ────────────────────────────────────────────────────────── */
+.drawer-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    flex: 1;
+    color: #475569;
+    padding: 48px 24px;
+    text-align: center;
+}
+
+.drawer-empty svg {
+    opacity: 0.4;
+}
+
+.drawer-empty p {
+    margin: 0;
+    font-size: 14px;
+    color: #64748b;
+}
+
+/* ─── Table ────────────────────────────────────────────────────────────────── */
+.drawer-table-wrapper {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0;
+}
+
+.drawer-table-wrapper::-webkit-scrollbar {
+    width: 6px;
+}
+
+.drawer-table-wrapper::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.drawer-table-wrapper::-webkit-scrollbar-thumb {
+    background: rgba(99, 102, 241, 0.25);
+    border-radius: 3px;
+}
+
+.drawer-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.drawer-table thead tr {
+    background: rgba(15, 23, 42, 0.6);
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+.drawer-table th {
+    padding: 12px 20px;
+    font-size: 10px;
+    font-weight: 700;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    text-align: left;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    white-space: nowrap;
+}
+
+.drawer-table-row {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    transition: background 0.15s ease;
+}
+
+.drawer-table-row:hover {
+    background: rgba(99, 102, 241, 0.06);
+}
+
+.drawer-table td {
+    padding: 14px 20px;
+    vertical-align: top;
+    color: #cbd5e1;
+}
+
+.drawer-cell-num {
+    font-size: 11px;
+    font-weight: 700;
+    color: #475569;
+    width: 32px;
+    text-align: center;
+}
+
+.drawer-cell-date {
+    white-space: nowrap;
+    min-width: 110px;
+}
+
+.drawer-date-day {
+    display: block;
+    font-size: 10px;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.drawer-date-full {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: #e2e8f0;
+}
+
+.drawer-cell-type {
+    min-width: 140px;
+}
+
+.drawer-type-pill {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    border: 1px solid;
+    white-space: nowrap;
+}
+
+.drawer-cell-duration {
+    white-space: nowrap;
+    min-width: 60px;
+    text-align: center;
+}
+
+.drawer-duration {
+    font-size: 12px;
+    font-weight: 600;
+    color: #94a3b8;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 2px 8px;
+    border-radius: 6px;
+}
+
+.drawer-cell-notes {
+    max-width: 260px;
+}
+
+.drawer-notes-text {
+    font-size: 12px;
+    color: #94a3b8;
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.drawer-empty-cell {
+    color: #334155;
+    font-size: 13px;
+}

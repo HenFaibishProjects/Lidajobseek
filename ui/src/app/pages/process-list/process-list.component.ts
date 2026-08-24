@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ProcessesService } from '../../services/processes.service';
+import { InteractionsService } from '../../services/interactions.service';
 import { ToastService } from '../../services/toast.service';
 import { ConfirmService } from '../../services/confirm.service';
 import { SettingsService, UserSettings } from '../../services/settings.service';
@@ -94,6 +95,12 @@ export class ProcessListComponent implements OnInit, OnDestroy, AfterViewChecked
     
     kpiTimeRange: 'all' | 'week' | 'month' | 'quarter' | 'year' = 'all';
 
+    // ─── Interaction History Drawer ────────────────────────────────────────────
+    drawerOpen = false;
+    drawerProcess: any = null;
+    drawerInteractions: any[] = [];
+    drawerLoading = false;
+
     get currentKpiRange() { return this.kpiTimeRange; }
     set currentKpiRange(val: any) {
         this.kpiTimeRange = val;
@@ -102,6 +109,7 @@ export class ProcessListComponent implements OnInit, OnDestroy, AfterViewChecked
 
     constructor(
         private processesService: ProcessesService,
+        private interactionsService: InteractionsService,
         private toastService: ToastService,
         private confirmService: ConfirmService,
         private settingsService: SettingsService,
@@ -540,5 +548,66 @@ export class ProcessListComponent implements OnInit, OnDestroy, AfterViewChecked
         const query = `site:glassdoor.com/Interview ${companyName} interview questions`;
         const url = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
         window.open(url, '_blank', 'noopener,noreferrer');
+    }
+
+    // ─── Interaction History Drawer ────────────────────────────────────────────
+
+    openHistoryDrawer(process: any, event: Event) {
+        event.stopPropagation();
+        event.preventDefault();
+        this.drawerProcess = process;
+        this.drawerOpen = true;
+        this.drawerInteractions = [];
+        this.drawerLoading = true;
+        this.interactionsService.getAll({ processId: process.id }).subscribe({
+            next: (data) => {
+                this.drawerInteractions = (data as any[]).sort(
+                    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+                );
+                this.drawerLoading = false;
+            },
+            error: () => {
+                this.toastService.show('Failed to load interactions', 'error');
+                this.drawerLoading = false;
+            }
+        });
+    }
+
+    closeHistoryDrawer() {
+        this.drawerOpen = false;
+        this.drawerProcess = null;
+        this.drawerInteractions = [];
+    }
+
+    getInteractionTypeLabel(type: string): string {
+        const labels: Record<string, string> = {
+            phone_interview: 'Phone Interview',
+            video_interview: 'Video Interview',
+            onsite_interview: 'On-Site Interview',
+            technical_interview: 'Technical Interview',
+            hr_interview: 'HR Interview',
+            panel_interview: 'Panel Interview',
+            take_home_task: 'Take-Home Task',
+            coding_challenge: 'Coding Challenge',
+            system_design: 'System Design',
+            behavioral: 'Behavioral',
+            offer: 'Offer',
+            follow_up: 'Follow-Up',
+            other: 'Other',
+        };
+        return labels[type] || type;
+    }
+
+    getInteractionTypeColor(type: string): string {
+        if (!type) return '#64748b';
+        const t = type.toLowerCase();
+        if (t.includes('phone')) return '#3b82f6';
+        if (t.includes('video')) return '#8b5cf6';
+        if (t.includes('onsite') || t.includes('on-site')) return '#10b981';
+        if (t.includes('technical') || t.includes('coding') || t.includes('system')) return '#f59e0b';
+        if (t.includes('offer')) return '#22c55e';
+        if (t.includes('hr') || t.includes('behavioral')) return '#ec4899';
+        if (t.includes('task') || t.includes('home')) return '#06b6d4';
+        return '#64748b';
     }
 }

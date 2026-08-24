@@ -56,7 +56,27 @@ export class AuthService {
   }
 
   isAuthenticated(): boolean {
-    return !!localStorage.getItem(this.tokenKey);
+    const token = localStorage.getItem(this.tokenKey);
+    if (!token) return false;
+
+    // Validate token expiry by decoding the JWT payload
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const isExpired = payload.exp && Date.now() >= payload.exp * 1000;
+      if (isExpired) {
+        // Token expired — clean up and force re-login
+        localStorage.removeItem(this.tokenKey);
+        localStorage.removeItem('app_user');
+        localStorage.removeItem('jobseek_user_settings');
+        return false;
+      }
+    } catch {
+      // Malformed token — treat as unauthenticated
+      localStorage.removeItem(this.tokenKey);
+      return false;
+    }
+
+    return true;
   }
 
   getToken(): string | null {

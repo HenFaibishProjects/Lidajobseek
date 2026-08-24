@@ -243,6 +243,7 @@
 
                         <div class="card-date-cell">
                             <div class="date-badge">
+                                <span class="weekday">{{ (interview.date | date:'EEE') }}</span>
                                 <span class="month">{{ (interview.date | date:'MMM') }}</span>
                                 <span class="day">{{ (interview.date | date:'dd') }}</span>
                             </div>
@@ -354,6 +355,7 @@
                         
                         <div class="card-date-cell">
                             <div class="date-badge">
+                                <span class="weekday">{{ (nextInterview.date | date:'EEE') }}</span>
                                 <span class="month">{{ (nextInterview.date | date:'MMM') }}</span>
                                 <span class="day">{{ (nextInterview.date | date:'dd') }}</span>
                             </div>
@@ -450,6 +452,7 @@
 
                             <div class="card-date-cell">
                                 <div class="date-badge">
+                                    <span class="weekday">{{ (interview.date | date:'EEE') }}</span>
                                     <span class="month">{{ (interview.date | date:'MMM') }}</span>
                                     <span class="day">{{ (interview.date | date:'dd') }}</span>
                                 </div>
