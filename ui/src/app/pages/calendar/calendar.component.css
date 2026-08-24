@@ -349,7 +349,12 @@
 }
 
 .date-badge .weekday {
+<<<<<<< HEAD
     font-size: 13px;
+=======
+    font-size: 9px;
+    text-transform: uppercase;
+>>>>>>> c7a1f2a0ea530814bc0c48280372e5e26df884fb
     font-weight: 800;
     color: #64748b;
     letter-spacing: 0.04em;
