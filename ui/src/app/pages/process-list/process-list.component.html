@@ -84,17 +84,8 @@
                         </svg>
                     </div>
                     <div class="kpi-body">
-                        <div class="kpi-value">{{ getInterviewCount() }}</div>
-                        <div class="kpi-label kpi-label-with-tooltip">
-                            In Interviews
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2" class="kpi-info-icon"
-                                title="Filtered by time range. Excludes: Submitted, Review, and Closed stages">
-                                <circle cx="12" cy="12" r="10"></circle>
-                                <line x1="12" y1="16" x2="12" y2="12"></line>
-                                <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                            </svg>
-                        </div>
+                        <div class="kpi-value">{{ getInProgressCount() }}</div>
+                        <div class="kpi-label">In Progress</div>
                     </div>
                 </div>
 
@@ -107,8 +98,8 @@
                         </svg>
                     </div>
                     <div class="kpi-body">
-                        <div class="kpi-value">{{ getOfferCount() }}</div>
-                        <div class="kpi-label">Offers</div>
+                        <div class="kpi-value">{{ getWithdrawnCount() }}</div>
+                        <div class="kpi-label">Withdrawn</div>
                     </div>
                 </div>
 
@@ -121,8 +112,8 @@
                         </svg>
                     </div>
                     <div class="kpi-body">
-                        <div class="kpi-value">{{ getRejectionRate() }}%</div>
-                        <div class="kpi-label">Rejection Rate</div>
+                        <div class="kpi-value">{{ getRejectedCount() }}</div>
+                        <div class="kpi-label">Rejected</div>
                     </div>
                 </div>
             </div>

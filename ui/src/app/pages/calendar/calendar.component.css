@@ -388,16 +388,23 @@
     color: #ffffff;
     font-size: 11px;
     font-weight: 600;
+    white-space: nowrap;
+}
+
+.time-label span {
+    white-space: nowrap;
 }
 
 .time-label svg {
     color: #818cf8;
+    flex-shrink: 0;
 }
 
 .featured-card .time-label {
     color: #ffffff;
     font-size: 11px;
     font-weight: 600;
+    white-space: nowrap;
 }
 
 /* Column 2: Company & Role details */

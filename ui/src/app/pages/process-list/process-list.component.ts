@@ -298,11 +298,12 @@ export class ProcessListComponent implements OnInit, OnDestroy, AfterViewChecked
         return this.processes.filter(p => new Date(p.createdAt) >= startDate);
     }
 
-    getRejectionRate(): number {
-        const procs = this.kpiProcesses;
-        if (!procs.length) return 0;
-        const rejected = procs.filter(p => p.currentStage === 'Rejected').length;
-        return Math.round((rejected / procs.length) * 100);
+    getRejectedCount(): number {
+        return this.kpiProcesses.filter(p => p.currentStage === 'Rejected').length;
+    }
+
+    getWithdrawnCount(): number {
+        return this.kpiProcesses.filter(p => p.currentStage === 'Withdrawn').length;
     }
 
     getResponseRate(): number {
@@ -531,8 +532,8 @@ export class ProcessListComponent implements OnInit, OnDestroy, AfterViewChecked
         return this.kpiProcesses.filter(p => ACTIVE_STAGES.has(p.currentStage)).length;
     }
 
-    getInterviewCount(): number {
-        return this.kpiProcesses.filter(p => !NON_INTERVIEW_STAGES.has(p.currentStage)).length;
+    getInProgressCount(): number {
+        return this.kpiProcesses.filter(p => !CLOSED_STAGES.has(p.currentStage)).length;
     }
 
     getOfferCount(): number {
