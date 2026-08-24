@@ -2174,18 +2174,19 @@ body.dark-theme .process-card-glassdoor-btn:hover {
 }
 
 .drawer-close-btn {
-    width: 36px;
-    height: 36px;
+    width: 56px;
+    height: 34px;
     border-radius: 10px;
     background: rgba(255, 255, 255, 0.04);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    color: #94a3b8;
+    color: #ef000b;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     transition: all 0.2s ease;
     flex-shrink: 0;
+    background-color: #dba7a9;
 }
 
 .drawer-close-btn:hover {
