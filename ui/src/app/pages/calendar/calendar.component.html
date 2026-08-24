@@ -243,8 +243,10 @@
 
                         <div class="card-date-cell">
                             <div class="date-badge">
-                                <span class="month">{{ (interview.date | date:'MMM') }}</span>
+                                <span class="weekday">{{ (interview.date | date:'EEE') }}</span>
                                 <span class="day">{{ (interview.date | date:'dd') }}</span>
+                                <span class="month">{{ (interview.date | date:'MMMM') }}</span>
+
                             </div>
                             <div class="time-label">
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -354,7 +356,8 @@
                         
                         <div class="card-date-cell">
                             <div class="date-badge">
-                                <span class="month">{{ (nextInterview.date | date:'MMM') }}</span>
+                                <span class="weekday">{{ (nextInterview.date | date:'EEE') }}</span>
+                                <span class="month">{{ (nextInterview.date | date:'MMMM') }}</span>
                                 <span class="day">{{ (nextInterview.date | date:'dd') }}</span>
                             </div>
                             <div class="time-label">
@@ -450,7 +453,8 @@
 
                             <div class="card-date-cell">
                                 <div class="date-badge">
-                                    <span class="month">{{ (interview.date | date:'MMM') }}</span>
+                                    <span class="weekday">{{ (interview.date | date:'EEE') }}</span>
+                                    <span class="month">{{ (interview.date | date:'MMMM') }}</span>
                                     <span class="day">{{ (interview.date | date:'dd') }}</span>
                                 </div>
                                 <div class="time-label">

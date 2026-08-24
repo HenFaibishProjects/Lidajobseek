@@ -420,6 +420,10 @@
                                 <span>Search interview questions on Glassdoor</span>
                                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="external-link-icon"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
                             </button>
+                            <button class="process-card-history-btn" (click)="openHistoryDrawer(p, $event)" title="View interaction history">
+                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                                <span>Interaction History</span>
+                            </button>
                         </div>
                     </div>
 
@@ -497,6 +501,7 @@
                                 </svg>
                             </button>
                         </div>
+                        <div class="list-col list-col-history">History</div>
                     </div>
 
                     <!-- List rows -->
@@ -545,6 +550,12 @@
                         <div class="list-col list-col-updated">
                             <span class="list-date">{{ p.updatedAt | dateFormat:'date' }}</span>
                         </div>
+                        <div class="list-col list-col-history">
+                            <button class="list-history-btn" (click)="openHistoryDrawer(p, $event)" title="View interaction history">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                                History
+                            </button>
+                        </div>
                     </a>
                 </div>
 
@@ -575,5 +586,103 @@
                 </div>
             </ng-template>
         </section>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- Interaction History Drawer                                  -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="history-drawer-overlay" [class.open]="drawerOpen" (click)="closeHistoryDrawer()"></div>
+
+<div class="history-drawer" [class.open]="drawerOpen">
+    <!-- Drawer Header -->
+    <div class="drawer-header">
+        <div class="drawer-title-block">
+            <div class="drawer-company-avatar">
+                <img *ngIf="drawerProcess?.companyLogoUrl" [src]="drawerProcess.companyLogoUrl" class="drawer-logo-img" (error)="drawerProcess.companyLogoUrl = null">
+                <span *ngIf="!drawerProcess?.companyLogoUrl">{{ drawerProcess?.companyName?.charAt(0)?.toUpperCase() }}</span>
+            </div>
+            <div>
+                <h2 class="drawer-title">Interaction History</h2>
+                <p class="drawer-subtitle">{{ drawerProcess?.companyName }} &middot; {{ drawerProcess?.roleTitle }}</p>
+            </div>
+        </div>
+        <div class="drawer-header-right">
+            <a [routerLink]="['/process', drawerProcess?.id]" class="drawer-view-btn" *ngIf="drawerProcess?.id" (click)="closeHistoryDrawer()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                View Process
+            </a>
+            <button class="drawer-close-btn" (click)="closeHistoryDrawer()" title="Close">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Loading State -->
+    <div class="drawer-loading" *ngIf="drawerLoading">
+        <div class="drawer-spinner"></div>
+        <span>Loading interactions...</span>
+    </div>
+
+    <!-- Empty State -->
+    <div class="drawer-empty" *ngIf="!drawerLoading && drawerInteractions.length === 0">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <p>No interactions recorded yet for this process.</p>
+        <a [routerLink]="['/process', drawerProcess?.id, 'interaction', 'new']" class="drawer-view-btn" (click)="closeHistoryDrawer()">Add First Interaction</a>
+    </div>
+
+    <!-- Summary Bar -->
+    <div class="drawer-summary-bar" *ngIf="!drawerLoading && drawerInteractions.length > 0">
+        <div class="drawer-summary-stat">
+            <span class="drawer-stat-value">{{ drawerInteractions.length }}</span>
+            <span class="drawer-stat-label">Total Sessions</span>
+        </div>
+        <div class="drawer-summary-stat">
+            <span class="drawer-stat-value">{{ drawerInteractions[drawerInteractions.length - 1]?.date | date:'MMM d, y' }}</span>
+            <span class="drawer-stat-label">First Interaction</span>
+        </div>
+        <div class="drawer-summary-stat">
+            <span class="drawer-stat-value">{{ drawerInteractions[0]?.date | date:'MMM d, y' }}</span>
+            <span class="drawer-stat-label">Last Interaction</span>
+        </div>
+    </div>
+
+    <!-- Interactions Table -->
+    <div class="drawer-table-wrapper" *ngIf="!drawerLoading && drawerInteractions.length > 0">
+        <table class="drawer-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Date</th>
+                    <th>Type</th>
+                    <th>Duration</th>
+                    <th>Notes / Summary</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let ix of drawerInteractions; let i = index" class="drawer-table-row">
+                    <td class="drawer-cell-num">{{ drawerInteractions.length - i }}</td>
+                    <td class="drawer-cell-date">
+                        <span class="drawer-date-day">{{ ix.date | date:'EEE' }}</span>
+                        <span class="drawer-date-full">{{ ix.date | date:'MMM d, y' }}</span>
+                    </td>
+                    <td class="drawer-cell-type">
+                        <span class="drawer-type-pill" [style.background]="getInteractionTypeColor(ix.interviewType) + '22'" [style.color]="getInteractionTypeColor(ix.interviewType)" [style.border-color]="getInteractionTypeColor(ix.interviewType) + '55'">
+                            {{ getInteractionTypeLabel(ix.interviewType) }}
+                        </span>
+                    </td>
+                    <td class="drawer-cell-duration">
+                        <span *ngIf="ix.durationMinutes" class="drawer-duration">{{ ix.durationMinutes }}m</span>
+                        <span *ngIf="!ix.durationMinutes" class="drawer-empty-cell">—</span>
+                    </td>
+                    <td class="drawer-cell-notes">
+                        <div class="drawer-notes-text" *ngIf="ix.notes || ix.headsup || ix.summary">
+                            {{ ix.notes || ix.headsup || ix.summary }}
+                        </div>
+                        <span *ngIf="!ix.notes && !ix.headsup && !ix.summary" class="drawer-empty-cell">—</span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 </div>
