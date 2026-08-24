@@ -1,6 +1,7 @@
 <div class="app-layout">
     <!-- Header Component -->
     <app-header
+        *ngIf="isAuthenticated"
         [isAuthenticated]="isAuthenticated"
         [showSettings]="showSettings"
         (toggleSettings)="toggleSettings()"
