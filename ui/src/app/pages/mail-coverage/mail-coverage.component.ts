@@ -51,24 +51,6 @@ export class MailCoverageComponent implements OnInit {
     this.load();
   }
 
-  get totalCompanies(): number {
-    return this.entries.length;
-  }
-
-  get receivedCount(): number {
-    return this.entries.filter((entry) => entry.receivedCvEmail).length;
-  }
-
-  get rejectedCount(): number {
-    return this.entries.filter((entry) => entry.rejectedEmail).length;
-  }
-
-  get awaitingCount(): number {
-    return this.entries.filter(
-      (entry) => entry.receivedCvEmail && !entry.rejectedEmail,
-    ).length;
-  }
-
   get filteredEntries(): MailCoverageEntry[] {
     const query = this.searchText.trim().toLowerCase();
     const filtered = this.entries.filter((entry) => {
