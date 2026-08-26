@@ -166,6 +166,19 @@
       />
     </div>
 
+    <div class="mc-note-field">
+      <label for="mc-company-note">Note <span>Optional</span></label>
+      <textarea
+        id="mc-company-note"
+        class="mc-input mc-textarea"
+        rows="3"
+        maxlength="2000"
+        placeholder="Add a reminder, contact name, follow-up detail, or any useful context…"
+        [(ngModel)]="form.note"
+      ></textarea>
+      <small class="mc-field-hint">{{ form.note.length }} / 2000</small>
+    </div>
+
     <div class="mc-mail-options">
       <article
         class="mc-option-card"
@@ -416,7 +429,7 @@
           <th>Company</th>
           <th>“We received your CV”</th>
           <th>Rejection email</th>
-          <th>Current status</th>
+          <th>Notes</th>
           <th class="mc-actions-heading">Actions</th>
         </tr>
       </thead>
@@ -482,13 +495,13 @@
               ><span class="mc-not-recorded">Not recorded</span></ng-template
             >
           </td>
-          <td data-label="Current status">
-            <span
-              class="mc-status"
-              [ngClass]="'mc-status--' + getStatusClass(entry)"
+          <td data-label="Notes">
+            <p *ngIf="entry.note; else noNote" class="mc-note-text">
+              {{ entry.note }}
+            </p>
+            <ng-template #noNote
+              ><span class="mc-not-recorded">No note</span></ng-template
             >
-              <span class="mc-status-dot"></span>{{ getStatus(entry) }}
-            </span>
           </td>
           <td data-label="Actions" class="mc-actions-cell">
             <div class="mc-actions-buttons">

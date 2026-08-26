@@ -15,6 +15,7 @@ type CoverageSort = 'company' | 'latest';
 
 interface MailCoverageForm {
   companyName: string;
+  note: string;
   receivedCvEmail: boolean;
   receivedCvDate: string;
   rejectedEmail: boolean;
@@ -72,7 +73,9 @@ export class MailCoverageComponent implements OnInit {
     const query = this.searchText.trim().toLowerCase();
     const filtered = this.entries.filter((entry) => {
       const matchesSearch =
-        !query || entry.companyName.toLowerCase().includes(query);
+        !query ||
+        entry.companyName.toLowerCase().includes(query) ||
+        entry.note?.toLowerCase().includes(query);
       if (!matchesSearch) return false;
 
       switch (this.activeFilter) {
@@ -123,6 +126,7 @@ export class MailCoverageComponent implements OnInit {
     this.editingId = entry.id;
     this.form = {
       companyName: entry.companyName,
+      note: entry.note || '',
       receivedCvEmail: entry.receivedCvEmail,
       receivedCvDate: this.toInputDate(entry.receivedCvDate),
       rejectedEmail: entry.rejectedEmail,
@@ -214,18 +218,6 @@ export class MailCoverageComponent implements OnInit {
     this.activeFilter = filter;
   }
 
-  getStatus(entry: MailCoverageEntry): string {
-    if (entry.rejectedEmail) return 'Rejected';
-    if (entry.receivedCvEmail) return 'Awaiting outcome';
-    return 'No automatic email';
-  }
-
-  getStatusClass(entry: MailCoverageEntry): string {
-    if (entry.rejectedEmail) return 'rejected';
-    if (entry.receivedCvEmail) return 'awaiting';
-    return 'missing';
-  }
-
   formatDate(value: string | null): string {
     if (!value) return '';
     const normalized = new Date(`${value.slice(0, 10)}T12:00:00`);
@@ -266,6 +258,7 @@ export class MailCoverageComponent implements OnInit {
 
     return {
       companyName,
+      note: this.form.note.trim() || null,
       receivedCvEmail: this.form.receivedCvEmail,
       receivedCvDate: this.form.receivedCvEmail
         ? this.form.receivedCvDate
@@ -293,6 +286,7 @@ export class MailCoverageComponent implements OnInit {
   private emptyForm(): MailCoverageForm {
     return {
       companyName: '',
+      note: '',
       receivedCvEmail: false,
       receivedCvDate: '',
       rejectedEmail: false,

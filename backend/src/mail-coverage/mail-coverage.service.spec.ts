@@ -37,6 +37,7 @@ describe('MailCoverageService', () => {
     const result = await service.create(
       {
         companyName: '  Acme  ',
+        note: '  Follow up with Dana next week  ',
         receivedCvEmail: true,
         receivedCvDate: '2026-08-20',
         rejectedEmail: true,
@@ -48,6 +49,7 @@ describe('MailCoverageService', () => {
     expect(repository.create).toHaveBeenCalledWith(
       expect.objectContaining({
         companyName: 'Acme',
+        note: 'Follow up with Dana next week',
         receivedCvEmail: true,
         rejectedEmail: true,
         user: userReference,
@@ -55,6 +57,24 @@ describe('MailCoverageService', () => {
     );
     expect(result.companyName).toBe('Acme');
     expect(entityManager.persistAndFlush).toHaveBeenCalled();
+  });
+
+  it('stores an empty note as null', async () => {
+    await service.create(
+      {
+        companyName: 'Acme',
+        note: '   ',
+        receivedCvEmail: false,
+        receivedCvDate: null,
+        rejectedEmail: false,
+        rejectedDate: null,
+      },
+      7,
+    );
+
+    expect(repository.create).toHaveBeenCalledWith(
+      expect.objectContaining({ note: null }),
+    );
   });
 
   it('requires a date when an email is marked as received', async () => {

@@ -208,12 +208,14 @@
   background: var(--bg-hover);
 }
 
-.mc-company-field {
+.mc-company-field,
+.mc-note-field {
   max-width: 520px;
   margin-bottom: 18px;
 }
 
 .mc-company-field label,
+.mc-note-field label,
 .mc-date-field label {
   display: block;
   margin-bottom: 7px;
@@ -226,6 +228,32 @@
 
 .mc-company-field label span {
   color: #dc2626;
+}
+
+.mc-note-field {
+  max-width: 760px;
+}
+
+.mc-note-field label span {
+  margin-left: 4px;
+  color: var(--text-tertiary);
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.mc-textarea {
+  min-height: 88px;
+  line-height: 1.45;
+  resize: vertical;
+}
+
+.mc-field-hint {
+  display: block;
+  margin-top: 5px;
+  color: var(--text-tertiary);
+  font-size: 10px;
+  text-align: right;
 }
 
 .mc-input,
@@ -570,8 +598,7 @@
   white-space: nowrap;
 }
 
-.mc-email-badge,
-.mc-status {
+.mc-email-badge {
   display: inline-flex;
   align-items: center;
   gap: 5px;
@@ -598,25 +625,14 @@
   font-style: italic;
 }
 
-.mc-status-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: currentColor;
-}
-
-.mc-status--awaiting {
-  color: #b45309;
-  background: rgba(245, 158, 11, 0.11);
-}
-.mc-status--rejected {
-  color: #b91c1c;
-  background: rgba(239, 68, 68, 0.09);
-}
-.mc-status--missing {
-  color: var(--text-tertiary);
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-color);
+.mc-note-text {
+  max-width: 310px;
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 11.5px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
 }
 
 .mc-actions-heading {

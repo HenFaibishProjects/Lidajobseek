@@ -16,6 +16,9 @@ export class MailCoverage {
   @Property()
   companyName!: string;
 
+  @Property({ type: 'text', nullable: true })
+  note: string | null = null;
+
   @Property({ default: false })
   receivedCvEmail: boolean = false;
 

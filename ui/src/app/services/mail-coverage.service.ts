@@ -5,6 +5,7 @@ import { environment } from '../../environments/environment';
 export interface MailCoverageEntry {
   id: number;
   companyName: string;
+  note: string | null;
   receivedCvEmail: boolean;
   receivedCvDate: string | null;
   rejectedEmail: boolean;
@@ -15,6 +16,7 @@ export interface MailCoverageEntry {
 
 export interface MailCoveragePayload {
   companyName: string;
+  note: string | null;
   receivedCvEmail: boolean;
   receivedCvDate: string | null;
   rejectedEmail: boolean;

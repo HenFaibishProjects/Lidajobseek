@@ -15,6 +15,7 @@ import { User } from '../users/user.entity';
 
 interface NormalizedMailCoverage {
   companyName: string;
+  note: string | null;
   receivedCvEmail: boolean;
   receivedCvDate: Date | null;
   rejectedEmail: boolean;
@@ -94,6 +95,11 @@ export class MailCoverageService {
       throw new BadRequestException('Company name is too long');
     }
 
+    const note = dto.note?.trim() || null;
+    if (note && note.length > 2000) {
+      throw new BadRequestException('Note is too long');
+    }
+
     const receivedCvEmail = dto.receivedCvEmail === true;
     const rejectedEmail = dto.rejectedEmail === true;
     const receivedCvDate = receivedCvEmail
@@ -111,6 +117,7 @@ export class MailCoverageService {
 
     return {
       companyName,
+      note,
       receivedCvEmail,
       receivedCvDate,
       rejectedEmail,
