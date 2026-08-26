@@ -39,6 +39,7 @@ export class MailCoverageService {
 
     const entry = this.mailCoverageRepository.create({
       ...data,
+      hadProcess: false,
       user: this.em.getReference(User, userId),
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -52,6 +53,40 @@ export class MailCoverageService {
       { user: userId },
       { orderBy: { companyName: QueryOrder.ASC } },
     );
+  }
+
+  async syncRejectedProcess(
+    companyName: string,
+    userId: number,
+  ): Promise<MailCoverage> {
+    const normalizedCompanyName = companyName.trim();
+    const existing = await this.mailCoverageRepository.findOne({
+      companyName: { $ilike: normalizedCompanyName },
+      user: userId,
+    });
+
+    if (existing) {
+      if (!existing.hadProcess) {
+        existing.hadProcess = true;
+        await this.em.flush();
+      }
+      return existing;
+    }
+
+    const entry = this.mailCoverageRepository.create({
+      companyName: normalizedCompanyName,
+      note: null,
+      hadProcess: true,
+      receivedCvEmail: false,
+      receivedCvDate: null,
+      rejectedEmail: false,
+      rejectedDate: null,
+      user: this.em.getReference(User, userId),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+    await this.em.persistAndFlush(entry);
+    return entry;
   }
 
   async update(

@@ -20,6 +20,9 @@ export class MailCoverage {
   note: string | null = null;
 
   @Property({ default: false })
+  hadProcess: boolean = false;
+
+  @Property({ default: false })
   receivedCvEmail: boolean = false;
 
   @Property({ nullable: true })

@@ -5,6 +5,7 @@ import { Process } from './process.entity';
 import { EntityManager, EntityRepository } from '@mikro-orm/postgresql';
 import { NotFoundException } from '@nestjs/common';
 import { User } from '../users/user.entity';
+import { MailCoverageService } from '../mail-coverage/mail-coverage.service';
 
 describe('ProcessesService', () => {
   let service: ProcessesService;
@@ -27,12 +28,17 @@ describe('ProcessesService', () => {
     findOne: jest.fn(),
   };
 
+  const mockMailCoverageService = {
+    syncRejectedProcess: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ProcessesService,
         { provide: getRepositoryToken(Process), useValue: mockRepo },
         { provide: EntityManager, useValue: mockEm },
+        { provide: MailCoverageService, useValue: mockMailCoverageService },
       ],
     }).compile();
 
@@ -198,6 +204,37 @@ describe('ProcessesService', () => {
     it('should throw NotFoundException when updating a non-existent process', async () => {
       mockRepo.findOne.mockResolvedValue(null);
       await expect(service.update(999, {}, 1)).rejects.toThrow(NotFoundException);
+    });
+
+    it('should sync mail coverage when a process is moved to Rejected', async () => {
+      const existingProcess: any = {
+        id: 1,
+        companyName: 'Acme',
+        currentStage: 'Phone Interview',
+      };
+      mockRepo.findOne.mockResolvedValue(existingProcess);
+
+      await service.update(1, { currentStage: 'Rejected' }, 1);
+
+      expect(mockMailCoverageService.syncRejectedProcess).toHaveBeenCalledWith(
+        'Acme',
+        1,
+      );
+    });
+
+    it('should not sync mail coverage for another process stage', async () => {
+      const existingProcess: any = {
+        id: 1,
+        companyName: 'Acme',
+        currentStage: 'Phone Interview',
+      };
+      mockRepo.findOne.mockResolvedValue(existingProcess);
+
+      await service.update(1, { currentStage: 'Technical Interview' }, 1);
+
+      expect(
+        mockMailCoverageService.syncRejectedProcess,
+      ).not.toHaveBeenCalled();
     });
 
     it('should persist jobDescriptionUrl when provided in create', async () => {

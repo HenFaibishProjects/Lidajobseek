@@ -1,0 +1,15 @@
+import { Migration } from '@mikro-orm/migrations';
+
+export class Migration20260826120000 extends Migration {
+  override async up(): Promise<void> {
+    this.addSql(
+      `alter table "app"."mail_coverage" add column "had_process" boolean not null default false;`,
+    );
+  }
+
+  override async down(): Promise<void> {
+    this.addSql(
+      `alter table "app"."mail_coverage" drop column if exists "had_process";`,
+    );
+  }
+}

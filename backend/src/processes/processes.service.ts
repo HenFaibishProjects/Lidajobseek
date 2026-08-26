@@ -7,6 +7,7 @@ import { SelfReview } from '../reviews/self-review.entity';
 import { Contact } from '../contacts/contact.entity';
 import { User } from '../users/user.entity';
 import { CreateProcessDto } from './dto/create-process.dto';
+import { MailCoverageService } from '../mail-coverage/mail-coverage.service';
 
 @Injectable()
 export class ProcessesService {
@@ -17,7 +18,13 @@ export class ProcessesService {
     @InjectRepository(Process)
     private readonly processRepository: EntityRepository<Process>,
     private readonly em: EntityManager,
+    private readonly mailCoverageService: MailCoverageService,
   ) { }
+
+  private isRejectedStage(stage?: string | null): boolean {
+    const normalizedStage = stage?.trim().toLowerCase();
+    return normalizedStage === 'rejected' || normalizedStage === 'reject';
+  }
 
   private isClosedStage(stage?: string | null): boolean {
     const normalizedStage = stage?.trim().toLowerCase();
@@ -57,6 +64,13 @@ export class ProcessesService {
 
     const process = this.processRepository.create(data);
     await this.em.persistAndFlush(process);
+
+    if (this.isRejectedStage(process.currentStage)) {
+      await this.mailCoverageService.syncRejectedProcess(
+        process.companyName,
+        userId,
+      );
+    }
 
     // Sync Initial Interaction
     if (process.initialInviteDate) {
@@ -243,6 +257,16 @@ export class ProcessesService {
 
     Object.assign(process, data);
     await this.em.flush();
+
+    if (
+      currentStage !== undefined &&
+      this.isRejectedStage(process.currentStage)
+    ) {
+      await this.mailCoverageService.syncRejectedProcess(
+        process.companyName,
+        userId,
+      );
+    }
 
     // Sync Initial Interaction after update
     if (process.initialInviteDate) {

@@ -77,6 +77,33 @@ describe('MailCoverageService', () => {
     );
   });
 
+  it('creates a process-linked entry when a process is rejected', async () => {
+    await service.syncRejectedProcess('  Acme  ', 7);
+
+    expect(repository.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        companyName: 'Acme',
+        hadProcess: true,
+        receivedCvEmail: false,
+        rejectedEmail: false,
+        user: userReference,
+      }),
+    );
+    expect(entityManager.persistAndFlush).toHaveBeenCalled();
+  });
+
+  it('marks an existing entry instead of creating a duplicate', async () => {
+    const existing = { id: 3, companyName: 'Acme', hadProcess: false };
+    repository.findOne.mockResolvedValue(existing);
+
+    const result = await service.syncRejectedProcess('Acme', 7);
+
+    expect(result).toBe(existing);
+    expect(existing.hadProcess).toBe(true);
+    expect(repository.create).not.toHaveBeenCalled();
+    expect(entityManager.flush).toHaveBeenCalled();
+  });
+
   it('requires a date when an email is marked as received', async () => {
     await expect(
       service.create(

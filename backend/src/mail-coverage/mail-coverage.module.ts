@@ -8,5 +8,6 @@ import { MailCoverageService } from './mail-coverage.service';
   imports: [MikroOrmModule.forFeature([MailCoverage])],
   controllers: [MailCoverageController],
   providers: [MailCoverageService],
+  exports: [MailCoverageService],
 })
 export class MailCoverageModule {}
