@@ -50,6 +50,12 @@ export class KeyboardShortcutsService implements OnDestroy {
     });
 
     this.registerShortcut({
+      key: 'm',
+      description: 'Go to Mail Coverage',
+      action: () => this.router.navigate(['/mail-coverage'])
+    });
+
+    this.registerShortcut({
       key: 'a',
       description: 'Go to Analytics',
       action: () => this.router.navigate(['/analytics'])

@@ -17,6 +17,7 @@ import { ProfilesModule } from './profiles/profiles.module';
 import { AiAssistantModule } from './ai-assistant/ai-assistant.module';
 import { RecruitmentAgenciesModule } from './recruitment-agencies/recruitment-agencies.module';
 import { TemplatesModule } from './templates/templates.module';
+import { MailCoverageModule } from './mail-coverage/mail-coverage.module';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { AuthGuard } from './auth/auth.guard';
 import { APP_GUARD } from '@nestjs/core';
@@ -76,6 +77,7 @@ import { APP_GUARD } from '@nestjs/core';
     AiAssistantModule,
     RecruitmentAgenciesModule,
     TemplatesModule,
+    MailCoverageModule,
     ThrottlerModule.forRoot([{
       name: 'default',
       ttl: 60000,

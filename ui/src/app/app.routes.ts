@@ -23,6 +23,7 @@ import { RecruiterCreateComponent } from './pages/recruiter-create/recruiter-cre
 import { RecruiterEditComponent } from './pages/recruiter-edit/recruiter-edit.component';
 import { RecruiterDetailsComponent } from './pages/recruiter-details/recruiter-details.component';
 import { TemplatesComponent } from './pages/templates/templates.component';
+import { MailCoverageComponent } from './pages/mail-coverage/mail-coverage.component';
 
 export const routes: Routes = [
     { path: 'login', component: LoginComponent },
@@ -36,6 +37,7 @@ export const routes: Routes = [
             { path: 'decision-board', component: DecisionBoardComponent },
             { path: 'coach-hub', component: CoachHubComponent },
             { path: 'calendar', component: CalendarComponent },
+            { path: 'mail-coverage', component: MailCoverageComponent },
             { path: 'schedule-interview', component: ScheduleInterviewComponent },
             { path: 'pipeline', component: PipelineBoardComponent },
             { path: 'profile', component: ProfileComponent },
@@ -61,4 +63,3 @@ export const routes: Routes = [
         ]
     }
 ];
-

@@ -42,6 +42,18 @@
                 <span class="nav-pip"></span>
             </a>
 
+            <a routerLink="/mail-coverage" routerLinkActive="active" class="nav-item" title="Mail Coverage [M]">
+                <span class="nav-icon-wrap">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="5" width="18" height="14" rx="2" />
+                        <path d="m3 7 9 6 9-6" />
+                        <path d="M8 19v2h8v-2" />
+                    </svg>
+                </span>
+                <span class="nav-label"><span class="shortcut-hint">M</span>ail</span>
+                <span class="nav-pip"></span>
+            </a>
+
             <a routerLink="/recruiters" routerLinkActive="active" class="nav-item" title="Recruiters [R]">
                 <span class="nav-icon-wrap">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -160,6 +172,16 @@
             <a routerLink="/calendar" routerLinkActive="active" class="drawer-item" (click)="closeDrawer()">
                 <span class="drawer-icon"><img src="assets/icons/calender.png" alt="Calendar" width="20" height="20" /></span>
                 <span><span class="shortcut-hint">C</span>alendar</span>
+            </a>
+            <a routerLink="/mail-coverage" routerLinkActive="active" class="drawer-item" (click)="closeDrawer()">
+                <span class="drawer-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="5" width="18" height="14" rx="2" />
+                        <path d="m3 7 9 6 9-6" />
+                        <path d="M8 19v2h8v-2" />
+                    </svg>
+                </span>
+                <span><span class="shortcut-hint">M</span>ail Coverage</span>
             </a>
         </div>
 

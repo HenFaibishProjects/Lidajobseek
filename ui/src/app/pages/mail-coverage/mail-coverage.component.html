@@ -1,0 +1,543 @@
+<div class="mc-page">
+  <header class="mc-header">
+    <div class="mc-title-block">
+      <div class="mc-title-row">
+        <span class="mc-title-icon" aria-hidden="true">
+          <svg
+            width="22"
+            height="22"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <rect x="3" y="5" width="18" height="14" rx="2"></rect>
+            <path d="m3 7 9 6 9-6"></path>
+            <path d="M8 19v2h8v-2"></path>
+          </svg>
+        </span>
+        <div>
+          <h1>Mail Coverage</h1>
+          <p>
+            Track the automatic CV confirmation and rejection emails you receive
+            from each company.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <button
+      *ngIf="!showForm"
+      class="mc-primary-btn"
+      type="button"
+      (click)="openCreate()"
+    >
+      <svg
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.5"
+      >
+        <line x1="12" y1="5" x2="12" y2="19"></line>
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+      </svg>
+      Add Company
+    </button>
+  </header>
+
+  <section class="mc-stats" aria-label="Mail coverage summary">
+    <article class="mc-stat-card mc-stat-card--total">
+      <div class="mc-stat-icon">
+        <svg
+          width="19"
+          height="19"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path d="M3 21h18"></path>
+          <path d="M6 21V7l6-4 6 4v14"></path>
+          <path d="M9 9h.01M15 9h.01M9 13h.01M15 13h.01"></path>
+        </svg>
+      </div>
+      <div>
+        <strong>{{ totalCompanies }}</strong
+        ><span>Companies tracked</span>
+      </div>
+    </article>
+
+    <article class="mc-stat-card mc-stat-card--received">
+      <div class="mc-stat-icon">
+        <svg
+          width="19"
+          height="19"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <rect x="3" y="5" width="18" height="14" rx="2"></rect>
+          <path d="m3 7 9 6 9-6"></path>
+          <path d="m8 12 2 2 4-4"></path>
+        </svg>
+      </div>
+      <div>
+        <strong>{{ receivedCount }}</strong
+        ><span>CV confirmations</span>
+      </div>
+    </article>
+
+    <article class="mc-stat-card mc-stat-card--awaiting">
+      <div class="mc-stat-icon">
+        <svg
+          width="19"
+          height="19"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <circle cx="12" cy="12" r="9"></circle>
+          <path d="M12 7v5l3 2"></path>
+        </svg>
+      </div>
+      <div>
+        <strong>{{ awaitingCount }}</strong
+        ><span>Awaiting outcome</span>
+      </div>
+    </article>
+
+    <article class="mc-stat-card mc-stat-card--rejected">
+      <div class="mc-stat-icon">
+        <svg
+          width="19"
+          height="19"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <circle cx="12" cy="12" r="9"></circle>
+          <path d="m9 9 6 6M15 9l-6 6"></path>
+        </svg>
+      </div>
+      <div>
+        <strong>{{ rejectedCount }}</strong
+        ><span>Rejection emails</span>
+      </div>
+    </article>
+  </section>
+
+  <section
+    *ngIf="showForm"
+    class="mc-form-card"
+    aria-labelledby="mail-coverage-form-title"
+  >
+    <div class="mc-form-header">
+      <div>
+        <h2 id="mail-coverage-form-title">
+          {{ editingId === null ? "Add company" : "Edit company" }}
+        </h2>
+        <p>Record only the automatic emails that actually arrived.</p>
+      </div>
+      <button
+        class="mc-close-btn"
+        type="button"
+        (click)="cancelForm()"
+        aria-label="Close form"
+      >
+        ✕
+      </button>
+    </div>
+
+    <div class="mc-company-field">
+      <label for="mc-company-name">Company name <span>*</span></label>
+      <input
+        id="mc-company-name"
+        class="mc-input"
+        type="text"
+        maxlength="255"
+        autocomplete="organization"
+        placeholder="e.g. Microsoft"
+        [(ngModel)]="form.companyName"
+      />
+    </div>
+
+    <div class="mc-mail-options">
+      <article
+        class="mc-option-card"
+        [class.mc-option-card--selected]="form.receivedCvEmail"
+      >
+        <label class="mc-option-toggle">
+          <input
+            type="checkbox"
+            [(ngModel)]="form.receivedCvEmail"
+            (change)="onReceivedToggle()"
+          />
+          <span class="mc-checkbox" aria-hidden="true">
+            <svg
+              width="13"
+              height="13"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="3"
+            >
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </span>
+          <span>
+            <strong>“We received your CV” email</strong>
+            <small>Confirmation that the application was received</small>
+          </span>
+        </label>
+
+        <div
+          class="mc-date-field"
+          [class.mc-date-field--disabled]="!form.receivedCvEmail"
+        >
+          <label for="mc-received-date">Email date</label>
+          <input
+            id="mc-received-date"
+            class="mc-input"
+            type="date"
+            [disabled]="!form.receivedCvEmail"
+            [(ngModel)]="form.receivedCvDate"
+          />
+        </div>
+      </article>
+
+      <article
+        class="mc-option-card mc-option-card--rejection"
+        [class.mc-option-card--selected]="form.rejectedEmail"
+      >
+        <label class="mc-option-toggle">
+          <input
+            type="checkbox"
+            [(ngModel)]="form.rejectedEmail"
+            (change)="onRejectedToggle()"
+          />
+          <span class="mc-checkbox" aria-hidden="true">
+            <svg
+              width="13"
+              height="13"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="3"
+            >
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </span>
+          <span>
+            <strong>Rejection email</strong>
+            <small
+              >Automatic notification that the application was rejected</small
+            >
+          </span>
+        </label>
+
+        <div
+          class="mc-date-field"
+          [class.mc-date-field--disabled]="!form.rejectedEmail"
+        >
+          <label for="mc-rejected-date">Email date</label>
+          <input
+            id="mc-rejected-date"
+            class="mc-input"
+            type="date"
+            [disabled]="!form.rejectedEmail"
+            [(ngModel)]="form.rejectedDate"
+          />
+        </div>
+      </article>
+    </div>
+
+    <div class="mc-form-actions">
+      <button
+        class="mc-primary-btn"
+        type="button"
+        [disabled]="isSaving"
+        (click)="save()"
+      >
+        <span *ngIf="isSaving" class="mc-button-spinner"></span>
+        {{
+          isSaving
+            ? "Saving…"
+            : editingId === null
+              ? "Add to coverage"
+              : "Save changes"
+        }}
+      </button>
+      <button
+        class="mc-secondary-btn"
+        type="button"
+        [disabled]="isSaving"
+        (click)="cancelForm()"
+      >
+        Cancel
+      </button>
+    </div>
+  </section>
+
+  <section class="mc-toolbar" aria-label="Mail coverage filters">
+    <div class="mc-search-wrap">
+      <svg
+        class="mc-search-icon"
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+      >
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <input
+        class="mc-search search-input"
+        type="text"
+        placeholder="Search company…"
+        [(ngModel)]="searchText"
+      />
+      <button
+        *ngIf="searchText"
+        class="mc-search-clear"
+        type="button"
+        (click)="clearSearch()"
+        aria-label="Clear search"
+      >
+        ✕
+      </button>
+    </div>
+
+    <div
+      class="mc-filter-tabs"
+      role="group"
+      aria-label="Filter by email status"
+    >
+      <button
+        type="button"
+        [class.active]="activeFilter === 'all'"
+        (click)="setFilter('all')"
+      >
+        All
+      </button>
+      <button
+        type="button"
+        [class.active]="activeFilter === 'received'"
+        (click)="setFilter('received')"
+      >
+        CV received
+      </button>
+      <button
+        type="button"
+        [class.active]="activeFilter === 'rejected'"
+        (click)="setFilter('rejected')"
+      >
+        Rejected
+      </button>
+      <button
+        type="button"
+        [class.active]="activeFilter === 'no-email'"
+        (click)="setFilter('no-email')"
+      >
+        No email
+      </button>
+    </div>
+
+    <label class="mc-sort-wrap">
+      <span>Sort</span>
+      <select [(ngModel)]="sortMode">
+        <option value="company">Company A–Z</option>
+        <option value="latest">Latest email</option>
+      </select>
+    </label>
+  </section>
+
+  <div *ngIf="isLoading" class="mc-loading">
+    <div class="mc-loader"></div>
+    <span>Loading mail coverage…</span>
+  </div>
+
+  <section *ngIf="!isLoading && filteredEntries.length === 0" class="mc-empty">
+    <div class="mc-empty-icon">
+      <svg
+        width="34"
+        height="34"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+      >
+        <rect x="3" y="5" width="18" height="14" rx="2"></rect>
+        <path d="m3 7 9 6 9-6"></path>
+      </svg>
+    </div>
+    <h2>
+      {{
+        entries.length === 0
+          ? "No companies tracked yet"
+          : "No matching companies"
+      }}
+    </h2>
+    <p>
+      {{
+        entries.length === 0
+          ? "Add a company and record the automatic emails you received."
+          : "Try a different search or email-status filter."
+      }}
+    </p>
+    <button
+      *ngIf="entries.length === 0 && !showForm"
+      class="mc-primary-btn"
+      type="button"
+      (click)="openCreate()"
+    >
+      Add first company
+    </button>
+    <button
+      *ngIf="entries.length > 0"
+      class="mc-secondary-btn"
+      type="button"
+      (click)="clearSearch(); setFilter('all')"
+    >
+      Clear filters
+    </button>
+  </section>
+
+  <div *ngIf="!isLoading && filteredEntries.length > 0" class="mc-table-wrap">
+    <table class="mc-table">
+      <thead>
+        <tr>
+          <th>Company</th>
+          <th>“We received your CV”</th>
+          <th>Rejection email</th>
+          <th>Current status</th>
+          <th class="mc-actions-heading">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let entry of filteredEntries; trackBy: trackById">
+          <td data-label="Company">
+            <div class="mc-company-cell">
+              <span class="mc-company-avatar">{{
+                entry.companyName.charAt(0).toUpperCase()
+              }}</span>
+              <strong>{{ entry.companyName }}</strong>
+            </div>
+          </td>
+          <td data-label="CV received email">
+            <div
+              *ngIf="entry.receivedCvEmail; else noCvEmail"
+              class="mc-email-state mc-email-state--received"
+            >
+              <span class="mc-email-badge">
+                <svg
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="3"
+                >
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                Received
+              </span>
+              <time [attr.datetime]="entry.receivedCvDate">{{
+                formatDate(entry.receivedCvDate)
+              }}</time>
+            </div>
+            <ng-template #noCvEmail
+              ><span class="mc-not-recorded">Not recorded</span></ng-template
+            >
+          </td>
+          <td data-label="Rejection email">
+            <div
+              *ngIf="entry.rejectedEmail; else noRejectedEmail"
+              class="mc-email-state mc-email-state--rejected"
+            >
+              <span class="mc-email-badge">
+                <svg
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="3"
+                >
+                  <path d="m7 7 10 10M17 7 7 17"></path>
+                </svg>
+                Received
+              </span>
+              <time [attr.datetime]="entry.rejectedDate">{{
+                formatDate(entry.rejectedDate)
+              }}</time>
+            </div>
+            <ng-template #noRejectedEmail
+              ><span class="mc-not-recorded">Not recorded</span></ng-template
+            >
+          </td>
+          <td data-label="Current status">
+            <span
+              class="mc-status"
+              [ngClass]="'mc-status--' + getStatusClass(entry)"
+            >
+              <span class="mc-status-dot"></span>{{ getStatus(entry) }}
+            </span>
+          </td>
+          <td data-label="Actions" class="mc-actions-cell">
+            <div class="mc-actions-buttons">
+              <button
+                class="mc-icon-btn"
+                type="button"
+                title="Edit"
+                (click)="startEdit(entry)"
+              >
+                <svg
+                  width="15"
+                  height="15"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M12 20h9"></path>
+                  <path
+                    d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"
+                  ></path>
+                </svg>
+              </button>
+              <button
+                class="mc-icon-btn mc-icon-btn--danger"
+                type="button"
+                title="Delete"
+                (click)="deleteEntry(entry)"
+              >
+                <svg
+                  width="15"
+                  height="15"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <polyline points="3 6 5 6 21 6"></polyline>
+                  <path
+                    d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"
+                  ></path>
+                  <path d="M10 11v6M14 11v6"></path>
+                  <path d="M9 6V4h6v2"></path>
+                </svg>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
