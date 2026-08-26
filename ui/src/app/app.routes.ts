@@ -15,6 +15,7 @@ import { ScheduleInterviewComponent } from './pages/schedule-interview/schedule-
 import { LoginComponent } from './pages/login/login.component';
 import { PricingComponent } from './pages/pricing/pricing.component';
 import { AuthGuard } from './guards/auth.guard';
+import { GuestGuard } from './guards/guest.guard';
 import { ProfileComponent } from './pages/profile/profile.component';
 import { ProfileCvComponent } from './pages/profile-cv/profile-cv.component';
 import { PipelineBoardComponent } from './pages/pipeline-board/pipeline-board.component';
@@ -26,7 +27,7 @@ import { TemplatesComponent } from './pages/templates/templates.component';
 import { MailCoverageComponent } from './pages/mail-coverage/mail-coverage.component';
 
 export const routes: Routes = [
-    { path: 'login', component: LoginComponent },
+    { path: 'login', component: LoginComponent, canActivate: [GuestGuard] },
     { path: 'pricing', component: PricingComponent },
     {
         path: '',

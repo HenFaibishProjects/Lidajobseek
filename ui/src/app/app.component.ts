@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterOutlet, RouterModule } from '@angular/router';
+import { Router, RouterOutlet, RouterModule } from '@angular/router';
 import { ToastComponent } from './components/toast/toast.component';
 import { ConfirmDialogComponent } from './components/confirm-dialog/confirm-dialog.component';
 import { SettingsPanelComponent } from './components/settings-panel/settings-panel.component';
@@ -27,18 +27,24 @@ export class AppComponent implements OnInit {
   showCareerChat = false;
 
   get showOnboarding(): boolean {
-    return this.isAuthenticated && !this.settingsService.getSettings().hasSeenOnboarding;
+    return this.showAppShell && !this.settingsService.getSettings().hasSeenOnboarding;
   }
 
   constructor(
     private authService: AuthService,
     private settingsService: SettingsService,
     private toastService: ToastService,
-    private keyboardShortcutsService: KeyboardShortcutsService
+    private keyboardShortcutsService: KeyboardShortcutsService,
+    private router: Router,
   ) { }
 
   get isAuthenticated(): boolean {
     return this.authService.isAuthenticated();
+  }
+
+  get showAppShell(): boolean {
+    const routePath = this.router.url.split('?')[0].split('#')[0];
+    return this.isAuthenticated && routePath !== '/login';
   }
 
   ngOnInit() {
