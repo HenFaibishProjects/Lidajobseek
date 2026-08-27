@@ -15,44 +15,31 @@ import Chart from 'chart.js/auto';
 
 
 const ACTIVE_STAGES = new Set([
-    'Application Submitted', 'Resume Under Review',
-    'Initial Call Scheduled', 'Initial Call Completed',
-    'Interview Scheduled', 'Waiting for Interview Feedback', 'Awaiting Next Interview',
-    'Home Task Assigned', 'Home Task Submitted (Under Review)',
-    'Final Interview Scheduled', 'References Requested', 'Background Check in Progress',
-    'Offer Received', 'Offer in Negotiation',
+    'Initial Call Scheduled',
+    'Waiting for Interview Feedback',
+    'Awaiting Next Interview',
+    'Home Task Assigned',
+    'Home Task Submitted (Under Review)',
+    'References Requested',
 ]);
 
 const INTERVIEW_STAGES = new Set([
-    'Initial Call Scheduled', 'Initial Call Completed',
-    'Interview Scheduled', 'Waiting for Interview Feedback', 'Awaiting Next Interview',
-    'Final Interview Scheduled',
+    'Initial Call Scheduled',
+    'Waiting for Interview Feedback',
+    'Awaiting Next Interview',
 ]);
 
-const OFFER_STAGES = new Set([
-    'Offer Received', 'Offer in Negotiation', 'Offer Accepted',
-]);
+const OFFER_STAGES = new Set<string>([]);
 
-const CLOSED_STAGES = new Set([
-    'Withdrawn', 'Rejected', 'Position Put On Hold', 'Ghosted / No Response', 'Offer Declined',
-]);
+const CLOSED_STAGES = new Set<string>([]);
 
 const NON_INTERVIEW_STAGES = new Set([
-    'Application Submitted',
-    'Resume Under Review',
-    'Initial Call Scheduled',
-    'Offer Received',
-    'Offer in Negotiation',
-    'Offer Declined',
-    'Withdrawn',
-    'Rejected',
-    'Position Put On Hold',
-    'Ghosted / No Response'
+    'Home Task Assigned',
+    'Home Task Submitted (Under Review)',
+    'References Requested',
 ]);
 
-const RESPONDED_STAGES = new Set([
-    'Application Submitted', 'Resume Under Review',
-]);
+const RESPONDED_STAGES = new Set<string>([]);
 
 @Component({
     selector: 'app-process-list',
@@ -298,12 +285,24 @@ export class ProcessListComponent implements OnInit, OnDestroy, AfterViewChecked
         return this.processes.filter(p => new Date(p.createdAt) >= startDate);
     }
 
+    getInterviewActiveCount(): number {
+        return this.kpiProcesses.filter(p => INTERVIEW_STAGES.has(p.currentStage)).length;
+    }
+
+    getHomeTaskCount(): number {
+        return this.kpiProcesses.filter(p => p.currentStage === 'Home Task Assigned' || p.currentStage === 'Home Task Submitted (Under Review)').length;
+    }
+
+    getReferencesCount(): number {
+        return this.kpiProcesses.filter(p => p.currentStage === 'References Requested').length;
+    }
+
     getRejectedCount(): number {
-        return this.kpiProcesses.filter(p => p.currentStage === 'Rejected').length;
+        return 0;
     }
 
     getWithdrawnCount(): number {
-        return this.kpiProcesses.filter(p => p.currentStage === 'Withdrawn').length;
+        return 0;
     }
 
     getResponseRate(): number {

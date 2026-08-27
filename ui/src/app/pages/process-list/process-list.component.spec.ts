@@ -112,18 +112,18 @@ describe('ProcessListComponent', () => {
 
   it('should calculate KPI metrics correctly from processes', () => {
     const mockProcesses = [
-      { id: '1', currentStage: 'Rejected', createdAt: new Date() },
-      { id: '2', currentStage: 'Offer Received', createdAt: new Date() },
-      { id: '3', currentStage: 'Technical Interview', createdAt: new Date() },
-      { id: '4', currentStage: 'Application Submitted', createdAt: new Date() }
+      { id: '1', currentStage: 'Initial Call Scheduled', createdAt: new Date() },
+      { id: '2', currentStage: 'Waiting for Interview Feedback', createdAt: new Date() },
+      { id: '3', currentStage: 'Home Task Assigned', createdAt: new Date() },
+      { id: '4', currentStage: 'References Requested', createdAt: new Date() }
     ];
     component.processes = mockProcesses;
     component.kpiTimeRange = 'all';
 
     expect(component.kpiProcesses.length).toBe(4);
-    expect(component.getRejectionRate()).toBe(25); 
-    expect(component.getOfferCount()).toBe(1);
-    expect(component.getInterviewCount()).toBe(1); 
+    expect(component.getInterviewActiveCount()).toBe(2); 
+    expect(component.getHomeTaskCount()).toBe(1);
+    expect(component.getReferencesCount()).toBe(1); 
   });
 
   it('should filter KPIs based on time range', () => {
@@ -131,18 +131,18 @@ describe('ProcessListComponent', () => {
     oldDate.setFullYear(oldDate.getFullYear() - 2);
     
     const mockProcesses = [
-      { id: '1', currentStage: 'Rejected', createdAt: new Date() }, 
-      { id: '2', currentStage: 'Rejected', createdAt: oldDate }     
+      { id: '1', currentStage: 'Waiting for Interview Feedback', createdAt: new Date() }, 
+      { id: '2', currentStage: 'Waiting for Interview Feedback', createdAt: oldDate }     
     ];
     component.processes = mockProcesses;
     
     component.kpiTimeRange = 'year';
     expect(component.kpiProcesses.length).toBe(1);
-    expect(component.getRejectionRate()).toBe(100);
+    expect(component.getInterviewActiveCount()).toBe(1);
 
     component.kpiTimeRange = 'all';
     expect(component.kpiProcesses.length).toBe(2);
-    expect(component.getRejectionRate()).toBe(100);
+    expect(component.getInterviewActiveCount()).toBe(2);
   });
 
   it('should handle zero processes gracefully in KPIs', () => {
@@ -150,13 +150,13 @@ describe('ProcessListComponent', () => {
     component.kpiTimeRange = 'all';
     
     expect(component.kpiProcesses.length).toBe(0);
-    expect(component.getRejectionRate()).toBe(0);
-    expect(component.getOfferCount()).toBe(0);
-    expect(component.getInterviewCount()).toBe(0);
+    expect(component.getInterviewActiveCount()).toBe(0);
+    expect(component.getHomeTaskCount()).toBe(0);
+    expect(component.getReferencesCount()).toBe(0);
   });
 
   it('should not crash if a process has a missing createdAt date', () => {
-    component.processes = [{ id: '1', currentStage: 'Applied', createdAt: null as any }];
+    component.processes = [{ id: '1', currentStage: 'Waiting for Interview Feedback', createdAt: null as any }];
     component.kpiTimeRange = 'week';
     
     expect(() => component.kpiProcesses).not.toThrow();

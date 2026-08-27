@@ -53,7 +53,7 @@ export class OnboardingComponent {
         scoreWLB: 9,
         scoreGrowth: 7,
         scoreVibe: 8,
-        currentStage: 'Interview Scheduled',
+        currentStage: 'Initial Call Scheduled',
         notes: 'Sample process added from onboarding. Great company culture!'
       }).toPromise();
 

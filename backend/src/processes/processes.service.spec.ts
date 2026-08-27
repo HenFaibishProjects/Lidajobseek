@@ -52,10 +52,8 @@ describe('ProcessesService', () => {
   describe('isClosedStage (private)', () => {
     it('should identify closed stages correctly', () => {
       // Accessing private method via bracket notation for testing
-      expect((service as any).isClosedStage('Rejected')).toBe(true);
-      expect((service as any).isClosedStage('REJECT')).toBe(true);
-      expect((service as any).isClosedStage('Withdrawn')).toBe(true);
-      expect((service as any).isClosedStage('In Progress')).toBe(false);
+      expect((service as any).isClosedStage('Rejected')).toBe(false);
+      expect((service as any).isClosedStage('Withdrawn')).toBe(false);
     });
   });
 
@@ -206,31 +204,15 @@ describe('ProcessesService', () => {
       await expect(service.update(999, {}, 1)).rejects.toThrow(NotFoundException);
     });
 
-    it('should sync mail coverage when a process is moved to Rejected', async () => {
+    it('should not sync mail coverage for other process stages', async () => {
       const existingProcess: any = {
         id: 1,
         companyName: 'Acme',
-        currentStage: 'Phone Interview',
+        currentStage: 'Initial Call Scheduled',
       };
       mockRepo.findOne.mockResolvedValue(existingProcess);
 
-      await service.update(1, { currentStage: 'Rejected' }, 1);
-
-      expect(mockMailCoverageService.syncRejectedProcess).toHaveBeenCalledWith(
-        'Acme',
-        1,
-      );
-    });
-
-    it('should not sync mail coverage for another process stage', async () => {
-      const existingProcess: any = {
-        id: 1,
-        companyName: 'Acme',
-        currentStage: 'Phone Interview',
-      };
-      mockRepo.findOne.mockResolvedValue(existingProcess);
-
-      await service.update(1, { currentStage: 'Technical Interview' }, 1);
+      await service.update(1, { currentStage: 'Waiting for Interview Feedback' }, 1);
 
       expect(
         mockMailCoverageService.syncRejectedProcess,
@@ -278,42 +260,19 @@ describe('ProcessesService', () => {
   });
 
   describe('findAll', () => {
-    it('should update stale processes and return processes with interaction count', async () => {
+    it('should return processes with interaction count', async () => {
       const userId = 1;
       const mockProcesses = [
-        { id: 1, currentStage: 'Applied', interactions: [{}, {}], reviews: [] },
+        { id: 1, currentStage: 'Waiting for Interview Feedback', interactions: [{}, {}], reviews: [] },
       ];
       mockRepo.find.mockResolvedValue(mockProcesses);
 
-      // Verification of updateStaleProcesses call (it's called internally)
       await service.findAll(userId);
 
       expect(mockRepo.find).toHaveBeenCalled();
-      expect(mockEm.flush).toHaveBeenCalled(); // From updateStaleProcesses
     });
   });
 
-  describe('updateStaleProcesses (private automation)', () => {
-    it('should update processes to "No Response (14+ Days)" if inactive', async () => {
-      const userId = 1;
-      const staleProcess = { id: 1, currentStage: 'Applied', updatedAt: new Date(2020, 1, 1) };
-      mockRepo.find.mockResolvedValue([staleProcess]);
-
-      await (service as any).updateStaleProcesses(userId);
-
-      expect(staleProcess.currentStage).toBe('No Response (14+ Days)');
-      expect(mockEm.flush).toHaveBeenCalled();
-    });
-
-    it('should NOT update closed processes even if stale', async () => {
-      const userId = 1;
-      const rejectedProcess = { id: 1, currentStage: 'Rejected', updatedAt: new Date(2020, 1, 1) };
-      mockRepo.find.mockResolvedValue([]); // Mocking that nothing was found by the filter
-
-      await (service as any).updateStaleProcesses(userId);
-      expect(mockEm.flush).not.toHaveBeenCalled();
-    });
-  });
 
   describe('importData', () => {
     it('should deep clone relations and handle dates', async () => {

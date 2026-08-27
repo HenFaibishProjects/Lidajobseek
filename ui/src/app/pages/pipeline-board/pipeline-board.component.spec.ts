@@ -66,9 +66,9 @@ describe('PipelineBoardComponent', () => {
   });
 
   describe('Columns structure', () => {
-    it('should have 5 columns: applied, in-process, offer, hired, closed', () => {
-      expect(component.columns.length).toBe(5);
-      expect(component.columns.map(c => c.id)).toEqual(['applied', 'in-process', 'offer', 'hired', 'closed']);
+    it('should have 4 columns: initial-call, interviews, home-tasks, references', () => {
+      expect(component.columns.length).toBe(4);
+      expect(component.columns.map(c => c.id)).toEqual(['initial-call', 'interviews', 'home-tasks', 'references']);
     });
   });
 });

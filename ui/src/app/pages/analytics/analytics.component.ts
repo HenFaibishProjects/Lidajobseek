@@ -235,11 +235,11 @@ export class AnalyticsComponent implements OnInit, AfterViewInit, OnDestroy {
         const p = this.rawProcesses;
 
         this.stats.total = total;
-        this.stats.active = p.filter(x => ['Initial Call Scheduled', 'Interview Scheduled', 'Home Task Assigned', 'Final HR Interview Scheduled'].includes(x.currentStage)).length;
+        this.stats.active = p.filter(x => ['Initial Call Scheduled', 'Waiting for Interview Feedback', 'Awaiting Next Interview', 'Home Task Assigned', 'Home Task Submitted (Under Review)', 'References Requested'].includes(x.currentStage)).length;
         this.stats.offers = p.filter(x => x.currentStage === 'Offer' || x.currentStage === 'Signed').length;
 
         // Calculate Interview Rate (Processes that passed initial stage)
-        const interviewed = p.filter(x => x.currentStage !== 'Applied' && x.currentStage !== 'No Response (14+ Days)').length;
+        const interviewed = p.filter(x => x.currentStage !== 'Initial Call Scheduled').length;
         this.stats.interviewRate = Math.round((interviewed / total) * 100);
 
         this.stats.rejectionRate = Math.round((p.filter(x => x.currentStage === 'Rejected').length / total) * 100);
@@ -500,7 +500,7 @@ export class AnalyticsComponent implements OnInit, AfterViewInit, OnDestroy {
 
         const reachedScreen = p.filter(x => {
             const hasScreenInteraction = x.interactions?.some((i: any) => i.interviewType === 'phone_screen');
-            const hasPassedApplied = x.currentStage !== 'Applied' && x.currentStage !== 'No Response (14+ Days)';
+            const hasPassedApplied = true;
             return hasScreenInteraction || hasPassedApplied;
         }).length;
 
@@ -508,7 +508,7 @@ export class AnalyticsComponent implements OnInit, AfterViewInit, OnDestroy {
             const hasInterviewInteraction = x.interactions?.some((i: any) => 
                 ['virtual_video', 'onsite', 'panel', 'behavioral', 'hiring_manager', 'executive', 'team_meet', 'tech_assessment', 'take_home', 'live_coding', 'system_design'].includes(i.interviewType)
             );
-            const hasPassedScreen = !['Applied', 'No Response (14+ Days)', 'Initial Call Scheduled'].includes(x.currentStage);
+            const hasPassedScreen = x.currentStage !== 'Initial Call Scheduled';
             return hasInterviewInteraction || hasPassedScreen;
         }).length;
 
@@ -547,7 +547,7 @@ export class AnalyticsComponent implements OnInit, AfterViewInit, OnDestroy {
             const hasInterview = x.interactions?.some((i: any) => 
                 !['phone_screen', 'coffee_chat'].includes(i.interviewType)
             );
-            if (hasInterview || !['Applied', 'No Response (14+ Days)', 'Initial Call Scheduled'].includes(x.currentStage)) {
+            if (hasInterview || x.currentStage !== 'Initial Call Scheduled') {
                 channelCounts[src].interviews++;
             }
         });

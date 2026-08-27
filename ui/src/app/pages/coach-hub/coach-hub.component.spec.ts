@@ -58,8 +58,8 @@ describe('CoachHubComponent', () => {
   it('should save categories to authService when saveCategories is called', () => {
     component.categories = [{ id: 'TEST', name: 'Test', icon: 'x', color: '#fff', enabled: true }];
     component.saveCategories();
-    expect(mockAuthService.updatePreferences).toHaveBeenCalledWith({
-      appSettings: { coachHubCategories: component.categories }
-    });
+    expect(mockAuthService.updatePreferences).toHaveBeenCalled();
+    const args = mockAuthService.updatePreferences.calls.mostRecent().args[0];
+    expect(args.appSettings.coachHubCategories).toEqual(component.categories);
   });
 });

@@ -12,7 +12,7 @@ import { MailCoverageService } from '../mail-coverage/mail-coverage.service';
 @Injectable()
 export class ProcessesService {
   private readonly logger = new Logger(ProcessesService.name);
-  private readonly CLOSED_STAGE_LABELS = ['Rejected', 'Reject', 'Withdrawn','Offer Declined'];
+  private readonly CLOSED_STAGE_LABELS: string[] = [];
 
   constructor(
     @InjectRepository(Process)
@@ -22,13 +22,11 @@ export class ProcessesService {
   ) { }
 
   private isRejectedStage(stage?: string | null): boolean {
-    const normalizedStage = stage?.trim().toLowerCase();
-    return normalizedStage === 'rejected' || normalizedStage === 'reject';
+    return false;
   }
 
   private isClosedStage(stage?: string | null): boolean {
-    const normalizedStage = stage?.trim().toLowerCase();
-    return normalizedStage === 'rejected' || normalizedStage === 'reject' || normalizedStage === 'withdrawn' || normalizedStage === 'offer declined';
+    return false;
   }
 
   async create(dto: CreateProcessDto, userId: number): Promise<Process> {
@@ -123,9 +121,6 @@ export class ProcessesService {
   }
 
   async findAll(userId: number): Promise<any[]> {
-    // First, check and update any processes that need automatic stage update
-    await this.updateStaleProcesses(userId);
-
     const processes = await this.processRepository.find(
       { user: userId },
       {
@@ -145,9 +140,6 @@ export class ProcessesService {
   }
 
   async findOne(id: number, userId: number): Promise<Process> {
-    // First, check and update any processes that need automatic stage update
-    await this.updateStaleProcesses(userId);
-
     const process = await this.processRepository.findOne(
       { id, user: userId },
       {
@@ -371,35 +363,4 @@ export class ProcessesService {
     return { count };
   }
 
-  /**
-   * Automatically update processes to "No Response (14+ Days)" if:
-   * - Last update was 14+ days ago
-   * - Current stage is NOT "Rejected" / "Reject" / "Withdrawn"
-   * - Current stage is NOT already "No Response (14+ Days)"
-   */
-  private async updateStaleProcesses(userId: number): Promise<void> {
-    const fourteenDaysAgo = new Date();
-    fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
-
-    try {
-      const staleProcesses = await this.processRepository.find({
-        user: userId,
-        updatedAt: { $lte: fourteenDaysAgo },
-        currentStage: { $nin: [...this.CLOSED_STAGE_LABELS, 'No Response (14+ Days)'] },
-      });
-
-      if (staleProcesses.length > 0) {
-        for (const process of staleProcesses) {
-          process.currentStage = 'No Response (14+ Days)';
-        }
-        await this.em.flush();
-        this.logger.log(
-          `Automatically updated ${staleProcesses.length} process(es) to "No Response (14+ Days)"`,
-        );
-      }
-    } catch (error) {
-      this.logger.error('Error updating stale processes:', error instanceof Error ? error.stack : error);
-      // Don't throw error to avoid breaking the main query
-    }
-  }
 }

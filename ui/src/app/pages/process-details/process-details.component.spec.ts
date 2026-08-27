@@ -7,7 +7,7 @@ import { ToastService } from '../../services/toast.service';
 import { SettingsService } from '../../services/settings.service';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { of, BehaviorSubject } from 'rxjs';
-import { LucideAngularModule, Briefcase, ExternalLink, Mail, Phone, Calendar, MapPin, Globe, Clock, Target, Rocket, Heart, Sparkles, Send, CheckCircle, Check, Clock4, FileText, ChevronRight, X, MessageSquare, Plus, History, Lightbulb, Trash2, Edit2, AlertCircle, Pencil, Edit, CheckCircle2, Users, User, UserPlus, Link } from 'lucide-angular';
+import { LucideAngularModule, Briefcase, ExternalLink, Mail, Phone, Calendar, MapPin, Globe, Clock, Target, Rocket, Heart, Sparkles, Send, CheckCircle, Check, Clock4, FileText, ChevronRight, X, MessageSquare, Plus, History, Lightbulb, Trash2, Edit2, AlertCircle, Pencil, Edit, CheckCircle2, Users, User, UserPlus, Link, Search, Copy } from 'lucide-angular';
 
 describe('ProcessDetailsComponent', () => {
   let component: ProcessDetailsComponent;
@@ -17,7 +17,7 @@ describe('ProcessDetailsComponent', () => {
     id: 1,
     companyName: 'Google',
     roleTitle: 'Frontend Engineer',
-    currentStage: 'Applied',
+    currentStage: 'Initial Call Scheduled',
     jobDescriptionUrl: 'https://careers.google.com/jobs/123',
     interactions: [],
     reviews: [],
@@ -38,7 +38,7 @@ describe('ProcessDetailsComponent', () => {
         ProcessDetailsComponent,
         HttpClientTestingModule,
         RouterTestingModule,
-        LucideAngularModule.pick({ Briefcase, ExternalLink, Mail, Phone, Calendar, MapPin, Globe, Clock, Target, Rocket, Heart, Sparkles, Send, CheckCircle, Check, Clock4, FileText, ChevronRight, X, MessageSquare, Plus, History, Lightbulb, Trash2, Edit2, AlertCircle, Pencil, Edit, CheckCircle2, Users, User, UserPlus, Link })
+        LucideAngularModule.pick({ Briefcase, ExternalLink, Mail, Phone, Calendar, MapPin, Globe, Clock, Target, Rocket, Heart, Sparkles, Send, CheckCircle, Check, Clock4, FileText, ChevronRight, X, MessageSquare, Plus, History, Lightbulb, Trash2, Edit2, AlertCircle, Pencil, Edit, CheckCircle2, Users, User, UserPlus, Link, Search, Copy })
       ],
       providers: [
         {

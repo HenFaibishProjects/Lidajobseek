@@ -227,6 +227,7 @@ describe('ProcessFormComponent', () => {
     });
 
     it('never goes below current percent when switching to II stage', () => {
+      component.isEdit = true;
       component.process.companyName = 'Google';   // +10
       component.process.roleTitle = 'Engineer';   // +10
       const before = component.completionPercent; // 20
@@ -251,6 +252,7 @@ describe('ProcessFormComponent', () => {
     });
 
     it('adds +13 bonus for II notes when II section is visible', () => {
+      component.isEdit = true;
       component.process.currentStage = component.stages[2]; // triggers II section
       component.process.initialInviteContent = 'Recruiter reached out via LinkedIn.';
       const pct = component.completionPercent;
@@ -258,6 +260,7 @@ describe('ProcessFormComponent', () => {
     });
 
     it('does NOT add II notes bonus when section is hidden', () => {
+      component.isEdit = false;
       component.process.currentStage = component.stages[0]; // no II
       component.process.initialInviteContent = 'Some notes';
       expect(component.completionPercent).toBe(0);
@@ -348,16 +351,19 @@ describe('ProcessFormComponent', () => {
   // ── shouldShowInteractionSection ────────────────────────────────────
   describe('shouldShowInteractionSection', () => {
     it('returns false for first stage', () => {
+      component.isEdit = true;
       component.process.currentStage = component.stages[0];
       expect(component.shouldShowInteractionSection).toBe(false);
     });
 
     it('returns false for second stage', () => {
+      component.isEdit = true;
       component.process.currentStage = component.stages[1];
       expect(component.shouldShowInteractionSection).toBe(false);
     });
 
     it('returns true for third stage and beyond', () => {
+      component.isEdit = true;
       component.process.currentStage = component.stages[2];
       expect(component.shouldShowInteractionSection).toBe(true);
     });
