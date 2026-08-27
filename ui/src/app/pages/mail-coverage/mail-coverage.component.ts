@@ -1,12 +1,14 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 import { ConfirmService } from '../../services/confirm.service';
 import {
   MailCoverageEntry,
   MailCoveragePayload,
   MailCoverageService,
 } from '../../services/mail-coverage.service';
+import { ProcessesService } from '../../services/processes.service';
 import { SettingsService } from '../../services/settings.service';
 import { ToastService } from '../../services/toast.service';
 
@@ -22,16 +24,26 @@ interface MailCoverageForm {
   rejectedDate: string;
 }
 
+interface WithdrawnProcess {
+  id: number;
+  companyName: string;
+  roleTitle?: string | null;
+  withdrawReason?: string | null;
+  updatedAt: string;
+}
+
 @Component({
   selector: 'app-mail-coverage',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './mail-coverage.component.html',
   styleUrls: ['./mail-coverage.component.css'],
 })
 export class MailCoverageComponent implements OnInit {
   entries: MailCoverageEntry[] = [];
+  withdrawnProcesses: WithdrawnProcess[] = [];
   isLoading = true;
+  isWithdrawnLoading = true;
   isSaving = false;
   showForm = false;
   editingId: number | null = null;
@@ -42,13 +54,15 @@ export class MailCoverageComponent implements OnInit {
 
   constructor(
     private readonly mailCoverageService: MailCoverageService,
+    private readonly processesService: ProcessesService,
     private readonly confirmService: ConfirmService,
     private readonly settingsService: SettingsService,
     private readonly toastService: ToastService,
   ) {}
 
   ngOnInit(): void {
-    this.load();
+    this.loadMailCoverage();
+    this.loadWithdrawnProcesses();
   }
 
   get filteredEntries(): MailCoverageEntry[] {
@@ -84,7 +98,7 @@ export class MailCoverageComponent implements OnInit {
     });
   }
 
-  load(): void {
+  loadMailCoverage(): void {
     this.isLoading = true;
     this.mailCoverageService.getAll().subscribe({
       next: (entries) => {
@@ -94,6 +108,33 @@ export class MailCoverageComponent implements OnInit {
       error: () => {
         this.toastService.show('Failed to load mail coverage', 'error');
         this.isLoading = false;
+      },
+    });
+  }
+
+  loadWithdrawnProcesses(): void {
+    this.isWithdrawnLoading = true;
+    this.processesService.getAll().subscribe({
+      next: (processes) => {
+        this.withdrawnProcesses = processes
+          .filter(
+            (process) => {
+              const stage = process.currentStage?.trim().toLowerCase();
+              return stage === 'withdrawn' || stage === 'withdraw';
+            },
+          )
+          .sort(
+            (a, b) =>
+              new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
+          );
+        this.isWithdrawnLoading = false;
+      },
+      error: () => {
+        this.toastService.show(
+          'Failed to load withdrawn applications',
+          'error',
+        );
+        this.isWithdrawnLoading = false;
       },
     });
   }
@@ -162,7 +203,7 @@ export class MailCoverageComponent implements OnInit {
         );
         this.isSaving = false;
         this.cancelForm();
-        this.load();
+        this.loadMailCoverage();
       },
       error: (error) => {
         const message = error?.error?.message || 'Failed to save mail coverage';
@@ -208,7 +249,7 @@ export class MailCoverageComponent implements OnInit {
       : this.settingsService.formatDate(normalized);
   }
 
-  trackById(_index: number, entry: MailCoverageEntry): number {
+  trackById(_index: number, entry: { id: number }): number {
     return entry.id;
   }
 

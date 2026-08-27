@@ -490,4 +490,129 @@
       </tbody>
     </table>
   </div>
+
+  <section
+    class="mc-withdrawn-section"
+    aria-labelledby="withdrawn-applications-title"
+  >
+    <div class="mc-section-header">
+      <span class="mc-section-icon" aria-hidden="true">
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path d="M10 17l5-5-5-5"></path>
+          <path d="M15 12H3"></path>
+          <path d="M21 19V5a2 2 0 0 0-2-2h-6"></path>
+        </svg>
+      </span>
+      <div>
+        <h2 id="withdrawn-applications-title">Withdrawn Applications</h2>
+        <p>
+          Applications you chose to leave. This list updates automatically from
+          the Process status.
+        </p>
+      </div>
+    </div>
+
+    <div *ngIf="isWithdrawnLoading" class="mc-loading mc-loading--compact">
+      <div class="mc-loader"></div>
+      <span>Loading withdrawn applications…</span>
+    </div>
+
+    <div
+      *ngIf="!isWithdrawnLoading && withdrawnProcesses.length === 0"
+      class="mc-withdrawn-empty"
+    >
+      <p>No withdrawn applications yet.</p>
+      <span>
+        A process will appear here automatically when its status changes to
+        Withdrawn.
+      </span>
+    </div>
+
+    <div
+      *ngIf="!isWithdrawnLoading && withdrawnProcesses.length > 0"
+      class="mc-table-wrap"
+    >
+      <table class="mc-table mc-withdrawn-table">
+        <thead>
+          <tr>
+            <th>Company</th>
+            <th>Position</th>
+            <th>Reason for withdrawal</th>
+            <th>Last updated</th>
+            <th class="mc-actions-heading">Process</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            *ngFor="let process of withdrawnProcesses; trackBy: trackById"
+          >
+            <td data-label="Company">
+              <div class="mc-company-cell">
+                <span class="mc-company-avatar mc-company-avatar--withdrawn">
+                  {{ process.companyName.charAt(0).toUpperCase() }}
+                </span>
+                <div class="mc-company-details">
+                  <strong>{{ process.companyName }}</strong>
+                  <span class="mc-withdrawn-badge">Withdrawn</span>
+                </div>
+              </div>
+            </td>
+            <td data-label="Position">
+              <span *ngIf="process.roleTitle; else noRole">{{
+                process.roleTitle
+              }}</span>
+              <ng-template #noRole>
+                <span class="mc-not-recorded">Not recorded</span>
+              </ng-template>
+            </td>
+            <td data-label="Reason">
+              <p
+                *ngIf="process.withdrawReason; else noWithdrawReason"
+                class="mc-note-text"
+              >
+                {{ process.withdrawReason }}
+              </p>
+              <ng-template #noWithdrawReason>
+                <span class="mc-not-recorded">No reason recorded</span>
+              </ng-template>
+            </td>
+            <td data-label="Last updated">
+              <time class="mc-updated-date" [attr.datetime]="process.updatedAt">
+                {{ formatDate(process.updatedAt) }}
+              </time>
+            </td>
+            <td data-label="Process" class="mc-actions-cell">
+              <div class="mc-actions-buttons">
+                <a
+                  class="mc-view-process"
+                  [routerLink]="['/process', process.id]"
+                  title="Open process"
+                >
+                  Open
+                  <svg
+                    width="13"
+                    height="13"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.2"
+                  >
+                    <path d="M5 12h14"></path>
+                    <path d="m13 6 6 6-6 6"></path>
+                  </svg>
+                </a>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
 </div>

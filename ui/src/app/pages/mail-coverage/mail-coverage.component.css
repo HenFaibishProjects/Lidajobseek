@@ -488,6 +488,117 @@
   vertical-align: middle;
 }
 
+.mc-withdrawn-section {
+  margin-top: 42px;
+  padding-top: 28px;
+  border-top: 1px solid var(--border-color);
+}
+
+.mc-section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.mc-section-icon {
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  color: #b45309;
+  background: rgba(245, 158, 11, 0.09);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  border-radius: 12px;
+}
+
+.mc-section-header h2 {
+  margin: 0 0 3px;
+  color: var(--text-primary);
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.mc-section-header p {
+  margin: 0;
+  color: var(--text-tertiary);
+  font-size: 12px;
+}
+
+.mc-loading--compact {
+  min-height: 150px;
+}
+
+.mc-withdrawn-empty {
+  padding: 24px;
+  color: var(--text-tertiary);
+  text-align: center;
+  background: var(--bg-secondary);
+  border: 1px dashed var(--border-dark);
+  border-radius: 14px;
+}
+
+.mc-withdrawn-empty p {
+  margin: 0 0 4px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.mc-withdrawn-empty span {
+  font-size: 11.5px;
+}
+
+.mc-company-avatar--withdrawn {
+  color: #b45309;
+  background: rgba(245, 158, 11, 0.09);
+  border-color: rgba(245, 158, 11, 0.2);
+}
+
+.mc-withdrawn-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 7px;
+  color: #b45309;
+  background: rgba(245, 158, 11, 0.09);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  border-radius: 999px;
+  font-size: 9.5px;
+  font-weight: 750;
+}
+
+.mc-updated-date {
+  color: var(--text-tertiary);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.mc-view-process {
+  min-height: 31px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 5px 9px;
+  color: #b45309;
+  background: rgba(245, 158, 11, 0.07);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  border-radius: 8px;
+  font-size: 10.5px;
+  font-weight: 750;
+  text-decoration: none;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
+}
+
+.mc-view-process:hover {
+  background: rgba(245, 158, 11, 0.13);
+  border-color: rgba(245, 158, 11, 0.32);
+}
+
 .mc-company-cell {
   display: flex;
   align-items: center;
