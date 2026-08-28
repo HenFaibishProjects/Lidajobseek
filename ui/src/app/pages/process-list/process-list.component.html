@@ -131,116 +131,13 @@
                         <canvas #dashTimelineChart></canvas>
                     </div>
                 </div>
-                <div class="chart-card">
-                    <div class="chart-card-header">
-                        <span class="chart-title">Pipeline distribution</span>
-                        <span class="chart-subtitle">By current stage</span>
-                    </div>
-                    <div class="chart-canvas-wrapper">
-                        <canvas #dashStageChart></canvas>
-                    </div>
-                </div>
             </div>
         </section>
 
         <!-- Insight Panels -->
         <div class="insight-panels">
 
-            <!-- Follow-up overdue -->
-            <div class="insight-card">
-                <div class="insight-card-header">
-                    <div class="insight-icon insight-icon-red">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <line x1="12" y1="8" x2="12" y2="12"></line>
-                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                        </svg>
-                    </div>
-                    <span class="insight-title">Follow-ups due</span>
-                    <span class="insight-badge insight-badge-red" *ngIf="tasks.length">{{ tasks.length }}</span>
-                </div>
-                <div class="insight-body">
-                    <ng-container *ngIf="tasks.length; else noFollowUps">
-                        <a class="insight-item" *ngFor="let t of tasks.slice(0, 4)" [routerLink]="['/process', t.id]">
-                            <span class="insight-company">{{ t.company }}</span>
-                            <span class="insight-tag tag-red">Overdue</span>
-                        </a>
-                    </ng-container>
-                    <ng-template #noFollowUps>
-                        <div class="insight-empty">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="1.5">
-                                <polyline points="20 6 9 17 4 12"></polyline>
-                            </svg>
-                            No follow-ups due
-                        </div>
-                    </ng-template>
-                </div>
-            </div>
-
-            <!-- Interviews this week -->
-            <div class="insight-card">
-                <div class="insight-card-header">
-                    <div class="insight-icon insight-icon-amber">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                            <line x1="16" y1="2" x2="16" y2="6"></line>
-                            <line x1="8" y1="2" x2="8" y2="6"></line>
-                            <line x1="3" y1="10" x2="21" y2="10"></line>
-                        </svg>
-                    </div>
-                    <span class="insight-title">Interviews this week</span>
-                    <span class="insight-badge insight-badge-amber" *ngIf="getInterviewsThisWeek().length">{{
-                        getInterviewsThisWeek().length }}</span>
-                </div>
-                <div class="insight-body">
-                    <ng-container *ngIf="getInterviewsThisWeek().length; else noInterviews">
-                        <a class="insight-item" *ngFor="let p of getInterviewsThisWeek()"
-                            [routerLink]="['/process', p.id]">
-                            <div class="insight-item-main">
-                                <span class="insight-company">{{ p.companyName }}</span>
-                                <span class="insight-role">{{ p.roleTitle }}</span>
-                            </div>
-                            <span class="insight-tag tag-amber">{{ p.currentStage }}</span>
-                        </a>
-                    </ng-container>
-                    <ng-template #noInterviews>
-                        <div class="insight-empty">No interviews active this week</div>
-                    </ng-template>
-                </div>
-            </div>
-
-            <!-- Top scored -->
-            <div class="insight-card">
-                <div class="insight-card-header">
-                    <div class="insight-icon insight-icon-purple">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <polygon
-                                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
-                            </polygon>
-                        </svg>
-                    </div>
-                    <span class="insight-title">Top opportunities</span>
-                </div>
-                <div class="insight-body">
-                    <ng-container *ngIf="getTopScored().length; else noScored">
-                        <a class="insight-item" *ngFor="let p of getTopScored()" [routerLink]="['/process', p.id]">
-                            <div class="insight-item-main">
-                                <span class="insight-company">{{ p.companyName }}</span>
-                                <span class="insight-role">{{ p.roleTitle }}</span>
-                            </div>
-                            <span class="insight-score" [ngClass]="scoreClass(avgScore(p))" title="Insight Score: Represents the average of your ratings for Tech Match, Work-Life Balance, Growth, and Company Vibe.">{{ avgScore(p) }}/10</span>
-                        </a>
-                    </ng-container>
-                    <ng-template #noScored>
-                        <div class="insight-empty">Score your applications via the decision panel to reveal your top
-                            matches</div>
-                    </ng-template>
-                </div>
-            </div>
+        
 
         </div>
     </div>

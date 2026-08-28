@@ -50,7 +50,6 @@ const RESPONDED_STAGES = new Set<string>([]);
 })
 export class ProcessListComponent implements OnInit, OnDestroy, AfterViewChecked {
     @ViewChild('dashTimelineChart') timelineRef!: ElementRef;
-    @ViewChild('dashStageChart') stageRef!: ElementRef;
 
     processes: any[] = [];
     processesOnActioin: any[] = [];
@@ -163,9 +162,8 @@ export class ProcessListComponent implements OnInit, OnDestroy, AfterViewChecked
     // ─── Dashboard Charts ─────────────────────────────────────────────────────
 
     private initDashCharts() {
-        if (!this.timelineRef?.nativeElement || !this.stageRef?.nativeElement) return;
+        if (!this.timelineRef?.nativeElement) return;
         this.buildTimelineChart();
-        this.buildStageChart();
     }
 
     private chartTextColor(): string {
@@ -244,25 +242,7 @@ export class ProcessListComponent implements OnInit, OnDestroy, AfterViewChecked
         });
     }
 
-    private buildStageChart() {
-        if (this.dashCharts['stage']) this.dashCharts['stage'].destroy();
-        const counts: Record<string, number> = {};
-        this.kpiProcesses.forEach(p => { counts[p.currentStage] = (counts[p.currentStage] || 0) + 1; });
-        const labels = Object.keys(counts);
-        const data = Object.values(counts);
-        const color = this.chartTextColor();
-        this.dashCharts['stage'] = new Chart(this.stageRef.nativeElement, {
-            type: 'doughnut',
-            data: {
-                labels,
-                datasets: [{ data, backgroundColor: ['#3b82f6','#10b981','#f59e0b','#8b5cf6','#ef4444','#06b6d4','#64748b','#ec4899'], borderWidth: 0 }]
-            },
-            options: {
-                responsive: true, maintainAspectRatio: false, cutout: '72%',
-                plugins: { legend: { position: 'bottom', labels: { font: { size: 11 }, color, usePointStyle: true, padding: 10 } } }
-            }
-        });
-    }
+
 
     // ─── KPI Stats ────────────────────────────────────────────────────────────
     
