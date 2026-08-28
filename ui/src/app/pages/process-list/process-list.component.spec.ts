@@ -83,6 +83,15 @@ describe('ProcessListComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  it('should create unique CSS classes for the two interview waiting stages', () => {
+    expect(component.getStatusClass('Waiting for Interview Feedback')).toBe(
+      'status-waiting-for-interview-feedback'
+    );
+    expect(component.getStatusClass('Awaiting Next Interview')).toBe(
+      'status-awaiting-next-interview'
+    );
+  });
+
   it('should fetch avatar URL based on settings', () => {
     const url = component.getAvatarUrl();
     expect(url).toContain('7.x/bottts/svg');

@@ -438,7 +438,11 @@ export class ProcessListComponent implements OnInit, OnDestroy, AfterViewChecked
 
     getStatusClass(stage: string): string {
         if (!stage) return '';
-        return 'status-' + stage.toLowerCase().replace(' ', '-');
+        return 'status-' + stage
+            .trim()
+            .toLowerCase()
+            .replace(/[\s/()]+/g, '-')
+            .replace(/-+$/, '');
     }
 
     // Sorting method
