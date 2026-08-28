@@ -383,7 +383,7 @@
 
 .time-label {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 4px;
     color: #ffffff;
     font-size: 11px;
@@ -391,8 +391,23 @@
     white-space: nowrap;
 }
 
-.time-label span {
+.time-label-copy {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    min-width: 0;
+}
+
+.time-label .time-range,
+.time-label .time-duration {
     white-space: nowrap;
+}
+
+.time-label .time-duration {
+    color: #a5b4fc;
+    font-size: 9.5px;
+    font-weight: 600;
 }
 
 .time-label svg {
@@ -1090,8 +1105,23 @@
 }
 
 .week-event-time {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1px;
     color: #818cf8;
     font-weight: 800;
+}
+
+.week-event-time-range,
+.week-event-duration {
+    white-space: nowrap;
+}
+
+.week-event-duration {
+    color: #a5b4fc;
+    font-size: 9px;
+    font-weight: 600;
 }
 
 .week-event-title {

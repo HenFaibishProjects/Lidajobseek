@@ -172,6 +172,24 @@ export class CalendarComponent implements OnInit {
     return new Date(date.getTime() + durationMinutes * 60000);
   }
 
+  formatDuration(durationMinutes?: number): string {
+    if (!durationMinutes || durationMinutes <= 0) return '';
+
+    const totalMinutes = Math.round(durationMinutes);
+    if (totalMinutes === 30) return 'Half an hour';
+    if (totalMinutes === 60) return 'One hour';
+    if (totalMinutes < 60) {
+      return `${totalMinutes} ${totalMinutes === 1 ? 'minute' : 'minutes'}`;
+    }
+
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    const hoursLabel = hours === 1 ? 'One hour' : `${hours} hours`;
+
+    if (minutes === 0) return hoursLabel;
+    return `${hoursLabel} and ${minutes} ${minutes === 1 ? 'minute' : 'minutes'}`;
+  }
+
   formatParticipants(participants: any[]): string {
     if (!participants || participants.length === 0) return 'No participants';
     return participants.map(p => p.name || p.role).join(', ');

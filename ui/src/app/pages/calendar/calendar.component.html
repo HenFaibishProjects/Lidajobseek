@@ -199,8 +199,13 @@
                                  *ngFor="let item of day.interviews"
                                  [style.border-left-color]="getInterviewColor(item.interviewType)">
                                 <div class="week-event-time">
-                                    {{ item.date | date:'HH:mm' }}
-                                    <ng-container *ngIf="item.durationMinutes"> - {{ getEndTime(item.date, item.durationMinutes) | date:'HH:mm' }} ({{item.durationMinutes}}m)</ng-container>
+                                    <span class="week-event-time-range">
+                                        {{ item.date | date:'HH:mm' }}
+                                        <ng-container *ngIf="item.durationMinutes"> - {{ getEndTime(item.date, item.durationMinutes) | date:'HH:mm' }}</ng-container>
+                                    </span>
+                                    <span *ngIf="item.durationMinutes" class="week-event-duration">
+                                        {{ formatDuration(item.durationMinutes) }}
+                                    </span>
                                 </div>
                                 <div class="week-event-title" [title]="item.process ? item.process.companyName : item.agency?.agencyName">
                                     {{ item.process ? item.process.companyName : item.agency?.agencyName }}
@@ -253,10 +258,15 @@
                                     <circle cx="12" cy="12" r="10"></circle>
                                     <polyline points="12 6 12 12 16 14"></polyline>
                                 </svg>
-                                <span>
-                                    {{ interview.date | date:'HH:mm' }}
-                                    <ng-container *ngIf="interview.durationMinutes"> - {{ getEndTime(interview.date, interview.durationMinutes) | date:'HH:mm' }} ({{interview.durationMinutes}}m)</ng-container>
-                                </span>
+                                <div class="time-label-copy">
+                                    <span class="time-range">
+                                        {{ interview.date | date:'HH:mm' }}
+                                        <ng-container *ngIf="interview.durationMinutes"> - {{ getEndTime(interview.date, interview.durationMinutes) | date:'HH:mm' }}</ng-container>
+                                    </span>
+                                    <span *ngIf="interview.durationMinutes" class="time-duration">
+                                        {{ formatDuration(interview.durationMinutes) }}
+                                    </span>
+                                </div>
                             </div>
                         </div>
 
@@ -365,10 +375,15 @@
                                     <circle cx="12" cy="12" r="10"></circle>
                                     <polyline points="12 6 12 12 16 14"></polyline>
                                 </svg>
-                                <span>
-                                    {{ nextInterview.date | date:'HH:mm' }}
-                                    <ng-container *ngIf="nextInterview.durationMinutes"> - {{ getEndTime(nextInterview.date, nextInterview.durationMinutes) | date:'HH:mm' }} ({{nextInterview.durationMinutes}}m)</ng-container>
-                                </span>
+                                <div class="time-label-copy">
+                                    <span class="time-range">
+                                        {{ nextInterview.date | date:'HH:mm' }}
+                                        <ng-container *ngIf="nextInterview.durationMinutes"> - {{ getEndTime(nextInterview.date, nextInterview.durationMinutes) | date:'HH:mm' }}</ng-container>
+                                    </span>
+                                    <span *ngIf="nextInterview.durationMinutes" class="time-duration">
+                                        {{ formatDuration(nextInterview.durationMinutes) }}
+                                    </span>
+                                </div>
                             </div>
                         </div>
 
@@ -462,10 +477,15 @@
                                         <circle cx="12" cy="12" r="10"></circle>
                                         <polyline points="12 6 12 12 16 14"></polyline>
                                     </svg>
-                                    <span>
-                                        {{ interview.date | date:'HH:mm' }}
-                                        <ng-container *ngIf="interview.durationMinutes"> - {{ getEndTime(interview.date, interview.durationMinutes) | date:'HH:mm' }} ({{interview.durationMinutes}}m)</ng-container>
-                                    </span>
+                                    <div class="time-label-copy">
+                                        <span class="time-range">
+                                            {{ interview.date | date:'HH:mm' }}
+                                            <ng-container *ngIf="interview.durationMinutes"> - {{ getEndTime(interview.date, interview.durationMinutes) | date:'HH:mm' }}</ng-container>
+                                        </span>
+                                        <span *ngIf="interview.durationMinutes" class="time-duration">
+                                            {{ formatDuration(interview.durationMinutes) }}
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
 
