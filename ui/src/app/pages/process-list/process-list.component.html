@@ -410,16 +410,27 @@
                                 </svg>
                             </button>
                         </div>
-                        <div class="list-col list-col-updated">
-                            <button class="list-sort-btn" (click)="sort('updated')">
-                                Updated
-                                <svg *ngIf="isSorted('updated')" width="12" height="12" viewBox="0 0 24 24" fill="none"
-                                    stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                                    stroke-linejoin="round">
-                                    <polyline *ngIf="getSortDirection('updated') === 'asc'" points="18 15 12 9 6 15" />
-                                    <polyline *ngIf="getSortDirection('updated') === 'desc'" points="6 9 12 15 18 9" />
-                                </svg>
-                            </button>
+                        <div class="list-col list-col-dates">
+                            <div class="list-date-sort-group">
+                                <button class="list-sort-btn list-sort-btn-date" (click)="sort('created')">
+                                    Opened
+                                    <svg *ngIf="isSorted('created')" width="11" height="11" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <polyline *ngIf="getSortDirection('created') === 'asc'" points="18 15 12 9 6 15" />
+                                        <polyline *ngIf="getSortDirection('created') === 'desc'" points="6 9 12 15 18 9" />
+                                    </svg>
+                                </button>
+                                <button class="list-sort-btn list-sort-btn-date" (click)="sort('updated')">
+                                    Updated
+                                    <svg *ngIf="isSorted('updated')" width="11" height="11" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <polyline *ngIf="getSortDirection('updated') === 'asc'" points="18 15 12 9 6 15" />
+                                        <polyline *ngIf="getSortDirection('updated') === 'desc'" points="6 9 12 15 18 9" />
+                                    </svg>
+                                </button>
+                            </div>
                         </div>
                         <div class="list-col list-col-history">History</div>
                     </div>
@@ -467,8 +478,17 @@
                             </span>
                             <span *ngIf="!p._count?.interactions" class="list-empty-cell">—</span>
                         </div>
-                        <div class="list-col list-col-updated">
-                            <span class="list-date">{{ p.updatedAt | dateFormat:'date' }}</span>
+                        <div class="list-col list-col-dates">
+                            <div class="list-date-stack">
+                                <span class="list-date-row" title="Process opened on {{ p.createdAt | dateFormat:'date' }}">
+                                    <span class="list-date-kind">Opened</span>
+                                    <time class="list-date" [attr.datetime]="p.createdAt">{{ p.createdAt | dateFormat:'date' }}</time>
+                                </span>
+                                <span class="list-date-row" title="Last updated on {{ p.updatedAt | dateFormat:'date' }}">
+                                    <span class="list-date-kind">Updated</span>
+                                    <time class="list-date" [attr.datetime]="p.updatedAt">{{ p.updatedAt | dateFormat:'date' }}</time>
+                                </span>
+                            </div>
                         </div>
                         <div class="list-col list-col-history">
                             <button class="list-history-btn" (click)="openHistoryDrawer(p, $event)" title="View interaction history">

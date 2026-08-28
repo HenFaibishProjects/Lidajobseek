@@ -149,6 +149,26 @@ describe('ProcessListComponent', () => {
     expect(name).toBe('shepard'); 
   });
 
+  it('should sort processes by their opened date', () => {
+    component.processes = [
+      { id: 'later', createdAt: '2026-08-20T10:00:00Z' },
+      { id: 'earlier', createdAt: '2026-08-10T10:00:00Z' },
+    ];
+
+    component.sort('created');
+
+    expect(component.filteredProcesses.map((process) => process.id)).toEqual(['earlier', 'later']);
+  });
+
+  it('should format company and role for chart tooltips', () => {
+    expect((component as any).formatProcessTooltipLabel({
+      companyName: 'Acme',
+      roleTitle: 'Backend Engineer',
+    })).toBe('Acme · Backend Engineer');
+
+    expect((component as any).formatProcessTooltipLabel({ companyName: 'Acme' })).toBe('Acme');
+  });
+
   it('should calculate the four KPI cards for all time', () => {
     const mockProcesses = [
       { id: '1', currentStage: 'Initial Call Scheduled', createdAt: new Date() },

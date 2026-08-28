@@ -196,12 +196,13 @@ export class ProcessListComponent implements OnInit, OnDestroy, AfterViewChecked
         
         let labels: string[] = [];
         let data: number[] = [];
+        const bucketProcesses: any[][] = [];
         const today = new Date();
 
         const selectedDayCount = this.getSelectedRangeDayCount();
         const datedProcesses = this.kpiProcesses
-            .map((process) => this.getProcessCreatedAt(process))
-            .filter((date): date is Date => date !== null);
+            .map((process) => ({ process, createdAt: this.getProcessCreatedAt(process) }))
+            .filter((entry): entry is { process: any; createdAt: Date } => entry.createdAt !== null);
 
         if (selectedDayCount !== null && selectedDayCount <= 30) {
             const days = selectedDayCount;
@@ -209,11 +210,15 @@ export class ProcessListComponent implements OnInit, OnDestroy, AfterViewChecked
                 const d = new Date(today);
                 d.setDate(today.getDate() - i);
                 labels.push(d.toLocaleDateString('default', { month: 'short', day: 'numeric' }));
-                data.push(datedProcesses.filter((date) => date.toDateString() === d.toDateString()).length);
+                const processesForDay = datedProcesses
+                    .filter((entry) => entry.createdAt.toDateString() === d.toDateString())
+                    .map((entry) => entry.process);
+                data.push(processesForDay.length);
+                bucketProcesses.push(processesForDay);
             }
         } else {
-            const firstDatedProcess = datedProcesses.reduce<Date | null>((earliest, date) => {
-                return !earliest || date < earliest ? date : earliest;
+            const firstDatedProcess = datedProcesses.reduce<Date | null>((earliest, entry) => {
+                return !earliest || entry.createdAt < earliest ? entry.createdAt : earliest;
             }, null);
             const rangeStart = this.getSelectedRangeStartDate() ?? firstDatedProcess ?? today;
             const monthCursor = new Date(rangeStart.getFullYear(), rangeStart.getMonth(), 1);
@@ -223,9 +228,13 @@ export class ProcessListComponent implements OnInit, OnDestroy, AfterViewChecked
                 const bucketMonth = monthCursor.getMonth();
                 const bucketYear = monthCursor.getFullYear();
                 labels.push(monthCursor.toLocaleString('default', { month: 'short', year: '2-digit' }));
-                data.push(datedProcesses.filter((date) => {
-                    return date.getMonth() === bucketMonth && date.getFullYear() === bucketYear;
-                }).length);
+                const processesForMonth = datedProcesses
+                    .filter((entry) => {
+                        return entry.createdAt.getMonth() === bucketMonth && entry.createdAt.getFullYear() === bucketYear;
+                    })
+                    .map((entry) => entry.process);
+                data.push(processesForMonth.length);
+                bucketProcesses.push(processesForMonth);
                 monthCursor.setMonth(monthCursor.getMonth() + 1);
             }
         }
@@ -239,13 +248,43 @@ export class ProcessListComponent implements OnInit, OnDestroy, AfterViewChecked
             },
             options: {
                 responsive: true, maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        displayColors: false,
+                        callbacks: {
+                            beforeBody: (items) => {
+                                const count = bucketProcesses[items[0]?.dataIndex]?.length ?? 0;
+                                if (count === 0) return 'No processes opened';
+                                return `${count} ${count === 1 ? 'process' : 'processes'} opened:`;
+                            },
+                            label: (context) => {
+                                const processes = bucketProcesses[context.dataIndex] ?? [];
+                                if (processes.length === 0) return '';
+
+                                const visibleProcesses = processes
+                                    .slice(0, 8)
+                                    .map((process) => this.formatProcessTooltipLabel(process));
+                                if (processes.length > 8) {
+                                    visibleProcesses.push(`+${processes.length - 8} more`);
+                                }
+                                return visibleProcesses;
+                            },
+                        },
+                    },
+                },
                 scales: {
                     y: { beginAtZero: true, ticks: { stepSize: 1, color }, grid: { color: 'rgba(148,163,184,0.15)' } },
                     x: { ticks: { color, font: { size: 10 } }, grid: { display: false } }
                 }
             }
         });
+    }
+
+    private formatProcessTooltipLabel(process: any): string {
+        const companyName = process?.companyName?.toString().trim() || 'Unknown company';
+        const roleTitle = process?.roleTitle?.toString().trim();
+        return roleTitle ? `${companyName} · ${roleTitle}` : companyName;
     }
 
 
@@ -506,6 +545,8 @@ export class ProcessListComponent implements OnInit, OnDestroy, AfterViewChecked
                 return process._count?.interactions || 0;
             case 'location':
                 return process.location?.toLowerCase();
+            case 'created':
+                return new Date(process.createdAt);
             case 'updated':
                 return new Date(process.updatedAt);
             default:
