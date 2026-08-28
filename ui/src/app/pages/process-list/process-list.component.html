@@ -298,6 +298,22 @@
                     </div>
                 </div>
 
+                <div class="filter-section">
+                    <div class="filter-section-title">
+                        <span class="filter-section-label">Visibility</span>
+                    </div>
+                    <label class="toggle-chip" title="Include rejected and withdrawn processes">
+                        <input
+                            type="checkbox"
+                            [(ngModel)]="showAllProcesses"
+                            (change)="applyFilters()"
+                        />
+                        <span class="toggle-label">
+                            <span class="toggle-dot"></span>
+                            Show all
+                        </span>
+                    </label>
+                </div>
 
             </div>
         </aside>

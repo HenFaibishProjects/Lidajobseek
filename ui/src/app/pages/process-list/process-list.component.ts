@@ -112,6 +112,11 @@ export class ProcessListComponent implements OnInit, OnDestroy, AfterViewChecked
         return stage === 'rejected' || stage === 'reject' || stage === 'withdrawn' || stage === 'offer declined';
     }
 
+    private isHiddenByDefault(process: any): boolean {
+        const stage = (process?.currentStage ?? '').toString().trim().toLowerCase();
+        return stage === 'rejected' || stage === 'reject' || stage === 'withdrawn';
+    }
+
     ngOnInit() {
         this.settings = this.settingsService.getSettings();
         this.userDisplayName = this.getDisplayName(this.settings);
@@ -402,9 +407,8 @@ export class ProcessListComponent implements OnInit, OnDestroy, AfterViewChecked
                 return false;
             }
 
-            // Show all processes filter
-            const isClosed = this.isClosedProcess(process);
-            if (!this.showAllProcesses && isClosed) {
+            // Rejected and withdrawn processes are hidden by default.
+            if (!this.showAllProcesses && this.isHiddenByDefault(process)) {
                 return false;
             }
 

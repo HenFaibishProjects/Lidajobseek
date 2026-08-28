@@ -92,6 +92,36 @@ describe('ProcessListComponent', () => {
     );
   });
 
+  it('should hide only rejected and withdrawn processes by default', () => {
+    component.processes = [
+      { id: 1, currentStage: 'Waiting for Interview Feedback' },
+      { id: 2, currentStage: 'Rejected', isClosed: true },
+      { id: 3, currentStage: 'Withdrawn', isClosed: true },
+      { id: 4, currentStage: 'Offer Declined', isClosed: true },
+    ];
+
+    component.showAllProcesses = false;
+    component.applyFilters();
+
+    expect(component.filteredProcesses.map((process) => process.id)).toEqual([
+      1,
+      4,
+    ]);
+  });
+
+  it('should include rejected and withdrawn processes when Show all is checked', () => {
+    component.processes = [
+      { id: 1, currentStage: 'Waiting for Interview Feedback' },
+      { id: 2, currentStage: 'Rejected', isClosed: true },
+      { id: 3, currentStage: 'Withdrawn', isClosed: true },
+    ];
+
+    component.showAllProcesses = true;
+    component.applyFilters();
+
+    expect(component.filteredProcesses.length).toBe(3);
+  });
+
   it('should fetch avatar URL based on settings', () => {
     const url = component.getAvatarUrl();
     expect(url).toContain('7.x/bottts/svg');
