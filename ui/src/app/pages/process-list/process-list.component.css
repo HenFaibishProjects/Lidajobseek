@@ -1192,10 +1192,34 @@ body:not(.dark-theme) .performance-section {
 
 .kpi-header {
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
-    margin-bottom: 5px;
+    gap: 7px;
+    margin-bottom: 12px;
     padding: 5px var(--space-xs);
+}
+
+.kpi-period-context {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--text-tertiary);
+    font-size: 11px;
+}
+
+.kpi-period-context strong {
+    color: var(--text-secondary);
+    font-weight: 750;
+}
+
+.kpi-period-dot {
+    width: 6px;
+    height: 6px;
+    flex-shrink: 0;
+    background: var(--primary-blue);
+    border-radius: 999px;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
 }
 
 .kpi-title {

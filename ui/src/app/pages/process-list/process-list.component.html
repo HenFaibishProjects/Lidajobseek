@@ -57,6 +57,10 @@
                     <button class="kpi-range-btn" [class.active]="currentKpiRange === 'week'"
                         (click)="currentKpiRange = 'week'">Week</button>
                 </div>
+                <div class="kpi-period-context" aria-live="polite">
+                    <span class="kpi-period-dot"></span>
+                    Cards and chart show: <strong>{{ getKpiPeriodLabel() }}</strong>
+                </div>
             </div>
 
             <div class="kpi-strip">
@@ -72,37 +76,21 @@
                     </div>
                     <div class="kpi-body">
                         <div class="kpi-value">{{ kpiProcesses.length }}</div>
-                        <div class="kpi-label">Total Applications</div>
+                        <div class="kpi-label">Applications in Period</div>
                     </div>
                 </div>
 
-                <div class="kpi-card kpi-amber">
+                <div class="kpi-card kpi-green">
                     <div class="kpi-icon">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2">
-                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                            <line x1="16" y1="2" x2="16" y2="6"></line>
-                            <line x1="8" y1="2" x2="8" y2="6"></line>
-                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                            <circle cx="12" cy="12" r="9"></circle>
+                            <path d="M12 7v5l3 2"></path>
                         </svg>
                     </div>
                     <div class="kpi-body">
-                        <div class="kpi-value">{{ getInterviewActiveCount() }}</div>
-                        <div class="kpi-label">Interviews Active</div>
-                    </div>
-                </div>
-
-                <div class="kpi-card kpi-purple">
-                    <div class="kpi-icon">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                            <polyline points="9 22 9 12 15 12 15 22"></polyline>
-                        </svg>
-                    </div>
-                    <div class="kpi-body">
-                        <div class="kpi-value">{{ getHomeTaskCount() }}</div>
-                        <div class="kpi-label">Home Tasks</div>
+                        <div class="kpi-value">{{ getInProgressCount() }}</div>
+                        <div class="kpi-label">In Progress</div>
                     </div>
                 </div>
 
@@ -110,15 +98,28 @@
                     <div class="kpi-icon">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2">
-                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                            <circle cx="9" cy="7" r="4"></circle>
-                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                            <circle cx="12" cy="12" r="9"></circle>
+                            <path d="m9 9 6 6M15 9l-6 6"></path>
                         </svg>
                     </div>
                     <div class="kpi-body">
-                        <div class="kpi-value{{ getReferencesCount() > 0 ? '' : ' kpi-value--zero' }}">{{ getReferencesCount() }}</div>
-                        <div class="kpi-label">References</div>
+                        <div class="kpi-value">{{ getRejectedCount() }}</div>
+                        <div class="kpi-label">Rejected</div>
+                    </div>
+                </div>
+
+                <div class="kpi-card kpi-purple">
+                    <div class="kpi-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M10 17l5-5-5-5"></path>
+                            <path d="M15 12H3"></path>
+                            <path d="M21 19V5a2 2 0 0 0-2-2h-6"></path>
+                        </svg>
+                    </div>
+                    <div class="kpi-body">
+                        <div class="kpi-value">{{ getWithdrawnCount() }}</div>
+                        <div class="kpi-label">Withdrawn</div>
                     </div>
                 </div>
             </div>

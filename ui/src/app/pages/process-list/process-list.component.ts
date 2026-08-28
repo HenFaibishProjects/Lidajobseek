@@ -182,6 +182,18 @@ export class ProcessListComponent implements OnInit, OnDestroy, AfterViewChecked
         }
     }
 
+    getKpiPeriodLabel(): string {
+        switch (this.kpiTimeRange) {
+            case 'week': return 'Last 7 days';
+            case '2weeks': return 'Last 14 days';
+            case '3weeks': return 'Last 21 days';
+            case 'month': return 'Last 30 days';
+            case 'quarter': return 'Last 90 days';
+            case 'year': return 'Last 12 months';
+            default: return 'All time';
+        }
+    }
+
     private buildTimelineChart() {
         if (this.dashCharts['timeline']) this.dashCharts['timeline'].destroy();
         
@@ -291,11 +303,17 @@ export class ProcessListComponent implements OnInit, OnDestroy, AfterViewChecked
     }
 
     getRejectedCount(): number {
-        return 0;
+        return this.kpiProcesses.filter((process) => {
+            const stage = (process?.currentStage ?? '').toString().trim().toLowerCase();
+            return stage === 'rejected' || stage === 'reject';
+        }).length;
     }
 
     getWithdrawnCount(): number {
-        return 0;
+        return this.kpiProcesses.filter((process) => {
+            const stage = (process?.currentStage ?? '').toString().trim().toLowerCase();
+            return stage === 'withdrawn';
+        }).length;
     }
 
     getResponseRate(): number {
@@ -528,7 +546,7 @@ export class ProcessListComponent implements OnInit, OnDestroy, AfterViewChecked
     }
 
     getInProgressCount(): number {
-        return this.kpiProcesses.filter(p => !CLOSED_STAGES.has(p.currentStage)).length;
+        return this.kpiProcesses.filter(p => !this.isClosedProcess(p)).length;
     }
 
     getOfferCount(): number {
