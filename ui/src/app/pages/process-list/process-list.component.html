@@ -38,29 +38,18 @@
     <!-- ═══ DASHBOARD INSIGHTS (KPIs + Charts + Panels) ═══ -->
     <div class="dashboard-insights" *ngIf="!isLoading">
 
-        <!-- KPI Strip -4 cards -->
+        <!-- Current pipeline snapshot: these cards always represent all processes. -->
         <section class="performance-section">
-            <div class="kpi-header">
-                <div class="kpi-range-selector">
-                    <button class="kpi-range-btn" [class.active]="currentKpiRange === 'all'"
-                        (click)="currentKpiRange = 'all'">All Time</button>
-                    <button class="kpi-range-btn" [class.active]="currentKpiRange === 'year'"
-                        (click)="currentKpiRange = 'year'">Year</button>
-                    <button class="kpi-range-btn" [class.active]="currentKpiRange === 'quarter'"
-                        (click)="currentKpiRange = 'quarter'">Quarter</button>
-                    <button class="kpi-range-btn" [class.active]="currentKpiRange === 'month'"
-                        (click)="currentKpiRange = 'month'">Month</button>
-                    <button class="kpi-range-btn" [class.active]="currentKpiRange === '3weeks'"
-                        (click)="currentKpiRange = '3weeks'">3 Weeks</button>
-                    <button class="kpi-range-btn" [class.active]="currentKpiRange === '2weeks'"
-                        (click)="currentKpiRange = '2weeks'">2 Weeks</button>
-                    <button class="kpi-range-btn" [class.active]="currentKpiRange === 'week'"
-                        (click)="currentKpiRange = 'week'">Week</button>
+            <div class="snapshot-header">
+                <div class="snapshot-heading">
+                    <span class="dashboard-section-kicker">Current pipeline</span>
+                    <h2 class="snapshot-title">Status overview</h2>
+                    <p class="snapshot-description">Where every application stands right now</p>
                 </div>
-                <div class="kpi-period-context" aria-live="polite">
-                    <span class="kpi-period-dot"></span>
-                    Cards and chart show: <strong>{{ getKpiPeriodLabel() }}</strong>
-                </div>
+                <span class="scope-badge" title="These four cards always include every process">
+                    <span class="scope-badge-dot"></span>
+                    All time
+                </span>
             </div>
 
             <div class="kpi-strip">
@@ -75,8 +64,8 @@
                         </svg>
                     </div>
                     <div class="kpi-body">
-                        <div class="kpi-value">{{ kpiProcesses.length }}</div>
-                        <div class="kpi-label">Applications in Period</div>
+                        <div class="kpi-value">{{ processes.length }}</div>
+                        <div class="kpi-label">Total Applications</div>
                     </div>
                 </div>
 
@@ -124,12 +113,46 @@
                 </div>
             </div>
 
-            <!-- Charts Row -Now inside the section -->
-            <div class="charts-row">
+            <!-- Creation activity: the selected time range affects this panel only. -->
+            <div class="activity-panel">
+                <div class="activity-header">
+                    <div class="activity-heading">
+                        <span class="dashboard-section-kicker">Creation activity</span>
+                        <h3 class="activity-title">Applications over time</h3>
+                        <p class="activity-summary" aria-live="polite">
+                            <strong>{{ kpiProcesses.length }}</strong>
+                            {{ kpiProcesses.length === 1 ? 'application' : 'applications' }} created
+                            <span class="activity-summary-separator">·</span>
+                            <strong>{{ getKpiPeriodLabel() }}</strong>
+                        </p>
+                    </div>
+
+                    <div class="activity-controls">
+                        <span class="activity-filter-label">Chart time range</span>
+                        <div class="kpi-range-selector">
+                            <button class="kpi-range-btn" [class.active]="currentKpiRange === 'all'"
+                                (click)="currentKpiRange = 'all'">All Time</button>
+                            <button class="kpi-range-btn" [class.active]="currentKpiRange === 'year'"
+                                (click)="currentKpiRange = 'year'">Year</button>
+                            <button class="kpi-range-btn" [class.active]="currentKpiRange === 'quarter'"
+                                (click)="currentKpiRange = 'quarter'">Quarter</button>
+                            <button class="kpi-range-btn" [class.active]="currentKpiRange === 'month'"
+                                (click)="currentKpiRange = 'month'">Month</button>
+                            <button class="kpi-range-btn" [class.active]="currentKpiRange === '3weeks'"
+                                (click)="currentKpiRange = '3weeks'">3 Weeks</button>
+                            <button class="kpi-range-btn" [class.active]="currentKpiRange === '2weeks'"
+                                (click)="currentKpiRange = '2weeks'">2 Weeks</button>
+                            <button class="kpi-range-btn" [class.active]="currentKpiRange === 'week'"
+                                (click)="currentKpiRange = 'week'">Week</button>
+                        </div>
+                        <span class="range-hint">Changes this chart only</span>
+                    </div>
+                </div>
+
                 <div class="chart-card">
                     <div class="chart-card-header">
-                        <span class="chart-title">Applications over time</span>
-                        <span class="chart-subtitle">{{ getTimelineSubtitle() }}</span>
+                        <span class="chart-title">Applications created by date</span>
+                        <span class="chart-subtitle">Based on process creation date · {{ getTimelineSubtitle() }}</span>
                     </div>
                     <div class="chart-canvas-wrapper">
                         <canvas #dashTimelineChart></canvas>

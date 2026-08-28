@@ -152,7 +152,7 @@ describe('ProcessListComponent', () => {
   it('should calculate the four KPI cards for all time', () => {
     const mockProcesses = [
       { id: '1', currentStage: 'Initial Call Scheduled', createdAt: new Date() },
-      { id: '2', currentStage: 'Rejected', createdAt: new Date() },
+      { id: '2', currentStage: 'Rejected', createdAt: new Date(), isClosed: false },
       { id: '3', currentStage: 'Withdrawn', createdAt: new Date() },
       { id: '4', currentStage: 'Waiting for Interview Feedback', createdAt: new Date() },
     ];
@@ -165,7 +165,7 @@ describe('ProcessListComponent', () => {
     expect(component.getWithdrawnCount()).toBe(1);
   });
 
-  it('should filter every KPI card based on the selected time range', () => {
+  it('should keep status cards all-time while the activity range changes', () => {
     const oldDate = new Date();
     oldDate.setFullYear(oldDate.getFullYear() - 2);
     
@@ -179,13 +179,31 @@ describe('ProcessListComponent', () => {
     
     component.kpiTimeRange = 'year';
     expect(component.kpiProcesses.length).toBe(3);
-    expect(component.getInProgressCount()).toBe(1);
+    expect(component.getInProgressCount()).toBe(2);
     expect(component.getRejectedCount()).toBe(1);
     expect(component.getWithdrawnCount()).toBe(1);
 
     component.kpiTimeRange = 'all';
     expect(component.kpiProcesses.length).toBe(4);
     expect(component.getInProgressCount()).toBe(2);
+  });
+
+  it('should count complete calendar days in the selected activity range', () => {
+    const rangeStart = new Date();
+    rangeStart.setHours(0, 0, 0, 0);
+    rangeStart.setDate(rangeStart.getDate() - 13);
+
+    const justBeforeRange = new Date(rangeStart);
+    justBeforeRange.setMilliseconds(-1);
+
+    component.processes = [
+      { id: '1', currentStage: 'Initial Call Scheduled', createdAt: new Date() },
+      { id: '2', currentStage: 'Initial Call Scheduled', createdAt: rangeStart },
+      { id: '3', currentStage: 'Initial Call Scheduled', createdAt: justBeforeRange },
+    ];
+    component.kpiTimeRange = '2weeks';
+
+    expect(component.kpiProcesses.map((process) => process.id)).toEqual(['1', '2']);
   });
 
   it('should handle zero processes gracefully in KPIs', () => {

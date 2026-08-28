@@ -78,7 +78,7 @@ export class ProcessListComponent implements OnInit, OnDestroy, AfterViewChecked
     settings!: UserSettings;
     private settingsSub!: Subscription;
     private dashCharts: { [key: string]: any } = {};
-    
+
     kpiTimeRange: 'all' | 'week' | '2weeks' | '3weeks' | 'month' | 'quarter' | 'year' = 'all';
 
     // ─── Interaction History Drawer ────────────────────────────────────────────
@@ -103,12 +103,9 @@ export class ProcessListComponent implements OnInit, OnDestroy, AfterViewChecked
     ) { }
 
     private isClosedProcess(process: any): boolean {
-        if (typeof process?.isClosed === 'boolean') {
-            return process.isClosed;
-        }
-
         const stage = (process?.currentStage ?? '').toString().trim().toLowerCase();
-        return stage === 'rejected' || stage === 'reject' || stage === 'withdrawn' || stage === 'offer declined';
+        const isClosedStage = stage === 'rejected' || stage === 'reject' || stage === 'withdrawn' || stage === 'offer declined';
+        return isClosedStage || process?.isClosed === true;
     }
 
     private isHiddenByDefault(process: any): boolean {
@@ -175,7 +172,7 @@ export class ProcessListComponent implements OnInit, OnDestroy, AfterViewChecked
             case 'week': return 'Daily trend (Last 7 days)';
             case '2weeks': return 'Daily trend (Last 14 days)';
             case '3weeks': return 'Daily trend (Last 21 days)';
-            case 'month': return 'Weekly trend (Last 30 days)';
+            case 'month': return 'Daily trend (Last 30 days)';
             case 'quarter': return 'Monthly trend (Last 90 days)';
             case 'year': return 'Monthly trend (Last 12 months)';
             default: return 'Monthly trend (All Time)';
@@ -200,41 +197,36 @@ export class ProcessListComponent implements OnInit, OnDestroy, AfterViewChecked
         let labels: string[] = [];
         let data: number[] = [];
         const today = new Date();
-        
-        if (this.kpiTimeRange === 'week' || this.kpiTimeRange === '2weeks' || this.kpiTimeRange === '3weeks') {
-            const days = this.kpiTimeRange === 'week' ? 7 : (this.kpiTimeRange === '2weeks' ? 14 : 21);
+
+        const selectedDayCount = this.getSelectedRangeDayCount();
+        const datedProcesses = this.kpiProcesses
+            .map((process) => this.getProcessCreatedAt(process))
+            .filter((date): date is Date => date !== null);
+
+        if (selectedDayCount !== null && selectedDayCount <= 30) {
+            const days = selectedDayCount;
             for (let i = days - 1; i >= 0; i--) {
                 const d = new Date(today);
                 d.setDate(today.getDate() - i);
                 labels.push(d.toLocaleDateString('default', { month: 'short', day: 'numeric' }));
-                data.push(this.processes.filter(p => {
-                    const pd = new Date(p.createdAt);
-                    return pd.toDateString() === d.toDateString();
-                }).length);
-            }
-        } else if (this.kpiTimeRange === 'month') {
-            // Last 4 weeks
-            for (let i = 3; i >= 0; i--) {
-                const start = new Date(today);
-                start.setDate(today.getDate() - (i * 7 + 6));
-                const end = new Date(today);
-                end.setDate(today.getDate() - (i * 7));
-                labels.push(`Week ${4-i}`);
-                data.push(this.processes.filter(p => {
-                    const pd = new Date(p.createdAt);
-                    return pd >= start && pd <= end;
-                }).length);
+                data.push(datedProcesses.filter((date) => date.toDateString() === d.toDateString()).length);
             }
         } else {
-            // Months view (all, year, quarter)
-            const count = this.kpiTimeRange === 'year' ? 12 : (this.kpiTimeRange === 'quarter' ? 3 : 6);
-            for (let i = count - 1; i >= 0; i--) {
-                const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
-                labels.push(d.toLocaleString('default', { month: 'short', year: '2-digit' }));
-                data.push(this.processes.filter(p => {
-                    const pd = new Date(p.createdAt);
-                    return pd.getMonth() === d.getMonth() && pd.getFullYear() === d.getFullYear();
+            const firstDatedProcess = datedProcesses.reduce<Date | null>((earliest, date) => {
+                return !earliest || date < earliest ? date : earliest;
+            }, null);
+            const rangeStart = this.getSelectedRangeStartDate() ?? firstDatedProcess ?? today;
+            const monthCursor = new Date(rangeStart.getFullYear(), rangeStart.getMonth(), 1);
+            const finalMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+
+            while (monthCursor <= finalMonth) {
+                const bucketMonth = monthCursor.getMonth();
+                const bucketYear = monthCursor.getFullYear();
+                labels.push(monthCursor.toLocaleString('default', { month: 'short', year: '2-digit' }));
+                data.push(datedProcesses.filter((date) => {
+                    return date.getMonth() === bucketMonth && date.getFullYear() === bucketYear;
                 }).length);
+                monthCursor.setMonth(monthCursor.getMonth() + 1);
             }
         }
 
@@ -243,7 +235,7 @@ export class ProcessListComponent implements OnInit, OnDestroy, AfterViewChecked
             type: 'bar',
             data: {
                 labels,
-                datasets: [{ label: 'Applications', data, backgroundColor: 'rgba(59,130,246,0.7)', borderRadius: 5, barThickness: 18 }]
+                datasets: [{ label: 'Applications', data, backgroundColor: 'rgba(59,130,246,0.7)', borderRadius: 5, maxBarThickness: 18 }]
             },
             options: {
                 responsive: true, maintainAspectRatio: false,
@@ -259,35 +251,44 @@ export class ProcessListComponent implements OnInit, OnDestroy, AfterViewChecked
 
 
     // ─── KPI Stats ────────────────────────────────────────────────────────────
-    
-    get kpiProcesses(): any[] {
-        if (this.kpiTimeRange === 'all') return this.processes;
-        
-        const now = new Date();
-        const startDate = new Date();
-        
+
+    private getProcessCreatedAt(process: any): Date | null {
+        if (!process?.createdAt) return null;
+
+        const date = new Date(process.createdAt);
+        return Number.isNaN(date.getTime()) ? null : date;
+    }
+
+    private getSelectedRangeDayCount(): number | null {
         switch (this.kpiTimeRange) {
-            case 'week':
-                startDate.setDate(now.getDate() - 7);
-                break;
-            case '2weeks':
-                startDate.setDate(now.getDate() - 14);
-                break;
-            case '3weeks':
-                startDate.setDate(now.getDate() - 21);
-                break;
-            case 'month':
-                startDate.setMonth(now.getMonth() - 1);
-                break;
-            case 'quarter':
-                startDate.setMonth(now.getMonth() - 3);
-                break;
-            case 'year':
-                startDate.setFullYear(now.getFullYear() - 1);
-                break;
+            case 'week': return 7;
+            case '2weeks': return 14;
+            case '3weeks': return 21;
+            case 'month': return 30;
+            case 'quarter': return 90;
+            case 'year': return 365;
+            default: return null;
         }
-        
-        return this.processes.filter(p => new Date(p.createdAt) >= startDate);
+    }
+
+    private getSelectedRangeStartDate(): Date | null {
+        const dayCount = this.getSelectedRangeDayCount();
+        if (dayCount === null) return null;
+
+        const startDate = new Date();
+        startDate.setHours(0, 0, 0, 0);
+        startDate.setDate(startDate.getDate() - (dayCount - 1));
+        return startDate;
+    }
+
+    get kpiProcesses(): any[] {
+        const startDate = this.getSelectedRangeStartDate();
+        if (startDate === null) return this.processes;
+
+        return this.processes.filter((process) => {
+            const createdAt = this.getProcessCreatedAt(process);
+            return createdAt !== null && createdAt >= startDate;
+        });
     }
 
     getInterviewActiveCount(): number {
@@ -303,14 +304,14 @@ export class ProcessListComponent implements OnInit, OnDestroy, AfterViewChecked
     }
 
     getRejectedCount(): number {
-        return this.kpiProcesses.filter((process) => {
+        return this.processes.filter((process) => {
             const stage = (process?.currentStage ?? '').toString().trim().toLowerCase();
             return stage === 'rejected' || stage === 'reject';
         }).length;
     }
 
     getWithdrawnCount(): number {
-        return this.kpiProcesses.filter((process) => {
+        return this.processes.filter((process) => {
             const stage = (process?.currentStage ?? '').toString().trim().toLowerCase();
             return stage === 'withdrawn';
         }).length;
@@ -546,7 +547,7 @@ export class ProcessListComponent implements OnInit, OnDestroy, AfterViewChecked
     }
 
     getInProgressCount(): number {
-        return this.kpiProcesses.filter(p => !this.isClosedProcess(p)).length;
+        return this.processes.filter(p => !this.isClosedProcess(p)).length;
     }
 
     getOfferCount(): number {
