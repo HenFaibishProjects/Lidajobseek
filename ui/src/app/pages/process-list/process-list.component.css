@@ -1192,10 +1192,10 @@ body:not(.dark-theme) .performance-section {
 
 .kpi-header {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
-    margin-bottom: var(--space-lg);
-    padding: 0 var(--space-xs);
+    margin-bottom: 5px;
+    padding: 5px var(--space-xs);
 }
 
 .kpi-title {

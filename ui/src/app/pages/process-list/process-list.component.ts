@@ -79,7 +79,7 @@ export class ProcessListComponent implements OnInit, OnDestroy, AfterViewChecked
     private settingsSub!: Subscription;
     private dashCharts: { [key: string]: any } = {};
     
-    kpiTimeRange: 'all' | 'week' | 'month' | 'quarter' | 'year' = 'all';
+    kpiTimeRange: 'all' | 'week' | '2weeks' | '3weeks' | 'month' | 'quarter' | 'year' = 'all';
 
     // ─── Interaction History Drawer ────────────────────────────────────────────
     drawerOpen = false;
@@ -173,6 +173,8 @@ export class ProcessListComponent implements OnInit, OnDestroy, AfterViewChecked
     getTimelineSubtitle(): string {
         switch (this.kpiTimeRange) {
             case 'week': return 'Daily trend (Last 7 days)';
+            case '2weeks': return 'Daily trend (Last 14 days)';
+            case '3weeks': return 'Daily trend (Last 21 days)';
             case 'month': return 'Weekly trend (Last 30 days)';
             case 'quarter': return 'Monthly trend (Last 90 days)';
             case 'year': return 'Monthly trend (Last 12 months)';
@@ -187,12 +189,12 @@ export class ProcessListComponent implements OnInit, OnDestroy, AfterViewChecked
         let data: number[] = [];
         const today = new Date();
         
-        if (this.kpiTimeRange === 'week') {
-            // Last 7 days
-            for (let i = 6; i >= 0; i--) {
+        if (this.kpiTimeRange === 'week' || this.kpiTimeRange === '2weeks' || this.kpiTimeRange === '3weeks') {
+            const days = this.kpiTimeRange === 'week' ? 7 : (this.kpiTimeRange === '2weeks' ? 14 : 21);
+            for (let i = days - 1; i >= 0; i--) {
                 const d = new Date(today);
                 d.setDate(today.getDate() - i);
-                labels.push(d.toLocaleDateString('default', { weekday: 'short', day: 'numeric' }));
+                labels.push(d.toLocaleDateString('default', { month: 'short', day: 'numeric' }));
                 data.push(this.processes.filter(p => {
                     const pd = new Date(p.createdAt);
                     return pd.toDateString() === d.toDateString();
@@ -255,6 +257,12 @@ export class ProcessListComponent implements OnInit, OnDestroy, AfterViewChecked
         switch (this.kpiTimeRange) {
             case 'week':
                 startDate.setDate(now.getDate() - 7);
+                break;
+            case '2weeks':
+                startDate.setDate(now.getDate() - 14);
+                break;
+            case '3weeks':
+                startDate.setDate(now.getDate() - 21);
                 break;
             case 'month':
                 startDate.setMonth(now.getMonth() - 1);

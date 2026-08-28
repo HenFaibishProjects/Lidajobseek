@@ -14,8 +14,8 @@
                         <img [src]="getAvatarUrl()" alt="User Avatar">
                     </div>
                 </h1>
-                <p class="hero-subtitle">Track, manage, and succeed in your career journey</p>
-                <p class="hero-subtitle-secondary">
+            
+                <p class="hero-subtitle">
                     You currently track <strong>{{ filteredProcesses.length }}</strong> applications. Keep them flowing
                     through the pipeline, one step at a time.
                 </p>
@@ -41,7 +41,6 @@
         <!-- KPI Strip -4 cards -->
         <section class="performance-section">
             <div class="kpi-header">
-                <h2 class="kpi-title">Performance Metrics</h2>
                 <div class="kpi-range-selector">
                     <button class="kpi-range-btn" [class.active]="currentKpiRange === 'all'"
                         (click)="currentKpiRange = 'all'">All Time</button>
@@ -51,6 +50,10 @@
                         (click)="currentKpiRange = 'quarter'">Quarter</button>
                     <button class="kpi-range-btn" [class.active]="currentKpiRange === 'month'"
                         (click)="currentKpiRange = 'month'">Month</button>
+                    <button class="kpi-range-btn" [class.active]="currentKpiRange === '3weeks'"
+                        (click)="currentKpiRange = '3weeks'">3 Weeks</button>
+                    <button class="kpi-range-btn" [class.active]="currentKpiRange === '2weeks'"
+                        (click)="currentKpiRange = '2weeks'">2 Weeks</button>
                     <button class="kpi-range-btn" [class.active]="currentKpiRange === 'week'"
                         (click)="currentKpiRange = 'week'">Week</button>
                 </div>
@@ -147,8 +150,7 @@
         <aside class="filters-panel">
             <div class="filters-header">
                 <div class="filters-heading">
-                    <h3>Refine board</h3>
-                    <p class="filters-subtitle">Narrow down by stage, work mode, and status.</p>
+                    <h3>Filter board</h3>
                 </div>
                 <button class="clear-btn" (click)="clearFilters()" [disabled]="!isFilterActive">Clear</button>
             </div>
@@ -181,7 +183,6 @@
 
                 <div class="filter-section">
                     <div class="filter-section-title">
-                        <span class="filter-section-label">Work style</span>
                     </div>
                     <div class="filter-group">
                         <label class="filter-label">
