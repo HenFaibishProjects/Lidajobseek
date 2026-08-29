@@ -77,6 +77,11 @@ describe('ProcessDetailsComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  it('should include the closed process stages in the stage selector', () => {
+    expect(component.stages).toContain('Rejected');
+    expect(component.stages).toContain('Withdrawn');
+  });
+
   it('should correctly format jobDescriptionUrl', () => {
     expect(component.formatUrl('google.com')).toBe('https://google.com');
     expect(component.formatUrl('https://google.com')).toBe('https://google.com');

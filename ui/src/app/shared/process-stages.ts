@@ -5,7 +5,9 @@ export const PROCESS_STAGES: string[] = [
   'Awaiting New Interview Date',
   'Home Task Assigned',
   'Home Task Submitted (Under Review)',
-  'References Requested'
+  'References Requested',
+  'Rejected',
+  'Withdrawn'
 ];
 
 export const DEFAULT_PROCESS_STAGE = PROCESS_STAGES[0];
