@@ -1143,3 +1143,13 @@
     grid-template-columns: 105px minmax(0, 1fr);
   }
 }
+
+.mc-table th,
+.mc-table td,
+.mc-table td *,
+.mc-table td::before,
+.mc-import-table th,
+.mc-import-table td,
+.mc-import-table td * {
+  font-size: 16px;
+}
