@@ -175,6 +175,25 @@ describe('ProcessListComponent', () => {
     expect(component.filteredProcesses.length).toBe(3);
   });
 
+  it('should build the stage filter only from statuses that exist in the current processes', () => {
+    component.processes = [
+      { id: 1, currentStage: 'Awaiting Next Interview' },
+      { id: 2, currentStage: 'Awaiting Next Interview' },
+      { id: 3, currentStage: 'Rejected' },
+      { id: 4, currentStage: 'Withdrawn' },
+      { id: 5, currentStage: 'Custom Legacy Stage' },
+    ];
+
+    expect(component.availableStages).toEqual([
+      'Awaiting Next Interview',
+      'Rejected',
+      'Withdrawn',
+      'Custom Legacy Stage',
+    ]);
+    expect(component.availableStages).not.toContain('Home Task Assigned');
+    expect(component.getStageProcessCount('Awaiting Next Interview')).toBe(2);
+  });
+
   it('should fetch avatar URL based on settings', () => {
     const url = component.getAvatarUrl();
     expect(url).toContain('7.x/bottts/svg');

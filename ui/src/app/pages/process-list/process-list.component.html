@@ -351,7 +351,9 @@
                         </label>
                         <select [(ngModel)]="selectedStage" (change)="onStageChange($event)" class="filter-chip">
                             <option value="">All stages</option>
-                            <option *ngFor="let stage of availableStages" [value]="stage">{{ stage }}</option>
+                            <option *ngFor="let stage of availableStages" [value]="stage">
+                                {{ stage }} ({{ getStageProcessCount(stage) }})
+                            </option>
                         </select>
                     </div>
                 </div>

@@ -113,8 +113,30 @@ export class ProcessListComponent implements OnInit, OnDestroy, AfterViewChecked
     private isBodyScrollLocked = false;
 
     // Available options for filters
-    availableStages: string[] = PROCESS_STAGES;
     availableWorkModes: string[] = ['remote', 'hybrid', 'onsite'];
+
+    get availableStages(): string[] {
+        const existingStages = Array.from(new Set(
+            this.processes
+                .map(process => process?.currentStage?.toString().trim())
+                .filter((stage): stage is string => !!stage),
+        ));
+        const preferredOrder = new Map(
+            [...PROCESS_STAGES, 'Rejected', 'Withdrawn'].map((stage, index) => [stage, index]),
+        );
+
+        return existingStages.sort((first, second) => {
+            const firstIndex = preferredOrder.get(first) ?? Number.MAX_SAFE_INTEGER;
+            const secondIndex = preferredOrder.get(second) ?? Number.MAX_SAFE_INTEGER;
+            return firstIndex === secondIndex
+                ? first.localeCompare(second)
+                : firstIndex - secondIndex;
+        });
+    }
+
+    getStageProcessCount(stage: string): number {
+        return this.processes.filter(process => process?.currentStage === stage).length;
+    }
 
     userDisplayName: string = 'Your Job Search';
     settings!: UserSettings;
