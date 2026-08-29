@@ -197,6 +197,32 @@ describe('ProcessListComponent', () => {
     expect(component.getFollowUpBadgeTitle(process)).toContain('No follow-up needed');
   });
 
+  it('should trust a scheduled stage when the process list has no future interaction date', () => {
+    const oldUpdate = new Date();
+    oldUpdate.setDate(oldUpdate.getDate() - 14);
+    const process = {
+      currentStage: 'Awaiting Next Interview',
+      updatedAt: oldUpdate,
+      interactions: [],
+    };
+
+    expect(component.getFollowUpState(process)).toBe('scheduled');
+    expect(component.getFollowUpBadgeTitle(process)).toBe('No follow-up needed: interview is scheduled');
+  });
+
+  it('should use a future next invite date for the scheduled interview tooltip', () => {
+    const futureInterview = new Date();
+    futureInterview.setDate(futureInterview.getDate() + 7);
+    const process = {
+      currentStage: 'Awaiting Next Interview',
+      updatedAt: new Date(),
+      interactions: [{ date: new Date(), nextInviteDate: futureInterview }],
+    };
+
+    expect(component.getFollowUpState(process)).toBe('scheduled');
+    expect(component.getFollowUpBadgeTitle(process)).toContain('interview scheduled for');
+  });
+
   it('should flag interview feedback after seven days', () => {
     const warningUpdate = new Date();
     warningUpdate.setDate(warningUpdate.getDate() - 4);

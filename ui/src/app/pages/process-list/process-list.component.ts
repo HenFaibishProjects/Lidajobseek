@@ -334,7 +334,7 @@ export class ProcessListComponent implements OnInit, OnDestroy, AfterViewChecked
             'Awaiting Next Interview',
         ]);
 
-        if (scheduledStages.has(process.currentStage) && this.getNextInterviewDate(process)) {
+        if (scheduledStages.has(process.currentStage)) {
             return 'scheduled';
         }
 
@@ -351,7 +351,10 @@ export class ProcessListComponent implements OnInit, OnDestroy, AfterViewChecked
         const daysLabel = days === null ? 'an unknown number of days' : `${days} ${days === 1 ? 'day' : 'days'}`;
 
         if (state === 'scheduled') {
-            const nextInterviewDate = this.getNextInterviewDate(process)!;
+            const nextInterviewDate = this.getNextInterviewDate(process);
+            if (!nextInterviewDate) {
+                return 'No follow-up needed: interview is scheduled';
+            }
             const formattedDate = nextInterviewDate.toLocaleString('en-GB', {
                 day: '2-digit',
                 month: '2-digit',
@@ -384,7 +387,9 @@ export class ProcessListComponent implements OnInit, OnDestroy, AfterViewChecked
 
         const now = Date.now();
         const futureDates = process.interactions
-            .map((interaction: any) => new Date(interaction?.date))
+            .flatMap((interaction: any) => [interaction?.date, interaction?.nextInviteDate])
+            .filter((dateValue: any) => !!dateValue)
+            .map((dateValue: string | Date) => new Date(dateValue))
             .filter((interactionDate: Date) => (
                 !Number.isNaN(interactionDate.getTime()) && interactionDate.getTime() > now
             ))
