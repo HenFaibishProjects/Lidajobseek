@@ -13,6 +13,7 @@ import { getInterviewTypeLabel as resolveInterviewTypeLabel } from '../../shared
 import { LucideAngularModule } from 'lucide-angular';
 import { AiAssistantPanelComponent } from '../../components/ai-assistant-panel/ai-assistant-panel.component';
 import { PROCESS_STAGES } from '../../shared/process-stages';
+import { buildCompanyResearchPrompt } from '../../shared/company-research-prompt';
 
 @Component({
     selector: 'app-process-details',
@@ -336,12 +337,7 @@ export class ProcessDetailsComponent implements OnInit, OnDestroy {
 
     copyResearchPrompt(event: Event) {
         event.stopPropagation();
-        const companyName = this.process.companyName?.trim() || 'Unknown Company';
-        const prompt =
-`Research the following company as a potential employer. Company name: ${companyName}
- Country or location: israel 
-Use web search and public sources only. Return a concise JSON overview for a job seeker. Rules: 1. Verify that you found the correct company and do not mix it with similarly named companies. 2. Prefer official sources, LinkedIn, career pages, reputable news sites, and employee review sites. 3. Do not guess. Use null when reliable information is unavailable. 4. Keep the response short: - Maximum 1-2 sentences per summary - Maximum 3 items in each list - Maximum 3 recent news items 5. Do not repeat the same fact in multiple sections. 6. Focus on information relevant to someone considering working at the company. 7. Return valid JSON only, without markdown or extra text. 8. Write summaries in Hebrew. Keep JSON keys and enum values in English. Return exactly this structure: { "company": { "name": null, "website": null, "location": null, "industry": null, "summary": null, "employee_range": null, "growth_trend": "growing | stable | shrinking | unknown" }, "workplace": { "work_model": "remote | hybrid | onsite | mixed | unknown", "review_rating": null, "review_count": null, "reviews_summary": null }, "hiring": { "is_hiring": null, "open_roles_summary": null }, "recent_news": [ { "date": null, "title": null, "summary": null, "source_url": null } ], "job_seeker_summary": { "overall_impression": null, "positive_signals": [], "concerns": [], "missing_information": [] } }
-please give the answer in json canvas , ready to copy for a code`;
+        const prompt = buildCompanyResearchPrompt(this.process.companyName);
 
         navigator.clipboard.writeText(prompt).then(() => {
             clearTimeout(this.promptCopiedTimer);

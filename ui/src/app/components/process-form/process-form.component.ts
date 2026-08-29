@@ -7,6 +7,7 @@ import countriesData from '../../../assets/countries.json';
 import { InitialInteractionFieldsComponent } from '../initial-interaction-fields/initial-interaction-fields.component';
 import { SettingsService } from '../../services/settings.service';
 import { ConfirmService } from '../../services/confirm.service';
+import { buildCompanyResearchPrompt } from '../../shared/company-research-prompt';
 
 @Component({
   selector: 'app-process-form',
@@ -358,12 +359,7 @@ export class ProcessFormComponent implements OnInit, OnDestroy {
 
   copyResearchPrompt(event: Event) {
     event.stopPropagation(); // prevent toggling the section
-    const companyName = this.process.companyName?.trim() || 'Unknown Company';
-    const prompt =
-`Research the following company as a potential employer. Company name: ${companyName}
- Country or location: israel 
-Use web search and public sources only. Return a concise JSON overview for a job seeker. Rules: 1. Verify that you found the correct company and do not mix it with similarly named companies. 2. Prefer official sources, LinkedIn, career pages, reputable news sites, and employee review sites. 3. Do not guess. Use null when reliable information is unavailable. 4. Keep the response short: - Maximum 1-2 sentences per summary - Maximum 3 items in each list - Maximum 3 recent news items 5. Do not repeat the same fact in multiple sections. 6. Focus on information relevant to someone considering working at the company. 7. Return valid JSON only. You MUST verify that the JSON is 100% valid and properly escaped. 8. Write summaries in Hebrew. Keep JSON keys and enum values in English. Return exactly this structure: { "company": { "name": null, "website": null, "location": null, "industry": null, "summary": null, "employee_range": null, "growth_trend": "growing | stable | shrinking | unknown" }, "workplace": { "work_model": "remote | hybrid | onsite | mixed | unknown", "review_rating": null, "review_count": null, "reviews_summary": null }, "hiring": { "is_hiring": null, "open_roles_summary": null }, "recent_news": [ { "date": null, "title": null, "summary": null, "source_url": null } ], "job_seeker_summary": { "overall_impression": null, "positive_signals": [], "concerns": [], "missing_information": [] } }
-Please verify the JSON validation and provide the final result in a JSON canvas (code block) ready to copy.`;
+    const prompt = buildCompanyResearchPrompt(this.process.companyName);
 
     navigator.clipboard.writeText(prompt).then(() => {
       clearTimeout(this.promptCopiedTimer);

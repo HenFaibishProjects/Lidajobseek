@@ -207,7 +207,7 @@
                         <div class="cr-items">
                             <div class="cr-item" *ngIf="process.companyResearch.company.name">
                                 <span class="cr-label">שם החברה</span>
-                                <span class="cr-value">{{ process.companyResearch.company.name }}</span>
+                                <span class="cr-value cr-bidi-text" dir="auto">{{ process.companyResearch.company.name }}</span>
                             </div>
                             <div class="cr-item" *ngIf="process.companyResearch.company.website">
                                 <span class="cr-label">אתר החברה</span>
@@ -218,15 +218,15 @@
                             </div>
                             <div class="cr-item" *ngIf="process.companyResearch.company.location">
                                 <span class="cr-label">מיקום</span>
-                                <span class="cr-value">{{ process.companyResearch.company.location }}</span>
+                                <span class="cr-value cr-bidi-text" dir="auto">{{ process.companyResearch.company.location }}</span>
                             </div>
                             <div class="cr-item" *ngIf="process.companyResearch.company.industry">
                                 <span class="cr-label">תחום פעילות</span>
-                                <span class="cr-value">{{ process.companyResearch.company.industry }}</span>
+                                <span class="cr-value cr-bidi-text" dir="auto">{{ process.companyResearch.company.industry }}</span>
                             </div>
                             <div class="cr-item cr-item--full" *ngIf="process.companyResearch.company.summary">
                                 <span class="cr-label">תיאור קצר</span>
-                                <span class="cr-value cr-value--wrap">{{ process.companyResearch.company.summary }}</span>
+                                <span class="cr-value cr-value--wrap cr-bidi-text" dir="auto">{{ process.companyResearch.company.summary }}</span>
                             </div>
                             <div class="cr-item" *ngIf="process.companyResearch.company.employee_range">
                                 <span class="cr-label">מספר עובדים</span>
@@ -264,7 +264,7 @@
                             </div>
                             <div class="cr-item cr-item--full" *ngIf="process.companyResearch.workplace.reviews_summary">
                                 <span class="cr-label">סיכום ביקורות</span>
-                                <span class="cr-value cr-value--wrap">{{ process.companyResearch.workplace.reviews_summary }}</span>
+                                <span class="cr-value cr-value--wrap cr-bidi-text" dir="auto">{{ process.companyResearch.workplace.reviews_summary }}</span>
                             </div>
                         </div>
                     </div>
@@ -284,7 +284,7 @@
                             </div>
                             <div class="cr-item cr-item--full" *ngIf="process.companyResearch.hiring.open_roles_summary">
                                 <span class="cr-label">סיכום משרות פתוחות</span>
-                                <span class="cr-value cr-value--wrap">{{ process.companyResearch.hiring.open_roles_summary }}</span>
+                                <span class="cr-value cr-value--wrap cr-bidi-text" dir="auto">{{ process.companyResearch.hiring.open_roles_summary }}</span>
                             </div>
                         </div>
                     </div>
@@ -298,8 +298,8 @@
                                 <div class="cr-news-meta">
                                     <span class="cr-news-date" *ngIf="news.date">{{ news.date }}</span>
                                 </div>
-                                <div class="cr-news-title" *ngIf="news.title">{{ news.title }}</div>
-                                <div class="cr-news-summary" *ngIf="news.summary">{{ news.summary }}</div>
+                                <div class="cr-news-title cr-bidi-text" dir="auto" *ngIf="news.title">{{ news.title }}</div>
+                                <div class="cr-news-summary cr-bidi-text" dir="auto" *ngIf="news.summary">{{ news.summary }}</div>
                                 <a class="cr-news-link" *ngIf="news.source_url" [href]="news.source_url" target="_blank" rel="noopener noreferrer">
                                     קישור למקור
                                     <lucide-icon name="external-link" [size]="11"></lucide-icon>
@@ -319,7 +319,7 @@
                         <div class="cr-items">
                             <div class="cr-item cr-item--full" *ngIf="process.companyResearch.job_seeker_summary.overall_impression">
                                 <span class="cr-label">התרשמות כללית</span>
-                                <span class="cr-value cr-value--wrap">{{ process.companyResearch.job_seeker_summary.overall_impression }}</span>
+                                <span class="cr-value cr-value--wrap cr-bidi-text" dir="auto">{{ process.companyResearch.job_seeker_summary.overall_impression }}</span>
                             </div>
                         </div>
                         <div class="cr-signal-cols">
@@ -327,21 +327,21 @@
                                  *ngIf="process.companyResearch.job_seeker_summary.positive_signals && process.companyResearch.job_seeker_summary.positive_signals.length > 0">
                                 <div class="cr-signal-title">✅ נקודות חיוביות</div>
                                 <ul class="cr-signal-list">
-                                    <li *ngFor="let s of process.companyResearch.job_seeker_summary.positive_signals">{{ s }}</li>
+                                    <li class="cr-bidi-text" dir="auto" *ngFor="let s of process.companyResearch.job_seeker_summary.positive_signals">{{ s }}</li>
                                 </ul>
                             </div>
                             <div class="cr-signal cr-signal--yellow"
                                  *ngIf="process.companyResearch.job_seeker_summary.concerns && process.companyResearch.job_seeker_summary.concerns.length > 0">
                                 <div class="cr-signal-title">⚠️ נקודות לבדיקה</div>
                                 <ul class="cr-signal-list">
-                                    <li *ngFor="let c of process.companyResearch.job_seeker_summary.concerns">{{ c }}</li>
+                                    <li class="cr-bidi-text" dir="auto" *ngFor="let c of process.companyResearch.job_seeker_summary.concerns">{{ c }}</li>
                                 </ul>
                             </div>
                             <div class="cr-signal cr-signal--gray"
                                  *ngIf="process.companyResearch.job_seeker_summary.missing_information && process.companyResearch.job_seeker_summary.missing_information.length > 0">
                                 <div class="cr-signal-title">❓ מידע חסר</div>
                                 <ul class="cr-signal-list">
-                                    <li *ngFor="let m of process.companyResearch.job_seeker_summary.missing_information">{{ m }}</li>
+                                    <li class="cr-bidi-text" dir="auto" *ngFor="let m of process.companyResearch.job_seeker_summary.missing_information">{{ m }}</li>
                                 </ul>
                             </div>
                         </div>
@@ -2392,6 +2392,12 @@
         font-weight: 400;
         line-height: 1.6;
         color: var(--text-secondary);
+    }
+
+    .cr-bidi-text {
+        unicode-bidi: plaintext;
+        text-align: start;
+        overflow-wrap: anywhere;
     }
 
     .cr-link {
