@@ -287,6 +287,29 @@ export class ProcessListComponent implements OnInit, OnDestroy, AfterViewChecked
         return roleTitle ? `${companyName} · ${roleTitle}` : companyName;
     }
 
+    getDaysSinceUpdate(updatedAt: string | Date | null | undefined): number | null {
+        if (!updatedAt) return null;
+
+        const updatedDate = new Date(updatedAt instanceof Date ? updatedAt.getTime() : updatedAt);
+        if (Number.isNaN(updatedDate.getTime())) return null;
+
+        const today = new Date();
+        const todayCalendarDay = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate());
+        const updatedCalendarDay = Date.UTC(
+            updatedDate.getFullYear(),
+            updatedDate.getMonth(),
+            updatedDate.getDate(),
+        );
+        const elapsedDays = Math.floor((todayCalendarDay - updatedCalendarDay) / 86_400_000);
+        return Math.max(0, elapsedDays);
+    }
+
+    getDaysSinceUpdateLabel(updatedAt: string | Date | null | undefined): string {
+        const days = this.getDaysSinceUpdate(updatedAt);
+        if (days === null) return '-';
+        return `${days} ${days === 1 ? 'day' : 'days'}`;
+    }
+
 
 
     // ─── KPI Stats ────────────────────────────────────────────────────────────
@@ -549,6 +572,8 @@ export class ProcessListComponent implements OnInit, OnDestroy, AfterViewChecked
                 return new Date(process.createdAt);
             case 'updated':
                 return new Date(process.updatedAt);
+            case 'age':
+                return this.getDaysSinceUpdate(process.updatedAt);
             default:
                 return null;
         }

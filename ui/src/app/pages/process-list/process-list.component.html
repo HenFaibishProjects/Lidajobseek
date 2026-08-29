@@ -432,6 +432,17 @@
                                 </button>
                             </div>
                         </div>
+                        <div class="list-col list-col-age">
+                            <button class="list-sort-btn" (click)="sort('age')" title="Days since the process was last updated">
+                                Days idle
+                                <svg *ngIf="isSorted('age')" width="11" height="11" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <polyline *ngIf="getSortDirection('age') === 'asc'" points="18 15 12 9 6 15" />
+                                    <polyline *ngIf="getSortDirection('age') === 'desc'" points="6 9 12 15 18 9" />
+                                </svg>
+                            </button>
+                        </div>
                         <div class="list-col list-col-history">History</div>
                     </div>
 
@@ -489,6 +500,11 @@
                                     <time class="list-date" [attr.datetime]="p.updatedAt">{{ p.updatedAt | dateFormat:'date' }}</time>
                                 </span>
                             </div>
+                        </div>
+                        <div class="list-col list-col-age">
+                            <span class="list-age-badge" title="Time since the last update">
+                                {{ getDaysSinceUpdateLabel(p.updatedAt) }}
+                            </span>
                         </div>
                         <div class="list-col list-col-history">
                             <button class="list-history-btn" (click)="openHistoryDrawer(p, $event)" title="View interaction history">

@@ -160,6 +160,32 @@ describe('ProcessListComponent', () => {
     expect(component.filteredProcesses.map((process) => process.id)).toEqual(['earlier', 'later']);
   });
 
+  it('should calculate calendar days since the last update', () => {
+    const today = new Date();
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    expect(component.getDaysSinceUpdate(today)).toBe(0);
+    expect(component.getDaysSinceUpdate(yesterday)).toBe(1);
+    expect(component.getDaysSinceUpdateLabel(yesterday)).toBe('1 day');
+    expect(component.getDaysSinceUpdateLabel(today)).toBe('0 days');
+    expect(component.getDaysSinceUpdate('invalid-date')).toBeNull();
+  });
+
+  it('should sort processes by days since their last update', () => {
+    const recentUpdate = new Date();
+    const oldUpdate = new Date();
+    oldUpdate.setDate(oldUpdate.getDate() - 8);
+    component.processes = [
+      { id: 'old', updatedAt: oldUpdate },
+      { id: 'recent', updatedAt: recentUpdate },
+    ];
+
+    component.sort('age');
+
+    expect(component.filteredProcesses.map((process) => process.id)).toEqual(['recent', 'old']);
+  });
+
   it('should format company and role for chart tooltips', () => {
     expect((component as any).formatProcessTooltipLabel({
       companyName: 'Acme',
