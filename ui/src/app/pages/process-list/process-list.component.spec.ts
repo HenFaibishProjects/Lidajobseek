@@ -181,6 +181,48 @@ describe('ProcessListComponent', () => {
     expect(component.getDaysSinceUpdate('invalid-date')).toBeNull();
   });
 
+  it('should mark a process with a future interview as scheduled regardless of update age', () => {
+    const oldUpdate = new Date();
+    oldUpdate.setDate(oldUpdate.getDate() - 14);
+    const futureInterview = new Date();
+    futureInterview.setDate(futureInterview.getDate() + 7);
+
+    const process = {
+      currentStage: 'Awaiting Next Interview',
+      updatedAt: oldUpdate,
+      interactions: [{ date: futureInterview }],
+    };
+
+    expect(component.getFollowUpState(process)).toBe('scheduled');
+    expect(component.getFollowUpBadgeTitle(process)).toContain('No follow-up needed');
+  });
+
+  it('should flag interview feedback after seven days', () => {
+    const warningUpdate = new Date();
+    warningUpdate.setDate(warningUpdate.getDate() - 4);
+    const overdueUpdate = new Date();
+    overdueUpdate.setDate(overdueUpdate.getDate() - 7);
+
+    expect(component.getFollowUpState({
+      currentStage: 'Waiting for Interview Feedback',
+      updatedAt: warningUpdate,
+    })).toBe('warning');
+    expect(component.getFollowUpState({
+      currentStage: 'Waiting for Interview Feedback',
+      updatedAt: overdueUpdate,
+    })).toBe('overdue');
+  });
+
+  it('should flag waiting for a new interview date using the same thresholds', () => {
+    const overdueUpdate = new Date();
+    overdueUpdate.setDate(overdueUpdate.getDate() - 7);
+
+    expect(component.getFollowUpState({
+      currentStage: 'Awaiting New Interview Date',
+      updatedAt: overdueUpdate,
+    })).toBe('overdue');
+  });
+
   it('should sort processes by days since their last update', () => {
     const recentUpdate = new Date();
     const oldUpdate = new Date();

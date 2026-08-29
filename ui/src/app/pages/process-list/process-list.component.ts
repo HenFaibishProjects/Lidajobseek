@@ -312,6 +312,87 @@ export class ProcessListComponent implements OnInit, OnDestroy, AfterViewChecked
         return `${days} ${days === 1 ? 'day' : 'days'}`;
     }
 
+    getFollowUpState(process: any): 'neutral' | 'scheduled' | 'warning' | 'overdue' {
+        if (!process || this.isClosedProcess(process)) return 'neutral';
+
+        const days = this.getDaysSinceUpdate(process.updatedAt);
+        if (days === null) return 'neutral';
+
+        const waitingStages = new Set([
+            'Waiting for Interview Feedback',
+            'Awaiting New Interview Date',
+        ]);
+
+        if (waitingStages.has(process.currentStage)) {
+            if (days >= 7) return 'overdue';
+            if (days >= 4) return 'warning';
+            return 'neutral';
+        }
+
+        const scheduledStages = new Set([
+            'Initial Call Scheduled',
+            'Awaiting Next Interview',
+        ]);
+
+        if (scheduledStages.has(process.currentStage) && this.getNextInterviewDate(process)) {
+            return 'scheduled';
+        }
+
+        return 'neutral';
+    }
+
+    getFollowUpBadgeClass(process: any): string {
+        return `list-age-badge--${this.getFollowUpState(process)}`;
+    }
+
+    getFollowUpBadgeTitle(process: any): string {
+        const state = this.getFollowUpState(process);
+        const days = this.getDaysSinceUpdate(process?.updatedAt);
+        const daysLabel = days === null ? 'an unknown number of days' : `${days} ${days === 1 ? 'day' : 'days'}`;
+
+        if (state === 'scheduled') {
+            const nextInterviewDate = this.getNextInterviewDate(process)!;
+            const formattedDate = nextInterviewDate.toLocaleString('en-GB', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+            });
+            return `No follow-up needed: interview scheduled for ${formattedDate}`;
+        }
+
+        if (state === 'overdue') {
+            const waitingFor = process.currentStage === 'Awaiting New Interview Date'
+                ? 'a new interview date'
+                : 'interview feedback';
+            return `Follow-up recommended: waiting for ${waitingFor} for ${daysLabel}`;
+        }
+
+        if (state === 'warning') {
+            const waitingFor = process.currentStage === 'Awaiting New Interview Date'
+                ? 'a new interview date'
+                : 'interview feedback';
+            return `Attention: waiting for ${waitingFor} for ${daysLabel}`;
+        }
+
+        return `Last updated ${daysLabel} ago`;
+    }
+
+    private getNextInterviewDate(process: any): Date | null {
+        if (!Array.isArray(process?.interactions)) return null;
+
+        const now = Date.now();
+        const futureDates = process.interactions
+            .map((interaction: any) => new Date(interaction?.date))
+            .filter((interactionDate: Date) => (
+                !Number.isNaN(interactionDate.getTime()) && interactionDate.getTime() > now
+            ))
+            .sort((first: Date, second: Date) => first.getTime() - second.getTime());
+
+        return futureDates[0] ?? null;
+    }
+
 
 
     // ─── KPI Stats ────────────────────────────────────────────────────────────
