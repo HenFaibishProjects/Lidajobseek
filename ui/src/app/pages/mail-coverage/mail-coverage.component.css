@@ -16,6 +16,18 @@
   margin-bottom: 24px;
 }
 
+.mc-header-actions,
+.mc-import-source-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mc-import-open-btn {
+  color: #4f46e5;
+  border-color: rgba(79, 70, 229, 0.3);
+}
+
 .mc-title-row {
   display: flex;
   align-items: center;
@@ -110,6 +122,176 @@
   border: 1px solid rgba(99, 102, 241, 0.32);
   border-radius: 16px;
   box-shadow: 0 8px 28px rgba(15, 23, 42, 0.07);
+}
+
+.mc-import-card {
+  overflow: hidden;
+  background:
+    radial-gradient(
+      circle at 100% 0,
+      rgba(99, 102, 241, 0.09),
+      transparent 34%
+    ),
+    var(--bg-primary);
+}
+
+.mc-import-source {
+  padding: 16px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 13px;
+}
+
+.mc-import-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.mc-import-label-row label {
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 750;
+  text-transform: uppercase;
+  letter-spacing: 0.055em;
+}
+
+.mc-import-label-row span {
+  overflow: hidden;
+  color: #6366f1;
+  font-size: 11px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mc-import-textarea {
+  min-height: 158px;
+  line-height: 1.45;
+  resize: vertical;
+}
+
+.mc-import-source-actions {
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+
+.mc-file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.mc-import-preview {
+  margin-top: 18px;
+}
+
+.mc-import-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.mc-import-summary > div {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 12px 14px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 11px;
+}
+
+.mc-import-summary strong {
+  color: #6366f1;
+  font-size: 20px;
+  font-weight: 850;
+}
+
+.mc-import-summary span {
+  color: var(--text-tertiary);
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.mc-import-notice,
+.mc-import-errors {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 9px;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.mc-import-notice {
+  color: #a16207;
+  background: rgba(245, 158, 11, 0.09);
+  border: 1px solid rgba(245, 158, 11, 0.24);
+}
+
+.mc-import-errors {
+  color: #b91c1c;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.22);
+}
+
+.mc-import-errors strong,
+.mc-import-errors p {
+  display: block;
+  margin: 0;
+}
+
+.mc-import-errors p {
+  margin-top: 3px;
+}
+
+.mc-import-table-wrap {
+  max-height: 330px;
+  margin-top: 12px;
+  overflow: auto;
+  border: 1px solid var(--border-color);
+  border-radius: 11px;
+}
+
+.mc-import-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.mc-import-table th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 9px 12px;
+  color: var(--text-tertiary);
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  font-size: 10px;
+  text-align: left;
+  text-transform: uppercase;
+  letter-spacing: 0.045em;
+}
+
+.mc-import-table td {
+  padding: 9px 12px;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-color);
+  vertical-align: top;
+}
+
+.mc-import-table td:first-child {
+  color: var(--text-primary);
+  font-weight: 750;
+}
+
+.mc-import-table tr:last-child td {
+  border-bottom: none;
 }
 
 .mc-form-header {
@@ -841,6 +1023,10 @@
     grid-template-columns: 1fr;
   }
 
+  .mc-import-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .mc-table-wrap {
     overflow: visible;
     border: none;
@@ -912,12 +1098,25 @@
     flex-direction: column;
   }
 
-  .mc-header > .mc-primary-btn {
+  .mc-header-actions {
     width: 100%;
+  }
+
+  .mc-header-actions > button {
+    flex: 1;
   }
 
   .mc-form-card {
     padding: 17px;
+  }
+
+  .mc-import-source-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .mc-import-summary {
+    grid-template-columns: 1fr;
   }
 
   .mc-toolbar {

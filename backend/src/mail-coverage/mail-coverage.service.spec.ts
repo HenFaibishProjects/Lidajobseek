@@ -12,6 +12,7 @@ describe('MailCoverageService', () => {
     assign: jest.Mock;
     flush: jest.Mock;
     getReference: jest.Mock;
+    persist: jest.Mock;
     persistAndFlush: jest.Mock;
     removeAndFlush: jest.Mock;
   };
@@ -27,6 +28,7 @@ describe('MailCoverageService', () => {
       assign: jest.fn(),
       flush: jest.fn(),
       getReference: jest.fn().mockReturnValue(userReference),
+      persist: jest.fn(),
       persistAndFlush: jest.fn(),
       removeAndFlush: jest.fn(),
     };
@@ -147,5 +149,88 @@ describe('MailCoverageService', () => {
         7,
       ),
     ).rejects.toBeInstanceOf(BadRequestException);
+  });
+
+  it('bulk imports new companies and safely merges existing coverage', async () => {
+    const existing = {
+      id: 3,
+      companyName: 'Acme',
+      note: 'Keep this manual note',
+      hadProcess: true,
+      receivedCvEmail: false,
+      receivedCvDate: null,
+      rejectedEmail: false,
+      rejectedDate: null,
+    };
+    repository.find.mockResolvedValue([existing]);
+
+    const result = await service.importMany(
+      [
+        {
+          companyName: 'Acme',
+          note: 'Position: Backend Engineer',
+          receivedCvEmail: true,
+          receivedCvDate: '2026-08-11',
+          rejectedEmail: true,
+          rejectedDate: '2026-08-21',
+        },
+        {
+          companyName: 'New Co',
+          note: null,
+          receivedCvEmail: true,
+          receivedCvDate: '2026-08-20',
+          rejectedEmail: false,
+          rejectedDate: null,
+        },
+      ],
+      7,
+    );
+
+    expect(entityManager.assign).toHaveBeenCalledWith(
+      existing,
+      expect.objectContaining({
+        note: 'Keep this manual note',
+        receivedCvEmail: true,
+        rejectedEmail: true,
+      }),
+    );
+    expect(existing.hadProcess).toBe(true);
+    expect(entityManager.persist).toHaveBeenCalledWith([
+      expect.objectContaining({ companyName: 'New Co', user: userReference }),
+    ]);
+    expect(entityManager.flush).toHaveBeenCalledTimes(1);
+    expect(result).toEqual({ created: 1, updated: 1, unchanged: 0, total: 2 });
+  });
+
+  it('bulk import reports unchanged records without flushing', async () => {
+    repository.find.mockResolvedValue([
+      {
+        id: 3,
+        companyName: 'Acme',
+        note: null,
+        hadProcess: false,
+        receivedCvEmail: true,
+        receivedCvDate: new Date('2026-08-11T12:00:00.000Z'),
+        rejectedEmail: false,
+        rejectedDate: null,
+      },
+    ]);
+
+    const result = await service.importMany(
+      [
+        {
+          companyName: 'Acme',
+          note: null,
+          receivedCvEmail: true,
+          receivedCvDate: '2026-08-11',
+          rejectedEmail: false,
+          rejectedDate: null,
+        },
+      ],
+      7,
+    );
+
+    expect(result.unchanged).toBe(1);
+    expect(entityManager.flush).not.toHaveBeenCalled();
   });
 });

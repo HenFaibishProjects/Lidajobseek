@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common';
 import { MailCoverageService } from './mail-coverage.service';
 import { UpsertMailCoverageDto } from './dto/upsert-mail-coverage.dto';
+import { BulkImportMailCoverageDto } from './dto/bulk-import-mail-coverage.dto';
 
 @Controller('mail-coverage')
 export class MailCoverageController {
@@ -19,6 +20,11 @@ export class MailCoverageController {
   @Post()
   create(@Body() dto: UpsertMailCoverageDto, @Req() req: any) {
     return this.mailCoverageService.create(dto, req.user.userId);
+  }
+
+  @Post('import')
+  importMany(@Body() dto: BulkImportMailCoverageDto, @Req() req: any) {
+    return this.mailCoverageService.importMany(dto.entries, req.user.userId);
   }
 
   @Get()

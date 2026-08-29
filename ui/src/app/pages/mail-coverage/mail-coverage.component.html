@@ -26,26 +26,203 @@
       </div>
     </div>
 
-    <button
-      *ngIf="!showForm"
-      class="mc-primary-btn"
-      type="button"
-      (click)="openCreate()"
-    >
-      <svg
-        width="16"
-        height="16"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2.5"
+    <div *ngIf="!showForm && !showImport" class="mc-header-actions">
+      <button
+        class="mc-secondary-btn mc-import-open-btn"
+        type="button"
+        (click)="openImport()"
       >
-        <line x1="12" y1="5" x2="12" y2="19"></line>
-        <line x1="5" y1="12" x2="19" y2="12"></line>
-      </svg>
-      Add Company
-    </button>
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path d="M12 3v12"></path>
+          <path d="m7 10 5 5 5-5"></path>
+          <path d="M5 21h14a2 2 0 0 0 2-2v-3"></path>
+          <path d="M3 16v3a2 2 0 0 0 2 2"></path>
+        </svg>
+        Import
+      </button>
+      <button class="mc-primary-btn" type="button" (click)="openCreate()">
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+        >
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        Add Company
+      </button>
+    </div>
   </header>
+
+  <section
+    *ngIf="showImport"
+    class="mc-form-card mc-import-card"
+    aria-labelledby="mail-coverage-import-title"
+  >
+    <div class="mc-form-header">
+      <div>
+        <h2 id="mail-coverage-import-title">Import mail coverage</h2>
+        <p>
+          Paste the Markdown table from your tracker or choose the exported
+          file.
+        </p>
+      </div>
+      <button
+        class="mc-close-btn"
+        type="button"
+        (click)="closeImport()"
+        aria-label="Close import"
+      >
+        ✕
+      </button>
+    </div>
+
+    <div class="mc-import-source">
+      <div class="mc-import-label-row">
+        <label for="mc-import-text">Markdown table</label>
+        <span *ngIf="importFileName">{{ importFileName }}</span>
+      </div>
+      <textarea
+        id="mc-import-text"
+        class="mc-input mc-import-textarea"
+        rows="8"
+        placeholder="Paste the table here…"
+        [(ngModel)]="importText"
+        (ngModelChange)="onImportTextChanged()"
+      ></textarea>
+
+      <div class="mc-import-source-actions">
+        <input
+          #importFile
+          class="mc-file-input"
+          type="file"
+          accept=".md,.txt,text/markdown,text/plain"
+          (change)="onImportFileSelected($event)"
+        />
+        <button
+          class="mc-secondary-btn"
+          type="button"
+          (click)="importFile.click()"
+        >
+          Choose .md file
+        </button>
+        <button class="mc-primary-btn" type="button" (click)="analyzeImport()">
+          Analyze table
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="importPreview" class="mc-import-preview">
+      <div class="mc-import-summary">
+        <div>
+          <strong>{{ importPreview.entries.length }}</strong>
+          <span>Companies</span>
+        </div>
+        <div>
+          <strong>{{ importReceivedCount }}</strong>
+          <span>CV received</span>
+        </div>
+        <div>
+          <strong>{{ importRejectedCount }}</strong>
+          <span>Rejected</span>
+        </div>
+        <div>
+          <strong>{{ importPreview.duplicatesMerged }}</strong>
+          <span>Duplicates merged</span>
+        </div>
+      </div>
+
+      <div
+        *ngIf="importPreview.correctedFutureDates > 0"
+        class="mc-import-notice"
+      >
+        Corrected {{ importPreview.correctedFutureDates }} future-year date
+        {{ importPreview.correctedFutureDates === 1 ? "typo" : "typos" }} to the
+        current year.
+      </div>
+      <div *ngIf="importPreview.skippedRows > 0" class="mc-import-notice">
+        Skipped {{ importPreview.skippedRows }} incomplete or unsupported rows.
+      </div>
+      <div *ngIf="importPreview.errors.length > 0" class="mc-import-errors">
+        <strong>Import needs attention</strong>
+        <p *ngFor="let error of importPreview.errors">{{ error }}</p>
+      </div>
+
+      <div
+        *ngIf="importPreview.entries.length > 0"
+        class="mc-import-table-wrap"
+      >
+        <table class="mc-import-table">
+          <thead>
+            <tr>
+              <th>Company</th>
+              <th>CV received</th>
+              <th>Rejected</th>
+              <th>Note</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let entry of importPreview.entries">
+              <td>{{ entry.companyName }}</td>
+              <td>
+                {{
+                  entry.receivedCvDate
+                    ? formatDate(entry.receivedCvDate)
+                    : "Not found"
+                }}
+              </td>
+              <td>
+                {{
+                  entry.rejectedDate
+                    ? formatDate(entry.rejectedDate)
+                    : "Not found"
+                }}
+              </td>
+              <td>{{ entry.note || "No position" }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="mc-form-actions">
+        <button
+          class="mc-primary-btn"
+          type="button"
+          [disabled]="
+            isImporting ||
+            importPreview.entries.length === 0 ||
+            importPreview.errors.length > 0
+          "
+          (click)="runImport()"
+        >
+          <span *ngIf="isImporting" class="mc-button-spinner"></span>
+          {{
+            isImporting
+              ? "Importing…"
+              : "Import " + importPreview.entries.length + " companies"
+          }}
+        </button>
+        <button
+          class="mc-secondary-btn"
+          type="button"
+          [disabled]="isImporting"
+          (click)="closeImport()"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  </section>
 
   <section
     *ngIf="showForm"
@@ -550,9 +727,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr
-            *ngFor="let process of withdrawnProcesses; trackBy: trackById"
-          >
+          <tr *ngFor="let process of withdrawnProcesses; trackBy: trackById">
             <td data-label="Company">
               <div class="mc-company-cell">
                 <span class="mc-company-avatar mc-company-avatar--withdrawn">

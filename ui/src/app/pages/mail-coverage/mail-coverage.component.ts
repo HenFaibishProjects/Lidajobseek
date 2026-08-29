@@ -11,6 +11,10 @@ import {
 import { ProcessesService } from '../../services/processes.service';
 import { SettingsService } from '../../services/settings.service';
 import { ToastService } from '../../services/toast.service';
+import {
+  MailCoverageImportPreview,
+  parseMailCoverageMarkdown,
+} from './mail-coverage-import';
 
 type CoverageFilter = 'all' | 'received' | 'rejected' | 'no-email';
 type CoverageSort = 'company' | 'latest';
@@ -45,12 +49,17 @@ export class MailCoverageComponent implements OnInit {
   isLoading = true;
   isWithdrawnLoading = true;
   isSaving = false;
+  isImporting = false;
   showForm = false;
+  showImport = false;
   editingId: number | null = null;
   searchText = '';
   activeFilter: CoverageFilter = 'all';
   sortMode: CoverageSort = 'company';
   form: MailCoverageForm = this.emptyForm();
+  importText = '';
+  importFileName = '';
+  importPreview: MailCoverageImportPreview | null = null;
 
   constructor(
     private readonly mailCoverageService: MailCoverageService,
@@ -117,12 +126,10 @@ export class MailCoverageComponent implements OnInit {
     this.processesService.getAll().subscribe({
       next: (processes) => {
         this.withdrawnProcesses = processes
-          .filter(
-            (process) => {
-              const stage = process.currentStage?.trim().toLowerCase();
-              return stage === 'withdrawn' || stage === 'withdraw';
-            },
-          )
+          .filter((process) => {
+            const stage = process.currentStage?.trim().toLowerCase();
+            return stage === 'withdrawn' || stage === 'withdraw';
+          })
           .sort(
             (a, b) =>
               new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
@@ -140,9 +147,106 @@ export class MailCoverageComponent implements OnInit {
   }
 
   openCreate(): void {
+    this.closeImport();
     this.editingId = null;
     this.form = this.emptyForm();
     this.showForm = true;
+  }
+
+  openImport(): void {
+    this.cancelForm();
+    this.showImport = true;
+    this.importText = '';
+    this.importFileName = '';
+    this.importPreview = null;
+  }
+
+  closeImport(): void {
+    this.showImport = false;
+    this.importText = '';
+    this.importFileName = '';
+    this.importPreview = null;
+  }
+
+  onImportFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.importText = typeof reader.result === 'string' ? reader.result : '';
+      this.importFileName = file.name;
+      this.analyzeImport();
+    };
+    reader.onerror = () =>
+      this.toastService.show('Failed to read the import file', 'error');
+    reader.readAsText(file);
+  }
+
+  onImportTextChanged(): void {
+    this.importFileName = '';
+    this.importPreview = null;
+  }
+
+  analyzeImport(): void {
+    if (!this.importText.trim()) {
+      this.toastService.show(
+        'Paste a Markdown table or choose a file',
+        'error',
+      );
+      return;
+    }
+    this.importPreview = parseMailCoverageMarkdown(this.importText);
+  }
+
+  runImport(): void {
+    if (
+      !this.importPreview ||
+      this.importPreview.entries.length === 0 ||
+      this.importPreview.errors.length > 0
+    ) {
+      return;
+    }
+
+    this.isImporting = true;
+    this.mailCoverageService.importMany(this.importPreview.entries).subscribe({
+      next: (result) => {
+        const details = [
+          result.created ? `${result.created} added` : '',
+          result.updated ? `${result.updated} updated` : '',
+          result.unchanged ? `${result.unchanged} already current` : '',
+        ].filter(Boolean);
+        this.toastService.show(
+          `Import complete: ${details.join(', ')}`,
+          'success',
+        );
+        this.isImporting = false;
+        this.closeImport();
+        this.loadMailCoverage();
+      },
+      error: (error) => {
+        const message =
+          error?.error?.message || 'Failed to import mail coverage';
+        this.toastService.show(message, 'error');
+        this.isImporting = false;
+      },
+    });
+  }
+
+  get importReceivedCount(): number {
+    return (
+      this.importPreview?.entries.filter((entry) => entry.receivedCvEmail)
+        .length || 0
+    );
+  }
+
+  get importRejectedCount(): number {
+    return (
+      this.importPreview?.entries.filter((entry) => entry.rejectedEmail)
+        .length || 0
+    );
   }
 
   startEdit(entry: MailCoverageEntry): void {

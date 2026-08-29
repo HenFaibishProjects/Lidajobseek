@@ -55,6 +55,82 @@ export class MailCoverageService {
     );
   }
 
+  async importMany(
+    entries: UpsertMailCoverageDto[] | null | undefined,
+    userId: number,
+  ): Promise<{
+    created: number;
+    updated: number;
+    unchanged: number;
+    total: number;
+  }> {
+    if (!Array.isArray(entries) || entries.length === 0) {
+      throw new BadRequestException(
+        'At least one mail coverage entry is required',
+      );
+    }
+    if (entries.length > 500) {
+      throw new BadRequestException(
+        'A maximum of 500 entries can be imported at once',
+      );
+    }
+
+    const normalizedByCompany = new Map<string, NormalizedMailCoverage>();
+    for (const entry of entries) {
+      const normalized = this.normalizeAndValidate(entry);
+      const key = normalized.companyName.toLowerCase();
+      const current = normalizedByCompany.get(key);
+      normalizedByCompany.set(
+        key,
+        current ? this.mergeImportedData(current, normalized) : normalized,
+      );
+    }
+
+    const existingEntries = await this.mailCoverageRepository.find({
+      user: userId,
+    });
+    const existingByCompany = new Map(
+      existingEntries.map((entry) => [entry.companyName.toLowerCase(), entry]),
+    );
+    const createdEntries: MailCoverage[] = [];
+    let updated = 0;
+    let unchanged = 0;
+
+    for (const [key, imported] of normalizedByCompany) {
+      const existing = existingByCompany.get(key);
+      if (!existing) {
+        createdEntries.push(
+          this.mailCoverageRepository.create({
+            ...imported,
+            hadProcess: false,
+            user: this.em.getReference(User, userId),
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          }),
+        );
+        continue;
+      }
+
+      const merged = this.mergeWithExisting(existing, imported);
+      if (this.hasImportChanges(existing, merged)) {
+        this.em.assign(existing, merged);
+        updated += 1;
+      } else {
+        unchanged += 1;
+      }
+    }
+
+    if (createdEntries.length > 0) this.em.persist(createdEntries);
+    if (createdEntries.length > 0 || updated > 0) await this.em.flush();
+
+    return {
+      created: createdEntries.length,
+      updated,
+      unchanged,
+      total: normalizedByCompany.size,
+    };
+  }
+
   async syncRejectedProcess(
     companyName: string,
     userId: number,
@@ -158,6 +234,82 @@ export class MailCoverageService {
       rejectedEmail,
       rejectedDate,
     };
+  }
+
+  private mergeImportedData(
+    current: NormalizedMailCoverage,
+    incoming: NormalizedMailCoverage,
+  ): NormalizedMailCoverage {
+    const receivedCvDate = this.earlierDate(
+      current.receivedCvDate,
+      incoming.receivedCvDate,
+    );
+    const rejectedDate = this.laterDate(
+      current.rejectedDate,
+      incoming.rejectedDate,
+    );
+    return {
+      companyName: current.companyName,
+      note: current.note || incoming.note,
+      receivedCvEmail: current.receivedCvEmail || incoming.receivedCvEmail,
+      receivedCvDate,
+      rejectedEmail: current.rejectedEmail || incoming.rejectedEmail,
+      rejectedDate,
+    };
+  }
+
+  private mergeWithExisting(
+    existing: MailCoverage,
+    imported: NormalizedMailCoverage,
+  ): NormalizedMailCoverage {
+    return {
+      companyName: existing.companyName,
+      note: existing.note || imported.note,
+      receivedCvEmail: existing.receivedCvEmail || imported.receivedCvEmail,
+      receivedCvDate: this.earlierDate(
+        existing.receivedCvDate || null,
+        imported.receivedCvDate,
+      ),
+      rejectedEmail: existing.rejectedEmail || imported.rejectedEmail,
+      rejectedDate: this.laterDate(
+        existing.rejectedDate || null,
+        imported.rejectedDate,
+      ),
+    };
+  }
+
+  private hasImportChanges(
+    existing: MailCoverage,
+    merged: NormalizedMailCoverage,
+  ): boolean {
+    return (
+      existing.note !== merged.note ||
+      existing.receivedCvEmail !== merged.receivedCvEmail ||
+      this.dateTimestamp(existing.receivedCvDate) !==
+        this.dateTimestamp(merged.receivedCvDate) ||
+      existing.rejectedEmail !== merged.rejectedEmail ||
+      this.dateTimestamp(existing.rejectedDate) !==
+        this.dateTimestamp(merged.rejectedDate)
+    );
+  }
+
+  private earlierDate(
+    current: Date | null,
+    incoming: Date | null,
+  ): Date | null {
+    if (!current) return incoming;
+    if (!incoming) return current;
+    return current <= incoming ? current : incoming;
+  }
+
+  private laterDate(current: Date | null, incoming: Date | null): Date | null {
+    if (!current) return incoming;
+    if (!incoming) return current;
+    return current >= incoming ? current : incoming;
+  }
+
+  private dateTimestamp(value: Date | null | undefined): number | null {
+    return value ? value.getTime() : null;
   }
 
   private parseDate(value: string | null | undefined, label: string): Date {

@@ -24,6 +24,13 @@ export interface MailCoveragePayload {
   rejectedDate: string | null;
 }
 
+export interface MailCoverageImportResult {
+  created: number;
+  updated: number;
+  unchanged: number;
+  total: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class MailCoverageService {
   private readonly url = `${environment.apiUrl}/api/mail-coverage`;
@@ -36,6 +43,12 @@ export class MailCoverageService {
 
   create(payload: MailCoveragePayload) {
     return this.http.post<MailCoverageEntry>(this.url, payload);
+  }
+
+  importMany(entries: MailCoveragePayload[]) {
+    return this.http.post<MailCoverageImportResult>(`${this.url}/import`, {
+      entries,
+    });
   }
 
   update(id: number, payload: MailCoveragePayload) {
