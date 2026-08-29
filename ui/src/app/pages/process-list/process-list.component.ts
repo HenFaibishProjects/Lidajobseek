@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef, AfterViewChecked, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -43,6 +43,40 @@ const NON_INTERVIEW_STAGES = new Set([
 
 const RESPONDED_STAGES = new Set<string>([]);
 
+type KpiModalType = 'total' | 'inProgress' | 'rejected' | 'withdrawn';
+
+const KPI_MODAL_CONFIG: Record<KpiModalType, {
+    eyebrow: string;
+    title: string;
+    description: string;
+    themeClass: string;
+}> = {
+    total: {
+        eyebrow: 'Complete portfolio',
+        title: 'Every application, one view',
+        description: 'Your full job-search history, from active conversations to closed opportunities.',
+        themeClass: 'total',
+    },
+    inProgress: {
+        eyebrow: 'Live pipeline',
+        title: 'Opportunities in motion',
+        description: 'The applications that are active right now and still moving forward.',
+        themeClass: 'in-progress',
+    },
+    rejected: {
+        eyebrow: 'Closed opportunities',
+        title: 'Rejected applications',
+        description: 'A clear record of processes that ended with a company rejection.',
+        themeClass: 'rejected',
+    },
+    withdrawn: {
+        eyebrow: 'Your decisions',
+        title: 'Withdrawn applications',
+        description: 'The opportunities you chose to leave, kept available for context and learning.',
+        themeClass: 'withdrawn',
+    },
+};
+
 @Component({
     selector: 'app-process-list',
     standalone: true,
@@ -71,6 +105,12 @@ export class ProcessListComponent implements OnInit, OnDestroy, AfterViewChecked
     selectedStage: string = '';
     selectedWorkMode: string = '';
     showAllProcesses: boolean = false;
+
+    // KPI detail modal
+    activeKpiModal: KpiModalType | null = null;
+    kpiModalSearchText = '';
+    private previousBodyOverflow = '';
+    private isBodyScrollLocked = false;
 
     // Available options for filters
     availableStages: string[] = PROCESS_STAGES;
@@ -151,6 +191,7 @@ export class ProcessListComponent implements OnInit, OnDestroy, AfterViewChecked
 
     ngOnDestroy() {
         if (this.settingsSub) this.settingsSub.unsubscribe();
+        this.restoreBodyScroll();
         Object.values(this.dashCharts).forEach(c => {
             if (c && typeof c.destroy === 'function') {
                 c.destroy();
@@ -465,6 +506,90 @@ export class ProcessListComponent implements OnInit, OnDestroy, AfterViewChecked
             const stage = (process?.currentStage ?? '').toString().trim().toLowerCase();
             return stage === 'withdrawn';
         }).length;
+    }
+
+    openKpiModal(type: KpiModalType): void {
+        if (!this.isBodyScrollLocked) {
+            this.previousBodyOverflow = document.body.style.overflow;
+            document.body.style.overflow = 'hidden';
+            this.isBodyScrollLocked = true;
+        }
+        this.activeKpiModal = type;
+        this.kpiModalSearchText = '';
+    }
+
+    closeKpiModal(): void {
+        this.activeKpiModal = null;
+        this.kpiModalSearchText = '';
+        this.restoreBodyScroll();
+    }
+
+    @HostListener('document:keydown.escape')
+    closeKpiModalOnEscape(): void {
+        if (this.activeKpiModal) this.closeKpiModal();
+    }
+
+    get kpiModalConfig() {
+        return this.activeKpiModal ? KPI_MODAL_CONFIG[this.activeKpiModal] : null;
+    }
+
+    get kpiModalProcesses(): any[] {
+        if (!this.activeKpiModal) return [];
+
+        let matchingProcesses: any[];
+        switch (this.activeKpiModal) {
+            case 'inProgress':
+                matchingProcesses = this.processes.filter(process => !this.isClosedProcess(process));
+                break;
+            case 'rejected':
+                matchingProcesses = this.processes.filter(process => {
+                    const stage = (process?.currentStage ?? '').toString().trim().toLowerCase();
+                    return stage === 'rejected' || stage === 'reject';
+                });
+                break;
+            case 'withdrawn':
+                matchingProcesses = this.processes.filter(process => (
+                    (process?.currentStage ?? '').toString().trim().toLowerCase() === 'withdrawn'
+                ));
+                break;
+            default:
+                matchingProcesses = this.processes;
+        }
+
+        return [...matchingProcesses].sort((first, second) => (
+            new Date(second?.updatedAt ?? 0).getTime() - new Date(first?.updatedAt ?? 0).getTime()
+        ));
+    }
+
+    get visibleKpiModalProcesses(): any[] {
+        const query = this.kpiModalSearchText.trim().toLowerCase();
+        if (!query) return this.kpiModalProcesses;
+
+        return this.kpiModalProcesses.filter(process => (
+            [process?.companyName, process?.roleTitle, process?.currentStage, process?.location]
+                .some(value => value?.toString().toLowerCase().includes(query))
+        ));
+    }
+
+    getKpiModalRecentCount(): number {
+        const cutoff = Date.now() - (7 * 86_400_000);
+        return this.kpiModalProcesses.filter(process => {
+            const updatedAt = new Date(process?.updatedAt).getTime();
+            return Number.isFinite(updatedAt) && updatedAt >= cutoff;
+        }).length;
+    }
+
+    getKpiModalInteractionCount(): number {
+        return this.kpiModalProcesses.reduce((total, process) => (
+            total + Number(process?._count?.interactions ?? process?.interactions?.length ?? 0)
+        ), 0);
+    }
+
+    private restoreBodyScroll(): void {
+        if (!this.isBodyScrollLocked) return;
+        document.body.style.overflow = this.previousBodyOverflow;
+        this.previousBodyOverflow = '';
+        this.isBodyScrollLocked = false;
     }
 
     getResponseRate(): number {

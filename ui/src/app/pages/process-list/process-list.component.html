@@ -53,7 +53,8 @@
             </div>
 
             <div class="kpi-strip">
-                <div class="kpi-card kpi-blue">
+                <button type="button" class="kpi-card kpi-blue" (click)="openKpiModal('total')"
+                    aria-label="Open all applications">
                     <div class="kpi-icon">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2">
@@ -67,9 +68,16 @@
                         <div class="kpi-value">{{ processes.length }}</div>
                         <div class="kpi-label">Total Applications</div>
                     </div>
-                </div>
+                    <span class="kpi-card-open" aria-hidden="true">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M5 12h14"></path><path d="m13 6 6 6-6 6"></path>
+                        </svg>
+                    </span>
+                </button>
 
-                <div class="kpi-card kpi-green">
+                <button type="button" class="kpi-card kpi-green" (click)="openKpiModal('inProgress')"
+                    aria-label="Open applications in progress">
                     <div class="kpi-icon">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2">
@@ -81,9 +89,16 @@
                         <div class="kpi-value">{{ getInProgressCount() }}</div>
                         <div class="kpi-label">In Progress</div>
                     </div>
-                </div>
+                    <span class="kpi-card-open" aria-hidden="true">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M5 12h14"></path><path d="m13 6 6 6-6 6"></path>
+                        </svg>
+                    </span>
+                </button>
 
-                <div class="kpi-card kpi-red">
+                <button type="button" class="kpi-card kpi-red" (click)="openKpiModal('rejected')"
+                    aria-label="Open rejected applications">
                     <div class="kpi-icon">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2">
@@ -95,9 +110,16 @@
                         <div class="kpi-value">{{ getRejectedCount() }}</div>
                         <div class="kpi-label">Rejected</div>
                     </div>
-                </div>
+                    <span class="kpi-card-open" aria-hidden="true">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M5 12h14"></path><path d="m13 6 6 6-6 6"></path>
+                        </svg>
+                    </span>
+                </button>
 
-                <div class="kpi-card kpi-purple">
+                <button type="button" class="kpi-card kpi-purple" (click)="openKpiModal('withdrawn')"
+                    aria-label="Open withdrawn applications">
                     <div class="kpi-icon">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2">
@@ -110,7 +132,13 @@
                         <div class="kpi-value">{{ getWithdrawnCount() }}</div>
                         <div class="kpi-label">Withdrawn</div>
                     </div>
-                </div>
+                    <span class="kpi-card-open" aria-hidden="true">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M5 12h14"></path><path d="m13 6 6 6-6 6"></path>
+                        </svg>
+                    </span>
+                </button>
             </div>
 
             <!-- Creation activity: the selected time range affects this panel only. -->
@@ -167,6 +195,129 @@
         
 
         </div>
+    </div>
+
+    <!-- KPI detail modal -->
+    <div class="kpi-modal-backdrop" *ngIf="kpiModalConfig as modalConfig"
+        (click)="closeKpiModal()" role="presentation">
+        <section class="kpi-modal" [ngClass]="'kpi-modal--' + modalConfig.themeClass"
+            (click)="$event.stopPropagation()" role="dialog" aria-modal="true"
+            [attr.aria-label]="modalConfig.title">
+
+            <div class="kpi-modal-glow" aria-hidden="true"></div>
+            <header class="kpi-modal-header">
+                <div class="kpi-modal-heading">
+                    <span class="kpi-modal-eyebrow">
+                        <span class="kpi-modal-eyebrow-dot"></span>
+                        {{ modalConfig.eyebrow }}
+                    </span>
+                    <h2>{{ modalConfig.title }}</h2>
+                    <p>{{ modalConfig.description }}</p>
+                </div>
+                <button type="button" class="kpi-modal-close" (click)="closeKpiModal()"
+                    aria-label="Close application list" title="Close">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2.2" stroke-linecap="round">
+                        <path d="M18 6 6 18M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </header>
+
+            <div class="kpi-modal-stats">
+                <div class="kpi-modal-stat kpi-modal-stat--primary">
+                    <span class="kpi-modal-stat-value">{{ kpiModalProcesses.length }}</span>
+                    <span class="kpi-modal-stat-label">Applications</span>
+                </div>
+                <div class="kpi-modal-stat">
+                    <span class="kpi-modal-stat-value">{{ getKpiModalRecentCount() }}</span>
+                    <span class="kpi-modal-stat-label">Updated this week</span>
+                </div>
+                <div class="kpi-modal-stat">
+                    <span class="kpi-modal-stat-value">{{ getKpiModalInteractionCount() }}</span>
+                    <span class="kpi-modal-stat-label">Interactions</span>
+                </div>
+            </div>
+
+            <div class="kpi-modal-toolbar">
+                <label class="kpi-modal-search">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round">
+                        <circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path>
+                    </svg>
+                    <input type="search" [(ngModel)]="kpiModalSearchText"
+                        placeholder="Search company, role, stage, or location" />
+                </label>
+                <span class="kpi-modal-result-count">
+                    {{ visibleKpiModalProcesses.length }}
+                    {{ visibleKpiModalProcesses.length === 1 ? 'result' : 'results' }}
+                </span>
+            </div>
+
+            <div class="kpi-modal-list" *ngIf="visibleKpiModalProcesses.length; else kpiModalEmpty">
+                <a class="kpi-modal-process" *ngFor="let process of visibleKpiModalProcesses"
+                    [routerLink]="['/process', process.id]" (click)="closeKpiModal()">
+                    <div class="kpi-modal-logo">
+                        <img *ngIf="process.companyLogoUrl" [src]="process.companyLogoUrl"
+                            [alt]="process.companyName + ' logo'" (error)="process.companyLogoUrl = null" />
+                        <span *ngIf="!process.companyLogoUrl">{{ process.companyName?.charAt(0)?.toUpperCase() }}</span>
+                    </div>
+
+                    <div class="kpi-modal-process-main">
+                        <div class="kpi-modal-process-title-row">
+                            <strong>{{ process.companyName }}</strong>
+                            <span class="badge-stage" [ngClass]="getStatusClass(process.currentStage)"
+                                [attr.title]="process.currentStage">
+                                {{ getCompactStageLabel(process.currentStage) }}
+                            </span>
+                        </div>
+                        <span class="kpi-modal-role">{{ process.roleTitle }}</span>
+                        <div class="kpi-modal-meta">
+                            <span *ngIf="process.location">
+                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2.3"><path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0z"></path><circle cx="12" cy="10" r="2.5"></circle></svg>
+                                {{ process.location }}
+                            </span>
+                            <span *ngIf="process.workMode">{{ process.workMode | titlecase }}</span>
+                            <span>{{ process._count?.interactions || 0 }} interactions</span>
+                        </div>
+                    </div>
+
+                    <div class="kpi-modal-process-time">
+                        <span class="kpi-modal-date-label">Updated</span>
+                        <time [attr.datetime]="process.updatedAt">{{ process.updatedAt | dateFormat:'date' }}</time>
+                        <span class="list-age-badge" [ngClass]="getFollowUpBadgeClass(process)"
+                            [attr.title]="getFollowUpBadgeTitle(process)">
+                            {{ getDaysSinceUpdateLabel(process.updatedAt) }}
+                        </span>
+                    </div>
+
+                    <span class="kpi-modal-process-arrow" aria-hidden="true">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="m9 18 6-6-6-6"></path>
+                        </svg>
+                    </span>
+                </a>
+            </div>
+
+            <ng-template #kpiModalEmpty>
+                <div class="kpi-modal-empty">
+                    <div class="kpi-modal-empty-icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="1.8" stroke-linecap="round">
+                            <circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path>
+                        </svg>
+                    </div>
+                    <h3>No applications found</h3>
+                    <p>{{ kpiModalSearchText ? 'Try a different search.' : 'There are no applications in this category yet.' }}</p>
+                </div>
+            </ng-template>
+
+            <footer class="kpi-modal-footer">
+                <span>Click any application to open the full process</span>
+                <span class="kpi-modal-escape">ESC to close</span>
+            </footer>
+        </section>
     </div>
 
     <!-- Search & Filters -->

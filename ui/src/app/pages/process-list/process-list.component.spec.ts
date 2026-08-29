@@ -101,6 +101,50 @@ describe('ProcessListComponent', () => {
     expect(component.getCompactStageLabel('Awaiting Next Interview')).toBe('Awaiting Next Interview');
   });
 
+  it('should open each KPI category with its matching processes', () => {
+    component.processes = [
+      { id: 1, companyName: 'Active', currentStage: 'Awaiting Next Interview', updatedAt: new Date() },
+      { id: 2, companyName: 'Rejected', currentStage: 'Rejected', updatedAt: new Date() },
+      { id: 3, companyName: 'Withdrawn', currentStage: 'Withdrawn', updatedAt: new Date() },
+    ];
+
+    component.openKpiModal('inProgress');
+    expect(component.kpiModalProcesses.map(process => process.id)).toEqual([1]);
+
+    component.openKpiModal('rejected');
+    expect(component.kpiModalProcesses.map(process => process.id)).toEqual([2]);
+
+    component.openKpiModal('withdrawn');
+    expect(component.kpiModalProcesses.map(process => process.id)).toEqual([3]);
+
+    component.openKpiModal('total');
+    expect(component.kpiModalProcesses.length).toBe(3);
+    component.closeKpiModal();
+  });
+
+  it('should search inside the open KPI category', () => {
+    component.processes = [
+      { id: 1, companyName: 'Centrical', roleTitle: 'Backend Developer', currentStage: 'Awaiting Next Interview' },
+      { id: 2, companyName: 'Faye', roleTitle: 'Senior Engineer', currentStage: 'Awaiting Next Interview' },
+    ];
+    component.openKpiModal('total');
+    component.kpiModalSearchText = 'backend';
+
+    expect(component.visibleKpiModalProcesses.map(process => process.id)).toEqual([1]);
+    component.closeKpiModal();
+  });
+
+  it('should lock page scrolling while the KPI modal is open and restore it when closed', () => {
+    const originalOverflow = document.body.style.overflow;
+
+    component.openKpiModal('total');
+    expect(document.body.style.overflow).toBe('hidden');
+
+    component.closeKpiModalOnEscape();
+    expect(component.activeKpiModal).toBeNull();
+    expect(document.body.style.overflow).toBe(originalOverflow);
+  });
+
   it('should hide only rejected and withdrawn processes by default', () => {
     component.processes = [
       { id: 1, currentStage: 'Waiting for Interview Feedback' },
