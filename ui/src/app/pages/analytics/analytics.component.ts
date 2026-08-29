@@ -235,7 +235,7 @@ export class AnalyticsComponent implements OnInit, AfterViewInit, OnDestroy {
         const p = this.rawProcesses;
 
         this.stats.total = total;
-        this.stats.active = p.filter(x => ['Initial Call Scheduled', 'Waiting for Interview Feedback', 'Awaiting Next Interview', 'Home Task Assigned', 'Home Task Submitted (Under Review)', 'References Requested'].includes(x.currentStage)).length;
+        this.stats.active = p.filter(x => ['Initial Call Scheduled', 'Waiting for Interview Feedback', 'Awaiting Next Interview', 'Awaiting New Interview Date', 'Home Task Assigned', 'Home Task Submitted (Under Review)', 'References Requested'].includes(x.currentStage)).length;
         this.stats.offers = p.filter(x => x.currentStage === 'Offer' || x.currentStage === 'Signed').length;
 
         // Calculate Interview Rate (Processes that passed initial stage)

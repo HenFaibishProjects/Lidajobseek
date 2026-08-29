@@ -18,6 +18,7 @@ const ACTIVE_STAGES = new Set([
     'Initial Call Scheduled',
     'Waiting for Interview Feedback',
     'Awaiting Next Interview',
+    'Awaiting New Interview Date',
     'Home Task Assigned',
     'Home Task Submitted (Under Review)',
     'References Requested',
@@ -27,6 +28,7 @@ const INTERVIEW_STAGES = new Set([
     'Initial Call Scheduled',
     'Waiting for Interview Feedback',
     'Awaiting Next Interview',
+    'Awaiting New Interview Date',
 ]);
 
 const OFFER_STAGES = new Set<string>([]);

@@ -29,8 +29,8 @@ const BOARD_COLUMNS: { id: string; label: string; icon: string; tooltip: string;
     id: 'interviews',
     label: 'Interviews',
     icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>',
-    tooltip: 'Actively interviewing or waiting for interview feedback.',
-    stages: ['Waiting for Interview Feedback', 'Awaiting Next Interview'],
+    tooltip: 'Actively interviewing, waiting for feedback, or waiting for a new interview date.',
+    stages: ['Waiting for Interview Feedback', 'Awaiting Next Interview', 'Awaiting New Interview Date'],
   },
   {
     id: 'home-tasks',
@@ -240,8 +240,12 @@ export class PipelineBoardComponent implements OnInit, OnDestroy {
     const updatePayload: any = { currentStage: newStage };
 
     this.processesService.update(processId, updatePayload).subscribe({
-      next: () => {
+      next: (updatedProcess: any) => {
+        if (updatedProcess?.updatedAt) {
+          process.updatedAt = updatedProcess.updatedAt;
+        }
         this.toastService.show(`Moved to ${newStage}`, 'success');
+        this.cdr.markForCheck();
       },
       error: () => {
         // Roll back

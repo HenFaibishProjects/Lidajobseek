@@ -83,12 +83,15 @@ describe('ProcessListComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should create unique CSS classes for the two interview waiting stages', () => {
+  it('should create unique CSS classes for interview waiting stages', () => {
     expect(component.getStatusClass('Waiting for Interview Feedback')).toBe(
       'status-waiting-for-interview-feedback'
     );
     expect(component.getStatusClass('Awaiting Next Interview')).toBe(
       'status-awaiting-next-interview'
+    );
+    expect(component.getStatusClass('Awaiting New Interview Date')).toBe(
+      'status-awaiting-new-interview-date'
     );
   });
 

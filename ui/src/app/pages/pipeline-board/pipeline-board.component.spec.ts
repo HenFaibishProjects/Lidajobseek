@@ -70,5 +70,15 @@ describe('PipelineBoardComponent', () => {
       expect(component.columns.length).toBe(4);
       expect(component.columns.map(c => c.id)).toEqual(['initial-call', 'interviews', 'home-tasks', 'references']);
     });
+
+    it('should keep processes awaiting a new interview date in the Interviews column', () => {
+      component.allProcesses = [{
+        id: 1,
+        companyName: 'Acme',
+        currentStage: 'Awaiting New Interview Date',
+      }];
+
+      expect(component.getColumnCards('interviews').map((process) => process.id)).toEqual([1]);
+    });
   });
 });

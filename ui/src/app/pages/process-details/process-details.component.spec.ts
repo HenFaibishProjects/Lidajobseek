@@ -45,6 +45,7 @@ describe('ProcessDetailsComponent', () => {
           provide: ProcessesService,
           useValue: {
             getById: jasmine.createSpy('getById').and.returnValue(of({ ...mockProcess })),
+            update: jasmine.createSpy('update').and.returnValue(of({})),
             delete: jasmine.createSpy('delete').and.returnValue(of({})),
           }
         },
@@ -79,6 +80,19 @@ describe('ProcessDetailsComponent', () => {
   it('should correctly format jobDescriptionUrl', () => {
     expect(component.formatUrl('google.com')).toBe('https://google.com');
     expect(component.formatUrl('https://google.com')).toBe('https://google.com');
+  });
+
+  it('should support the awaiting new interview date stage and refresh updatedAt', () => {
+    const updatedAt = '2026-08-29T10:00:00.000Z';
+    const processesService = TestBed.inject(ProcessesService);
+    (processesService.update as jasmine.Spy).and.returnValue(of({ updatedAt }));
+    component.process = { ...mockProcess };
+
+    component.updateStage('Awaiting New Interview Date');
+
+    expect(component.process.currentStage).toBe('Awaiting New Interview Date');
+    expect(component.process.updatedAt).toBe(updatedAt);
+    expect(component.getStatusClass(component.process.currentStage)).toBe('status-awaiting-new-interview-date');
   });
 
   it('should render the Visit Original Post link when jobDescriptionUrl is present', () => {

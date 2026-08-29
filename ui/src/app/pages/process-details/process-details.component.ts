@@ -162,7 +162,10 @@ export class ProcessDetailsComponent implements OnInit, OnDestroy {
         const updatePayload: any = { currentStage: newStage };
 
         this.processesService.update(this.process.id, updatePayload).subscribe({
-            next: () => {
+            next: (updatedProcess: any) => {
+                if (updatedProcess?.updatedAt) {
+                    this.process.updatedAt = updatedProcess.updatedAt;
+                }
                 this.toastService.show(`Stage updated to "${newStage}"`, 'success');
                 this.isUpdatingStage = false;
             },
@@ -253,7 +256,11 @@ export class ProcessDetailsComponent implements OnInit, OnDestroy {
 
     getStatusClass(stage: string): string {
         if (!stage) return '';
-        return 'status-' + stage.toLowerCase().replace(' ', '-');
+        return 'status-' + stage
+            .trim()
+            .toLowerCase()
+            .replace(/[\s/()]+/g, '-')
+            .replace(/-+$/, '');
     }
 
     getInterviewTypeLabel(interviewType: string): string {

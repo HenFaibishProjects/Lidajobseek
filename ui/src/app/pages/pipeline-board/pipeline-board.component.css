@@ -970,6 +970,7 @@ body.dark-theme .age-overdue { background: rgba(239,68,68,0.15);  color: #f87171
 .status-rejected,
 .status-ghosted-no-response          { background: rgba(239,68,68,0.1);   color: #b91c1c; }
 .status-position-put-on-hold         { background: rgba(148,163,184,0.15); color: #64748b; }
+.status-awaiting-new-interview-date  { background: rgba(236,72,153,0.12); color: #be185d; }
 
 body.dark-theme .status-application-submitted,
 body.dark-theme .status-resume-under-review          { background: rgba(59,130,246,0.15);  color: #93c5fd; }
@@ -978,6 +979,7 @@ body.dark-theme .status-initial-call-completed       { background: rgba(6,182,21
 body.dark-theme .status-interview-scheduled,
 body.dark-theme .status-waiting-for-interview-feedback,
 body.dark-theme .status-awaiting-next-interview      { background: rgba(139,92,246,0.15);  color: #c4b5fd; }
+body.dark-theme .status-awaiting-new-interview-date  { background: rgba(236,72,153,0.18);  color: #f9a8d4; }
 body.dark-theme .status-home-task-assigned,
 body.dark-theme .status-home-task-submitted-under-review { background: rgba(245,158,11,0.15); color: #fcd34d; }
 body.dark-theme .status-final-interview-scheduled,

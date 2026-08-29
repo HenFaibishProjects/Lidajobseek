@@ -818,6 +818,21 @@
     box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.14);
 }
 
+.status-awaiting-new-interview-date {
+    background: #ec4899;
+    color: #be185d;
+}
+
+.badge-stage.status-awaiting-new-interview-date {
+    background: linear-gradient(135deg, rgba(236, 72, 153, 0.17), rgba(244, 63, 94, 0.08));
+    border: 1px solid rgba(219, 39, 119, 0.28);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22);
+}
+
+.status-dot.status-awaiting-new-interview-date {
+    box-shadow: 0 0 0 4px rgba(236, 72, 153, 0.14);
+}
+
 :host-context(body.dark-theme) .status-waiting-for-interview-feedback {
     background: #fbbf24;
     color: #fcd34d;
@@ -836,6 +851,16 @@
 :host-context(body.dark-theme) .badge-stage.status-awaiting-next-interview {
     background: linear-gradient(135deg, rgba(99, 102, 241, 0.25), rgba(139, 92, 246, 0.14));
     border-color: rgba(165, 180, 252, 0.3);
+}
+
+:host-context(body.dark-theme) .status-awaiting-new-interview-date {
+    background: #f472b6;
+    color: #fbcfe8;
+}
+
+:host-context(body.dark-theme) .badge-stage.status-awaiting-new-interview-date {
+    background: linear-gradient(135deg, rgba(236, 72, 153, 0.25), rgba(244, 63, 94, 0.13));
+    border-color: rgba(244, 114, 182, 0.34);
 }
 
 .footer-right {
