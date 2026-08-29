@@ -50,4 +50,29 @@ describe('parseMailCoverageMarkdown', () => {
     expect(preview.entries).toEqual([]);
     expect(preview.errors[0]).toContain('Date, Company and Status');
   });
+
+  it('accepts a tab-separated table copied from a rendered table', () => {
+    const preview = parseMailCoverageMarkdown(
+      [
+        'Date\tCompany\tPosition\tStatus\tAction\tDescription',
+        '11/08/2026\tAidoc\tSenior Software Engineer\tREJECTED\t\tRejected email received',
+        '12/08/2026\tApono\tBackend Developer\tRECEIVED\t\tCV received',
+      ].join('\n'),
+      new Date('2026-08-29T12:00:00Z'),
+    );
+
+    expect(preview.entries).toEqual([
+      jasmine.objectContaining({
+        companyName: 'Aidoc',
+        rejectedEmail: true,
+        rejectedDate: '2026-08-11',
+      }),
+      jasmine.objectContaining({
+        companyName: 'Apono',
+        receivedCvEmail: true,
+        receivedCvDate: '2026-08-12',
+      }),
+    ]);
+    expect(preview.errors).toEqual([]);
+  });
 });

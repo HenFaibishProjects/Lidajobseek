@@ -73,8 +73,8 @@
       <div>
         <h2 id="mail-coverage-import-title">Import mail coverage</h2>
         <p>
-          Paste the Markdown table from your tracker or choose the exported
-          file.
+          Paste a copied table or raw Markdown from your tracker, or choose the
+          exported file.
         </p>
       </div>
       <button
@@ -89,14 +89,14 @@
 
     <div class="mc-import-source">
       <div class="mc-import-label-row">
-        <label for="mc-import-text">Markdown table</label>
+        <label for="mc-import-text">Copied or Markdown table</label>
         <span *ngIf="importFileName">{{ importFileName }}</span>
       </div>
       <textarea
         id="mc-import-text"
         class="mc-input mc-import-textarea"
         rows="8"
-        placeholder="Paste the table here…"
+        placeholder="Paste the copied table or raw Markdown here…"
         [(ngModel)]="importText"
         (ngModelChange)="onImportTextChanged()"
       ></textarea>

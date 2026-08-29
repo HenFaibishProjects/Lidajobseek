@@ -36,7 +36,7 @@ export function parseMailCoverageMarkdown(
     .split(/\r?\n/)
     .map((line) => line.trim())
     .filter(Boolean);
-  const rows = lines.map(splitMarkdownRow).filter((row) => row.length > 1);
+  const rows = lines.map(splitTableRow).filter((row) => row.length > 1);
   const headerIndex = rows.findIndex((row) => {
     const headers = row.map(normalizeHeader);
     return (
@@ -165,6 +165,12 @@ function splitMarkdownRow(line: string): string[] {
   }
   cells.push(current.trim());
   return cells;
+}
+
+function splitTableRow(line: string): string[] {
+  if (line.includes('|')) return splitMarkdownRow(line);
+  if (line.includes('\t')) return line.split('\t').map((cell) => cell.trim());
+  return [line];
 }
 
 function normalizeHeader(value: string): string {
