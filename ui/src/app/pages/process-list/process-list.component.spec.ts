@@ -95,6 +95,12 @@ describe('ProcessListComponent', () => {
     );
   });
 
+  it('should use compact stage labels in the process table', () => {
+    expect(component.getCompactStageLabel('Waiting for Interview Feedback')).toBe('Waiting for Feedback');
+    expect(component.getCompactStageLabel('Awaiting New Interview Date')).toBe('Awaiting New Date');
+    expect(component.getCompactStageLabel('Awaiting Next Interview')).toBe('Awaiting Next Interview');
+  });
+
   it('should hide only rejected and withdrawn processes by default', () => {
     component.processes = [
       { id: 1, currentStage: 'Waiting for Interview Feedback' },

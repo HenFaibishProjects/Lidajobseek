@@ -471,8 +471,8 @@
                             <span class="list-role-text">{{ p.roleTitle }}</span>
                         </div>
                         <div class="list-col list-col-stage">
-                            <span class="badge-stage" [ngClass]="getStatusClass(p.currentStage)">{{ p.currentStage
-                                }}</span>
+                            <span class="badge-stage" [ngClass]="getStatusClass(p.currentStage)"
+                                [attr.title]="p.currentStage">{{ getCompactStageLabel(p.currentStage) }}</span>
                         </div>
                         <div class="list-col list-col-mode">
                             <span class="list-mode-badge" *ngIf="p.workMode" [attr.data-mode]="p.workMode">{{ p.workMode

@@ -520,6 +520,17 @@ export class ProcessListComponent implements OnInit, OnDestroy, AfterViewChecked
             .replace(/-+$/, '');
     }
 
+    getCompactStageLabel(stage: string): string {
+        switch (stage) {
+            case 'Waiting for Interview Feedback':
+                return 'Waiting for Feedback';
+            case 'Awaiting New Interview Date':
+                return 'Awaiting New Date';
+            default:
+                return stage;
+        }
+    }
+
     // Sorting method
     sort(column: string, skipFilteredUpdate: boolean = false) {
         if (this.sortColumn === column) {
