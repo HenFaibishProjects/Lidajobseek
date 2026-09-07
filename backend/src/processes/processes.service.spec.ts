@@ -120,7 +120,47 @@ describe('ProcessesService', () => {
 
       expect(mockEm.findOne).toHaveBeenCalled();
       expect(existingInteraction.summary).toContain('Initial Interaction:');
-      expect(mockEm.persist).not.toHaveBeenCalled(); // Should NOT persist a new one, just update the existing
+      expect(mockEm.create).not.toHaveBeenCalled(); // Should NOT create a new interaction, just update the existing one
+      expect(mockEm.flush).toHaveBeenCalled();
+    });
+
+    it('should create an optional contact together with the process', async () => {
+      const dto = {
+        companyName: 'Contact Corp',
+        initialContact: {
+          name: '  Dana Cohen  ',
+          role: ' Technical Recruiter ',
+          email: ' dana@example.com ',
+          phone: ' +972500000000 ',
+          linkedIn: ' https://linkedin.com/in/dana ',
+          socialHooks: ' Met at a meetup ',
+        },
+      };
+      const contacts = { add: jest.fn() };
+      mockEm.getReference.mockReturnValue({ id: 1 });
+      mockRepo.create.mockImplementation(data => ({
+        ...data,
+        contacts,
+        interactions: { add: jest.fn() },
+        reviews: { add: jest.fn() },
+      }));
+      mockEm.create.mockImplementation((_entity, data) => data);
+
+      await service.create(dto as any, 1);
+
+      expect(mockRepo.create).toHaveBeenCalledWith(
+        expect.not.objectContaining({ initialContact: expect.anything() }),
+      );
+      expect(mockEm.create).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          name: 'Dana Cohen',
+          role: 'Technical Recruiter',
+          email: 'dana@example.com',
+          process: expect.anything(),
+        }),
+      );
+      expect(contacts.add).toHaveBeenCalled();
       expect(mockEm.flush).toHaveBeenCalled();
     });
 

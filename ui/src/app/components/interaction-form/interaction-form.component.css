@@ -672,6 +672,91 @@ body.dark-theme .ic-participant-card {
   gap: var(--space-md);
 }
 
+/* ── Interview Debrief ────────────────────────────────── */
+.ic-section--debrief {
+  border-color: rgba(6, 182, 212, 0.32);
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.035), rgba(20, 184, 166, 0.02));
+  box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.06), 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.ic-section-number--debrief {
+  background: linear-gradient(135deg, #0891b2, #0d9488);
+}
+
+.ic-debrief-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-md);
+}
+
+.ic-pass-likelihood {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 16px;
+  background: rgba(6, 182, 212, 0.06);
+  border: 1px solid rgba(6, 182, 212, 0.18);
+  border-radius: 12px;
+}
+
+.ic-pass-title {
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.ic-pass-help {
+  margin-top: 3px;
+  color: var(--text-tertiary);
+  font-size: 11px;
+}
+
+.ic-pass-score-wrap,
+.ic-pass-scores {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.ic-pass-score {
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgba(6, 182, 212, 0.28);
+  border-radius: 9px;
+  background: var(--bg-primary);
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.15s, background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.ic-pass-score:hover {
+  transform: translateY(-1px);
+  border-color: #06b6d4;
+  color: #0891b2;
+}
+
+.ic-pass-score--active {
+  color: #fff;
+  border-color: transparent;
+  background: linear-gradient(135deg, #0891b2, #0d9488);
+  box-shadow: 0 4px 12px rgba(6, 182, 212, 0.24);
+}
+
+.ic-pass-label {
+  min-width: 74px;
+  color: #0891b2;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+body.dark-theme .ic-pass-label {
+  color: #67e8f9;
+}
+
 /* ── Form Actions ─────────────────────────────────────── */
 .ic-form-actions {
   display: flex;
@@ -819,6 +904,16 @@ body.dark-theme .ic-textarea--primary {
 
   .ic-notes-grid {
     grid-template-columns: 1fr;
+  }
+
+  .ic-debrief-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ic-pass-likelihood,
+  .ic-pass-score-wrap {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .ic-form-actions {

@@ -80,6 +80,11 @@ describe('ProcessFormComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  it('shows optional contact fields when creating a process', () => {
+    const input = fixture.nativeElement.querySelector('input[name="initialContactName"]');
+    expect(input).toBeTruthy();
+  });
+
   // ── DEFAULT_LOGO ────────────────────────────────────────────────────
   describe('DEFAULT_LOGO', () => {
     it('should equal the asset path', () => {

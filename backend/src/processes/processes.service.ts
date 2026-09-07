@@ -36,7 +36,8 @@ export class ProcessesService {
   }
 
   async create(dto: CreateProcessDto, userId: number): Promise<Process> {
-    const data: any = { ...dto, user: this.em.getReference(User, userId) };
+    const { initialContact, ...processDto } = dto;
+    const data: any = { ...processDto, user: this.em.getReference(User, userId) };
     
     // Convert date strings to Date objects
     if (dto.initialInviteDate) {
@@ -67,7 +68,24 @@ export class ProcessesService {
     }
 
     const process = this.processRepository.create(data);
-    await this.em.persistAndFlush(process);
+    this.em.persist(process);
+
+    const contactName = initialContact?.name?.trim();
+    if (contactName) {
+      const contact = this.em.create(Contact, {
+        name: contactName,
+        role: initialContact?.role?.trim() || undefined,
+        linkedIn: initialContact?.linkedIn?.trim() || undefined,
+        socialHooks: initialContact?.socialHooks?.trim() || undefined,
+        email: initialContact?.email?.trim() || undefined,
+        phone: initialContact?.phone?.trim() || undefined,
+        process,
+      });
+      process.contacts.add(contact);
+      this.em.persist(contact);
+    }
+
+    await this.em.flush();
 
     if (this.isRejectedStage(process.currentStage)) {
       await this.mailCoverageService.syncRejectedProcess(

@@ -1,3 +1,12 @@
+export class InitialContactDto {
+  name: string;
+  role?: string;
+  linkedIn?: string;
+  socialHooks?: string;
+  email?: string;
+  phone?: string;
+}
+
 export class CreateProcessDto {
   companyName: string;
   companyWebsite?: string;
@@ -20,6 +29,9 @@ export class CreateProcessDto {
   initiatedBy?: string;
   firstContactChannel?: string;
   initialInviteContent?: string;
+
+  // Optional contact created together with the process
+  initialContact?: InitialContactDto;
 
   // Career Intelligence
   scoreTech?: number;

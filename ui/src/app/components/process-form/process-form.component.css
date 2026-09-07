@@ -232,6 +232,36 @@
   border-color: rgba(37, 99, 235, 0.2);
 }
 
+.initial-contact-section {
+  background: linear-gradient(135deg, rgba(20, 184, 166, 0.045), rgba(6, 182, 212, 0.025));
+  border-color: rgba(20, 184, 166, 0.22);
+}
+
+.section-icon.contact-icon {
+  color: #0f766e;
+  background: rgba(20, 184, 166, 0.1);
+  border-color: rgba(20, 184, 166, 0.2);
+}
+
+.optional-label {
+  display: inline-flex;
+  margin-left: 6px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: rgba(20, 184, 166, 0.1);
+  color: #0f766e;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  vertical-align: middle;
+}
+
+:host-context(body.dark-theme) .section-icon.contact-icon,
+:host-context(body.dark-theme) .optional-label {
+  color: #5eead4;
+}
+
 .intel-section {
   background: linear-gradient(135deg, rgba(245, 158, 11, 0.04), rgba(249, 115, 22, 0.02));
   border-color: rgba(245, 158, 11, 0.15);

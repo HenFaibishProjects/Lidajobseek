@@ -137,6 +137,11 @@ export class CalendarComponent implements OnInit {
     return this.interviews.filter(i => i.id !== next.id);
   }
 
+  isNextInterview(interview: any): boolean {
+    const next = this.nextInterview;
+    return !!next && Number(interview?.id) === Number(next.id);
+  }
+
   getInterviewColor(interviewType: string): string {
     const normalized = normalizeInterviewType(interviewType);
     if (normalized === 'phone_screen') {

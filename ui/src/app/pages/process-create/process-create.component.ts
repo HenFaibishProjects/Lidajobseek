@@ -36,7 +36,15 @@ export class ProcessCreateComponent {
         scoreWLB: 3,
         scoreVibe: 3,
         tailoredPitch: '',
-        companyResearch: null
+        companyResearch: null,
+        initialContact: {
+            name: '',
+            role: '',
+            email: '',
+            phone: '',
+            linkedIn: '',
+            socialHooks: ''
+        }
     };
 
     constructor(
@@ -64,4 +72,3 @@ export class ProcessCreateComponent {
         this.router.navigate(['/']);
     }
 }
-

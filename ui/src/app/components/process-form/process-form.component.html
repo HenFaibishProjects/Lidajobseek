@@ -190,6 +190,63 @@
         </div>
       </section>
 
+      <!-- ── SECTION: Initial Contact (create only) ─────────────── -->
+      <section class="form-section initial-contact-section anim-2" *ngIf="!isEdit">
+        <div class="section-header">
+          <div class="section-icon contact-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+              <line x1="19" y1="8" x2="19" y2="14" />
+              <line x1="22" y1="11" x2="16" y2="11" />
+            </svg>
+          </div>
+          <div>
+            <h2 class="section-title">Initial Contact <span class="optional-label">Optional</span></h2>
+            <p class="section-desc">Add your recruiter or hiring contact now. Leave the name empty to skip.</p>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="field-label">Contact Name</label>
+            <input type="text" name="initialContactName" [(ngModel)]="process.initialContact.name"
+              placeholder="e.g. Dana Cohen" class="field-input" autocomplete="name">
+          </div>
+          <div class="form-group">
+            <label class="field-label">Role / Title</label>
+            <input type="text" name="initialContactRole" [(ngModel)]="process.initialContact.role"
+              placeholder="e.g. Technical Recruiter" class="field-input">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="field-label">Email</label>
+            <input type="email" name="initialContactEmail" [(ngModel)]="process.initialContact.email"
+              placeholder="name@company.com" class="field-input" autocomplete="email">
+          </div>
+          <div class="form-group">
+            <label class="field-label">Phone</label>
+            <input type="tel" name="initialContactPhone" [(ngModel)]="process.initialContact.phone"
+              placeholder="e.g. +972 50 000 0000" class="field-input" autocomplete="tel">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="field-label">LinkedIn</label>
+            <input type="url" name="initialContactLinkedIn" [(ngModel)]="process.initialContact.linkedIn"
+              placeholder="https://linkedin.com/in/..." class="field-input">
+          </div>
+          <div class="form-group">
+            <label class="field-label">Contact Notes</label>
+            <input type="text" name="initialContactNotes" [(ngModel)]="process.initialContact.socialHooks"
+              placeholder="Context, shared interests, follow-up notes..." class="field-input">
+          </div>
+        </div>
+      </section>
+
       <!-- ── SECTION: Initial Interaction (conditional) ─────────── -->
       <section class="form-section highlight-section anim-2" *ngIf="shouldShowInteractionSection">
         <div class="section-header">

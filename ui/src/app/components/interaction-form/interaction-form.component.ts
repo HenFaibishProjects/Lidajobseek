@@ -30,6 +30,8 @@ export class InteractionFormComponent implements OnInit {
     typeCategories = Object.keys(this.groupedTypes) as (keyof typeof this.groupedTypes)[];
 
     contactDropdownOpen = false;
+    readonly passLikelihoodScores = [1, 2, 3, 4, 5];
+    readonly passLikelihoodLabels = ['', 'Very unlikely', 'Unlikely', 'Uncertain', 'Likely', 'Very likely'];
 
     // Split date/time for the date+time inputs
     datePart = '';
@@ -94,6 +96,10 @@ export class InteractionFormComponent implements OnInit {
 
     removeParticipant(i: number) {
         this.interaction.participants.splice(i, 1);
+    }
+
+    setPassLikelihood(score: number) {
+        this.interaction.passLikelihood = this.interaction.passLikelihood === score ? null : score;
     }
 
     onSubmit() {

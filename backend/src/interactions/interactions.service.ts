@@ -4,6 +4,7 @@ import {
   OnModuleDestroy,
   OnModuleInit,
   NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityRepository, EntityManager, QueryOrder } from '@mikro-orm/postgresql';
@@ -53,6 +54,17 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
     private readonly mailService: MailService,
     private readonly whatsappReminderService: WhatsAppReminderService,
   ) { }
+
+  private normalizePassLikelihood(value: unknown): number | null | undefined {
+    if (value === undefined) return undefined;
+    if (value === null || value === '') return null;
+
+    const score = Number(value);
+    if (!Number.isInteger(score) || score < 1 || score > 5) {
+      throw new BadRequestException('Pass likelihood must be an integer from 1 to 5');
+    }
+    return score;
+  }
 
 
   onModuleInit() {
@@ -555,6 +567,10 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
         nextInviteDate: dto.nextInviteDate ? new Date(dto.nextInviteDate) : undefined,
         testsAssessment: dto.testsAssessment,
         roleInsights: dto.roleInsights,
+        whatHappened: dto.whatHappened,
+        howItWent: dto.howItWent,
+        questionsAsked: dto.questionsAsked,
+        passLikelihood: this.normalizePassLikelihood(dto.passLikelihood),
         videoLink: dto.videoLink,
         durationMinutes: dto.durationMinutes,
         // Legacy single reminder
@@ -684,6 +700,9 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
     const data: any = { ...dto };
     if (dto.date) data.date = new Date(dto.date);
     if (dto.nextInviteDate) data.nextInviteDate = new Date(dto.nextInviteDate);
+    if (Object.prototype.hasOwnProperty.call(dto, 'passLikelihood')) {
+      data.passLikelihood = this.normalizePassLikelihood(dto.passLikelihood);
+    }
 
     if (dto.date && interaction.reminder?.enabled && !Object.prototype.hasOwnProperty.call(dto, 'reminder')) {
       data.reminder = {

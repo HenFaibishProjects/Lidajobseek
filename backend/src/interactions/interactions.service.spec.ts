@@ -7,7 +7,7 @@ import { Contact } from '../contacts/contact.entity';
 import { EntityManager, EntityRepository } from '@mikro-orm/postgresql';
 import { MailService } from '../mail/mail.service';
 import { WhatsAppReminderService } from './whatsapp-reminder.service';
-import { NotFoundException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 
 describe('InteractionsService', () => {
   let service: InteractionsService;
@@ -119,6 +119,38 @@ describe('InteractionsService', () => {
 
       expect(mockContactRepo.create).not.toHaveBeenCalled();
     });
+
+    it('should persist the interview debrief fields', async () => {
+      const mockProcess = { id: 10, user: 1 };
+      mockProcessRepo.findOne.mockResolvedValue(mockProcess);
+      mockInteractionRepo.create.mockImplementation(data => data);
+
+      await service.create({
+        ...dto,
+        participants: [],
+        whatHappened: 'Completed a system design round',
+        howItWent: 'Strong conversation with one weak answer',
+        questionsAsked: 'Design a notification service',
+        passLikelihood: 4,
+      } as any, user);
+
+      expect(mockInteractionRepo.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          whatHappened: 'Completed a system design round',
+          howItWent: 'Strong conversation with one weak answer',
+          questionsAsked: 'Design a notification service',
+          passLikelihood: 4,
+        }),
+      );
+    });
+
+    it('should reject a pass likelihood outside the 1 to 5 range', async () => {
+      const mockProcess = { id: 10, user: 1 };
+      mockProcessRepo.findOne.mockResolvedValue(mockProcess);
+
+      await expect(service.create({ ...dto, passLikelihood: 6 } as any, user))
+        .rejects.toThrow(BadRequestException);
+    });
   });
 
   describe('findAll', () => {
@@ -171,6 +203,16 @@ describe('InteractionsService', () => {
     it('should throw NotFoundException if interaction doesn belong to user', async () => {
       mockInteractionRepo.findOne.mockResolvedValue(null);
       await expect(service.update(1, {}, { userId: 1 })).rejects.toThrow(NotFoundException);
+    });
+
+    it('should update a valid pass likelihood score', async () => {
+      const existing: any = { id: 1, process: { user: 1 } };
+      mockInteractionRepo.findOne.mockResolvedValue(existing);
+
+      await service.update(1, { passLikelihood: 5 }, { userId: 1 });
+
+      expect(existing.passLikelihood).toBe(5);
+      expect(em.flush).toHaveBeenCalled();
     });
   });
 

@@ -234,8 +234,60 @@
       </div>
     </section>
 
-    <!-- Section 5: Post-Interaction Reflection -->
-    <app-reflection-form [reflection]="reflection"></app-reflection-form>
+    <!-- Section 5: Interview Debrief (edit only) -->
+    <section class="ic-section ic-section--debrief" *ngIf="mode === 'edit'">
+      <div class="ic-section-head">
+        <span class="ic-section-number ic-section-number--debrief">5</span>
+        <div>
+          <h2 class="ic-section-title">Interview Debrief</h2>
+          <p class="ic-section-desc">Capture the outcome while the conversation is still fresh</p>
+        </div>
+      </div>
+
+      <div class="ic-field ic-field--full">
+        <label class="ic-label" for="whatHappened">What happened?</label>
+        <textarea id="whatHappened" name="whatHappened" [(ngModel)]="interaction.whatHappened"
+          rows="3" placeholder="Main events, decisions, next steps, and anything important that happened..."
+          class="ic-textarea"></textarea>
+      </div>
+
+      <div class="ic-debrief-grid">
+        <div class="ic-field">
+          <label class="ic-label" for="howItWent">How did it go?</label>
+          <textarea id="howItWent" name="howItWent" [(ngModel)]="interaction.howItWent"
+            rows="4" placeholder="Your honest impression, the tone, strong moments, and concerns..."
+            class="ic-textarea"></textarea>
+        </div>
+        <div class="ic-field">
+          <label class="ic-label" for="questionsAsked">What did they ask?</label>
+          <textarea id="questionsAsked" name="questionsAsked" [(ngModel)]="interaction.questionsAsked"
+            rows="4" placeholder="Technical, behavioral, product, or role-specific questions..."
+            class="ic-textarea"></textarea>
+        </div>
+      </div>
+
+      <div class="ic-pass-likelihood">
+        <div>
+          <div class="ic-pass-title">Do I think I passed?</div>
+          <div class="ic-pass-help">1 means very unlikely, 5 means very likely</div>
+        </div>
+        <div class="ic-pass-score-wrap">
+          <div class="ic-pass-scores" role="group" aria-label="Estimated chance of passing">
+            <button type="button" *ngFor="let score of passLikelihoodScores"
+              class="ic-pass-score"
+              [class.ic-pass-score--active]="interaction.passLikelihood === score"
+              [attr.aria-pressed]="interaction.passLikelihood === score"
+              (click)="setPassLikelihood(score)">{{ score }}</button>
+          </div>
+          <span class="ic-pass-label">
+            {{ passLikelihoodLabels[interaction.passLikelihood || 0] || 'Not rated' }}
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 6: Post-Interaction Reflection -->
+    <app-reflection-form [reflection]="reflection" [sectionNumber]="mode === 'edit' ? 6 : 5"></app-reflection-form>
 
     <!-- Form Actions -->
     <div class="ic-form-actions">

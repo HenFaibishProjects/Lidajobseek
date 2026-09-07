@@ -112,6 +112,17 @@ export class ProcessFormComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    if (!this.isEdit && !this.process.initialContact) {
+      this.process.initialContact = {
+        name: '',
+        role: '',
+        email: '',
+        phone: '',
+        linkedIn: '',
+        socialHooks: ''
+      };
+    }
+
     // Self-heal: if a website is set but logo was lost, re-fetch silently
     if (this.process?.companyWebsite && !this.process?.companyLogoUrl) {
       setTimeout(() => this.fetchLogo(), 300);

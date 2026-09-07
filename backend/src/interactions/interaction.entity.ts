@@ -29,6 +29,18 @@ export class Interaction {
   notes?: string;
 
   @Property({ type: 'text', nullable: true })
+  whatHappened?: string;
+
+  @Property({ type: 'text', nullable: true })
+  howItWent?: string;
+
+  @Property({ type: 'text', nullable: true })
+  questionsAsked?: string;
+
+  @Property({ nullable: true })
+  passLikelihood?: number | null;
+
+  @Property({ type: 'text', nullable: true })
   headsup?: string;
 
   @Property({ type: 'json', nullable: true })

@@ -30,6 +30,10 @@ export class CreateInteractionDto {
   testsAssessment?: string;
   roleInsights?: string;
   notes?: string;
+  whatHappened?: string;
+  howItWent?: string;
+  questionsAsked?: string;
+  passLikelihood?: number | null;
   headsup?: string;
   /** Legacy single-reminder (kept for backward compat) */
   reminder?: ReminderDto;

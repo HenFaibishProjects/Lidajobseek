@@ -110,6 +110,10 @@
             <span class="legend-dot" style="background-color: #ffffff;"></span>
             <span class="legend-label">Other Interactions</span>
         </div>
+        <div class="legend-item legend-item--next">
+            <span class="legend-next-marker"></span>
+            <span class="legend-label">Next Upcoming Interview</span>
+        </div>
     </div>
 
     <div class="calendar-content">
@@ -150,7 +154,8 @@
                         <div class="day-events-indicators" *ngIf="day.interviews.length > 0">
                             <div class="month-event-pill" 
                                   *ngFor="let item of day.interviews.slice(0, 5)" 
-                                  [title]="(item.process ? item.process.companyName : item.agency?.agencyName) + ' - ' + getInterviewTypeLabel(item.interviewType)">
+                                  [class.next-interview-event]="isNextInterview(item)"
+                                  [title]="(isNextInterview(item) ? 'Next upcoming interview: ' : '') + (item.process ? item.process.companyName : item.agency?.agencyName) + ' - ' + getInterviewTypeLabel(item.interviewType)">
                                 <span class="event-dot" [style.background-color]="getInterviewColor(item.interviewType)"></span>
                                 <span class="event-time">
                                     {{ item.date | date:'HH:mm' }}
@@ -197,6 +202,7 @@
                         <div class="week-day-events">
                             <div class="week-event-card" 
                                  *ngFor="let item of day.interviews"
+                                 [class.next-interview-event]="isNextInterview(item)"
                                  [style.border-left-color]="getInterviewColor(item.interviewType)">
                                 <div class="week-event-time">
                                     <span class="week-event-time-range">
@@ -243,7 +249,8 @@
                 </div>
 
                 <div class="day-interviews-list" *ngIf="selectedDay.interviews.length > 0">
-                    <div *ngFor="let interview of selectedDay.interviews" class="interview-card card-grid-layout">
+                    <div *ngFor="let interview of selectedDay.interviews" class="interview-card card-grid-layout"
+                        [class.next-interview-card]="isNextInterview(interview)">
                         <div class="card-status-strip" [style.background-color]="getInterviewColor(interview.interviewType)"></div>
 
                         <div class="card-date-cell">
@@ -271,6 +278,7 @@
                         </div>
 
                         <div class="card-info-cell">
+                            <span class="next-interview-label" *ngIf="isNextInterview(interview)">Next Upcoming</span>
                             <span class="type-badge" [style.color]="getInterviewColor(interview.interviewType)">
                                 {{ getInterviewTypeLabel(interview.interviewType) }}
                             </span>
@@ -361,7 +369,7 @@
                 <!-- Featured Next Interview -->
                 <div *ngIf="!showAllInterviews && nextInterview" class="featured-next-section">
                     <div class="section-badge">Next Interview</div>
-                    <div class="featured-card card-grid-layout">
+                    <div class="featured-card card-grid-layout next-interview-card">
                         <div class="featured-status-strip card-status-strip" [style.background-color]="getInterviewColor(nextInterview.interviewType)"></div>
                         
                         <div class="card-date-cell">
@@ -463,7 +471,8 @@
                     <h2 class="list-section-title" *ngIf="showAllInterviews">All Interactions</h2>
                     
                     <div class="interviews-grid">
-                        <div *ngFor="let interview of (showAllInterviews ? interviews : otherInterviews) | orderByDate" class="interview-card card-grid-layout">
+                        <div *ngFor="let interview of (showAllInterviews ? interviews : otherInterviews) | orderByDate" class="interview-card card-grid-layout"
+                            [class.next-interview-card]="isNextInterview(interview)">
                             <div class="card-status-strip" [style.background-color]="getInterviewColor(interview.interviewType)"></div>
 
                             <div class="card-date-cell">
@@ -490,6 +499,7 @@
                             </div>
 
                             <div class="card-info-cell">
+                                <span class="next-interview-label" *ngIf="isNextInterview(interview)">Next Upcoming</span>
                                 <span class="type-badge" [style.color]="getInterviewColor(interview.interviewType)">
                                     {{ getInterviewTypeLabel(interview.interviewType) }}
                                 </span>
