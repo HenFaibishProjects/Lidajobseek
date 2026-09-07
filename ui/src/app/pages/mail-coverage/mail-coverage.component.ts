@@ -37,6 +37,24 @@ interface WithdrawnProcess {
   updatedAt: string;
 }
 
+export function isProcessRejectionEntry(entry: MailCoverageEntry): boolean {
+  return entry.hadProcess === true && entry.rejectedEmail === true;
+}
+
+export function splitMailCoverageEntries(entries: MailCoverageEntry[]): {
+  other: MailCoverageEntry[];
+  processRejections: MailCoverageEntry[];
+} {
+  const other: MailCoverageEntry[] = [];
+  const processRejections: MailCoverageEntry[] = [];
+
+  for (const entry of entries) {
+    (isProcessRejectionEntry(entry) ? processRejections : other).push(entry);
+  }
+
+  return { other, processRejections };
+}
+
 @Component({
   selector: 'app-mail-coverage',
   standalone: true,
@@ -106,6 +124,19 @@ export class MailCoverageComponent implements OnInit {
         sensitivity: 'base',
       });
     });
+  }
+
+  get coverageGroups(): {
+    all: MailCoverageEntry[];
+    other: MailCoverageEntry[];
+    processRejections: MailCoverageEntry[];
+  } {
+    const all = this.filteredEntries;
+    const groups = splitMailCoverageEntries(all);
+    return {
+      all,
+      ...groups,
+    };
   }
 
   loadMailCoverage(): void {

@@ -494,53 +494,8 @@
     <span>Loading mail coverage…</span>
   </div>
 
-  <section *ngIf="!isLoading && filteredEntries.length === 0" class="mc-empty">
-    <div class="mc-empty-icon">
-      <svg
-        width="34"
-        height="34"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="1.5"
-      >
-        <rect x="3" y="5" width="18" height="14" rx="2"></rect>
-        <path d="m3 7 9 6 9-6"></path>
-      </svg>
-    </div>
-    <h2>
-      {{
-        entries.length === 0
-          ? "No companies tracked yet"
-          : "No matching companies"
-      }}
-    </h2>
-    <p>
-      {{
-        entries.length === 0
-          ? "Add a company and record the automatic emails you received."
-          : "Try a different search or email-status filter."
-      }}
-    </p>
-    <button
-      *ngIf="entries.length === 0 && !showForm"
-      class="mc-primary-btn"
-      type="button"
-      (click)="openCreate()"
-    >
-      Add first company
-    </button>
-    <button
-      *ngIf="entries.length > 0"
-      class="mc-secondary-btn"
-      type="button"
-      (click)="clearSearch(); setFilter('all')"
-    >
-      Clear filters
-    </button>
-  </section>
-
-  <div *ngIf="!isLoading && filteredEntries.length > 0" class="mc-table-wrap">
+  <ng-template #coverageTable let-tableEntries="entries">
+    <div class="mc-table-wrap">
     <table class="mc-table">
       <thead>
         <tr>
@@ -552,7 +507,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let entry of filteredEntries; trackBy: trackById">
+        <tr *ngFor="let entry of tableEntries; trackBy: trackById">
           <td data-label="Company">
             <div class="mc-company-cell">
               <span class="mc-company-avatar">{{
@@ -691,7 +646,116 @@
         </tr>
       </tbody>
     </table>
-  </div>
+    </div>
+  </ng-template>
+
+  <ng-container *ngIf="!isLoading && coverageGroups as groups">
+    <section *ngIf="groups.all.length === 0" class="mc-empty">
+      <div class="mc-empty-icon">
+        <svg
+          width="34"
+          height="34"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+        >
+          <rect x="3" y="5" width="18" height="14" rx="2"></rect>
+          <path d="m3 7 9 6 9-6"></path>
+        </svg>
+      </div>
+      <h2>
+        {{
+          entries.length === 0
+            ? "No companies tracked yet"
+            : "No matching companies"
+        }}
+      </h2>
+      <p>
+        {{
+          entries.length === 0
+            ? "Add a company and record the automatic emails you received."
+            : "Try a different search or email-status filter."
+        }}
+      </p>
+      <button
+        *ngIf="entries.length === 0 && !showForm"
+        class="mc-primary-btn"
+        type="button"
+        (click)="openCreate()"
+      >
+        Add first company
+      </button>
+      <button
+        *ngIf="entries.length > 0"
+        class="mc-secondary-btn"
+        type="button"
+        (click)="clearSearch(); setFilter('all')"
+      >
+        Clear filters
+      </button>
+    </section>
+
+    <ng-container *ngIf="groups.all.length > 0">
+      <section class="mc-coverage-section" aria-labelledby="other-mail-coverage-title">
+        <div class="mc-section-header">
+          <span class="mc-section-icon mc-section-icon--coverage" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="5" width="18" height="14" rx="2"></rect>
+              <path d="m3 7 9 6 9-6"></path>
+            </svg>
+          </span>
+          <div class="mc-section-heading-copy">
+            <div class="mc-section-title-row">
+              <h2 id="other-mail-coverage-title">Other Mail Coverage</h2>
+              <span class="mc-section-count">{{ groups.other.length }}</span>
+            </div>
+            <p>All other tracked mail records, excluding rejection emails from companies with a Process.</p>
+          </div>
+        </div>
+
+        <ng-container *ngIf="groups.other.length > 0; else noOtherCoverage">
+          <ng-container
+            [ngTemplateOutlet]="coverageTable"
+            [ngTemplateOutletContext]="{ entries: groups.other }"
+          ></ng-container>
+        </ng-container>
+        <ng-template #noOtherCoverage>
+          <div class="mc-section-empty">No other mail records match the current filters.</div>
+        </ng-template>
+      </section>
+
+      <section class="mc-coverage-section mc-process-rejections-section" aria-labelledby="process-rejections-title">
+        <div class="mc-section-header">
+          <span class="mc-section-icon mc-section-icon--rejected" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="9"></circle>
+              <path d="m9 9 6 6M15 9l-6 6"></path>
+            </svg>
+          </span>
+          <div class="mc-section-heading-copy">
+            <div class="mc-section-title-row">
+              <h2 id="process-rejections-title">Rejections With a Process</h2>
+              <span class="mc-section-count mc-section-count--rejected">{{ groups.processRejections.length }}</span>
+            </div>
+            <p>Companies where you had a Process and received a rejection email.</p>
+          </div>
+        </div>
+
+        <ng-container *ngIf="groups.processRejections.length > 0; else noProcessRejections">
+          <ng-container
+            [ngTemplateOutlet]="coverageTable"
+            [ngTemplateOutletContext]="{ entries: groups.processRejections }"
+          ></ng-container>
+        </ng-container>
+        <ng-template #noProcessRejections>
+          <div class="mc-section-empty mc-section-empty--rejected">
+            No rejection emails from companies with a Process match the current filters.
+          </div>
+        </ng-template>
+      </section>
+    </ng-container>
+  </ng-container>
 
   <section
     class="mc-withdrawn-section"
