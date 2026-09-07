@@ -425,6 +425,17 @@
   box-shadow: inset 0 0 0 1px rgba(239, 68, 68, 0.05);
 }
 
+.mc-option-card--process {
+  max-width: 488px;
+  margin-bottom: 14px;
+}
+
+.mc-option-card--process.mc-option-card--selected {
+  background: rgba(99, 102, 241, 0.06);
+  border-color: rgba(99, 102, 241, 0.38);
+  box-shadow: inset 0 0 0 1px rgba(99, 102, 241, 0.08);
+}
+
 .mc-option-toggle {
   display: flex;
   align-items: flex-start;
@@ -467,6 +478,11 @@
 .mc-option-card--rejection .mc-option-toggle input:checked + .mc-checkbox {
   background: #ef4444;
   border-color: #ef4444;
+}
+
+.mc-option-card--process .mc-option-toggle input:checked + .mc-checkbox {
+  background: #6366f1;
+  border-color: #6366f1;
 }
 
 .mc-option-toggle strong,

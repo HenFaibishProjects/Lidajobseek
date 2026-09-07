@@ -272,6 +272,31 @@
       <small class="mc-field-hint">{{ form.note.length }} / 2000</small>
     </div>
 
+    <article
+      class="mc-option-card mc-option-card--process"
+      [class.mc-option-card--selected]="form.hadProcess"
+    >
+      <label class="mc-option-toggle">
+        <input type="checkbox" [(ngModel)]="form.hadProcess" />
+        <span class="mc-checkbox" aria-hidden="true">
+          <svg
+            width="13"
+            height="13"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="3"
+          >
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        </span>
+        <span>
+          <strong>Had a recruiting process</strong>
+          <small>Show the Process badge next to this company</small>
+        </span>
+      </label>
+    </article>
+
     <div class="mc-mail-options">
       <article
         class="mc-option-card"

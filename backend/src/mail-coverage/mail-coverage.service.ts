@@ -12,6 +12,7 @@ import {
 import { MailCoverage } from './mail-coverage.entity';
 import { UpsertMailCoverageDto } from './dto/upsert-mail-coverage.dto';
 import { User } from '../users/user.entity';
+import { Process } from '../processes/process.entity';
 
 interface NormalizedMailCoverage {
   companyName: string;
@@ -27,6 +28,8 @@ export class MailCoverageService {
   constructor(
     @InjectRepository(MailCoverage)
     private readonly mailCoverageRepository: EntityRepository<MailCoverage>,
+    @InjectRepository(Process)
+    private readonly processRepository: EntityRepository<Process>,
     private readonly em: EntityManager,
   ) {}
 
@@ -36,10 +39,13 @@ export class MailCoverageService {
   ): Promise<MailCoverage> {
     const data = this.normalizeAndValidate(dto);
     await this.ensureCompanyIsUnique(data.companyName, userId);
+    const hadProcess =
+      dto.hadProcess === true ||
+      (await this.hasMatchingProcess(data.companyName, userId));
 
     const entry = this.mailCoverageRepository.create({
       ...data,
-      hadProcess: false,
+      hadProcess,
       user: this.em.getReference(User, userId),
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -49,10 +55,28 @@ export class MailCoverageService {
   }
 
   async findAll(userId: number): Promise<MailCoverage[]> {
-    return this.mailCoverageRepository.find(
+    const entries = await this.mailCoverageRepository.find(
       { user: userId },
       { orderBy: { companyName: QueryOrder.ASC } },
     );
+
+    if (entries.length === 0) return entries;
+
+    const processCompanyKeys = await this.findProcessCompanyKeys(userId);
+    let repaired = false;
+
+    for (const entry of entries) {
+      if (
+        !entry.hadProcess &&
+        processCompanyKeys.has(this.normalizeCompanyKey(entry.companyName))
+      ) {
+        entry.hadProcess = true;
+        repaired = true;
+      }
+    }
+
+    if (repaired) await this.em.flush();
+    return entries;
   }
 
   async importMany(
@@ -78,7 +102,7 @@ export class MailCoverageService {
     const normalizedByCompany = new Map<string, NormalizedMailCoverage>();
     for (const entry of entries) {
       const normalized = this.normalizeAndValidate(entry);
-      const key = normalized.companyName.toLowerCase();
+      const key = this.normalizeCompanyKey(normalized.companyName);
       const current = normalizedByCompany.get(key);
       normalizedByCompany.set(
         key,
@@ -89,8 +113,12 @@ export class MailCoverageService {
     const existingEntries = await this.mailCoverageRepository.find({
       user: userId,
     });
+    const processCompanyKeys = await this.findProcessCompanyKeys(userId);
     const existingByCompany = new Map(
-      existingEntries.map((entry) => [entry.companyName.toLowerCase(), entry]),
+      existingEntries.map((entry) => [
+        this.normalizeCompanyKey(entry.companyName),
+        entry,
+      ]),
     );
     const createdEntries: MailCoverage[] = [];
     let updated = 0;
@@ -102,7 +130,7 @@ export class MailCoverageService {
         createdEntries.push(
           this.mailCoverageRepository.create({
             ...imported,
-            hadProcess: false,
+            hadProcess: processCompanyKeys.has(key),
             user: this.em.getReference(User, userId),
             createdAt: new Date(),
             updatedAt: new Date(),
@@ -112,8 +140,12 @@ export class MailCoverageService {
       }
 
       const merged = this.mergeWithExisting(existing, imported);
-      if (this.hasImportChanges(existing, merged)) {
-        this.em.assign(existing, merged);
+      const hadProcess = existing.hadProcess || processCompanyKeys.has(key);
+      if (
+        this.hasImportChanges(existing, merged) ||
+        existing.hadProcess !== hadProcess
+      ) {
+        this.em.assign(existing, { ...merged, hadProcess });
         updated += 1;
       } else {
         unchanged += 1;
@@ -173,8 +205,11 @@ export class MailCoverageService {
     const entry = await this.findOne(id, userId);
     const data = this.normalizeAndValidate(dto);
     await this.ensureCompanyIsUnique(data.companyName, userId, id);
+    const hadProcess =
+      dto.hadProcess === true ||
+      (await this.hasMatchingProcess(data.companyName, userId));
 
-    this.em.assign(entry, data);
+    this.em.assign(entry, { ...data, hadProcess });
     await this.em.flush();
     return entry;
   }
@@ -234,6 +269,25 @@ export class MailCoverageService {
       rejectedEmail,
       rejectedDate,
     };
+  }
+
+  private normalizeCompanyKey(companyName: string): string {
+    return companyName.trim().toLowerCase();
+  }
+
+  private async hasMatchingProcess(
+    companyName: string,
+    userId: number,
+  ): Promise<boolean> {
+    const processCompanyKeys = await this.findProcessCompanyKeys(userId);
+    return processCompanyKeys.has(this.normalizeCompanyKey(companyName));
+  }
+
+  private async findProcessCompanyKeys(userId: number): Promise<Set<string>> {
+    const processes = await this.processRepository.find({ user: userId });
+    return new Set(
+      processes.map((process) => this.normalizeCompanyKey(process.companyName)),
+    );
   }
 
   private mergeImportedData(

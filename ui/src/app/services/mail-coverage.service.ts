@@ -18,6 +18,7 @@ export interface MailCoverageEntry {
 export interface MailCoveragePayload {
   companyName: string;
   note: string | null;
+  hadProcess?: boolean;
   receivedCvEmail: boolean;
   receivedCvDate: string | null;
   rejectedEmail: boolean;

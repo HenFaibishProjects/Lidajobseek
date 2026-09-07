@@ -12,7 +12,6 @@ import { MailCoverageService } from '../mail-coverage/mail-coverage.service';
 @Injectable()
 export class ProcessesService {
   private readonly logger = new Logger(ProcessesService.name);
-  private readonly CLOSED_STAGE_LABELS: string[] = [];
 
   constructor(
     @InjectRepository(Process)
@@ -22,11 +21,18 @@ export class ProcessesService {
   ) { }
 
   private isRejectedStage(stage?: string | null): boolean {
-    return false;
+    const normalizedStage = stage?.trim().toLowerCase();
+    return normalizedStage === 'rejected' || normalizedStage === 'reject';
   }
 
   private isClosedStage(stage?: string | null): boolean {
-    return false;
+    const normalizedStage = stage?.trim().toLowerCase();
+    return (
+      normalizedStage === 'rejected' ||
+      normalizedStage === 'reject' ||
+      normalizedStage === 'withdrawn' ||
+      normalizedStage === 'offer declined'
+    );
   }
 
   async create(dto: CreateProcessDto, userId: number): Promise<Process> {

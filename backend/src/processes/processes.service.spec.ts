@@ -52,8 +52,11 @@ describe('ProcessesService', () => {
   describe('isClosedStage (private)', () => {
     it('should identify closed stages correctly', () => {
       // Accessing private method via bracket notation for testing
-      expect((service as any).isClosedStage('Rejected')).toBe(false);
-      expect((service as any).isClosedStage('Withdrawn')).toBe(false);
+      expect((service as any).isClosedStage('Rejected')).toBe(true);
+      expect((service as any).isClosedStage('Withdrawn')).toBe(true);
+      expect(
+        (service as any).isClosedStage('Waiting for Interview Feedback'),
+      ).toBe(false);
     });
   });
 
@@ -217,6 +220,21 @@ describe('ProcessesService', () => {
       expect(
         mockMailCoverageService.syncRejectedProcess,
       ).not.toHaveBeenCalled();
+    });
+
+    it('should sync mail coverage when a process is rejected', async () => {
+      const existingProcess: any = {
+        id: 1,
+        companyName: 'Acme',
+        currentStage: 'Waiting for Interview Feedback',
+      };
+      mockRepo.findOne.mockResolvedValue(existingProcess);
+
+      await service.update(1, { currentStage: 'Rejected' }, 7);
+
+      expect(
+        mockMailCoverageService.syncRejectedProcess,
+      ).toHaveBeenCalledWith('Acme', 7);
     });
 
     it('should persist jobDescriptionUrl when provided in create', async () => {

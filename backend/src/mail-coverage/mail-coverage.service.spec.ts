@@ -8,6 +8,9 @@ describe('MailCoverageService', () => {
     find: jest.Mock;
     findOne: jest.Mock;
   };
+  let processRepository: {
+    find: jest.Mock;
+  };
   let entityManager: {
     assign: jest.Mock;
     flush: jest.Mock;
@@ -24,6 +27,9 @@ describe('MailCoverageService', () => {
       find: jest.fn(),
       findOne: jest.fn().mockResolvedValue(null),
     };
+    processRepository = {
+      find: jest.fn().mockResolvedValue([]),
+    };
     entityManager = {
       assign: jest.fn(),
       flush: jest.fn(),
@@ -32,7 +38,11 @@ describe('MailCoverageService', () => {
       persistAndFlush: jest.fn(),
       removeAndFlush: jest.fn(),
     };
-    service = new MailCoverageService(repository as any, entityManager as any);
+    service = new MailCoverageService(
+      repository as any,
+      processRepository as any,
+      entityManager as any,
+    );
   });
 
   it('creates an entry with normalized company name and dates', async () => {
@@ -79,6 +89,24 @@ describe('MailCoverageService', () => {
     );
   });
 
+  it('stores a manually selected process badge', async () => {
+    await service.create(
+      {
+        companyName: 'Acme',
+        hadProcess: true,
+        receivedCvEmail: false,
+        receivedCvDate: null,
+        rejectedEmail: false,
+        rejectedDate: null,
+      },
+      7,
+    );
+
+    expect(repository.create).toHaveBeenCalledWith(
+      expect.objectContaining({ hadProcess: true }),
+    );
+  });
+
   it('creates a process-linked entry when a process is rejected', async () => {
     await service.syncRejectedProcess('  Acme  ', 7);
 
@@ -104,6 +132,71 @@ describe('MailCoverageService', () => {
     expect(existing.hadProcess).toBe(true);
     expect(repository.create).not.toHaveBeenCalled();
     expect(entityManager.flush).toHaveBeenCalled();
+  });
+
+  it('repairs missing process badges when mail coverage is loaded', async () => {
+    const linkedEntry = {
+      id: 3,
+      companyName: 'Acme',
+      hadProcess: false,
+    };
+    const unrelatedEntry = {
+      id: 4,
+      companyName: 'Other Co',
+      hadProcess: false,
+    };
+    repository.find.mockResolvedValue([linkedEntry, unrelatedEntry]);
+    processRepository.find.mockResolvedValue([{ companyName: '  ACME  ' }]);
+
+    const result = await service.findAll(7);
+
+    expect(result).toEqual([linkedEntry, unrelatedEntry]);
+    expect(linkedEntry.hadProcess).toBe(true);
+    expect(unrelatedEntry.hadProcess).toBe(false);
+    expect(entityManager.flush).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps a historical process badge even if the process was deleted', async () => {
+    const historicalEntry = {
+      id: 3,
+      companyName: 'Acme',
+      hadProcess: true,
+    };
+    repository.find.mockResolvedValue([historicalEntry]);
+
+    await service.findAll(7);
+
+    expect(historicalEntry.hadProcess).toBe(true);
+    expect(entityManager.flush).not.toHaveBeenCalled();
+  });
+
+  it('allows a manually selected process badge to be cleared on edit', async () => {
+    const existing = {
+      id: 3,
+      companyName: 'Acme',
+      hadProcess: true,
+    };
+    repository.findOne
+      .mockResolvedValueOnce(existing)
+      .mockResolvedValueOnce(null);
+
+    await service.update(
+      3,
+      {
+        companyName: 'Acme',
+        hadProcess: false,
+        receivedCvEmail: false,
+        receivedCvDate: null,
+        rejectedEmail: false,
+        rejectedDate: null,
+      },
+      7,
+    );
+
+    expect(entityManager.assign).toHaveBeenCalledWith(
+      existing,
+      expect.objectContaining({ hadProcess: false }),
+    );
   });
 
   it('requires a date when an email is marked as received', async () => {
@@ -200,6 +293,32 @@ describe('MailCoverageService', () => {
     ]);
     expect(entityManager.flush).toHaveBeenCalledTimes(1);
     expect(result).toEqual({ created: 1, updated: 1, unchanged: 0, total: 2 });
+  });
+
+  it('marks a newly imported company when it already has a process', async () => {
+    repository.find.mockResolvedValue([]);
+    processRepository.find.mockResolvedValue([{ companyName: 'New Co' }]);
+
+    await service.importMany(
+      [
+        {
+          companyName: 'New Co',
+          note: null,
+          receivedCvEmail: true,
+          receivedCvDate: '2026-08-20',
+          rejectedEmail: false,
+          rejectedDate: null,
+        },
+      ],
+      7,
+    );
+
+    expect(entityManager.persist).toHaveBeenCalledWith([
+      expect.objectContaining({
+        companyName: 'New Co',
+        hadProcess: true,
+      }),
+    ]);
   });
 
   it('bulk import reports unchanged records without flushing', async () => {

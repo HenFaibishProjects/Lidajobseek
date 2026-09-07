@@ -22,6 +22,7 @@ type CoverageSort = 'company' | 'latest';
 interface MailCoverageForm {
   companyName: string;
   note: string;
+  hadProcess: boolean;
   receivedCvEmail: boolean;
   receivedCvDate: string;
   rejectedEmail: boolean;
@@ -254,6 +255,7 @@ export class MailCoverageComponent implements OnInit {
     this.form = {
       companyName: entry.companyName,
       note: entry.note || '',
+      hadProcess: entry.hadProcess,
       receivedCvEmail: entry.receivedCvEmail,
       receivedCvDate: this.toInputDate(entry.receivedCvDate),
       rejectedEmail: entry.rejectedEmail,
@@ -386,6 +388,7 @@ export class MailCoverageComponent implements OnInit {
     return {
       companyName,
       note: this.form.note.trim() || null,
+      hadProcess: this.form.hadProcess,
       receivedCvEmail: this.form.receivedCvEmail,
       receivedCvDate: this.form.receivedCvEmail
         ? this.form.receivedCvDate
@@ -414,6 +417,7 @@ export class MailCoverageComponent implements OnInit {
     return {
       companyName: '',
       note: '',
+      hadProcess: false,
       receivedCvEmail: false,
       receivedCvDate: '',
       rejectedEmail: false,
