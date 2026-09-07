@@ -75,4 +75,60 @@ describe('parseMailCoverageMarkdown', () => {
     ]);
     expect(preview.errors).toEqual([]);
   });
+
+  it('accepts year-first dates with an optional time', () => {
+    const preview = parseMailCoverageMarkdown(
+      [
+        'Date\tCompany\tPosition\tStatus',
+        '2026-07-09 12:27\tMiami\tSenior Backend Engineer\tRECEIVED',
+        '2026-07-09 13:45\tSimilarweb\tBackend Engineer, Data Foundations\tREJECTED',
+      ].join('\n'),
+      new Date('2026-09-07T12:00:00Z'),
+    );
+
+    expect(preview.entries).toEqual([
+      jasmine.objectContaining({
+        companyName: 'Miami',
+        receivedCvEmail: true,
+        receivedCvDate: '2026-07-09',
+      }),
+      jasmine.objectContaining({
+        companyName: 'Similarweb',
+        rejectedEmail: true,
+        rejectedDate: '2026-07-09',
+      }),
+    ]);
+    expect(preview.skippedRows).toBe(0);
+    expect(preview.errors).toEqual([]);
+  });
+
+  it('accepts a time before a day-first date', () => {
+    const preview = parseMailCoverageMarkdown(
+      [
+        'Date\tCompany \tPosition\tStatus',
+        '12:27 09/07/2026\tMami\tSenior Backend Engineer\tRECEIVED',
+        '13:45 09/07/2026\tSimilarweb\tBackend Engineer, Data Foundations\tREJECTED',
+        '20:16 09/07/2026\tK Health\t\tRECEIVED',
+      ].join('\n'),
+      new Date('2026-09-07T12:00:00Z'),
+    );
+
+    expect(preview.entries).toEqual([
+      jasmine.objectContaining({
+        companyName: 'K Health',
+        receivedCvDate: '2026-07-09',
+      }),
+      jasmine.objectContaining({
+        companyName: 'Mami',
+        receivedCvDate: '2026-07-09',
+      }),
+      jasmine.objectContaining({
+        companyName: 'Similarweb',
+        rejectedDate: '2026-07-09',
+      }),
+    ]);
+    expect(preview.sourceRows).toBe(3);
+    expect(preview.skippedRows).toBe(0);
+    expect(preview.errors).toEqual([]);
+  });
 });

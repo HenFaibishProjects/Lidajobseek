@@ -187,14 +187,26 @@ function isAlignmentRow(row: string[]): boolean {
 }
 
 function parseDate(value: string, now: Date): ParsedDate | null {
-  const match = cleanMarkdownText(value).match(
+  const normalizedValue = cleanMarkdownText(value);
+  const dayFirstMatch = normalizedValue.match(
     /^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+\d{1,2}:\d{2})?/,
   );
-  if (!match) return null;
-
-  const day = Number(match[1]);
-  const month = Number(match[2]);
-  let year = Number(match[3]);
+  const timeFirstMatch = normalizedValue.match(
+    /^\d{1,2}:\d{2}\s+(\d{1,2})\/(\d{1,2})\/(\d{4})/,
+  );
+  const yearFirstMatch = normalizedValue.match(
+    /^(\d{4})-(\d{1,2})-(\d{1,2})(?:[T\s]+\d{1,2}:\d{2})?/,
+  );
+  const day = Number(
+    dayFirstMatch?.[1] || timeFirstMatch?.[1] || yearFirstMatch?.[3],
+  );
+  const month = Number(
+    dayFirstMatch?.[2] || timeFirstMatch?.[2] || yearFirstMatch?.[2],
+  );
+  let year = Number(
+    dayFirstMatch?.[3] || timeFirstMatch?.[3] || yearFirstMatch?.[1],
+  );
+  if (!day || !month || !year) return null;
   const correctedFutureYear = year === now.getFullYear() + 1;
   if (correctedFutureYear) year = now.getFullYear();
 
