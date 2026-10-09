@@ -75,8 +75,8 @@
         <div class="form-row">
           <div class="form-group">
             <label class="field-label">Current Stage <span class="req">*</span></label>
-            <select name="currentStage" [(ngModel)]="process.currentStage" class="field-input" required
-              (change)="onStageChange()">
+            <select name="currentStage" [ngModel]="process.currentStage" class="field-input" required
+              (change)="onStageChange($any($event.target).value, $any($event.target))">
               <option *ngFor="let stage of stages" [value]="stage">{{ stage }}</option>
             </select>
           </div>
@@ -108,6 +108,15 @@
             <label class="field-label" style="color: var(--danger-color, #ef4444);">Reason for Withdrawal</label>
             <input type="text" name="withdrawReason" [(ngModel)]="process.withdrawReason"
               placeholder="e.g. Salary too low, found another job..." class="field-input">
+          </div>
+        </div>
+
+        <div class="form-row" *ngIf="process.currentStage === 'Rejected'">
+          <div class="form-group">
+            <label class="field-label" for="process-rejection-summary">Rejection summary (optional)</label>
+            <textarea id="process-rejection-summary" name="rejectionSummary" rows="4"
+              [(ngModel)]="process.rejectionSummary" class="field-input"
+              placeholder="Why was this application rejected?"></textarea>
           </div>
         </div>
 

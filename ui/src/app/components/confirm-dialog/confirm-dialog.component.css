@@ -114,3 +114,17 @@
   from { transform: scale(0.92) translateY(8px); opacity: 0; }
   to { transform: scale(1) translateY(0); opacity: 1; }
 }
+
+.rejection-summary-field { margin-bottom: 24px; }
+.rejection-summary-field label { display: block; margin-bottom: 8px; font-size: 14px; }
+.rejection-summary-field textarea {
+  width: 100%;
+  box-sizing: border-box;
+  resize: vertical;
+  padding: 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font: inherit;
+}

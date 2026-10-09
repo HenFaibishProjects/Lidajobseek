@@ -270,7 +270,15 @@ export class ProcessFormComponent implements OnInit, OnDestroy {
     return this.process.currentStage !== this.stages[0] && this.process.currentStage !== this.stages[1];
   }
 
-  onStageChange() {
+  async onStageChange(newStage: string = this.process.currentStage, stageSelect?: HTMLSelectElement) {
+    if (stageSelect) stageSelect.value = this.process.currentStage;
+    if (newStage === 'Rejected' && this.process.currentStage !== 'Rejected') {
+      const rejectionSummary = await this.confirmService.rejectionSummary(this.process.companyName, this.process.rejectionSummary);
+      if (rejectionSummary === null) return;
+      this.process.rejectionSummary = rejectionSummary;
+    }
+    this.process.currentStage = newStage;
+    if (stageSelect) stageSelect.value = newStage;
     if (this.shouldShowInteractionSection) {
       if (!this.process.initialInviteDate)
         this.process.initialInviteDate = new Date().toISOString().split('T')[0];

@@ -14,6 +14,7 @@ export interface ConfirmOptions {
   cancelText?: string;
   buttons?: ConfirmButton[];
   danger?: boolean;
+  rejectionSummary?: string;
 }
 
 @Injectable({
@@ -70,6 +71,16 @@ export class ConfirmService {
         sub.unsubscribe();
         this.confirmSubject.next(null); // Close dialog
       });
+    });
+  }
+
+  rejectionSummary(companyName: string, summary?: string | null): Promise<string | null> {
+    return this.custom({
+      title: 'Reject application',
+      message: `Add a short rejection summary for ${companyName} (optional).`,
+      confirmText: 'Save rejection',
+      cancelText: 'Cancel',
+      rejectionSummary: summary || ''
     });
   }
 

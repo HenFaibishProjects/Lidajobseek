@@ -17,6 +17,11 @@
       </button>
     </div>
     <p class="dialog-message">{{ options.message }}</p>
+    <div class="rejection-summary-field" *ngIf="options.rejectionSummary !== undefined">
+      <label for="rejection-summary">Rejection summary (optional)</label>
+      <textarea id="rejection-summary" rows="4" [(ngModel)]="options.rejectionSummary"
+        placeholder="Why was this application rejected?"></textarea>
+    </div>
     <div class="dialog-actions">
       <ng-container *ngIf="options.buttons; else defaultButtons">
         <button *ngFor="let btn of options.buttons"
@@ -27,7 +32,7 @@
       </ng-container>
       <ng-template #defaultButtons>
         <button class="btn-secondary" (click)="onCancel()">{{ options.cancelText }}</button>
-        <button [class]="options.danger ? 'btn-danger' : 'btn-primary'" (click)="onConfirm()">{{ options.confirmText }}</button>
+        <button [class]="options.danger ? 'btn-danger' : 'btn-primary'" (click)="onConfirm(options)">{{ options.confirmText }}</button>
       </ng-template>
     </div>
     <div class="keyboard-hint">Press <kbd>ESC</kbd> to cancel</div>

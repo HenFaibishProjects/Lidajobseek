@@ -22,6 +22,7 @@ export class CreateProcessDto {
   dataFromThePhoneCall?: string;
   nextFollowUp?: string;
   withdrawReason?: string;
+  rejectionSummary?: string | null;
 
   // Initial Interaction Details
   initialInviteDate?: string;

@@ -1237,3 +1237,5 @@
 .mc-import-table td * {
   font-size: 16px;
 }
+
+.mc-section-toggle { margin-left: auto; flex-shrink: 0; }
