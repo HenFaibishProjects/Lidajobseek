@@ -116,6 +116,7 @@
         </div>
     </div>
 
+    <div class="calendar-layout">
     <div class="calendar-content">
         <div *ngIf="loading" class="loading-state">
             <div class="spinner"></div>
@@ -572,5 +573,35 @@
                 </div>
             </div>
         </div>
+    </div>
+        <aside class="recent-interviews" aria-labelledby="recent-interviews-title">
+            <header class="recent-interviews-header">
+                <h2 id="recent-interviews-title">Recent interviews</h2>
+                <p>Today and yesterday · Past scheduled times</p>
+            </header>
+            <p class="recent-interviews-state" *ngIf="recentPastInterviewsLoading">Loading recent interviews…</p>
+            <p class="recent-interviews-state" *ngIf="!recentPastInterviewsLoading && recentPastInterviewsError">
+                Could not load recent interviews.
+                <button type="button" class="btn-secondary" (click)="loadRecentPastInterviews()">Retry</button>
+            </p>
+            <p class="recent-interviews-state"
+                *ngIf="!recentPastInterviewsLoading && !recentPastInterviewsError && recentPastInterviews.length === 0">
+                No past interviews from today or yesterday.
+            </p>
+            <div class="recent-interviews-list" *ngIf="!recentPastInterviewsLoading && recentPastInterviews.length > 0">
+                <article class="recent-interview" *ngFor="let interview of recentPastInterviews">
+                    <strong dir="auto">{{ interview.process ? interview.process.companyName : interview.agency?.agencyName }}</strong>
+                    <span>{{ getInterviewTypeLabel(interview.interviewType) }}</span>
+                    <time [attr.datetime]="interview.date">{{ formatDateTime(interview.date) }}</time>
+                    <a *ngIf="interview.processId"
+                        [routerLink]="['/process', interview.processId, 'interaction', interview.id, 'edit']"
+                        [attr.aria-label]="'Edit interview for ' + interview.process.companyName">Edit interview</a>
+                    <a *ngIf="!interview.processId && interview.agencyId"
+                        [routerLink]="['/recruiters', interview.agencyId, 'edit']"
+                        [queryParams]="{ editInteractionId: interview.id }"
+                        [attr.aria-label]="'Edit interview for ' + interview.agency?.agencyName">Edit interview</a>
+                </article>
+            </div>
+        </aside>
     </div>
 </div>

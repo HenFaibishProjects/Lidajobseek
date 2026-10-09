@@ -1341,3 +1341,60 @@
         border-top: 1px solid rgba(255, 255, 255, 0.09);
     }
 }
+
+.calendar-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 260px;
+    align-items: start;
+    gap: 20px;
+}
+
+.calendar-content { min-width: 0; }
+
+.recent-interviews {
+    padding: 16px;
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+}
+
+.recent-interviews-header h2 {
+    margin: 0 0 6px;
+    color: var(--text-primary);
+    font-size: 15px;
+}
+
+.recent-interviews-header p,
+.recent-interviews-state {
+    margin: 0 0 12px;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.recent-interviews-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 440px;
+    overflow-y: auto;
+}
+
+.recent-interview {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    background: var(--bg-primary);
+    font-size: 12px;
+    overflow-wrap: anywhere;
+}
+
+.recent-interview strong { color: var(--text-primary); }
+.recent-interview a { color: var(--primary-blue); align-self: flex-start; }
+
+@media (max-width: 1200px) {
+    .calendar-layout { grid-template-columns: minmax(0, 1fr); }
+}
