@@ -63,6 +63,9 @@ export function splitMailCoverageEntries(entries: MailCoverageEntry[]): {
   styleUrls: ['./mail-coverage.component.css'],
 })
 export class MailCoverageComponent implements OnInit {
+  otherCoverageExpanded = true;
+  processRejectionsExpanded = true;
+  withdrawnApplicationsExpanded = true;
   entries: MailCoverageEntry[] = [];
   withdrawnProcesses: WithdrawnProcess[] = [];
   isLoading = true;

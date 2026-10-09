@@ -224,6 +224,7 @@ export class ProcessesService {
       jobDescriptionUrl,
       companyResearch,
       withdrawReason,
+      rejectionSummary,
     } = dto;
 
     const data: any = {};
@@ -270,6 +271,7 @@ export class ProcessesService {
     if (scoreVibe !== undefined) data.scoreVibe = scoreVibe;
     if (companyResearch !== undefined) data.companyResearch = companyResearch;
     if (withdrawReason !== undefined) data.withdrawReason = withdrawReason;
+    if (rejectionSummary !== undefined) data.rejectionSummary = rejectionSummary;
 
     Object.assign(process, data);
     await this.em.flush();

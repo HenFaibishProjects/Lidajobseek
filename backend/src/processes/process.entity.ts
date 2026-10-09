@@ -57,6 +57,9 @@ export class Process {
   @Property({ type: 'text', nullable: true })
   withdrawReason?: string;
 
+  @Property({ type: 'text', nullable: true })
+  rejectionSummary?: string;
+
   @Property({ onCreate: () => new Date() })
   createdAt: Date = new Date();
 

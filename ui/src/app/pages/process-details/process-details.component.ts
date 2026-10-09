@@ -152,8 +152,15 @@ export class ProcessDetailsComponent implements OnInit, OnDestroy {
         }
     }
 
-    updateStage(newStage: string) {
+    async updateStage(newStage: string, stageSelect?: HTMLSelectElement) {
         if (!newStage || newStage === this.process.currentStage) return;
+
+        if (stageSelect) stageSelect.value = this.process.currentStage;
+        let rejectionSummary: string | null = null;
+        if (newStage === 'Rejected') {
+            rejectionSummary = await this.confirmService.rejectionSummary(this.process.companyName, this.process.rejectionSummary);
+            if (rejectionSummary === null) return;
+        }
 
         const previous = this.process.currentStage;
         this.process.currentStage = newStage; // optimistic
@@ -161,9 +168,11 @@ export class ProcessDetailsComponent implements OnInit, OnDestroy {
         this.isUpdatingStage = true;
         
         const updatePayload: any = { currentStage: newStage };
+        if (rejectionSummary !== null) updatePayload.rejectionSummary = rejectionSummary;
 
         this.processesService.update(this.process.id, updatePayload).subscribe({
             next: (updatedProcess: any) => {
+                if (rejectionSummary !== null) this.process.rejectionSummary = rejectionSummary;
                 if (updatedProcess?.updatedAt) {
                     this.process.updatedAt = updatedProcess.updatedAt;
                 }

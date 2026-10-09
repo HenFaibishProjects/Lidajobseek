@@ -271,6 +271,10 @@
                             </span>
                         </div>
                         <span class="kpi-modal-role">{{ process.roleTitle }}</span>
+                        <div class="kpi-modal-rejection-summary" *ngIf="activeKpiModal === 'rejected'">
+                            <strong>Rejection summary</strong>
+                            <p>{{ process.rejectionSummary?.trim() || 'No rejection summary' }}</p>
+                        </div>
                         <div class="kpi-modal-meta">
                             <span *ngIf="process.location">
                                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor"

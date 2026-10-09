@@ -19,7 +19,7 @@
                             <select
                                 class="stage-select"
                                 [ngModel]="process.currentStage"
-                                (ngModelChange)="updateStage($event)"
+                                (change)="updateStage($any($event.target).value, $any($event.target))"
                                 [disabled]="isUpdatingStage"
                                 title="Change current stage"
                             >
