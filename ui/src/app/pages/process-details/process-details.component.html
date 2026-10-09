@@ -217,7 +217,7 @@
                     </div>
                 </div>
 
-                <div class="card-body cr-body">
+                <div class="card-body cr-body" dir="rtl">
 
                     <!-- ── Group: פרטי החברה ── -->
                     <div class="cr-group"
@@ -2451,6 +2451,7 @@
 
     /* ── Card body ── */
     .cr-body {
+        text-align: right;
         display: flex;
         flex-direction: column;
         gap: 20px;
@@ -2519,7 +2520,7 @@
 
     .cr-bidi-text {
         unicode-bidi: plaintext;
-        text-align: start;
+        text-align: right;
         overflow-wrap: anywhere;
     }
 

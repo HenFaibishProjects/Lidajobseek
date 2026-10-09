@@ -23,6 +23,9 @@ import {
 })
 export class CalendarComponent implements OnInit {
   interviews: any[] = [];
+  recentPastInterviews: any[] = [];
+  recentPastInterviewsLoading = true;
+  recentPastInterviewsError = false;
   processes: any[] = [];
   filteredProcesses: any[] = [];
   loading = true;
@@ -76,6 +79,7 @@ export class CalendarComponent implements OnInit {
   }
 
   loadInterviews() {
+    this.loadRecentPastInterviews();
     this.loading = true;
     const params: any = {};
 
@@ -113,6 +117,38 @@ export class CalendarComponent implements OnInit {
         console.error('Failed to load interviews', err);
         this.loading = false;
       }
+    });
+  }
+
+  loadRecentPastInterviews() {
+    const now = new Date();
+    const yesterdayStart = new Date(now);
+    yesterdayStart.setDate(yesterdayStart.getDate() - 1);
+    yesterdayStart.setHours(0, 0, 0, 0);
+    const params: { startDate: string; endDate: string; processId?: string } = {
+      startDate: yesterdayStart.toISOString(),
+      endDate: now.toISOString(),
+    };
+    if (this.selectedProcessId) params.processId = this.selectedProcessId;
+
+    this.recentPastInterviewsLoading = true;
+    this.recentPastInterviewsError = false;
+    this.interactionsService.getAll(params).subscribe({
+      next: (interviews) => {
+        this.recentPastInterviews = interviews
+          .filter((interview: any) => {
+            const interviewTime = new Date(interview.date).getTime();
+            return interviewTime >= yesterdayStart.getTime() && interviewTime < now.getTime();
+          })
+          .sort((firstInterview: any, secondInterview: any) =>
+            new Date(secondInterview.date).getTime() - new Date(firstInterview.date).getTime());
+        this.recentPastInterviewsLoading = false;
+      },
+      error: () => {
+        this.recentPastInterviews = [];
+        this.recentPastInterviewsLoading = false;
+        this.recentPastInterviewsError = true;
+      },
     });
   }
 
