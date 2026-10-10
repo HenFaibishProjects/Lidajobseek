@@ -1,3 +1,4 @@
+import { AvailabilityModule } from '../availability/availability.module';
 import { Module } from '@nestjs/common';
 import { InteractionsService } from './interactions.service';
 import { InteractionsController } from './interactions.controller';
@@ -10,7 +11,7 @@ import { MailModule } from '../mail/mail.module';
 import { WhatsAppReminderService } from './whatsapp-reminder.service';
 
 @Module({
-  imports: [MikroOrmModule.forFeature([Interaction, Contact, Process, RecruitmentAgency]), MailModule],
+  imports: [MikroOrmModule.forFeature([Interaction, Contact, Process, RecruitmentAgency]), MailModule, AvailabilityModule],
   controllers: [InteractionsController],
   providers: [InteractionsService, WhatsAppReminderService],
   exports: [InteractionsService, WhatsAppReminderService],

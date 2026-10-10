@@ -1,3 +1,4 @@
+import { AvailabilityCheckComponent } from '../../components/availability-check/availability-check.component';
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -18,7 +19,7 @@ import {
 @Component({
   selector: 'app-schedule-interview',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, DateFormatPipe],
+  imports: [CommonModule, FormsModule, RouterModule, DateFormatPipe, AvailabilityCheckComponent],
   templateUrl: './schedule-interview.component.html',
   styleUrls: ['./schedule-interview.component.css']
 })
@@ -26,6 +27,7 @@ export class ScheduleInterviewComponent implements OnInit {
   processes: any[] = [];
   agencies: any[] = [];
   loading = false;
+  editingInterviewId?: number;
   processSearch = '';
 
   /** 'process' = linked to a job process | 'recruiter' = meeting with a recruiter/agency */
@@ -103,7 +105,7 @@ export class ScheduleInterviewComponent implements OnInit {
     if (!id) return null;
     const process = this.processes.find((p) => Number(p.id) === id) ?? null;
     if (!process) return null;
-    return this.isClosedProcess(process) ? null : process;
+    return this.isClosedProcess(process) && !this.editingInterviewId ? null : process;
   }
 
   get completionPercent(): number {
@@ -201,12 +203,32 @@ export class ScheduleInterviewComponent implements OnInit {
 
     // Check for query parameters to prefill date
     this.route.queryParams.subscribe(params => {
+      if (params['editInterviewId']) {
+        this.loadInterview(Number(params['editInterviewId']));
+      }
       if (params['date']) {
         this.datePart = params['date'];
       }
     });
 
     this.interaction.date = `${this.datePart}T${this.timePart}`;
+  }
+
+  loadInterview(id: number) {
+    this.loading = true;
+    this.interactionsService.getById(id).subscribe({ next: interview => {
+      this.editingInterviewId = id;
+      this.interaction = { ...this.interaction, ...interview, processId: interview.process?.id || null, agencyId: interview.agency?.id || null, durationMinutes: interview.durationMinutes || 60 };
+      this.meetingMode = interview.agency ? 'recruiter' : 'process';
+      const date = new Date(interview.date);
+      const localIso = new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString();
+      this.datePart = localIso.slice(0, 10); this.timePart = localIso.slice(11, 16);
+      this.updateDateTime(); this.loading = false;
+    }, error: () => { this.loading = false; this.toastService.show('Could not load interview', 'error'); } });
+  }
+
+  chooseAnotherTime() {
+    document.querySelector<HTMLInputElement>('input[name="datePart"]')?.focus();
   }
 
   loadAgencies() {
@@ -224,9 +246,7 @@ export class ScheduleInterviewComponent implements OnInit {
 
 
   updateDateTime() {
-    if (this.datePart && this.timePart) {
-      this.interaction.date = `${this.datePart}T${this.timePart}`;
-    }
+    this.interaction.date = this.datePart && this.timePart ? `${this.datePart}T${this.timePart}` : '';
   }
 
   loadProcesses() {
@@ -292,11 +312,15 @@ export class ScheduleInterviewComponent implements OnInit {
       return;
     }
 
+    if (this.loading || !this.canSubmit) return;
+    let interviewInstant: string;
+    try { interviewInstant = this.interactionsService.availability.interviewInstant(this.interaction.date); }
+    catch (error) { this.toastService.show((error as Error).message, 'error'); return; }
     this.loading = true;
 
     // Build payload based on mode — only one of processId / agencyId is set
     const payload: any = {
-      date: new Date(this.interaction.date).toISOString(),
+      date: interviewInstant,
       interviewType: this.interaction.interviewType,
       summary: this.interaction.summary,
     };
@@ -309,11 +333,11 @@ export class ScheduleInterviewComponent implements OnInit {
     }
 
     // Add optional fields only if they have values
-    if (this.interaction.headsup) payload.headsup = this.interaction.headsup;
-    if (this.interaction.notes) payload.notes = this.interaction.notes;
-    if (this.interaction.testsAssessment) payload.testsAssessment = this.interaction.testsAssessment;
-    if (this.interaction.roleInsights) payload.roleInsights = this.interaction.roleInsights;
-    if (this.interaction.videoLink) payload.videoLink = this.interaction.videoLink;
+    if (this.interaction.headsup || this.editingInterviewId) payload.headsup = this.interaction.headsup;
+    if (this.interaction.notes || this.editingInterviewId) payload.notes = this.interaction.notes;
+    if (this.interaction.testsAssessment || this.editingInterviewId) payload.testsAssessment = this.interaction.testsAssessment;
+    if (this.interaction.roleInsights || this.editingInterviewId) payload.roleInsights = this.interaction.roleInsights;
+    if (this.interaction.videoLink || this.editingInterviewId) payload.videoLink = this.interaction.videoLink;
     if (this.interaction.durationMinutes) payload.durationMinutes = this.interaction.durationMinutes;
 
     // Build reminders array — filter out any with no channels selected
@@ -328,17 +352,18 @@ export class ScheduleInterviewComponent implements OnInit {
       },
       sendWhatsAppReminder: !!r.sendWhatsAppReminder
     }));
-    if (validReminders.length > 0) payload.reminders = validReminders;
+    if (validReminders.length > 0 || this.editingInterviewId) payload.reminders = validReminders;
 
 
-    this.interactionsService.create(payload).subscribe({
+    const request = this.editingInterviewId ? this.interactionsService.update(this.editingInterviewId, payload) : this.interactionsService.create(payload);
+    request.subscribe({
       next: () => {
-        this.toastService.show('Interview scheduled successfully', 'success');
+        this.toastService.show(this.editingInterviewId ? 'Interview updated successfully' : 'Interview scheduled successfully', 'success');
         this.router.navigate(['/calendar']);
       },
       error: (err) => {
         console.error('Failed to schedule interview', err);
-        this.toastService.show('Failed to schedule interview', 'error');
+        if (err.status !== 409) this.toastService.show(err.error?.message || 'Failed to save interview', 'error');
         this.loading = false;
       }
     });

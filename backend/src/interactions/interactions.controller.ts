@@ -70,6 +70,11 @@ export class InteractionsController {
     return this.interactionsService.findByProcess(processId, req.user.userId);
   }
 
+  @Get(':id')
+  findOne(@Param('id', ParseIntPipe) id: number, @Req() request: any) {
+    return this.interactionsService.findOne(id, request.user.userId);
+  }
+
   @Patch(':id')
   update(@Param('id', ParseIntPipe) id: number, @Body() dto: any, @Req() req: any) {
     return this.interactionsService.update(id, dto, req.user);

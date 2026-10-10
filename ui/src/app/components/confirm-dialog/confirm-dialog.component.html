@@ -16,7 +16,7 @@
         </svg>
       </button>
     </div>
-    <p class="dialog-message">{{ options.message }}</p>
+    <p class="dialog-message" [style.white-space]="options.title === 'Time Conflict Detected' ? 'pre-line' : null">{{ options.message }}</p>
     <div class="rejection-summary-field" *ngIf="options.rejectionSummary !== undefined">
       <label for="rejection-summary">Rejection summary (optional)</label>
       <textarea id="rejection-summary" rows="4" [(ngModel)]="options.rejectionSummary"

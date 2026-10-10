@@ -8,6 +8,8 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityRepository, EntityManager, QueryOrder } from '@mikro-orm/postgresql';
+import { validateInstant } from '../availability/availability-time';
+import { AvailabilityService } from '../availability/availability.service';
 import { Interaction } from './interaction.entity';
 import { Process } from '../processes/process.entity';
 import { Contact } from '../contacts/contact.entity';
@@ -53,6 +55,7 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
     private readonly em: EntityManager,
     private readonly mailService: MailService,
     private readonly whatsappReminderService: WhatsAppReminderService,
+    private readonly availabilityService: AvailabilityService,
   ) { }
 
   private normalizePassLikelihood(value: unknown): number | null | undefined {
@@ -515,6 +518,18 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
   }
 
   async create(dto: CreateInteractionDto, user?: any): Promise<Interaction> {
+    const userId = Number(user?.id || user?.userId);
+    if (!Number.isInteger(userId) || userId < 1) throw new BadRequestException('User identity is missing');
+    return this.em.transactional(async () => {
+      await this.availabilityService.lockUser(userId);
+      if (this.availabilityService.isScheduledInterview(dto.interviewType)) {
+        await this.availabilityService.assertInterviewAvailable(dto.date, dto.durationMinutes, userId, dto);
+      }
+      return this.createWithinTransaction(dto, user);
+    });
+  }
+
+  private async createWithinTransaction(dto: CreateInteractionDto, user?: any): Promise<Interaction> {
     this.logger.log(`Creating interaction for process/agency. Process: ${dto.processId}, Agency: ${dto.agencyId}, User: ${user?.id || user?.userId}`);
     
     try {
@@ -672,6 +687,12 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
     }));
   }
 
+  async findOne(id: number, userId: number): Promise<Interaction> {
+    const interaction = await this.interactionRepository.findOne({ id, $or: [{ process: { user: userId } }, { agency: { user: userId } }] }, { populate: ['process', 'agency'] });
+    if (!interaction) throw new NotFoundException('Interview not found');
+    return interaction;
+  }
+
   async findByProcess(processId: number, userId: number): Promise<any[]> {
     const interactions = await this.interactionRepository.find(
       { process: { id: processId, user: userId } },
@@ -685,6 +706,14 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
   }
 
   async update(id: number, dto: any, user?: any): Promise<Interaction> {
+    const userId = Number(user?.userId ?? user?.id);
+    return this.em.transactional(async () => {
+      await this.availabilityService.lockUser(userId);
+      return this.updateWithinTransaction(id, dto, user);
+    });
+  }
+
+  private async updateWithinTransaction(id: number, dto: any, user?: any): Promise<Interaction> {
     const userId = user?.userId ?? user?.id;
     const interaction = await this.interactionRepository.findOne({
       id,
@@ -697,7 +726,20 @@ export class InteractionsService implements OnModuleInit, OnModuleDestroy {
       throw new NotFoundException(`Interaction with ID ${id} not found`);
     }
 
+    const proposedDate = dto.date ? validateInstant(dto.date) : interaction.date;
+    const proposedDuration = dto.durationMinutes !== undefined ? dto.durationMinutes : interaction.durationMinutes;
+    if (this.availabilityService.isScheduledInterview(dto.interviewType ?? interaction.interviewType) &&
+      (proposedDate.getTime() !== interaction.date.getTime() || proposedDuration !== interaction.durationMinutes || dto.interviewType !== undefined && dto.interviewType !== interaction.interviewType)) {
+      await this.availabilityService.assertInterviewAvailable(proposedDate.toISOString(), proposedDuration, Number(userId), dto, id);
+    }
     const data: any = { ...dto };
+    delete data.allowConflict;
+    delete data.conflictToken;
+    delete data.process;
+    delete data.agency;
+    delete data.processId;
+    delete data.agencyId;
+    delete data.id;
     if (dto.date) data.date = new Date(dto.date);
     if (dto.nextInviteDate) data.nextInviteDate = new Date(dto.nextInviteDate);
     if (Object.prototype.hasOwnProperty.call(dto, 'passLikelihood')) {
