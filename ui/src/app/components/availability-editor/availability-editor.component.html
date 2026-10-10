@@ -1,0 +1,138 @@
+<div class="availability-backdrop" (click)="!saving && closed.emit()">
+  <section
+    class="availability-dialog"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="availability-editor-title"
+    (click)="$event.stopPropagation()"
+    (keydown)="trapFocus($event)"
+    (keydown.escape)="!saving && closed.emit()"
+    tabindex="-1"
+  >
+    <header>
+      <div>
+        <span>YOUR AVAILABILITY</span>
+        <h2 id="availability-editor-title">
+          {{ block ? "Edit blocked time" : "Block Time" }}
+        </h2>
+      </div>
+      <button
+        type="button"
+        class="close-button"
+        aria-label="Close availability editor"
+        [disabled]="saving"
+        (click)="closed.emit()"
+      >
+        ×
+      </button>
+    </header>
+    <p *ngIf="block?.repeatWeekly" class="series-note">
+      Changes apply to the complete weekly series.
+    </p>
+    <form #availabilityForm="ngForm" (ngSubmit)="save()">
+      <fieldset [disabled]="saving">
+        <label for="block-date">Date</label
+        ><input
+          id="block-date"
+          name="startDate"
+          type="date"
+          [(ngModel)]="form.startDate"
+          (ngModelChange)="dateChanged()"
+          required
+          autofocus
+        />
+        <label class="checkbox-row"
+          ><input name="allDay" type="checkbox" [(ngModel)]="form.allDay" />
+          Block Entire Day</label
+        >
+        <div class="time-fields" *ngIf="!form.allDay">
+          <div>
+            <label for="block-start-time">Start time</label
+            ><input
+              id="block-start-time"
+              name="startTime"
+              type="time"
+              [(ngModel)]="form.startTime"
+              required
+            />
+          </div>
+          <div>
+            <label for="block-end-time">End time</label
+            ><input
+              id="block-end-time"
+              name="endTime"
+              type="time"
+              [(ngModel)]="form.endTime"
+              required
+            />
+          </div>
+          <div class="end-date">
+            <label for="block-end-date">End date</label
+            ><input
+              id="block-end-date"
+              name="endDate"
+              type="date"
+              [(ngModel)]="form.endDate"
+              [min]="form.startDate"
+              required
+            /><small>Choose the next day for a block crossing midnight.</small>
+          </div>
+        </div>
+        <label class="checkbox-row"
+          ><input
+            name="repeatWeekly"
+            type="checkbox"
+            [(ngModel)]="form.repeatWeekly"
+          />
+          Repeat Weekly</label
+        >
+        <label for="block-timezone">Timezone</label
+        ><input
+          id="block-timezone"
+          name="timeZone"
+          type="text"
+          [(ngModel)]="form.timeZone"
+          required
+          placeholder="e.g. Europe/London"
+        />
+        <small
+          >All-day blocks follow this timezone. Weekly blocks retain their local
+          time when the clocks change. Repeated clock times use the first
+          occurrence; skipped weekly times move forward.</small
+        >
+        <label for="block-reason">Reason <span>(optional)</span></label
+        ><textarea
+          id="block-reason"
+          name="reason"
+          [(ngModel)]="form.reason"
+          rows="3"
+          maxlength="2000"
+          dir="auto"
+          placeholder="Personal appointment, vacation…"
+        ></textarea>
+      </fieldset>
+      <p *ngIf="errorMessage" class="editor-error" role="alert">
+        {{ errorMessage }}
+      </p>
+      <footer>
+        <button
+          *ngIf="block"
+          type="button"
+          class="delete-button"
+          [disabled]="saving"
+          (click)="delete()"
+        >
+          Delete{{ block.repeatWeekly ? " series" : "" }}</button
+        ><button type="button" [disabled]="saving" (click)="closed.emit()">
+          Cancel</button
+        ><button
+          class="save-button"
+          type="submit"
+          [disabled]="saving || availabilityForm.invalid"
+        >
+          {{ saving ? "Saving…" : "Save" }}
+        </button>
+      </footer>
+    </form>
+  </section>
+</div>

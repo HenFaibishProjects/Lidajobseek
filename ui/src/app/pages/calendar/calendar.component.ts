@@ -1,3 +1,5 @@
+import { AvailabilityBlock, OccupiedInterval } from '../../services/availability.service';
+import { AvailabilityEditorComponent } from '../../components/availability-editor/availability-editor.component';
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -17,12 +19,21 @@ import {
 @Component({
   selector: 'app-calendar',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, OrderByDatePipe],
+  imports: [CommonModule, FormsModule, RouterModule, OrderByDatePipe, AvailabilityEditorComponent],
   templateUrl: './calendar.component.html',
   styleUrls: ['./calendar.component.css']
 })
 export class CalendarComponent implements OnInit {
   interviews: any[] = [];
+  availabilityIntervals: OccupiedInterval[] = [];
+  availabilityLoading = false;
+  availabilityError = false;
+  showAvailabilityManager = false;
+  showAvailabilityEditor = false;
+  availabilityEditorDate = '';
+  editingAvailabilityBlock: AvailabilityBlock | null = null;
+  blockDetailsLoading = false;
+  private availabilityRequest = 0;
   recentPastInterviews: any[] = [];
   recentPastInterviewsLoading = true;
   recentPastInterviewsError = false;
@@ -60,11 +71,13 @@ export class CalendarComponent implements OnInit {
     // Default: Show from today onwards, no end date limit (show all upcoming)
     const today = new Date();
     this.startDate = this.formatDateForInput(today);
-    this.endDate = ''; 
+    this.endDate = '';
+    this.generateCalendar();
+    this.loadAvailability();
   }
 
   formatDateForInput(date: Date): string {
-    return date.toISOString().split('T')[0];
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
   }
 
   loadProcesses() {
@@ -92,10 +105,10 @@ export class CalendarComponent implements OnInit {
     // However, the requirement is "Show all" should see everything including past.
     if (!this.showAllInterviews) {
         if (this.startDate) {
-          params.startDate = this.startDate + 'T00:00:00.000Z';
+          params.startDate = new Date(`${this.startDate}T00:00:00`).toISOString();
         }
         if (this.endDate) {
-          params.endDate = this.endDate + 'T23:59:59.999Z';
+          params.endDate = new Date(`${this.endDate}T23:59:59.999`).toISOString();
         }
     }
 
@@ -111,6 +124,7 @@ export class CalendarComponent implements OnInit {
         }
         this.interviews = interviews;
         this.generateCalendar();
+        this.loadAvailability();
         this.loading = false;
       },
       error: (err) => {
@@ -150,6 +164,82 @@ export class CalendarComponent implements OnInit {
         this.recentPastInterviewsError = true;
       },
     });
+  }
+
+  get calendarTimeZone(): string { return this.interactionsService.availability.browserTimeZone; }
+
+  get manualIntervals(): OccupiedInterval[] { return this.availabilityIntervals.filter(interval => interval.source === 'MANUAL_BLOCK'); }
+
+  changeView(view: 'month' | 'week' | 'list') { this.viewMode = view; this.generateCalendar(); this.loadAvailability(); }
+
+  loadAvailability() {
+    const requestId = ++this.availabilityRequest;
+    let start: Date;
+    let end: Date;
+    if (this.viewMode === 'month') {
+      start = new Date(this.calendarDays[0]?.date || this.currentMonthDate);
+      end = new Date(start); end.setDate(end.getDate() + 42);
+    } else if (this.viewMode === 'week') {
+      start = new Date(this.weekDays[0]?.date || this.currentWeekDate);
+      end = new Date(start); end.setDate(end.getDate() + 7);
+    } else {
+      start = this.startDate ? new Date(`${this.startDate}T00:00:00`) : new Date();
+      if (this.showAllInterviews) start.setMonth(start.getMonth() - 1);
+      end = this.endDate ? new Date(`${this.endDate}T00:00:00`) : new Date(start);
+      if (this.endDate) end.setDate(end.getDate() + 1); else end.setDate(end.getDate() + 90);
+    }
+    start.setHours(0, 0, 0, 0); end.setHours(0, 0, 0, 0);
+    if (!(end > start) || end.getTime() - start.getTime() > 366 * 86400000) {
+      this.availabilityError = true; this.availabilityLoading = false; this.availabilityIntervals = []; this.generateCalendar(); return;
+    }
+    this.availabilityLoading = true; this.availabilityError = false;
+    this.interactionsService.availability.getAvailability(start.toISOString(), end.toISOString()).subscribe({
+      next: intervals => {
+        if (requestId !== this.availabilityRequest) return;
+        this.availabilityIntervals = intervals; this.availabilityLoading = false; this.generateCalendar();
+      }, error: () => {
+        if (requestId !== this.availabilityRequest) return;
+        this.availabilityIntervals = []; this.availabilityLoading = false; this.availabilityError = true; this.generateCalendar();
+      },
+    });
+  }
+
+  blocksForDay(date: Date): OccupiedInterval[] {
+    const start = new Date(date); start.setHours(0, 0, 0, 0);
+    const end = new Date(start); end.setDate(end.getDate() + 1);
+    return this.manualIntervals.filter(interval => new Date(interval.start) < end && new Date(interval.end) > start);
+  }
+
+  blockDayLabel(interval: OccupiedInterval, date: Date): string {
+    if (interval.allDay) return 'Entire day';
+    const dayStart = new Date(date); dayStart.setHours(0, 0, 0, 0);
+    const dayEnd = new Date(dayStart); dayEnd.setDate(dayEnd.getDate() + 1);
+    const start = new Date(Math.max(Date.parse(interval.start), dayStart.getTime()));
+    const end = new Date(Math.min(Date.parse(interval.end), dayEnd.getTime()));
+    const time = (value: Date) => `${String(value.getHours()).padStart(2, '0')}:${String(value.getMinutes()).padStart(2, '0')}`;
+    return `${time(start)}–${end.getTime() === dayEnd.getTime() ? '24:00' : time(end)}`;
+  }
+
+  blockRange(interval: OccupiedInterval): string {
+    return interval.allDay ? `Entire day · ${interval.timeZone}` : `${this.formatDateTime(interval.start)} – ${this.formatDateTime(interval.end)}`;
+  }
+
+  openAvailabilityEditor(date?: Date) {
+    this.editingAvailabilityBlock = null;
+    this.availabilityEditorDate = this.formatDateForInput(date || this.selectedDay?.date || new Date());
+    this.showAvailabilityEditor = true;
+  }
+
+  editAvailability(interval: OccupiedInterval) {
+    if (this.blockDetailsLoading) return;
+    this.blockDetailsLoading = true;
+    this.interactionsService.availability.getBlock(interval.recordId).subscribe({ next: block => {
+      this.editingAvailabilityBlock = block; this.showAvailabilityEditor = true; this.blockDetailsLoading = false;
+    }, error: () => { this.blockDetailsLoading = false; this.toastService.show('Could not load availability block', 'error'); } });
+  }
+
+  availabilitySaved() {
+    this.showAvailabilityEditor = false; this.editingAvailabilityBlock = null; this.loadAvailability();
   }
 
   onFilterChange() {
@@ -358,7 +448,9 @@ export class CalendarComponent implements OnInit {
         date: new Date(tempDate),
         isCurrentMonth: tempDate.getMonth() === month,
         isToday: dayDate.getTime() === today.getTime(),
-        interviews: dayInterviews
+        interviews: dayInterviews,
+        blocks: this.blocksForDay(dayDate),
+        hasAllDayBlock: this.blocksForDay(dayDate).some(interval => interval.allDay)
       });
 
       tempDate.setDate(tempDate.getDate() + 1);
@@ -390,7 +482,9 @@ export class CalendarComponent implements OnInit {
       days.push({
         date: tempDate,
         isToday: dayDate.getTime() === today.getTime(),
-        interviews: dayInterviews
+        interviews: dayInterviews,
+        blocks: this.blocksForDay(dayDate),
+        hasAllDayBlock: this.blocksForDay(dayDate).some(interval => interval.allDay)
       });
     }
     this.weekDays = days;
@@ -419,7 +513,9 @@ export class CalendarComponent implements OnInit {
       
       this.selectedDay = {
         ...this.selectedDay,
-        interviews: refreshedInterviews
+        interviews: refreshedInterviews,
+        blocks: this.blocksForDay(selDate),
+        hasAllDayBlock: this.blocksForDay(selDate).some(interval => interval.allDay)
       };
     }
   }
@@ -436,6 +532,7 @@ export class CalendarComponent implements OnInit {
       1
     );
     this.generateCalendar();
+    this.loadAvailability();
   }
 
   nextMonth() {
@@ -445,11 +542,13 @@ export class CalendarComponent implements OnInit {
       1
     );
     this.generateCalendar();
+    this.loadAvailability();
   }
 
   todayMonth() {
     this.currentMonthDate = new Date();
     this.generateCalendar();
+    this.loadAvailability();
   }
 
   // Week navigation
@@ -458,6 +557,7 @@ export class CalendarComponent implements OnInit {
     nextDate.setDate(nextDate.getDate() - 7);
     this.currentWeekDate = nextDate;
     this.generateCalendar();
+    this.loadAvailability();
   }
 
   nextWeek() {
@@ -465,11 +565,13 @@ export class CalendarComponent implements OnInit {
     nextDate.setDate(nextDate.getDate() + 7);
     this.currentWeekDate = nextDate;
     this.generateCalendar();
+    this.loadAvailability();
   }
 
   todayWeek() {
     this.currentWeekDate = new Date();
     this.generateCalendar();
+    this.loadAvailability();
   }
 
   async deleteInterview(id: number) {

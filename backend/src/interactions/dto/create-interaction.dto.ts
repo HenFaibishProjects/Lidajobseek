@@ -21,6 +21,8 @@ export type ReminderItemDto = {
 
 
 export class CreateInteractionDto {
+  allowConflict?: boolean;
+  conflictToken?: string;
   processId?: number;
   agencyId?: number;
   date: string;

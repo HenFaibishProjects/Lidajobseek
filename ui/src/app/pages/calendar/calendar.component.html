@@ -16,6 +16,8 @@
             </div>
         </div>
         <div class="header-actions">
+            <button type="button" class="btn-secondary availability-control" (click)="showAvailabilityManager = !showAvailabilityManager">Manage Availability</button>
+            <button type="button" class="btn-secondary availability-control availability-block-action" (click)="openAvailabilityEditor()">Block Time</button>
             <button class="btn-secondary" (click)="exportData()">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -47,9 +49,9 @@
     <!-- Toolbar / Filters -->
     <div class="toolbar">
         <div class="view-mode-tabs">
-            <button class="view-tab" [class.active]="viewMode === 'month'" (click)="viewMode = 'month'">Month Grid</button>
-            <button class="view-tab" [class.active]="viewMode === 'week'" (click)="viewMode = 'week'">Week Grid</button>
-            <button class="view-tab" [class.active]="viewMode === 'list'" (click)="viewMode = 'list'">List View</button>
+            <button class="view-tab" [class.active]="viewMode === 'month'" (click)="changeView('month')">Month Grid</button>
+            <button class="view-tab" [class.active]="viewMode === 'week'" (click)="changeView('week')">Week Grid</button>
+            <button class="view-tab" [class.active]="viewMode === 'list'" (click)="changeView('list')">List View</button>
         </div>
 
         <div class="search-wrapper">
@@ -92,8 +94,23 @@
         </div>
     </div>
 
+    <div class="availability-status" aria-live="polite">
+        <span *ngIf="availabilityLoading">Loading availability…</span>
+        <span *ngIf="availabilityError">Availability could not be loaded. Choose a range of up to 366 days. <button type="button" class="btn-secondary" (click)="loadAvailability()">Retry</button></span>
+        <span *ngIf="!availabilityLoading && !availabilityError">Calendar timezone: {{ calendarTimeZone }} · Manual blocks stay visible with company filters.</span>
+    </div>
+    <section *ngIf="showAvailabilityManager || viewMode === 'list'" class="availability-manager" aria-labelledby="availability-manager-title">
+        <div class="availability-manager-header"><div><h2 id="availability-manager-title">{{ showAvailabilityManager ? 'Manage Availability' : 'Blocked time' }}</h2><p>{{ viewMode === 'list' ? 'Occurrences in the selected range, or the next 90 days when no end date is set.' : 'Occurrences in the displayed calendar range.' }}</p></div><button type="button" class="btn-secondary" (click)="openAvailabilityEditor()">Block Time</button></div>
+        <p *ngIf="!availabilityLoading && !availabilityError && !manualIntervals.length" class="availability-empty">No manual blocks in this range.</p>
+        <div class="availability-block-list">
+            <button type="button" *ngFor="let interval of manualIntervals" class="availability-block-card" [disabled]="blockDetailsLoading" (click)="editAvailability(interval)"><strong dir="auto">{{ interval.title }}</strong><span>{{ interval.start | date:'EEE, MMM d' }} · {{ blockRange(interval) }}</span><small>{{ interval.repeatWeekly ? 'Repeats weekly · Edit or delete series' : 'Edit or delete' }}</small></button>
+        </div>
+    </section>
+
     <!-- Calendar Color Legend -->
     <div class="calendar-legend" *ngIf="!loading && viewMode !== 'list'">
+        <div class="legend-item"><span class="legend-dot availability-legend-dot"></span><span class="legend-label">Manually blocked / Entire day</span></div>
+        <div class="legend-item"><span class="legend-dot availability-free-dot"></span><span class="legend-label">Unmarked time: check before scheduling</span></div>
         <div class="legend-item">
             <span class="legend-dot" style="background-color: #3b82f6;"></span>
             <span class="legend-label">Phone Interview</span>
@@ -150,8 +167,10 @@
                          [class.today]="day.isToday"
                          [class.selected]="selectedDay && (selectedDay.date | date:'yyyy-MM-dd') === (day.date | date:'yyyy-MM-dd')"
                          [class.has-events]="day.interviews.length > 0"
+                         [class.availability-all-day]="day.hasAllDayBlock"
                          (click)="selectDay(day)">
                         <span class="day-number">{{ day.date | date:'d' }}</span>
+                        <button type="button" *ngFor="let block of day.blocks" class="availability-month-block" (click)="$event.stopPropagation(); editAvailability(block)" [title]="blockRange(block) + ' · ' + block.title">{{ blockDayLabel(block, day.date) }} · {{ block.title }}{{ block.repeatWeekly ? ' ↻' : '' }}</button>
                         <div class="day-events-indicators" *ngIf="day.interviews.length > 0">
                             <div class="month-event-pill" 
                                   *ngFor="let item of day.interviews.slice(0, 5)" 
@@ -190,7 +209,7 @@
                 </div>
 
                 <div class="week-grid">
-                    <div class="week-day-column" 
+                    <div class="week-day-column" [class.availability-all-day]="day.hasAllDayBlock"
                          *ngFor="let day of weekDays"
                          [class.today]="day.isToday"
                          [class.selected]="selectedDay && (selectedDay.date | date:'yyyy-MM-dd') === (day.date | date:'yyyy-MM-dd')"
@@ -201,6 +220,7 @@
                         </div>
                         
                         <div class="week-day-events">
+                            <button type="button" *ngFor="let block of day.blocks" class="availability-week-block" (click)="$event.stopPropagation(); editAvailability(block)"><strong dir="auto">{{ block.title }}</strong><span>{{ blockDayLabel(block, day.date) }}</span><small *ngIf="block.repeatWeekly">Repeats weekly ↻</small></button>
                             <div class="week-event-card" 
                                  *ngFor="let item of day.interviews"
                                  [class.next-interview-event]="isNextInterview(item)"
@@ -219,8 +239,8 @@
                                 </div>
                                 <div class="week-event-subtitle">{{ getInterviewTypeLabel(item.interviewType) }}</div>
                             </div>
-                            <div class="week-no-events" *ngIf="day.interviews.length === 0">
-                                No events
+                            <div class="week-no-events" *ngIf="day.interviews.length === 0 && !day.blocks?.length">
+                                No recorded occupancy
                             </div>
                         </div>
                     </div>
@@ -230,6 +250,7 @@
             <!-- Details Section for Selected Day (for month and week views) -->
             <div *ngIf="viewMode !== 'list' && selectedDay" class="selected-day-details-section">
                 <div class="details-section-header">
+                    <button type="button" class="btn-secondary" (click)="openAvailabilityEditor(selectedDay.date)">Block Time on this day</button>
                     <h3 class="details-title">
                         Interviews on {{ selectedDay.date | date:'EEEE, MMMM d, yyyy' }}
                         <span class="today-marker" *ngIf="selectedDay.isToday">Today</span>
@@ -245,6 +266,7 @@
                     </a>
                 </div>
 
+                <div class="availability-block-list"><button type="button" *ngFor="let block of selectedDay.blocks" class="availability-block-card" (click)="editAvailability(block)"><strong dir="auto">{{ block.title }}</strong><span>{{ blockRange(block) }}</span><small>{{ block.repeatWeekly ? 'Repeats weekly · Edit or delete series' : 'Edit or delete' }}</small></button></div>
                 <div *ngIf="selectedDay.interviews.length === 0" class="empty-day-state">
                     <p>No interviews scheduled for this day.</p>
                 </div>
@@ -342,7 +364,7 @@
                                 <a *ngIf="interview.processId" [routerLink]="['/process', interview.processId, 'interaction', interview.id, 'edit']" class="btn-action btn-secondary-action" style="flex: 1; justify-content: center; text-align: center;">
                                     Edit
                                 </a>
-                                <a *ngIf="!interview.processId && interview.agencyId" [routerLink]="['/recruiters', interview.agencyId, 'edit']" [queryParams]="{ editInteractionId: interview.id }" class="btn-action btn-secondary-action" style="flex: 1; justify-content: center; text-align: center;">
+                                <a *ngIf="!interview.processId && interview.agencyId" [routerLink]="['/schedule-interview']" [queryParams]="{ editInterviewId: interview.id }" class="btn-action btn-secondary-action" style="flex: 1; justify-content: center; text-align: center;">
                                     Edit
                                 </a>
                             </div>
@@ -459,7 +481,7 @@
                                 <a *ngIf="nextInterview.processId" [routerLink]="['/process', nextInterview.processId, 'interaction', nextInterview.id, 'edit']" class="btn-action btn-secondary-action" style="flex: 1; justify-content: center; text-align: center;">
                                     Edit
                                 </a>
-                                <a *ngIf="!nextInterview.processId && nextInterview.agencyId" [routerLink]="['/recruiters', nextInterview.agencyId, 'edit']" [queryParams]="{ editInteractionId: nextInterview.id }" class="btn-action btn-secondary-action" style="flex: 1; justify-content: center; text-align: center;">
+                                <a *ngIf="!nextInterview.processId && nextInterview.agencyId" [routerLink]="['/schedule-interview']" [queryParams]="{ editInterviewId: nextInterview.id }" class="btn-action btn-secondary-action" style="flex: 1; justify-content: center; text-align: center;">
                                     Edit
                                 </a>
                             </div>
@@ -563,7 +585,7 @@
                                     <a *ngIf="interview.processId" [routerLink]="['/process', interview.processId, 'interaction', interview.id, 'edit']" class="btn-action btn-secondary-action" style="flex: 1; justify-content: center; text-align: center;">
                                         Edit
                                     </a>
-                                    <a *ngIf="!interview.processId && interview.agencyId" [routerLink]="['/recruiters', interview.agencyId, 'edit']" [queryParams]="{ editInteractionId: interview.id }" class="btn-action btn-secondary-action" style="flex: 1; justify-content: center; text-align: center;">
+                                    <a *ngIf="!interview.processId && interview.agencyId" [routerLink]="['/schedule-interview']" [queryParams]="{ editInterviewId: interview.id }" class="btn-action btn-secondary-action" style="flex: 1; justify-content: center; text-align: center;">
                                         Edit
                                     </a>
                                 </div>
@@ -597,11 +619,12 @@
                         [routerLink]="['/process', interview.processId, 'interaction', interview.id, 'edit']"
                         [attr.aria-label]="'Edit interview for ' + interview.process.companyName">Edit interview</a>
                     <a *ngIf="!interview.processId && interview.agencyId"
-                        [routerLink]="['/recruiters', interview.agencyId, 'edit']"
-                        [queryParams]="{ editInteractionId: interview.id }"
+                        [routerLink]="['/schedule-interview']" [queryParams]="{ editInterviewId: interview.id }"
                         [attr.aria-label]="'Edit interview for ' + interview.agency?.agencyName">Edit interview</a>
                 </article>
             </div>
         </aside>
     </div>
 </div>
+
+<app-availability-editor *ngIf="showAvailabilityEditor" [block]="editingAvailabilityBlock" [selectedDate]="availabilityEditorDate" (closed)="showAvailabilityEditor = false" (saved)="availabilitySaved()"></app-availability-editor>

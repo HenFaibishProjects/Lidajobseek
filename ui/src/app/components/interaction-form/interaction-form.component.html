@@ -39,13 +39,13 @@
         <div class="ic-field">
           <label class="ic-label" for="datePart">Date</label>
           <input id="datePart" type="date" name="datePart"
-            [(ngModel)]="datePart" (change)="updateDateTime()"
+            [(ngModel)]="datePart" (ngModelChange)="updateDateTime()"
             class="ic-input" required />
         </div>
         <div class="ic-field">
           <label class="ic-label" for="timePart">Time</label>
           <input id="timePart" type="time" name="timePart"
-            [(ngModel)]="timePart" (change)="updateDateTime()"
+            [(ngModel)]="timePart" (ngModelChange)="updateDateTime()"
             class="ic-input" required />
         </div>
       </div>
@@ -64,6 +64,8 @@
         </div>
       </div>
     </section>
+
+    <app-availability-check [date]="interaction.date" [durationMinutes]="interaction.durationMinutes || 60" [excludeInterviewId]="mode === 'edit' ? interaction.id : undefined" (scheduleAnyway)="onSubmit()" (chooseAnotherTime)="chooseAnotherTime()"></app-availability-check>
 
     <!-- Section 2: Interaction Type -->
     <section class="ic-section">

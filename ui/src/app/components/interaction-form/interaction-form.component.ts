@@ -1,3 +1,6 @@
+import { AvailabilityCheckComponent } from '../availability-check/availability-check.component';
+import { AvailabilityService } from '../../services/availability.service';
+import { ToastService } from '../../services/toast.service';
 import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -8,7 +11,7 @@ import { ReflectionFormComponent } from '../reflection-form/reflection-form.comp
 @Component({
     selector: 'app-interaction-form',
     standalone: true,
-    imports: [CommonModule, FormsModule, RouterModule, ReflectionFormComponent],
+    imports: [CommonModule, FormsModule, RouterModule, ReflectionFormComponent, AvailabilityCheckComponent],
     templateUrl: './interaction-form.component.html',
     styleUrl: './interaction-form.component.css'
 })
@@ -46,6 +49,10 @@ export class InteractionFormComponent implements OnInit {
         return this.existingContacts.filter(c => !participantNames.includes(c.name));
     }
 
+    constructor(private readonly availabilityService: AvailabilityService, private readonly toastService: ToastService) {}
+
+    chooseAnotherTime() { document.getElementById('datePart')?.focus(); }
+
     ngOnInit() {
         if (this.interaction?.date) {
             this._splitDate(new Date(this.interaction.date));
@@ -63,9 +70,7 @@ export class InteractionFormComponent implements OnInit {
     }
 
     updateDateTime() {
-        if (this.datePart && this.timePart) {
-            this.interaction.date = `${this.datePart}T${this.timePart}`;
-        }
+        this.interaction.date = this.datePart && this.timePart ? `${this.datePart}T${this.timePart}` : '';
     }
 
     getSelectedTypeLabel(): string {
@@ -103,7 +108,8 @@ export class InteractionFormComponent implements OnInit {
     }
 
     onSubmit() {
-        this.interaction.date = new Date(this.interaction.date).toISOString();
+        try { this.interaction.date = this.availabilityService.interviewInstant(this.interaction.date); }
+        catch (error) { this.toastService.show((error as Error).message, 'error'); return; }
         this.submitted.emit();
     }
 }

@@ -1,0 +1,35 @@
+<div
+  class="availability-check"
+  *ngIf="state !== 'idle'"
+  [class.availability-check--available]="state === 'available'"
+  [class.availability-check--conflict]="state === 'conflict'"
+  aria-live="polite"
+>
+  <span *ngIf="state === 'checking'">Checking availability…</span>
+  <strong *ngIf="state === 'available'">✓ Available for interview</strong>
+  <div *ngIf="state === 'error'">
+    <strong>Availability could not be confirmed</strong>
+    <p>
+      Check the date, time and duration, then try again. Saving will check
+      availability again.
+    </p>
+    <button type="button" (click)="refresh()">Retry availability check</button>
+  </div>
+  <ng-container *ngIf="state === 'conflict'">
+    <strong>Time Conflict Detected</strong>
+    <ul>
+      <li *ngFor="let conflict of result?.conflicts" dir="auto">
+        {{ describeConflict(conflict) }}
+      </li>
+    </ul>
+    <div class="availability-check-actions">
+      <button type="button" (click)="chooseAnotherTime.emit()">
+        Choose Another Time
+      </button>
+      <button type="button" (click)="scheduleAnyway.emit()">
+        Schedule Anyway
+      </button>
+    </div>
+  </ng-container>
+  <small>Times shown in {{ timeZone }}</small>
+</div>

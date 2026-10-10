@@ -1,13 +1,14 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { AvailabilityService } from './availability.service';
 import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class InteractionsService {
     private apiUrl = `${environment.apiUrl}/api/interactions`;
 
-    constructor(private http: HttpClient) { }
+    constructor(private http: HttpClient, public readonly availability: AvailabilityService) { }
 
     getAll(params?: { startDate?: string, endDate?: string, processId?: string }): Observable<any> {
         let httpParams = new HttpParams();
@@ -28,12 +29,14 @@ export class InteractionsService {
     }
 
     create(data: any) {
-        return this.http.post(this.apiUrl, data);
+        return this.availability.saveWithConflictConfirmation(override => this.http.post(this.apiUrl, { ...data, ...override }));
     }
 
     update(id: number, data: any) {
-        return this.http.patch(`${this.apiUrl}/${id}`, data);
+        return this.availability.saveWithConflictConfirmation(override => this.http.patch(`${this.apiUrl}/${id}`, { ...data, ...override }));
     }
+
+    getById(id: number) { return this.http.get<any>(`${this.apiUrl}/${id}`); }
 
     delete(id: number) {
         return this.http.delete(`${this.apiUrl}/${id}`);
