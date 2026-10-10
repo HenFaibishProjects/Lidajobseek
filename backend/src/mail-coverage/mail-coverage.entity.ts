@@ -34,6 +34,18 @@ export class MailCoverage {
   @Property({ nullable: true })
   rejectedDate?: Date;
 
+  @Property({ default: 0 })
+  receivedCvCount: number = 0;
+
+  @Property({ default: 0 })
+  rejectedCount: number = 0;
+
+  @Property({ type: 'json', default: '[]', hidden: true })
+  receivedCvImportKeys: string[] = [];
+
+  @Property({ type: 'json', default: '[]', hidden: true })
+  rejectedImportKeys: string[] = [];
+
   @Property({ onCreate: () => new Date() })
   createdAt: Date = new Date();
 

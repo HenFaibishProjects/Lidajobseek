@@ -23,6 +23,8 @@ interface MailCoverageForm {
   companyName: string;
   note: string;
   hadProcess: boolean;
+  receivedCvCount: number;
+  rejectedCount: number;
   receivedCvEmail: boolean;
   receivedCvDate: string;
   rejectedEmail: boolean;
@@ -287,6 +289,8 @@ export class MailCoverageComponent implements OnInit {
   startEdit(entry: MailCoverageEntry): void {
     this.editingId = entry.id;
     this.form = {
+      receivedCvCount: entry.receivedCvCount || Number(entry.receivedCvEmail),
+      rejectedCount: entry.rejectedCount || Number(entry.rejectedEmail),
       companyName: entry.companyName,
       note: entry.note || '',
       hadProcess: entry.hadProcess,
@@ -306,6 +310,9 @@ export class MailCoverageComponent implements OnInit {
   }
 
   onReceivedToggle(): void {
+    this.form.receivedCvCount = this.form.receivedCvEmail
+      ? this.form.receivedCvCount || 1
+      : 0;
     if (this.form.receivedCvEmail && !this.form.receivedCvDate) {
       this.form.receivedCvDate = this.today();
     }
@@ -315,6 +322,9 @@ export class MailCoverageComponent implements OnInit {
   }
 
   onRejectedToggle(): void {
+    this.form.rejectedCount = this.form.rejectedEmail
+      ? this.form.rejectedCount || 1
+      : 0;
     if (this.form.rejectedEmail && !this.form.rejectedDate) {
       this.form.rejectedDate = this.today();
     }
@@ -408,18 +418,30 @@ export class MailCoverageComponent implements OnInit {
       return null;
     }
     if (
-      this.form.receivedCvEmail &&
-      this.form.rejectedEmail &&
-      this.form.rejectedDate < this.form.receivedCvDate
+      (this.form.receivedCvEmail && !this.form.receivedCvCount) ||
+      (this.form.rejectedEmail && !this.form.rejectedCount)
     ) {
       this.toastService.show(
-        'Rejection date cannot be earlier than the CV received date',
+        'Record at least one email for each selected email type',
         'error',
       );
       return null;
     }
+    for (const count of [this.form.receivedCvCount, this.form.rejectedCount]) {
+      if (!Number.isSafeInteger(count) || count < 0 || count > 2147483647) {
+        this.toastService.show(
+          'Email counts must be non-negative whole numbers',
+          'error',
+        );
+        return null;
+      }
+    }
 
     return {
+      receivedCvCount: this.form.receivedCvEmail
+        ? this.form.receivedCvCount
+        : 0,
+      rejectedCount: this.form.rejectedEmail ? this.form.rejectedCount : 0,
       companyName,
       note: this.form.note.trim() || null,
       hadProcess: this.form.hadProcess,
@@ -433,8 +455,14 @@ export class MailCoverageComponent implements OnInit {
   }
 
   private latestActivityTimestamp(entry: MailCoverageEntry): number {
-    const value = entry.rejectedDate || entry.receivedCvDate || entry.updatedAt;
-    return new Date(value).getTime();
+    const emailDates = [entry.rejectedDate, entry.receivedCvDate].filter(
+      Boolean,
+    );
+    return Math.max(
+      ...(emailDates.length ? emailDates : [entry.updatedAt]).map((value) =>
+        new Date(value!).getTime(),
+      ),
+    );
   }
 
   private toInputDate(value: string | null): string {
@@ -449,6 +477,8 @@ export class MailCoverageComponent implements OnInit {
 
   private emptyForm(): MailCoverageForm {
     return {
+      receivedCvCount: 0,
+      rejectedCount: 0,
       companyName: '',
       note: '',
       hadProcess: false,
