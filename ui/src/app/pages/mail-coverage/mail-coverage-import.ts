@@ -1,6 +1,10 @@
 export interface MailCoverageImportEntry {
   companyName: string;
   note: string | null;
+  receivedCvCount?: number;
+  rejectedCount?: number;
+  receivedCvImportKeys?: string[];
+  rejectedImportKeys?: string[];
   receivedCvEmail: boolean;
   receivedCvDate: string | null;
   rejectedEmail: boolean;
@@ -19,6 +23,8 @@ export interface MailCoverageImportPreview {
 interface AggregatedImportEntry {
   companyName: string;
   positions: Set<string>;
+  receivedCvImportKeys: Set<string>;
+  rejectedImportKeys: Set<string>;
   receivedCvDate: string | null;
   rejectedDate: string | null;
 }
@@ -83,6 +89,8 @@ export function parseMailCoverageMarkdown(
     const current = companies.get(key) || {
       companyName,
       positions: new Set<string>(),
+      receivedCvImportKeys: new Set<string>(),
+      rejectedImportKeys: new Set<string>(),
       receivedCvDate: null,
       rejectedDate: null,
     };
@@ -90,12 +98,15 @@ export function parseMailCoverageMarkdown(
       positionIndex >= 0 ? cleanMarkdownText(row[positionIndex] || '') : '';
     if (position) current.positions.add(position);
 
+    const emailKey = `${parsedDate.value}|${position.toLowerCase()}`;
     if (status === 'RECEIVED') {
+      current.receivedCvImportKeys.add(emailKey);
       current.receivedCvDate = earlierDate(
         current.receivedCvDate,
         parsedDate.value,
       );
     } else {
+      current.rejectedImportKeys.add(emailKey);
       current.rejectedDate = laterDate(current.rejectedDate, parsedDate.value);
     }
     companies.set(key, current);
@@ -104,18 +115,13 @@ export function parseMailCoverageMarkdown(
   const errors: string[] = [];
   const entries = Array.from(companies.values())
     .map<MailCoverageImportEntry>((entry) => {
-      if (
-        entry.receivedCvDate &&
-        entry.rejectedDate &&
-        entry.rejectedDate < entry.receivedCvDate
-      ) {
-        errors.push(
-          `${entry.companyName}: rejection date is earlier than the received date.`,
-        );
-      }
       const positions = Array.from(entry.positions);
       return {
         companyName: entry.companyName,
+        receivedCvCount: entry.receivedCvImportKeys.size,
+        rejectedCount: entry.rejectedImportKeys.size,
+        receivedCvImportKeys: [...entry.receivedCvImportKeys],
+        rejectedImportKeys: [...entry.rejectedImportKeys],
         note:
           positions.length === 0
             ? null

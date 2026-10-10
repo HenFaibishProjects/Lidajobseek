@@ -271,9 +271,13 @@
                             </span>
                         </div>
                         <span class="kpi-modal-role">{{ process.roleTitle }}</span>
-                        <div class="kpi-modal-rejection-summary" *ngIf="activeKpiModal === 'rejected'">
+                        <div class="kpi-modal-outcome-summary" *ngIf="process.currentStage?.trim().toLowerCase() === 'rejected'">
                             <strong>Rejection summary</strong>
-                            <p>{{ process.rejectionSummary?.trim() || 'No rejection summary' }}</p>
+                            <p dir="auto">{{ process.rejectionSummary?.trim() || 'No rejection summary' }}</p>
+                        </div>
+                        <div class="kpi-modal-outcome-summary" *ngIf="['withdrawn', 'withdraw'].includes(process.currentStage?.trim().toLowerCase())">
+                            <strong>Withdrawal reason</strong>
+                            <p dir="auto">{{ process.withdrawReason?.trim() || 'No withdrawal reason' }}</p>
                         </div>
                         <div class="kpi-modal-meta">
                             <span *ngIf="process.location">

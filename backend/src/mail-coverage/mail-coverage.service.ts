@@ -17,6 +17,10 @@ import { Process } from '../processes/process.entity';
 interface NormalizedMailCoverage {
   companyName: string;
   note: string | null;
+  receivedCvCount: number;
+  rejectedCount: number;
+  receivedCvImportKeys: string[];
+  rejectedImportKeys: string[];
   receivedCvEmail: boolean;
   receivedCvDate: Date | null;
   rejectedEmail: boolean;
@@ -66,6 +70,14 @@ export class MailCoverageService {
     let repaired = false;
 
     for (const entry of entries) {
+      if (entry.receivedCvEmail && entry.receivedCvCount === 0) {
+        entry.receivedCvCount = 1;
+        repaired = true;
+      }
+      if (entry.rejectedEmail && entry.rejectedCount === 0) {
+        entry.rejectedCount = 1;
+        repaired = true;
+      }
       if (
         !entry.hadProcess &&
         processCompanyKeys.has(this.normalizeCompanyKey(entry.companyName))
@@ -185,6 +197,10 @@ export class MailCoverageService {
       companyName: normalizedCompanyName,
       note: null,
       hadProcess: true,
+      receivedCvCount: 0,
+      rejectedCount: 0,
+      receivedCvImportKeys: [],
+      rejectedImportKeys: [],
       receivedCvEmail: false,
       receivedCvDate: null,
       rejectedEmail: false,
@@ -203,7 +219,20 @@ export class MailCoverageService {
     userId: number,
   ): Promise<MailCoverage> {
     const entry = await this.findOne(id, userId);
-    const data = this.normalizeAndValidate(dto);
+    const data = this.normalizeAndValidate({
+      ...dto,
+      receivedCvCount:
+        dto.receivedCvCount ??
+        (dto.receivedCvEmail ? entry.receivedCvCount || 1 : 0),
+      rejectedCount:
+        dto.rejectedCount ?? (dto.rejectedEmail ? entry.rejectedCount || 1 : 0),
+    });
+    data.receivedCvImportKeys = data.receivedCvEmail
+      ? entry.receivedCvImportKeys || []
+      : [];
+    data.rejectedImportKeys = data.rejectedEmail
+      ? entry.rejectedImportKeys || []
+      : [];
     await this.ensureCompanyIsUnique(data.companyName, userId, id);
     const hadProcess =
       dto.hadProcess === true ||
@@ -255,20 +284,89 @@ export class MailCoverageService {
       ? this.parseDate(dto.rejectedDate, 'Rejection date')
       : null;
 
-    if (receivedCvDate && rejectedDate && rejectedDate < receivedCvDate) {
+    const receivedCvCount = this.normalizeCount(
+      dto.receivedCvCount,
+      receivedCvEmail,
+    );
+    const rejectedCount = this.normalizeCount(dto.rejectedCount, rejectedEmail);
+    const receivedCvImportKeys = this.normalizeImportKeys(
+      dto.receivedCvImportKeys,
+    );
+    const rejectedImportKeys = this.normalizeImportKeys(dto.rejectedImportKeys);
+    if (
+      receivedCvImportKeys.length > receivedCvCount ||
+      rejectedImportKeys.length > rejectedCount
+    ) {
       throw new BadRequestException(
-        'Rejection date cannot be earlier than the CV received date',
+        'Imported email identifiers exceed the email count',
       );
     }
 
     return {
       companyName,
       note,
+      receivedCvCount,
+      rejectedCount,
+      receivedCvImportKeys,
+      rejectedImportKeys,
       receivedCvEmail,
       receivedCvDate,
       rejectedEmail,
       rejectedDate,
     };
+  }
+
+  private normalizeCount(value: number | undefined, hasEmail: boolean): number {
+    const count = value ?? Number(hasEmail);
+    if (
+      !Number.isSafeInteger(count) ||
+      count < 0 ||
+      count > 2147483647 ||
+      Boolean(count) !== hasEmail
+    ) {
+      throw new BadRequestException(
+        'Email counts must be whole numbers consistent with the email status',
+      );
+    }
+    return count;
+  }
+
+  private normalizeImportKeys(value: string[] | undefined): string[] {
+    if (value === undefined) return [];
+    if (
+      !Array.isArray(value) ||
+      value.length > 5000 ||
+      value.some(
+        (key) =>
+          typeof key !== 'string' ||
+          key.length > 1000 ||
+          !/^\d{4}-\d{2}-\d{2}\|/.test(key),
+      )
+    ) {
+      throw new BadRequestException('Invalid imported email identifiers');
+    }
+    return [...new Set(value)];
+  }
+
+  private mergeCount(
+    currentCount: number,
+    currentKeys: string[],
+    currentDate: Date | undefined,
+    incomingCount: number,
+    incomingKeys: string[],
+  ): number {
+    if (!incomingKeys.length) return Math.max(currentCount, incomingCount);
+    const known = new Set(currentKeys);
+    const added = incomingKeys.filter((key) => !known.has(key));
+    const matchesLegacyEmail =
+      currentKeys.length === 0 &&
+      currentCount > 0 &&
+      currentDate &&
+      added.some((key) =>
+        key.startsWith(currentDate.toISOString().slice(0, 10) + '|'),
+      );
+    const count = currentCount + added.length - (matchesLegacyEmail ? 1 : 0);
+    return this.normalizeCount(count, count > 0);
   }
 
   private normalizeCompanyKey(companyName: string): string {
@@ -303,6 +401,32 @@ export class MailCoverageService {
       incoming.rejectedDate,
     );
     return {
+      receivedCvCount: Math.max(
+        current.receivedCvCount,
+        incoming.receivedCvCount,
+        new Set([
+          ...current.receivedCvImportKeys,
+          ...incoming.receivedCvImportKeys,
+        ]).size,
+      ),
+      rejectedCount: Math.max(
+        current.rejectedCount,
+        incoming.rejectedCount,
+        new Set([...current.rejectedImportKeys, ...incoming.rejectedImportKeys])
+          .size,
+      ),
+      receivedCvImportKeys: [
+        ...new Set([
+          ...current.receivedCvImportKeys,
+          ...incoming.receivedCvImportKeys,
+        ]),
+      ],
+      rejectedImportKeys: [
+        ...new Set([
+          ...current.rejectedImportKeys,
+          ...incoming.rejectedImportKeys,
+        ]),
+      ],
       companyName: current.companyName,
       note: current.note || incoming.note,
       receivedCvEmail: current.receivedCvEmail || incoming.receivedCvEmail,
@@ -317,6 +441,32 @@ export class MailCoverageService {
     imported: NormalizedMailCoverage,
   ): NormalizedMailCoverage {
     return {
+      receivedCvCount: this.mergeCount(
+        existing.receivedCvCount || Number(existing.receivedCvEmail),
+        existing.receivedCvImportKeys || [],
+        existing.receivedCvDate,
+        imported.receivedCvCount,
+        imported.receivedCvImportKeys,
+      ),
+      rejectedCount: this.mergeCount(
+        existing.rejectedCount || Number(existing.rejectedEmail),
+        existing.rejectedImportKeys || [],
+        existing.rejectedDate,
+        imported.rejectedCount,
+        imported.rejectedImportKeys,
+      ),
+      receivedCvImportKeys: [
+        ...new Set([
+          ...(existing.receivedCvImportKeys || []),
+          ...imported.receivedCvImportKeys,
+        ]),
+      ],
+      rejectedImportKeys: [
+        ...new Set([
+          ...(existing.rejectedImportKeys || []),
+          ...imported.rejectedImportKeys,
+        ]),
+      ],
       companyName: existing.companyName,
       note: existing.note || imported.note,
       receivedCvEmail: existing.receivedCvEmail || imported.receivedCvEmail,
@@ -337,6 +487,14 @@ export class MailCoverageService {
     merged: NormalizedMailCoverage,
   ): boolean {
     return (
+      (existing.receivedCvCount ?? Number(existing.receivedCvEmail)) !==
+        merged.receivedCvCount ||
+      (existing.rejectedCount ?? Number(existing.rejectedEmail)) !==
+        merged.rejectedCount ||
+      JSON.stringify(existing.receivedCvImportKeys || []) !==
+        JSON.stringify(merged.receivedCvImportKeys) ||
+      JSON.stringify(existing.rejectedImportKeys || []) !==
+        JSON.stringify(merged.rejectedImportKeys) ||
       existing.note !== merged.note ||
       existing.receivedCvEmail !== merged.receivedCvEmail ||
       this.dateTimestamp(existing.receivedCvDate) !==

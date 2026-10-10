@@ -38,6 +38,7 @@ export const routes: Routes = [
             { path: 'decision-board', component: DecisionBoardComponent },
             { path: 'coach-hub', component: CoachHubComponent },
             { path: 'calendar', component: CalendarComponent },
+            { path: 'contact-history', loadComponent: () => import('./pages/contact-history/contact-history.component').then(m => m.ContactHistoryComponent) },
             { path: 'mail-coverage', component: MailCoverageComponent },
             { path: 'schedule-interview', component: ScheduleInterviewComponent },
             { path: 'pipeline', component: PipelineBoardComponent },

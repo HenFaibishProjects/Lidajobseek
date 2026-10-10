@@ -3317,7 +3317,7 @@ body.dark-theme .process-card-glassdoor-btn:hover {
     font-size: 13px;
 }
 
-.kpi-modal-rejection-summary { min-width: 0; margin-top: 8px; color: var(--text-secondary); }
-.kpi-modal-rejection-summary p { margin: 4px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.kpi-modal-outcome-summary { min-width: 0; margin-top: 8px; color: var(--text-secondary); }
+.kpi-modal-outcome-summary p { margin: 4px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; }
 
-.kpi-modal--rejected a.kpi-modal-process { flex-shrink: 0; }
+a.kpi-modal-process { flex-shrink: 0; }

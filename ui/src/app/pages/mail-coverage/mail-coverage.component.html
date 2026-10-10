@@ -18,6 +18,7 @@
         </span>
         <div>
           <h1>Mail Coverage</h1>
+          <a routerLink="/contact-history">View contact history →</a>
           <p>
             Track the automatic CV confirmation and rejection emails you receive
             from each company.
@@ -72,6 +73,7 @@
     <div class="mc-form-header">
       <div>
         <h2 id="mail-coverage-import-title">Import mail coverage</h2>
+        <p>Each unique date, position and email status counts once. Reimporting the same row does not increase the count. For multiple emails on the same date for the same role, adjust the count in Edit.</p>
         <p>
           Paste a copied table or raw Markdown from your tracker, or choose the
           exported file.
@@ -330,6 +332,9 @@
           class="mc-date-field"
           [class.mc-date-field--disabled]="!form.receivedCvEmail"
         >
+          <label for="mc-received-count">Number of emails received</label>
+          <input id="mc-received-count" class="mc-input" type="number" min="1" max="2147483647" step="1" [disabled]="!form.receivedCvEmail" [(ngModel)]="form.receivedCvCount" />
+          <button class="mc-secondary-btn" type="button" [disabled]="!form.receivedCvEmail" (click)="form.receivedCvCount = form.receivedCvCount + 1">+1 email</button>
           <label for="mc-received-date">Email date</label>
           <input
             id="mc-received-date"
@@ -375,6 +380,9 @@
           class="mc-date-field"
           [class.mc-date-field--disabled]="!form.rejectedEmail"
         >
+          <label for="mc-rejected-count">Number of emails received</label>
+          <input id="mc-rejected-count" class="mc-input" type="number" min="1" max="2147483647" step="1" [disabled]="!form.rejectedEmail" [(ngModel)]="form.rejectedCount" />
+          <button class="mc-secondary-btn" type="button" [disabled]="!form.rejectedEmail" (click)="form.rejectedCount = form.rejectedCount + 1">+1 email</button>
           <label for="mc-rejected-date">Email date</label>
           <input
             id="mc-rejected-date"
@@ -553,14 +561,14 @@
                 >
                   <polyline points="20 6 9 17 4 12"></polyline>
                 </svg>
-                Received
+                Received × {{ entry.receivedCvCount || 1 }}
               </span>
               <time [attr.datetime]="entry.receivedCvDate">{{
                 formatDate(entry.receivedCvDate)
               }}</time>
             </div>
             <ng-template #noCvEmail
-              ><span class="mc-not-recorded">Not recorded</span></ng-template
+              ><span class="mc-not-recorded">Not recorded · 0</span></ng-template
             >
           </td>
           <td data-label="Rejection email">
@@ -579,14 +587,14 @@
                 >
                   <path d="m7 7 10 10M17 7 7 17"></path>
                 </svg>
-                Received
+                Received × {{ entry.rejectedCount || 1 }}
               </span>
               <time [attr.datetime]="entry.rejectedDate">{{
                 formatDate(entry.rejectedDate)
               }}</time>
             </div>
             <ng-template #noRejectedEmail
-              ><span class="mc-not-recorded">Not recorded</span></ng-template
+              ><span class="mc-not-recorded">Not recorded · 0</span></ng-template
             >
           </td>
           <td data-label="Notes">

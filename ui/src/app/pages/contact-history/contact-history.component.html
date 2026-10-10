@@ -1,0 +1,115 @@
+<div class="history-page">
+  <header class="history-header">
+    <div>
+      <span class="history-eyebrow">YOUR JOB SEARCH</span>
+      <h1>Contact history</h1>
+      <p>Closed applications and recorded emails, together in one place.</p>
+    </div>
+    <a class="history-link" routerLink="/mail-coverage"
+      >Manage mail coverage →</a
+    >
+  </header>
+
+  <div class="history-summary" *ngIf="!isLoading && !loadFailed">
+    <strong>{{ companyCount }}</strong> companies contacted
+    <span>{{ rows.length }} application and email records</span>
+  </div>
+
+  <section class="history-card">
+    <div class="history-toolbar">
+      <div class="history-search">
+        <label for="history-search">Search history</label>
+        <input
+          id="history-search"
+          type="search"
+          [(ngModel)]="searchText"
+          placeholder="Company, role or reason…"
+        />
+      </div>
+      <div>
+        <label for="history-status">Status</label>
+        <select id="history-status" [(ngModel)]="statusFilter">
+          <option value="">All history</option>
+          <option *ngFor="let status of statuses" [value]="status">
+            {{ status }}
+          </option>
+        </select>
+      </div>
+    </div>
+    <p class="history-state" *ngIf="isLoading" role="status">
+      Loading contact history…
+    </p>
+    <div class="history-state" *ngIf="loadFailed" role="alert">
+      <p>Could not load contact history.</p>
+      <button type="button" class="history-link" (click)="loadHistory()">
+        Try again
+      </button>
+    </div>
+    <ng-container *ngIf="!isLoading && !loadFailed">
+      <div
+        class="history-table-wrap"
+        *ngIf="filteredRows.length; else emptyHistory"
+      >
+        <table>
+          <caption>
+            Each closed application is listed separately. Email counts are
+            totals per company and type; dates are the recorded coverage dates.
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col">Company / role</th>
+              <th scope="col">Status</th>
+              <th scope="col">Date</th>
+              <th scope="col">Emails</th>
+              <th scope="col">Reason / notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of filteredRows; trackBy: trackByKey">
+              <td>
+                <a
+                  *ngIf="row.processId; else mailCompany"
+                  [routerLink]="['/process', row.processId]"
+                  >{{ row.companyName }}</a
+                ><ng-template #mailCompany
+                  ><strong>{{ row.companyName }}</strong></ng-template
+                ><small *ngIf="row.role !== '—'">{{ row.role }}</small>
+              </td>
+              <td>
+                <span
+                  class="history-status"
+                  [class.history-status--withdrawn]="row.status === 'Withdrawn'"
+                  [class.history-status--received]="
+                    row.status === 'CV received'
+                  "
+                  >{{ row.status }}</span
+                >
+              </td>
+              <td>
+                <time [attr.datetime]="row.date || null">{{
+                  formatDate(row.date)
+                }}</time
+                ><small>{{ row.dateLabel }}</small>
+              </td>
+              <td class="history-count">
+                {{ row.processId ? "—" : row.count }}
+              </td>
+              <td>
+                <p class="history-details" dir="auto">{{ row.details }}</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <ng-template #emptyHistory
+        ><p class="history-state">
+          {{
+            rows.length
+              ? "No matching history. Try another search or status."
+              : "No closed applications or recorded emails yet."
+          }}
+        </p></ng-template
+      >
+    </ng-container>
+  </section>
+</div>
