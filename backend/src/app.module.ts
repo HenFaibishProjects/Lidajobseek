@@ -18,6 +18,7 @@ import { AiAssistantModule } from './ai-assistant/ai-assistant.module';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { AuthGuard } from './auth/auth.guard';
 import { APP_GUARD } from '@nestjs/core';
+import { IntelligenceModule } from './intelligence/intelligence.module';
 
 @Module({
   imports: [
@@ -72,6 +73,7 @@ import { APP_GUARD } from '@nestjs/core';
     ResourcesModule,
     ProfilesModule,
     AiAssistantModule,
+    IntelligenceModule,
     ThrottlerModule.forRoot([{
       name: 'default',
       ttl: 60000,
