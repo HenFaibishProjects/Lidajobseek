@@ -91,11 +91,14 @@ describe('Recruiter research-depth contract and documented policy', () => {
   });
   it('defaults only autonomous research to DeepSeek Flash and retains Luna/Terra', () => {
     const config = environmentSchema.parse({
-      DB_HOST: 'localhost',
-      DB_PORT: 5432,
-      DB_USERNAME: 'test',
-      DB_PASSWORD: 'test',
-      DB_DATABASE: 'test',
+      INTELLIGENCE_DB_HOST: 'localhost',
+      INTELLIGENCE_DB_PORT: 5432,
+      INTELLIGENCE_DB_USERNAME: 'test',
+      INTELLIGENCE_DB_PASSWORD: 'test',
+      INTELLIGENCE_DB_DATABASE: 'test',
+      GOOGLE_CLIENT_ID: 'synthetic-client',
+      GOOGLE_CLIENT_SECRET: 'synthetic-secret',
+      GOOGLE_REFRESH_TOKEN: 'synthetic-refresh',
     });
     expect(config.RECRUITER_RESEARCH_PROVIDER).toBe('deepseek');
     expect(config.RECRUITER_RESEARCH_MODEL).toBe('deepseek-flash');
