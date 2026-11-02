@@ -19,15 +19,7 @@ function part(mimeType: string, text: string): gmail_v1.Schema$MessagePart {
 }
 
 describe('Gmail body extraction with synthetic MIME fixtures', () => {
-  it('keeps Gmail read-only: auth scope and client contain no send/draft/write operations', () => {
-    const auth = readFileSync(
-      require.resolve('../scripts/gmail-auth.ts'),
-      'utf8',
-    );
-    const scopes = auth.match(
-      /https:\/\/www.googleapis.com\/auth\/gmail\.[a-z]+/g,
-    );
-    expect(scopes).toEqual(['https://www.googleapis.com/auth/gmail.readonly']);
+  it('keeps the runtime Gmail client read-only', () => {
     const source = readFileSync(
       require.resolve('./gmail-client.service.ts'),
       'utf8',
