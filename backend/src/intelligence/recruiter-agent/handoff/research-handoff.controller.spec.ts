@@ -1,3 +1,4 @@
+import { IntelligenceOwnerGuard } from '../../guards/intelligence-owner.guard';
 import { ResearchHandoffImportService } from './research-handoff-import.service';
 import { Test } from '@nestjs/testing';
 import type { INestApplication } from '@nestjs/common';
@@ -30,7 +31,7 @@ describe('Research handoff API', () => {
           useValue: { importResearch: jest.fn() },
         },
       ],
-    }).compile();
+    }).overrideGuard(IntelligenceOwnerGuard).useValue({ canActivate: () => true }).compile();
     app = module.createNestApplication();
     app.setGlobalPrefix('api');
     await app.init();
@@ -40,34 +41,34 @@ describe('Research handoff API', () => {
   });
   it('lists pending handoffs through the API prefix with pagination', async () => {
     const result = await request(app.getHttpServer())
-      .get('/api/research-handoffs/pending?limit=10&offset=20')
+      .get('/api/intelligence/research-handoffs/pending?limit=10&offset=20')
       .expect(200);
     expect(result.body[0].status).toBe('PENDING_CHATGPT');
     expect(service.listPendingResearch).toHaveBeenCalledWith(10, 20);
   });
   it('returns a prompt for copying and validates UUIDs', async () => {
     await request(app.getHttpServer())
-      .get(`/api/research-handoffs/${id}`)
+      .get(`/api/intelligence/research-handoffs/${id}`)
       .expect(200, { id, chatGptPrompt: 'Manual research prompt' });
     await request(app.getHttpServer())
-      .get('/api/research-handoffs/not-a-uuid')
+      .get('/api/intelligence/research-handoffs/not-a-uuid')
       .expect(400);
   });
   it('validates list limits and status', async () => {
     await request(app.getHttpServer())
-      .get('/api/research-handoffs?limit=101')
+      .get('/api/intelligence/research-handoffs?limit=101')
       .expect(400);
     await request(app.getHttpServer())
-      .get('/api/research-handoffs?status=invalid')
+      .get('/api/intelligence/research-handoffs?status=invalid')
       .expect(400);
     await request(app.getHttpServer())
-      .get('/api/research-handoffs?status=COMPLETED&limit=10')
+      .get('/api/intelligence/research-handoffs?status=COMPLETED&limit=10')
       .expect(200);
     expect(service.list).toHaveBeenCalledWith('COMPLETED', 10, 0);
   });
   it('supports explicitly starting a handoff without invoking research', async () => {
     await request(app.getHttpServer())
-      .post(`/api/research-handoffs/${id}/start`)
+      .post(`/api/intelligence/research-handoffs/${id}/start`)
       .expect(201);
     expect(service.startHandoff).toHaveBeenCalledWith(id);
   });
