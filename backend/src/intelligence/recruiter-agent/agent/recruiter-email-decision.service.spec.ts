@@ -7,11 +7,11 @@ import { RecruiterEmailDecisionService } from './recruiter-email-decision.servic
 import { recruiterEmailDecisionSchema } from '../recruiter-email-decision.schema';
 
 const environment = {
-  DB_HOST: 'test',
-  DB_PORT: 5432,
-  DB_USERNAME: 'test',
-  DB_PASSWORD: 'test',
-  DB_DATABASE: 'test',
+  INTELLIGENCE_DB_HOST: 'test',
+  INTELLIGENCE_DB_PORT: 5432,
+  INTELLIGENCE_DB_USERNAME: 'test',
+  INTELLIGENCE_DB_PASSWORD: 'test',
+  INTELLIGENCE_DB_DATABASE: 'test',
   GOOGLE_CLIENT_ID: 'synthetic-client',
   GOOGLE_CLIENT_SECRET: 'synthetic-secret',
   GOOGLE_REFRESH_TOKEN: 'synthetic-refresh',
