@@ -5,6 +5,7 @@ import { Global, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import { DataSource } from 'typeorm';
+import { getDataSourceToken } from '@nestjs/typeorm';
 import { RecruiterAgentModule } from './recruiter-agent.module';
 import { RecruiterAgentActionService } from './agent/recruiter-agent-action.service';
 import { RecruiterEmailPipelineService } from './agent/recruiter-email-pipeline.service';
@@ -19,7 +20,7 @@ jest.mock('@nestjs/schedule', () => ({
 @Module({
   providers: [
     {
-      provide: DataSource,
+      provide: getDataSourceToken('intelligence'),
       useValue: {
         entityMetadatas: [],
         options: { type: 'postgres' },
@@ -27,7 +28,7 @@ jest.mock('@nestjs/schedule', () => ({
       },
     },
   ],
-  exports: [DataSource],
+  exports: [getDataSourceToken('intelligence')],
 })
 class TestDatabaseModule {}
 
