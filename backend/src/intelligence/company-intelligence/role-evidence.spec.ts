@@ -227,22 +227,21 @@ describe('Website origin and role evidence', () => {
       'דורשים אימות',
     );
   });
-  it('rejects an invented role URL even on a discovered company domain', () => {
-    expect(() =>
-      validateRelevantRoles(
-        {
-          ...reportWithRoles,
-          relevantRoles: [
-            { ...role, url: 'https://careers.acme.com/roles/invented' },
-          ],
-        },
-        discoveredRoles,
-        new Map(),
-        profile,
-        'Backend',
-        10,
-      ),
-    ).toThrow('discovered and cited');
+  it('drops an invented role URL even on a discovered company domain', () => {
+    const validated = validateRelevantRoles(
+      {
+        ...reportWithRoles,
+        relevantRoles: [
+          { ...role, url: 'https://careers.acme.com/roles/invented' },
+        ],
+      },
+      discoveredRoles,
+      new Map(),
+      profile,
+      'Backend',
+      10,
+    );
+    expect(validated.relevantRoles).toEqual([]);
   });
   it('sanitizes unsupported semantic facts independently without exact-text matching', () => {
     const output = llmCompanyReportSchema.parse(
@@ -414,21 +413,20 @@ describe('Website origin and role evidence', () => {
     },
   );
 
-  it('still rejects a discovered role URL when it is not cited as a job-posting', () => {
-    expect(() =>
-      validateRelevantRoles(
-        {
-          ...reportWithRoles,
-          sources: [{ title: role.title, url: role.url, sourceType: 'other' }],
-          relevantRoles: [role],
-        },
-        discoveredRoles,
-        new Map(),
-        profile,
-        'Backend',
-        10,
-      ),
-    ).toThrow('discovered and cited');
+  it('drops a discovered role URL when it is not cited as a job-posting', () => {
+    const validated = validateRelevantRoles(
+      {
+        ...reportWithRoles,
+        sources: [{ title: role.title, url: role.url, sourceType: 'other' }],
+        relevantRoles: [role],
+      },
+      discoveredRoles,
+      new Map(),
+      profile,
+      'Backend',
+      10,
+    );
+    expect(validated.relevantRoles).toEqual([]);
   });
 
   it('deduplicates the same exact role URL without selecting a single winner', () => {
