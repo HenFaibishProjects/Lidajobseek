@@ -16,13 +16,29 @@ interface RecruiterEmailFilterConfig {
   advertisingSignalThreshold: number;
 }
 
-const CONFIG_PATH = path.join(
-  process.cwd(),
-  'src',
-  'recruiter-agent',
-  'config',
-  'recruiter-email-filter.yml',
-);
+const CONFIG_CANDIDATES = [
+  path.join(
+    process.cwd(),
+    'src',
+    'intelligence',
+    'recruiter-agent',
+    'config',
+    'recruiter-email-filter.yml',
+  ),
+  path.join(
+    process.cwd(),
+    'backend',
+    'src',
+    'intelligence',
+    'recruiter-agent',
+    'config',
+    'recruiter-email-filter.yml',
+  ),
+];
+
+const CONFIG_PATH =
+  CONFIG_CANDIDATES.find((candidate) => fs.existsSync(candidate)) ??
+  CONFIG_CANDIDATES[0];
 
 let cachedConfig: RecruiterEmailFilterConfig | null = null;
 let cachedModifiedTime = 0;
