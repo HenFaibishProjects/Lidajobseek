@@ -71,11 +71,14 @@ describe('Provider selection and research adapters', () => {
 
   it('defaults OpenAI to gpt-6.1-sol, retains environment overrides, and leaves DeepSeek unchanged', () => {
     const base = {
-      DB_HOST: 'database.example.com',
-      DB_PORT: 5432,
-      DB_USERNAME: 'test',
-      DB_PASSWORD: 'test',
-      DB_DATABASE: 'test',
+      INTELLIGENCE_DB_HOST: 'database.example.com',
+      INTELLIGENCE_DB_PORT: 5432,
+      INTELLIGENCE_DB_USERNAME: 'test',
+      INTELLIGENCE_DB_PASSWORD: 'test',
+      INTELLIGENCE_DB_DATABASE: 'test',
+      GOOGLE_CLIENT_ID: 'synthetic-client',
+      GOOGLE_CLIENT_SECRET: 'synthetic-secret',
+      GOOGLE_REFRESH_TOKEN: 'synthetic-refresh',
       OPENAI_API_KEY: 'test',
       DEEPSEEK_API_KEY: 'test',
     };
@@ -515,18 +518,19 @@ describe('URL safety and output schemas', () => {
     expect(
       validateReportEvidence(reportDraftFixture, discovered).sources[0].title,
     ).toBe('Verified title');
-    expect(() =>
-      validateReportEvidence(
-        {
-          ...reportDraftFixture,
-          sources: [
-            ...reportDraftFixture.sources,
-            ...reportDraftFixture.sources,
-          ],
-        },
-        discovered,
-      ),
-    ).toThrow('duplicate source');
+    const deduplicated = validateReportEvidence(
+      {
+        ...reportDraftFixture,
+        sources: [
+          ...reportDraftFixture.sources,
+          ...reportDraftFixture.sources,
+        ],
+      },
+      discovered,
+    );
+    expect(deduplicated.sources).toHaveLength(
+      reportDraftFixture.sources.length,
+    );
   });
 });
 
