@@ -1,3 +1,4 @@
+import { ConfigService } from '@nestjs/config';
 import { ResearchHandoffService } from '../handoff/research-handoff.service';
 import { EmailProcessingAuditService } from '../audit/email-processing-audit.service';
 import { RecruiterEmailPipelineService } from '../agent/recruiter-email-pipeline.service';
@@ -33,11 +34,32 @@ function setup() {
     audit as unknown as EmailProcessingAuditService,
     pipeline as unknown as RecruiterEmailPipelineService,
     handoffs as unknown as ResearchHandoffService,
+    { get: jest.fn().mockReturnValue('true') } as unknown as ConfigService,
   );
   return { trigger, client, audit, pipeline, handoffs };
 }
 
 describe('Durable Gmail polling', () => {
+  it('does nothing when recruiter Gmail polling is disabled', async () => {
+    const client = { getRecentInboxEmails: jest.fn() };
+    const audit = { listRetryableEmails: jest.fn() };
+    const pipeline = { process: jest.fn() };
+    const handoffs = { retryNotifications: jest.fn() };
+    const trigger = new GmailTriggerService(
+      client as unknown as GmailClientService,
+      audit as unknown as EmailProcessingAuditService,
+      pipeline as unknown as RecruiterEmailPipelineService,
+      handoffs as unknown as ResearchHandoffService,
+      { get: jest.fn().mockReturnValue('false') } as unknown as ConfigService,
+    );
+
+    await trigger.pollInbox();
+
+    expect(client.getRecentInboxEmails).not.toHaveBeenCalled();
+    expect(audit.listRetryableEmails).not.toHaveBeenCalled();
+    expect(handoffs.retryNotifications).not.toHaveBeenCalled();
+  });
+
   it('retries handoff notifications even when Gmail is unavailable and releases the lock on notification failure', async () => {
     const s = setup();
     s.client.getRecentInboxEmails.mockRejectedValue(new Error('offline'));
