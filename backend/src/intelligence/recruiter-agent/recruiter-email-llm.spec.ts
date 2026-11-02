@@ -234,6 +234,9 @@ describe('Recruiter provider configuration and actual request auditing', () => {
       INTELLIGENCE_DB_USERNAME: 'test',
       INTELLIGENCE_DB_PASSWORD: 'test',
       INTELLIGENCE_DB_DATABASE: 'test',
+      GOOGLE_CLIENT_ID: 'synthetic-client',
+      GOOGLE_CLIENT_SECRET: 'synthetic-secret',
+      GOOGLE_REFRESH_TOKEN: 'synthetic-refresh',
     };
     const defaults = environmentSchema.parse(db);
     const providers = new LlmProviders(
