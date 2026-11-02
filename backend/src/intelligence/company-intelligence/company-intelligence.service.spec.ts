@@ -740,12 +740,10 @@ describe('Company intelligence agent (real SDK loop, scripted model)', () => {
       ]);
       await context.service.research(request, mode);
       expect(context.model.doGenerateCalls[0].toolChoice).toEqual({
-        type: 'tool',
-        toolName: 'search',
+        type: 'required',
       });
       expect(context.model.doGenerateCalls[1].toolChoice).toEqual({
-        type: 'tool',
-        toolName: 'readPage',
+        type: 'required',
       });
       expect(
         context.model.doGenerateCalls[mode === 'DEEP' ? 3 : 2].toolChoice,
