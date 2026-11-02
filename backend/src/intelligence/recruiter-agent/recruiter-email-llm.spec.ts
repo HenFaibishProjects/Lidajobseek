@@ -207,11 +207,14 @@ describe('Recruiter provider configuration and actual request auditing', () => {
 
   it('validates provider choices and permits unset stage models until first use', () => {
     const db = {
-      DB_HOST: 'localhost',
-      DB_PORT: 5432,
-      DB_USERNAME: 'test',
-      DB_PASSWORD: 'test',
-      DB_DATABASE: 'test',
+      INTELLIGENCE_DB_HOST: 'localhost',
+      INTELLIGENCE_DB_PORT: 5432,
+      INTELLIGENCE_DB_USERNAME: 'test',
+      INTELLIGENCE_DB_PASSWORD: 'test',
+      INTELLIGENCE_DB_DATABASE: 'test',
+      GOOGLE_CLIENT_ID: 'synthetic-client',
+      GOOGLE_CLIENT_SECRET: 'synthetic-secret',
+      GOOGLE_REFRESH_TOKEN: 'synthetic-refresh',
     };
     expect(
       environmentSchema.parse({ ...db, RECRUITER_CHEAP_MODEL: '' })
@@ -226,11 +229,11 @@ describe('Recruiter provider configuration and actual request auditing', () => {
   });
   it('resolves both selected default models and allows explicit overrides', () => {
     const db = {
-      DB_HOST: 'localhost',
-      DB_PORT: 5432,
-      DB_USERNAME: 'test',
-      DB_PASSWORD: 'test',
-      DB_DATABASE: 'test',
+      INTELLIGENCE_DB_HOST: 'localhost',
+      INTELLIGENCE_DB_PORT: 5432,
+      INTELLIGENCE_DB_USERNAME: 'test',
+      INTELLIGENCE_DB_PASSWORD: 'test',
+      INTELLIGENCE_DB_DATABASE: 'test',
     };
     const defaults = environmentSchema.parse(db);
     const providers = new LlmProviders(
