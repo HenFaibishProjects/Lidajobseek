@@ -69,7 +69,7 @@ describe('Hebrew report presentation and official sources', () => {
     expect(quick.whatTheyDo.length).toBeLessThanOrEqual(
       QUICK_PRESENTATION_LIMITS.summary,
     );
-    expect(quick.workModel!.length).toBeLessThanOrEqual(160);
+    expect(quick.workModel).toBeNull();
     expect(Object.keys(quick.relevantRoles[0]).sort()).toEqual(
       ['title', 'location', 'workModel', 'matchScore', 'url'].sort(),
     );
