@@ -25,6 +25,7 @@ import { RecruiterEditComponent } from './pages/recruiter-edit/recruiter-edit.co
 import { RecruiterDetailsComponent } from './pages/recruiter-details/recruiter-details.component';
 import { TemplatesComponent } from './pages/templates/templates.component';
 import { MailCoverageComponent } from './pages/mail-coverage/mail-coverage.component';
+import { CompanyIntelligenceComponent } from './pages/company-intelligence/company-intelligence.component';
 
 export const routes: Routes = [
     { path: 'login', component: LoginComponent, canActivate: [GuestGuard] },
