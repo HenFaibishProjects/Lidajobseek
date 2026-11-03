@@ -100,6 +100,54 @@ describe('chatGptResearchImportSchema', () => {
     });
   });
 
+  it('adds a limitation independently to interview and workplace sections', () => {
+    const parsed = parseChatGptResearchImport(
+      JSON.stringify({
+        companyName: 'WalkMe',
+        interviewInsights: {
+          summary: null,
+          stages: [
+            {
+              statement: 'Interview signal',
+              status: 'FACT',
+              sourceUrls: [],
+              reportedAt: null,
+              context: null,
+            },
+          ],
+          reportedTopics: [],
+          candidateExperiences: [],
+          limitations: [],
+        },
+        workplaceSignals: {
+          summary: null,
+          positiveSignals: [
+            {
+              statement: 'Workplace signal',
+              status: 'DIRECT_REPORT',
+              sourceUrls: [],
+              reportedAt: null,
+              context: null,
+            },
+          ],
+          negativeSignals: [],
+          mixedSignals: [],
+          limitations: [],
+        },
+        sources: [],
+      }),
+    );
+
+    expect(parsed.interviewInsights?.limitations).toContain(
+      'חלק מהממצאים יובאו ללא מקור תואם ולכן סומנו כ־UNKNOWN.',
+    );
+    expect(parsed.workplaceSignals?.limitations).toContain(
+      'חלק מהממצאים יובאו ללא מקור תואם ולכן סומנו כ־UNKNOWN.',
+    );
+    expect(parsed.interviewInsights?.stages[0].status).toBe('UNKNOWN');
+    expect(parsed.workplaceSignals?.positiveSignals[0].status).toBe('UNKNOWN');
+  });
+
   it('still rejects invalid supported fields', () => {
     expect(() =>
       parseChatGptResearchImport(
