@@ -6,29 +6,15 @@ import type { IncomingEmail } from '../recruiter-agent.types';
 
 @Injectable()
 export class GmailClientService {
-  private readonly gmail: gmail_v1.Gmail;
+  private gmail?: gmail_v1.Gmail;
 
-  constructor(private readonly configService: ConfigService) {
-    const oauth2Client = new google.auth.OAuth2(
-      this.configService.getOrThrow<string>('GOOGLE_CLIENT_ID'),
-      this.configService.getOrThrow<string>('GOOGLE_CLIENT_SECRET'),
-    );
-
-    oauth2Client.setCredentials({
-      refresh_token:
-        this.configService.getOrThrow<string>('GOOGLE_REFRESH_TOKEN'),
-    });
-
-    this.gmail = google.gmail({
-      version: 'v1',
-      auth: oauth2Client,
-    });
-  }
+  constructor(private readonly configService: ConfigService) {}
 
   async getRecentInboxEmails(
     maxResults = 20,
   ): Promise<IncomingEmail[]> {
-    const response = await this.gmail.users.messages.list({
+    const gmail = this.getGmailClient();
+    const response = await gmail.users.messages.list({
       userId: 'me',
       labelIds: ['INBOX'],
       maxResults,
@@ -44,7 +30,7 @@ export class GmailClientService {
   }
 
   async getEmail(messageId: string): Promise<IncomingEmail> {
-    const response = await this.gmail.users.messages.get({
+    const response = await this.getGmailClient().users.messages.get({
       userId: 'me',
       id: messageId,
       format: 'full',
@@ -60,6 +46,26 @@ export class GmailClientService {
       body: this.extractBody(message.payload),
       receivedAt: new Date(Number(message.internalDate)),
     };
+  }
+
+  private getGmailClient(): gmail_v1.Gmail {
+    if (this.gmail) return this.gmail;
+
+    const oauth2Client = new google.auth.OAuth2(
+      this.configService.getOrThrow<string>('GOOGLE_CLIENT_ID'),
+      this.configService.getOrThrow<string>('GOOGLE_CLIENT_SECRET'),
+    );
+
+    oauth2Client.setCredentials({
+      refresh_token:
+        this.configService.getOrThrow<string>('GOOGLE_REFRESH_TOKEN'),
+    });
+
+    this.gmail = google.gmail({
+      version: 'v1',
+      auth: oauth2Client,
+    });
+    return this.gmail;
   }
 
   private getHeader(

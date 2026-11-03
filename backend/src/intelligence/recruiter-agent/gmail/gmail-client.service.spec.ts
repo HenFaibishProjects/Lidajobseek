@@ -33,6 +33,7 @@ describe('Gmail body extraction with synthetic MIME fixtures', () => {
   let service: GmailClientService;
 
   beforeEach(() => {
+    jest.clearAllMocks();
     get.mockReset();
     jest.mocked(google.gmail).mockReturnValue({
       users: { messages: { get } },
@@ -43,6 +44,22 @@ describe('Gmail body extraction with synthetic MIME fixtures', () => {
         GOOGLE_CLIENT_SECRET: 'synthetic-secret',
         GOOGLE_REFRESH_TOKEN: 'synthetic-refresh',
       }),
+    );
+  });
+
+  it('does not require Gmail credentials during service construction', () => {
+    expect(
+      () => new GmailClientService(new ConfigService({})),
+    ).not.toThrow();
+    expect(google.auth.OAuth2).not.toHaveBeenCalled();
+    expect(google.gmail).not.toHaveBeenCalled();
+  });
+
+  it('requires Gmail credentials only when Gmail is actually accessed', async () => {
+    const unconfigured = new GmailClientService(new ConfigService({}));
+
+    await expect(unconfigured.getEmail('synthetic')).rejects.toThrow(
+      /GOOGLE_CLIENT_ID/,
     );
   });
 
