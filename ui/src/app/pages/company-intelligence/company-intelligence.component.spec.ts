@@ -18,6 +18,7 @@ describe('CompanyIntelligenceComponent', () => {
       .and.returnValue(of([])),
     getHandoff: jasmine.createSpy('getHandoff'),
     startHandoff: jasmine.createSpy('startHandoff'),
+    cancelHandoff: jasmine.createSpy('cancelHandoff').and.returnValue(of({})),
     importHandoffResearch: jasmine.createSpy('importHandoffResearch'),
   };
 
@@ -89,6 +90,38 @@ describe('CompanyIntelligenceComponent', () => {
 
     expect(component.visibleHandoffs).toHaveSize(1);
     expect(component.visibleHandoffs[0].id).toBe('older-specific');
+  });
+
+  it('removes the selected pending company and compatible legacy duplicate', () => {
+    spyOn(window, 'confirm').and.returnValue(true);
+    component.handoffs = [
+      {
+        id: 'generic',
+        companyName: 'WalkMe',
+        roleTitle: null,
+        eventType: 'INTERVIEW_INVITATION',
+        researchReason: 'Screening call',
+        status: 'PENDING_CHATGPT',
+        createdAt: '2026-11-03T12:30:43.000Z',
+        notificationSentAt: null,
+      },
+      {
+        id: 'specific',
+        companyName: 'WalkMe',
+        roleTitle: 'Senior Software Engineer - Big Data Platform',
+        eventType: 'INTERVIEW_SCHEDULING',
+        researchReason: 'Active interview scheduling',
+        status: 'PENDING_CHATGPT',
+        createdAt: '2026-11-03T12:29:39.000Z',
+        notificationSentAt: null,
+      },
+    ];
+
+    component.removePendingHandoff(component.visibleHandoffs[0]);
+
+    expect(service.cancelHandoff).toHaveBeenCalledWith('generic');
+    expect(service.cancelHandoff).toHaveBeenCalledWith('specific');
+    expect(component.handoffs).toEqual([]);
   });
 
   it('shows handoff errors inside the open modal without clearing pasted research', () => {

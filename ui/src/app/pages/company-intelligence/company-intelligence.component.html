@@ -430,18 +430,35 @@
       </header>
 
       <div class="ci-handoff-list" *ngIf="visibleHandoffs.length; else handoffEmpty">
-        <button type="button" class="ci-handoff-card" *ngFor="let item of visibleHandoffs; trackBy: trackByHandoffId" (click)="openHandoff(item)">
-          <div>
-            <strong dir="auto">{{ item.companyName }}</strong>
-            <span>{{ item.roleTitle || 'התפקיד לא צוין' }}</span>
-          </div>
-          <div class="ci-handoff-meta">
-            <span>{{ eventTypeLabel(item.eventType) }}</span>
-            <span>{{ handoffStatusLabel(item.status) }}</span>
-            <time>{{ item.createdAt | date:'medium' }}</time>
-          </div>
-          <p>{{ item.researchReason }}</p>
-        </button>
+        <article class="ci-handoff-card" *ngFor="let item of visibleHandoffs; trackBy: trackByHandoffId">
+          <button type="button" class="ci-handoff-main" (click)="openHandoff(item)">
+            <div>
+              <strong dir="auto">{{ item.companyName }}</strong>
+              <span>{{ item.roleTitle || 'התפקיד לא צוין' }}</span>
+            </div>
+            <div class="ci-handoff-meta">
+              <span>{{ eventTypeLabel(item.eventType) }}</span>
+              <span>{{ handoffStatusLabel(item.status) }}</span>
+              <time>{{ item.createdAt | date:'medium' }}</time>
+            </div>
+            <p>{{ item.researchReason }}</p>
+          </button>
+          <button
+            type="button"
+            class="ci-handoff-remove"
+            (click)="removePendingHandoff(item)"
+            [disabled]="loading"
+            [attr.aria-label]="'הסר את ' + item.companyName + ' מהממתינים'"
+            title="הסר מהממתינים">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M3 6h18"></path>
+              <path d="M8 6V4h8v2"></path>
+              <path d="M19 6l-1 14H6L5 6"></path>
+              <path d="M10 11v5M14 11v5"></path>
+            </svg>
+            <span>הסר</span>
+          </button>
+        </article>
 
         <button
           type="button"
