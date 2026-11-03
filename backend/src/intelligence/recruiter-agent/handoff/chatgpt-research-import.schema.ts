@@ -30,7 +30,7 @@ const employeeCount = z
 const finding = z.object({
   statement: z.string().trim().min(1).max(1500),
   status: z.enum(['FACT', 'DIRECT_REPORT', 'INFERENCE', 'UNKNOWN']),
-  sourceUrls: z.array(sourceUrl).max(5),
+  sourceUrls: z.array(sourceUrl).max(5).default([]),
   reportedAt: shortText(100),
   context: shortText(500),
 });
@@ -137,33 +137,69 @@ export const chatGptResearchImportSchema = z
       )
       .max(50)
       .default([]),
-  })
-  .superRefine((research, context) => {
-    const urls = new Set(research.sources.map((source) => source.url));
-    for (const section of [
-      research.interviewInsights,
-      research.workplaceSignals,
-    ]) {
-      if (!section) continue;
-      for (const value of Object.values(section)) {
-        if (!Array.isArray(value)) continue;
-        for (const item of value) {
-          if (typeof item === 'string') continue;
-          if (item.sourceUrls.some((url) => !urls.has(url)))
-            context.addIssue({
-              code: 'custom',
-              message: 'Finding URLs must also appear in sources.',
-            });
-          if (item.status !== 'UNKNOWN' && item.sourceUrls.length === 0)
-            context.addIssue({
-              code: 'custom',
-              message: 'Findings must cite a source or use UNKNOWN.',
-            });
-        }
-      }
-    }
   });
 export type ChatGptResearchImport = z.infer<typeof chatGptResearchImportSchema>;
+
+function normalizeImportedFindingCitations(
+  research: ChatGptResearchImport,
+): ChatGptResearchImport {
+  const knownUrls = new Set(research.sources.map((source) => source.url));
+
+  const normalize = (items: Array<z.infer<typeof finding>>) => {
+    let changed = false;
+    for (const item of items) {
+      const supportedUrls = item.sourceUrls.filter((url) => knownUrls.has(url));
+      if (supportedUrls.length !== item.sourceUrls.length) changed = true;
+      item.sourceUrls = supportedUrls;
+
+      if (item.status !== 'UNKNOWN' && supportedUrls.length === 0) {
+        item.status = 'UNKNOWN';
+        changed = true;
+      }
+    }
+    return changed;
+  };
+
+  if (research.interviewInsights) {
+    const interviewNormalized =
+      normalize(research.interviewInsights.stages) ||
+      normalize(research.interviewInsights.reportedTopics) ||
+      normalize(research.interviewInsights.candidateExperiences);
+
+    if (
+      interviewNormalized &&
+      !research.interviewInsights.limitations.includes(
+        'חלק מהממצאים יובאו ללא מקור תואם ולכן סומנו כ־UNKNOWN.',
+      )
+    ) {
+      research.interviewInsights.limitations.push(
+        'חלק מהממצאים יובאו ללא מקור תואם ולכן סומנו כ־UNKNOWN.',
+      );
+    }
+  }
+
+  if (research.workplaceSignals) {
+    const workplaceNormalized =
+      normalize(research.workplaceSignals.positiveSignals) ||
+      normalize(research.workplaceSignals.negativeSignals) ||
+      normalize(research.workplaceSignals.mixedSignals);
+
+    if (
+      workplaceNormalized &&
+      !research.workplaceSignals.limitations.includes(
+        'חלק מהממצאים יובאו ללא מקור תואם ולכן סומנו כ־UNKNOWN.',
+      )
+    ) {
+      research.workplaceSignals.limitations.push(
+        'חלק מהממצאים יובאו ללא מקור תואם ולכן סומנו כ־UNKNOWN.',
+      );
+    }
+  }
+
+  return research;
+}
+
+
 
 export function parseChatGptResearchImport(
   content: string,
@@ -206,7 +242,7 @@ export function parseChatGptResearchImport(
         message: issue.message,
       })),
     });
-  return parsed.data;
+  return normalizeImportedFindingCitations(parsed.data);
 }
 
 export const CHATGPT_IMPORT_FORMAT = `After the Hebrew report, append a final section named exactly APP_IMPORT_JSON on its own line, followed by ONE JSON object matching this schema. No prose after the object, no markdown inside JSON. Use null for unknown facts, empty arrays for unavailable findings, and never invent data or source URLs. Keep companyName exactly equal to the hiring-context companyName. Counts must be {"count":123,"approximate":true/false} or {"min":100,"max":200,"approximate":true}, or null. All insight citations must also appear in sources; label FACT, DIRECT_REPORT, INFERENCE or UNKNOWN honestly. Keep the JSON below 60,000 characters.\n${JSON.stringify(z.toJSONSchema(chatGptResearchImportSchema, { io: 'input', unrepresentable: 'any' }))}`;
