@@ -41,6 +41,9 @@ export class CompanyIntelligenceComponent {
   handoffDetail: ResearchHandoffDetail | null = null;
   handoffImportContent = '';
   copiedPrompt = false;
+  readonly handoffPageSize = 20;
+  handoffOffset = 0;
+  hasMoreHandoffs = false;
 
   loading = false;
   errorMessage = '';
@@ -51,7 +54,7 @@ export class CompanyIntelligenceComponent {
     this.activeTab = tab;
     this.errorMessage = '';
     if (tab === 'history' && this.history.length === 0) this.loadHistory();
-    if (tab === 'handoffs' && this.handoffs.length === 0) this.loadHandoffs();
+    if (tab === 'handoffs' && this.handoffs.length === 0) this.loadHandoffs(true);
   }
 
   researchCompany(): void {
@@ -151,14 +154,21 @@ export class CompanyIntelligenceComponent {
       });
   }
 
-  loadHandoffs(): void {
+  loadHandoffs(reset = true): void {
+    if (!reset && !this.hasMoreHandoffs) return;
+
+    const offset = reset ? 0 : this.handoffOffset;
     this.loading = true;
     this.errorMessage = '';
     this.intelligence
-      .listPendingHandoffs()
+      .listPendingHandoffs(this.handoffPageSize, offset)
       .pipe(finalize(() => (this.loading = false)))
       .subscribe({
-        next: (items) => (this.handoffs = items),
+        next: (items) => {
+          this.handoffs = reset ? items : [...this.handoffs, ...items];
+          this.handoffOffset = offset + items.length;
+          this.hasMoreHandoffs = items.length === this.handoffPageSize;
+        },
         error: (error) =>
           this.handleError(error, 'Pending ChatGPT research could not be loaded.'),
       });
@@ -241,6 +251,14 @@ export class CompanyIntelligenceComponent {
     this.companyName = item.companyName;
     this.historyDetail = null;
     this.setTab(tab);
+  }
+
+  openSavedReport(detail: CompanyHistoryDetail): void {
+    this.companyName = detail.report.companyName;
+    this.companyReport = detail.report;
+    this.historyDetail = null;
+    this.errorMessage = '';
+    this.activeTab = 'research';
   }
 
   get filteredHistory(): CompanyHistoryItem[] {

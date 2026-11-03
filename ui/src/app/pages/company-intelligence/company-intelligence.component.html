@@ -367,8 +367,46 @@
         <div class="ci-metric"><span>Global</span><strong>{{ employeeCount(detail.report.employees.global) }}</strong></div>
         <div class="ci-metric"><span>Work model</span><strong>{{ detail.report.workModel || 'Unknown' }}</strong></div>
       </div>
+      <div class="ci-flags-grid" *ngIf="detail.report.greenFlags.length || detail.report.redFlags.length">
+        <section class="ci-section ci-flags ci-flags-good" *ngIf="detail.report.greenFlags.length">
+          <h3>Positive signals</h3>
+          <ul><li *ngFor="let flag of detail.report.greenFlags">{{ flag }}</li></ul>
+        </section>
+        <section class="ci-section ci-flags ci-flags-risk" *ngIf="detail.report.redFlags.length">
+          <h3>Things to examine</h3>
+          <ul><li *ngFor="let flag of detail.report.redFlags">{{ flag }}</li></ul>
+        </section>
+      </div>
+
+      <section class="ci-section">
+        <h3>Saved research briefing</h3>
+        <div class="ci-detail-grid">
+          <div><span>Company</span><p>{{ detail.report.details.companySummary }}</p></div>
+          <div><span>Product</span><p>{{ detail.report.details.productSummary }}</p></div>
+          <div *ngIf="detail.report.details.engineeringSummary"><span>Engineering</span><p>{{ detail.report.details.engineeringSummary }}</p></div>
+          <div *ngIf="detail.report.details.technologySummary"><span>Technology</span><p>{{ detail.report.details.technologySummary }}</p></div>
+        </div>
+      </section>
+
+      <section class="ci-section" *ngIf="detail.report.details.questionsToAskRecruiter.length">
+        <h3>Questions for the recruiter</h3>
+        <ol class="ci-question-list">
+          <li *ngFor="let question of detail.report.details.questionsToAskRecruiter">{{ question }}</li>
+        </ol>
+      </section>
+
+      <details class="ci-disclosure" *ngIf="detail.report.sources.length">
+        <summary>Saved sources ({{ detail.report.sources.length }})</summary>
+        <div class="ci-source-list">
+          <a *ngFor="let source of detail.report.sources" [href]="source.url" target="_blank" rel="noopener">
+            <span>{{ source.title }}</span>
+            <small>{{ source.sourceType }}</small>
+          </a>
+        </div>
+      </details>
+
       <div class="ci-history-detail-actions">
-        <button type="button" class="ci-primary" (click)="companyName = detail.report.companyName; setTab('research')">Research again</button>
+        <button type="button" class="ci-primary" (click)="openSavedReport(detail)">Open full saved report</button>
         <button type="button" class="ci-secondary" (click)="companyName = detail.report.companyName; setTab('jobs')">Match jobs</button>
       </div>
     </section>
@@ -381,7 +419,7 @@
           <h2>Pending ChatGPT research</h2>
           <p>Research handoffs created by the recruiter pipeline. Gmail polling remains controlled separately on the backend.</p>
         </div>
-        <button type="button" class="ci-secondary" (click)="loadHandoffs()" [disabled]="loading">Refresh</button>
+        <button type="button" class="ci-secondary" (click)="loadHandoffs(true)" [disabled]="loading">Refresh</button>
       </header>
 
       <div class="ci-handoff-list" *ngIf="handoffs.length; else handoffEmpty">
@@ -396,6 +434,15 @@
             <time>{{ item.createdAt | date:'medium' }}</time>
           </div>
           <p>{{ item.researchReason }}</p>
+        </button>
+
+        <button
+          type="button"
+          class="ci-secondary ci-load-more"
+          *ngIf="hasMoreHandoffs"
+          (click)="loadHandoffs(false)"
+          [disabled]="loading">
+          Load older pending research
         </button>
       </div>
 
