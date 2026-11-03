@@ -9,9 +9,9 @@
     ]
   },
   "scripts": {
-  "prebuild": "cd backend",
-  "build": "npm run build -w backend && npm run build -w ui && node -e \"const fs = require('fs'); const path = require('path'); const browserDir = path.join(__dirname, 'dist', 'public', 'browser'); const publicDir = path.join(__dirname, 'dist', 'public'); if (fs.existsSync(browserDir)) { const files = fs.readdirSync(browserDir); files.forEach(file => { const src = path.join(browserDir, file); const dest = path.join(publicDir, file); fs.renameSync(src, dest); }); fs.rmSync(browserDir, { recursive: true, force: true }); console.log('Moved browser files to public directory'); } else { console.log('No browser directory found'); }\"",
-  "start": "node dist/main.js"
+    "prebuild": "cd backend",
+    "build": "npm run build -w backend && npm run build -w ui && node -e \"const fs = require('fs'); const path = require('path'); const browserDir = path.join(__dirname, 'dist', 'public', 'browser'); const publicDir = path.join(__dirname, 'dist', 'public'); if (fs.existsSync(browserDir)) { const files = fs.readdirSync(browserDir); files.forEach(file => { const src = path.join(browserDir, file); const dest = path.join(publicDir, file); fs.renameSync(src, dest); }); fs.rmSync(browserDir, { recursive: true, force: true }); console.log('Moved browser files to public directory'); } else { console.log('No browser directory found'); }\"",
+    "start": "node dist/main.js"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
@@ -28,5 +28,8 @@
     "@nestjs/schematics": "^11.0.0",
     "@types/node": "^22.10.7",
     "typescript": "^5.7.3"
+  },
+  "engines": {
+    "node": ">=22"
   }
 }
