@@ -199,6 +199,10 @@ export class CompanyIntelligenceComponent {
           this.handoffs = this.handoffs.filter(
             (candidate) => !removed.has(candidate.id),
           );
+          this.handoffOffset = Math.max(
+            0,
+            this.handoffOffset - ids.length,
+          );
           if (this.handoffDetail && removed.has(this.handoffDetail.id)) {
             this.closeHandoff();
           }

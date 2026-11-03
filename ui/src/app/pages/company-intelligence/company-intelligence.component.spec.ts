@@ -117,11 +117,13 @@ describe('CompanyIntelligenceComponent', () => {
       },
     ];
 
+    component.handoffOffset = 20;
     component.removePendingHandoff(component.visibleHandoffs[0]);
 
     expect(service.cancelHandoff).toHaveBeenCalledWith('generic');
     expect(service.cancelHandoff).toHaveBeenCalledWith('specific');
     expect(component.handoffs).toEqual([]);
+    expect(component.handoffOffset).toBe(18);
   });
 
   it('shows handoff errors inside the open modal without clearing pasted research', () => {
