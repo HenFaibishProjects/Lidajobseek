@@ -185,6 +185,15 @@ export class ResearchHandoffService {
     return handoff;
   }
 
+  async cancelHandoff(id: string) {
+    if (!(await this.repository.cancel(id))) {
+      const existing = await this.get(id);
+      if (existing.status === ResearchHandoffStatus.CANCELLED) return existing;
+      throw new ConflictException('Completed handoffs cannot be cancelled.');
+    }
+    return this.get(id);
+  }
+
   async startHandoff(id: string) {
     if (!(await this.repository.start(id))) {
       await this.get(id);

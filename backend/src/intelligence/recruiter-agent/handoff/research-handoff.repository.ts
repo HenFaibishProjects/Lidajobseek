@@ -120,6 +120,17 @@ export class ResearchHandoffRepository {
       .getMany();
   }
 
+  async cancel(id: string): Promise<boolean> {
+    const result = await this.repository
+      .createQueryBuilder()
+      .update()
+      .set({ status: ResearchHandoffStatus.CANCELLED })
+      .where('id = :id', { id })
+      .andWhere('status IN (:...statuses)', { statuses: OPEN_STATUSES })
+      .execute();
+    return result.affected === 1;
+  }
+
   async start(id: string): Promise<boolean> {
     const result = await this.repository
       .createQueryBuilder()
