@@ -350,7 +350,13 @@
       </ng-template>
     </section>
 
-    <section class="ci-panel ci-history-detail" *ngIf="historyDetail as detail">
+    <div class="ci-modal-backdrop" *ngIf="historyDetail as detail" (click)="closeHistoryDetail()">
+      <section
+        class="ci-panel ci-history-detail ci-detail-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-label="פרטי מחקר חברה"
+        (click)="$event.stopPropagation()">
       <header class="ci-panel-header">
         <div>
           <span class="ci-eyebrow">דוח שמור</span>
@@ -407,9 +413,10 @@
 
       <div class="ci-history-detail-actions">
         <button type="button" class="ci-primary" (click)="openSavedReport(detail)">פתיחת הדוח השמור המלא</button>
-        <button type="button" class="ci-secondary" (click)="companyName = detail.report.companyName; setTab('jobs')">התאמת משרות</button>
+        <button type="button" class="ci-secondary" (click)="companyName = detail.report.companyName; closeHistoryDetail(); setTab('jobs')">התאמת משרות</button>
       </div>
-    </section>
+      </section>
+    </div>
   </ng-container>
 
   <ng-container *ngIf="activeTab === 'handoffs'">
@@ -454,7 +461,13 @@
       </ng-template>
     </section>
 
-    <section class="ci-panel" *ngIf="handoffDetail as handoff">
+    <div class="ci-modal-backdrop" *ngIf="handoffDetail as handoff" (click)="closeHandoff()">
+      <section
+        class="ci-panel ci-detail-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-label="פרטי מחקר ChatGPT"
+        (click)="$event.stopPropagation()">
       <header class="ci-panel-header">
         <div>
           <span class="ci-eyebrow">משימת מחקר</span>
@@ -489,6 +502,7 @@
       <button type="button" class="ci-primary" (click)="importHandoff()" [disabled]="loading || !handoffImportContent.trim()">
         ייבוא המחקר למערכת
       </button>
-    </section>
+      </section>
+    </div>
   </ng-container>
 </section>
