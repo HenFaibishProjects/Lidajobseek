@@ -40,6 +40,7 @@ export const routes: Routes = [
             { path: 'calendar', component: CalendarComponent },
             { path: 'contact-history', loadComponent: () => import('./pages/contact-history/contact-history.component').then(m => m.ContactHistoryComponent) },
             { path: 'mail-coverage', component: MailCoverageComponent },
+            { path: 'intelligence', loadComponent: () => import('./pages/company-intelligence/company-intelligence.component').then(m => m.CompanyIntelligenceComponent) },
             { path: 'schedule-interview', component: ScheduleInterviewComponent },
             { path: 'pipeline', component: PipelineBoardComponent },
             { path: 'profile', component: ProfileComponent },

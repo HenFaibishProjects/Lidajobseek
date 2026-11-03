@@ -1,0 +1,447 @@
+<section class="ci-page page-enter">
+  <header class="ci-hero">
+    <div class="ci-hero-copy">
+      <div class="ci-eyebrow">Reqcue Intelligence</div>
+      <h1>Company Intelligence</h1>
+      <p>Research a company, match open roles to your profile, and reuse saved research before recruiter conversations.</p>
+    </div>
+
+    <div class="ci-hero-status">
+      <span class="ci-status-dot"></span>
+      <span>Production backend connected</span>
+    </div>
+  </header>
+
+  <nav class="ci-tabs" aria-label="Company Intelligence sections">
+    <button type="button" [class.active]="activeTab === 'research'" (click)="setTab('research')">
+      Company research
+    </button>
+    <button type="button" [class.active]="activeTab === 'jobs'" (click)="setTab('jobs')">
+      Job matching
+    </button>
+    <button type="button" [class.active]="activeTab === 'history'" (click)="setTab('history')">
+      History
+    </button>
+    <button type="button" [class.active]="activeTab === 'handoffs'" (click)="setTab('handoffs')">
+      ChatGPT research
+      <span class="ci-count" *ngIf="handoffs.length">{{ handoffs.length }}</span>
+    </button>
+  </nav>
+
+  <div class="ci-alert ci-alert-error" *ngIf="errorMessage" role="alert">
+    <strong>Could not complete the request.</strong>
+    <span>{{ errorMessage }}</span>
+  </div>
+
+  <div class="ci-loading" *ngIf="loading" aria-live="polite">
+    <span class="ci-spinner"></span>
+    <span>Working…</span>
+  </div>
+
+  <ng-container *ngIf="activeTab === 'research' || activeTab === 'jobs'">
+    <form class="ci-search-card" (ngSubmit)="activeTab === 'research' ? researchCompany() : matchJobs()">
+      <div class="ci-search-grid">
+        <label class="ci-field ci-company-field">
+          <span>Company</span>
+          <input
+            name="companyName"
+            [(ngModel)]="companyName"
+            maxlength="200"
+            autocomplete="off"
+            placeholder="e.g. Varonis, ZoomInfo, Connecteam"
+          />
+        </label>
+
+        <label class="ci-field" *ngIf="activeTab === 'research'">
+          <span>Role <small>optional</small></span>
+          <input
+            name="role"
+            [(ngModel)]="role"
+            maxlength="500"
+            autocomplete="off"
+            placeholder="e.g. Senior Backend Engineer"
+          />
+        </label>
+
+        <label class="ci-force-refresh">
+          <input type="checkbox" name="forceRefresh" [(ngModel)]="forceRefresh" />
+          <span>
+            <strong>Force fresh research</strong>
+            <small>Bypass the existing cache and use external providers again.</small>
+          </span>
+        </label>
+
+        <button class="ci-primary" type="submit" [disabled]="loading || !companyName.trim()">
+          {{ activeTab === 'research' ? 'Research company' : 'Match open jobs' }}
+        </button>
+      </div>
+
+      <div class="ci-examples">
+        <span>Try:</span>
+        <button type="button" (click)="companyName = 'ZoomInfo'">ZoomInfo</button>
+        <button type="button" (click)="companyName = 'Varonis'">Varonis</button>
+        <button type="button" (click)="companyName = 'Connecteam'">Connecteam</button>
+      </div>
+    </form>
+  </ng-container>
+
+  <ng-container *ngIf="activeTab === 'research' && companyReport as report">
+    <article class="ci-report">
+      <header class="ci-report-header">
+        <div>
+          <div class="ci-badges">
+            <span class="ci-badge">Company research</span>
+            <span class="ci-badge ci-badge-muted" *ngIf="report.researchQuality">
+              {{ evidenceLabel(report.researchQuality.evidenceLevel) }} evidence
+            </span>
+            <span class="ci-badge ci-badge-muted" *ngIf="report.cache">
+              {{ report.cache.company === 'hit' ? 'Cached' : 'Fresh' }}
+            </span>
+          </div>
+          <h2>{{ report.companyName }}</h2>
+          <p class="ci-report-subtitle">{{ report.whatTheyDo }}</p>
+        </div>
+
+        <a *ngIf="report.website" class="ci-secondary" [href]="report.website" target="_blank" rel="noopener">
+          Company website ↗
+        </a>
+      </header>
+
+      <div class="ci-metric-grid">
+        <div class="ci-metric">
+          <span>Israel employees</span>
+          <strong>{{ employeeCount(report.employees.israel) }}</strong>
+        </div>
+        <div class="ci-metric">
+          <span>Israel engineering</span>
+          <strong>{{ employeeCount(report.employees.israelEngineering) }}</strong>
+        </div>
+        <div class="ci-metric">
+          <span>Global employees</span>
+          <strong>{{ employeeCount(report.employees.global) }}</strong>
+        </div>
+        <div class="ci-metric">
+          <span>Work model</span>
+          <strong>{{ report.workModel || 'Unknown' }}</strong>
+        </div>
+      </div>
+
+      <section class="ci-section">
+        <h3>Israel office</h3>
+        <div class="ci-location-grid">
+          <div><span>City</span><strong>{{ report.location.city || 'Unknown' }}</strong></div>
+          <div><span>Address</span><strong>{{ report.location.address || 'Unknown' }}</strong></div>
+          <div><span>Building</span><strong>{{ report.location.building || report.location.campus || 'Unknown' }}</strong></div>
+          <div><span>Company floors</span><strong>{{ report.location.companyFloors || report.location.floor || 'Unknown' }}</strong></div>
+        </div>
+        <p class="ci-note" *ngIf="report.location.verificationNote">{{ report.location.verificationNote }}</p>
+      </section>
+
+      <div class="ci-flags-grid" *ngIf="report.greenFlags.length || report.redFlags.length">
+        <section class="ci-section ci-flags ci-flags-good" *ngIf="report.greenFlags.length">
+          <h3>Positive signals</h3>
+          <ul><li *ngFor="let flag of report.greenFlags">{{ flag }}</li></ul>
+        </section>
+        <section class="ci-section ci-flags ci-flags-risk" *ngIf="report.redFlags.length">
+          <h3>Things to examine</h3>
+          <ul><li *ngFor="let flag of report.redFlags">{{ flag }}</li></ul>
+        </section>
+      </div>
+
+      <section class="ci-section" *ngIf="report.relevantRoles.length">
+        <div class="ci-section-title-row">
+          <h3>Relevant roles</h3>
+          <span>{{ report.relevantRoles.length }} found</span>
+        </div>
+        <div class="ci-role-list">
+          <a class="ci-role" *ngFor="let role of report.relevantRoles" [href]="role.url" target="_blank" rel="noopener">
+            <div>
+              <strong>{{ role.title }}</strong>
+              <span>{{ role.location || 'Location not verified' }} · {{ role.workModel || 'Work model unknown' }}</span>
+            </div>
+            <span class="ci-score" *ngIf="role.matchScore !== null">{{ role.matchScore }}%</span>
+          </a>
+        </div>
+      </section>
+
+      <section class="ci-section">
+        <h3>Research briefing</h3>
+        <div class="ci-detail-grid">
+          <div>
+            <span>Company</span>
+            <p>{{ report.details.companySummary }}</p>
+          </div>
+          <div>
+            <span>Product</span>
+            <p>{{ report.details.productSummary }}</p>
+          </div>
+          <div *ngIf="report.details.businessModel">
+            <span>Business model</span>
+            <p>{{ report.details.businessModel }}</p>
+          </div>
+          <div *ngIf="report.details.engineeringSummary">
+            <span>Engineering</span>
+            <p>{{ report.details.engineeringSummary }}</p>
+          </div>
+          <div *ngIf="report.details.technologySummary">
+            <span>Technology</span>
+            <p>{{ report.details.technologySummary }}</p>
+          </div>
+          <div *ngIf="report.details.stabilitySummary">
+            <span>Stability</span>
+            <p>{{ report.details.stabilitySummary }}</p>
+          </div>
+          <div *ngIf="report.details.employeeSentimentSummary">
+            <span>Employee sentiment</span>
+            <p>{{ report.details.employeeSentimentSummary }}</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="ci-section" *ngIf="report.details.questionsToAskRecruiter.length">
+        <h3>Questions for the recruiter</h3>
+        <ol class="ci-question-list">
+          <li *ngFor="let question of report.details.questionsToAskRecruiter">{{ question }}</li>
+        </ol>
+      </section>
+
+      <section class="ci-section" *ngIf="report.publicSignals.length">
+        <h3>Public signals</h3>
+        <div class="ci-signal-list">
+          <article class="ci-signal" *ngFor="let signal of report.publicSignals" [attr.data-signal]="signal.signalType">
+            <div class="ci-signal-title">
+              <strong>{{ signal.title }}</strong>
+              <span>{{ signal.confidence }} confidence</span>
+            </div>
+            <p>{{ signal.observation }}</p>
+            <p class="ci-note">{{ signal.interpretation }}</p>
+          </article>
+        </div>
+      </section>
+
+      <details class="ci-disclosure" *ngIf="report.sources.length">
+        <summary>Sources ({{ report.sources.length }})</summary>
+        <div class="ci-source-list">
+          <a *ngFor="let source of report.sources" [href]="source.url" target="_blank" rel="noopener">
+            <span>{{ source.title }}</span>
+            <small>{{ source.sourceType }}</small>
+          </a>
+        </div>
+      </details>
+
+      <div class="ci-limitations" *ngIf="report.researchQuality?.limitations?.length">
+        <strong>Research limitations</strong>
+        <ul><li *ngFor="let limitation of report.researchQuality?.limitations">{{ limitation }}</li></ul>
+      </div>
+    </article>
+  </ng-container>
+
+  <ng-container *ngIf="activeTab === 'jobs' && jobResult as result">
+    <article class="ci-report">
+      <header class="ci-report-header">
+        <div>
+          <div class="ci-badges">
+            <span class="ci-badge">Job matching</span>
+            <span class="ci-badge ci-badge-muted">{{ result.cache.status === 'hit' ? 'Cached' : 'Fresh' }}</span>
+          </div>
+          <h2>{{ result.companyName }}</h2>
+          <p class="ci-report-subtitle">{{ result.summary }}</p>
+        </div>
+        <div class="ci-jobs-scanned">
+          <strong>{{ result.jobsScanned }}</strong>
+          <span>jobs scanned</span>
+        </div>
+      </header>
+
+      <div class="ci-job-list" *ngIf="result.relevantJobs.length; else noRelevantJobs">
+        <article class="ci-job-card" *ngFor="let job of result.relevantJobs">
+          <div class="ci-job-topline">
+            <div>
+              <h3>{{ job.title }}</h3>
+              <p>{{ job.team || 'Team not specified' }} · {{ job.location || 'Location unknown' }}</p>
+            </div>
+            <div class="ci-job-score" [attr.data-level]="job.matchLevel">
+              <strong>{{ job.matchScore }}%</strong>
+              <span>{{ job.matchLevel }}</span>
+            </div>
+          </div>
+
+          <p class="ci-job-summary">{{ job.matchSummary }}</p>
+
+          <div class="ci-chip-group" *ngIf="job.matchedSkills.length">
+            <span class="ci-chip ci-chip-good" *ngFor="let skill of job.matchedSkills">{{ skill }}</span>
+          </div>
+
+          <div class="ci-job-columns" *ngIf="job.transferableExperience.length || job.gaps.length || job.concerns.length">
+            <div *ngIf="job.transferableExperience.length">
+              <strong>Transferable</strong>
+              <ul><li *ngFor="let item of job.transferableExperience">{{ item }}</li></ul>
+            </div>
+            <div *ngIf="job.gaps.length">
+              <strong>Gaps</strong>
+              <ul><li *ngFor="let item of job.gaps">{{ item }}</li></ul>
+            </div>
+            <div *ngIf="job.concerns.length">
+              <strong>Concerns</strong>
+              <ul><li *ngFor="let item of job.concerns">{{ item }}</li></ul>
+            </div>
+          </div>
+
+          <footer class="ci-job-footer">
+            <span>{{ job.workModel || 'Work model unknown' }} · {{ job.evidenceLevel }}</span>
+            <a class="ci-primary ci-primary-small" [href]="job.url" target="_blank" rel="noopener">Open job ↗</a>
+          </footer>
+        </article>
+      </div>
+
+      <ng-template #noRelevantJobs>
+        <div class="ci-empty">
+          <strong>No relevant jobs found</strong>
+          <span>The scan completed successfully, but nothing met the matching threshold.</span>
+        </div>
+      </ng-template>
+
+      <div class="ci-limitations" *ngIf="result.limitations.length">
+        <strong>Limitations</strong>
+        <ul><li *ngFor="let limitation of result.limitations">{{ limitation }}</li></ul>
+      </div>
+    </article>
+  </ng-container>
+
+  <ng-container *ngIf="activeTab === 'history'">
+    <section class="ci-panel">
+      <header class="ci-panel-header">
+        <div>
+          <h2>Company history</h2>
+          <p>Saved research from the Intelligence database. Opening a company does not call an AI provider.</p>
+        </div>
+        <button type="button" class="ci-secondary" (click)="loadHistory()" [disabled]="loading">Refresh</button>
+      </header>
+
+      <label class="ci-history-search" *ngIf="history.length">
+        <span>Search saved companies</span>
+        <input [(ngModel)]="historyFilter" placeholder="Company, city, or summary" />
+      </label>
+
+      <div class="ci-history-list" *ngIf="filteredHistory.length; else historyEmpty">
+        <article class="ci-history-card" *ngFor="let item of filteredHistory; trackBy: trackByCompanyId">
+          <button type="button" class="ci-history-main" (click)="openHistory(item)">
+            <div class="ci-company-avatar">{{ item.companyName.slice(0, 1).toUpperCase() }}</div>
+            <div>
+              <strong>{{ item.companyName }}</strong>
+              <p>{{ item.whatTheyDo || 'Saved company research' }}</p>
+              <span>{{ item.city || 'Location unknown' }} · {{ item.researchedAt | date:'mediumDate' }}</span>
+            </div>
+          </button>
+
+          <div class="ci-history-actions">
+            <button type="button" (click)="useHistoryCompany(item, 'research')">Research</button>
+            <button type="button" (click)="useHistoryCompany(item, 'jobs')">Jobs</button>
+            <button type="button" class="danger" (click)="deleteHistory(item)">Delete</button>
+          </div>
+        </article>
+      </div>
+
+      <ng-template #historyEmpty>
+        <div class="ci-empty" *ngIf="!loading">
+          <strong>No saved companies yet</strong>
+          <span>Run Company Research and the report will appear here automatically.</span>
+        </div>
+      </ng-template>
+    </section>
+
+    <section class="ci-panel ci-history-detail" *ngIf="historyDetail as detail">
+      <header class="ci-panel-header">
+        <div>
+          <span class="ci-eyebrow">Saved report</span>
+          <h2>{{ detail.report.companyName }}</h2>
+          <p>Last researched {{ detail.researchedAt | date:'medium' }}</p>
+        </div>
+        <button type="button" class="ci-secondary" (click)="closeHistoryDetail()">Close</button>
+      </header>
+
+      <p class="ci-history-detail-summary">{{ detail.report.whatTheyDo }}</p>
+      <div class="ci-metric-grid">
+        <div class="ci-metric"><span>Israel</span><strong>{{ employeeCount(detail.report.employees.israel) }}</strong></div>
+        <div class="ci-metric"><span>Engineering</span><strong>{{ employeeCount(detail.report.employees.israelEngineering) }}</strong></div>
+        <div class="ci-metric"><span>Global</span><strong>{{ employeeCount(detail.report.employees.global) }}</strong></div>
+        <div class="ci-metric"><span>Work model</span><strong>{{ detail.report.workModel || 'Unknown' }}</strong></div>
+      </div>
+      <div class="ci-history-detail-actions">
+        <button type="button" class="ci-primary" (click)="companyName = detail.report.companyName; setTab('research')">Research again</button>
+        <button type="button" class="ci-secondary" (click)="companyName = detail.report.companyName; setTab('jobs')">Match jobs</button>
+      </div>
+    </section>
+  </ng-container>
+
+  <ng-container *ngIf="activeTab === 'handoffs'">
+    <section class="ci-panel">
+      <header class="ci-panel-header">
+        <div>
+          <h2>Pending ChatGPT research</h2>
+          <p>Research handoffs created by the recruiter pipeline. Gmail polling remains controlled separately on the backend.</p>
+        </div>
+        <button type="button" class="ci-secondary" (click)="loadHandoffs()" [disabled]="loading">Refresh</button>
+      </header>
+
+      <div class="ci-handoff-list" *ngIf="handoffs.length; else handoffEmpty">
+        <button type="button" class="ci-handoff-card" *ngFor="let item of handoffs; trackBy: trackByHandoffId" (click)="openHandoff(item)">
+          <div>
+            <strong>{{ item.companyName }}</strong>
+            <span>{{ item.roleTitle || 'Role not specified' }}</span>
+          </div>
+          <div class="ci-handoff-meta">
+            <span>{{ item.eventType }}</span>
+            <span>{{ item.status }}</span>
+            <time>{{ item.createdAt | date:'medium' }}</time>
+          </div>
+          <p>{{ item.researchReason }}</p>
+        </button>
+      </div>
+
+      <ng-template #handoffEmpty>
+        <div class="ci-empty" *ngIf="!loading">
+          <strong>No pending ChatGPT research</strong>
+          <span>Nothing is waiting for manual deep research right now.</span>
+        </div>
+      </ng-template>
+    </section>
+
+    <section class="ci-panel" *ngIf="handoffDetail as handoff">
+      <header class="ci-panel-header">
+        <div>
+          <span class="ci-eyebrow">Research handoff</span>
+          <h2>{{ handoff.companyName }}</h2>
+          <p>{{ handoff.roleTitle || 'Role not specified' }} · {{ handoff.status }}</p>
+        </div>
+        <button type="button" class="ci-secondary" (click)="closeHandoff()">Close</button>
+      </header>
+
+      <div class="ci-handoff-context">
+        <div><span>Recruiter</span><strong>{{ handoff.recruiterName || 'Unknown' }}</strong></div>
+        <div><span>Event</span><strong>{{ handoff.eventType }}</strong></div>
+        <div><span>Reason</span><strong>{{ handoff.researchReason }}</strong></div>
+      </div>
+
+      <div class="ci-handoff-actions" *ngIf="handoff.status === 'PENDING_CHATGPT'">
+        <button type="button" class="ci-primary" (click)="startHandoff()" [disabled]="loading">Mark as started</button>
+      </div>
+
+      <label class="ci-prompt-field">
+        <span>ChatGPT deep-research prompt</span>
+        <textarea readonly rows="12" [value]="handoff.chatGptPrompt"></textarea>
+      </label>
+      <button type="button" class="ci-secondary" (click)="copyHandoffPrompt()">
+        {{ copiedPrompt ? 'Copied' : 'Copy prompt' }}
+      </button>
+
+      <label class="ci-prompt-field">
+        <span>Paste the completed ChatGPT research result</span>
+        <textarea rows="12" [(ngModel)]="handoffImportContent" placeholder="Paste the structured research output here…"></textarea>
+      </label>
+      <button type="button" class="ci-primary" (click)="importHandoff()" [disabled]="loading || !handoffImportContent.trim()">
+        Import research into Company Intelligence
+      </button>
+    </section>
+  </ng-container>
+</section>
