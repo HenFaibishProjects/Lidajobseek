@@ -284,6 +284,12 @@ export class MailCoverageService {
       ? this.parseDate(dto.rejectedDate, 'Rejection date')
       : null;
 
+    if (receivedCvDate && rejectedDate && rejectedDate < receivedCvDate) {
+      throw new BadRequestException(
+        'Rejection date must not be earlier than CV received date',
+      );
+    }
+
     const receivedCvCount = this.normalizeCount(
       dto.receivedCvCount,
       receivedCvEmail,

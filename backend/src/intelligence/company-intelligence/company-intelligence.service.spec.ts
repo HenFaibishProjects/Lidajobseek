@@ -780,11 +780,17 @@ describe('Company intelligence agent (real SDK loop, scripted model)', () => {
           .slice(0, 4)
           .map((step) => step.toolChoice),
       ).toEqual([
-        { type: 'tool', toolName: 'search' },
-        { type: 'tool', toolName: 'search' },
-        { type: 'tool', toolName: 'readPage' },
+        { type: 'required' },
+        { type: 'required' },
+        { type: 'required' },
         { type: 'auto' },
       ]);
+      // The SDK exposes activeTools as the provider's available tool list.
+      expect(
+        context.model.doGenerateCalls
+          .slice(0, 3)
+          .map((step) => step.tools?.map((tool) => tool.name)),
+      ).toEqual([['search'], ['search'], ['readPage']]);
       expect(context.tavily.searchWeb).toHaveBeenCalledTimes(3);
       expect(context.firecrawl.readPage).toHaveBeenCalledTimes(1);
     },
