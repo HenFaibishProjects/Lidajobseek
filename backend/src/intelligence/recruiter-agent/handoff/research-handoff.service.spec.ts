@@ -267,6 +267,9 @@ describe('Durable manual ChatGPT handoff service', () => {
       'system design',
       'recruiter',
       'Hebrew',
+      'grammatically complete',
+      'dependent "ש..." clause',
+      'fluency pass',
     ])
       expect(prompt).toContain(topic);
     expect(context.existingResearch).toBeNull();

@@ -97,6 +97,7 @@ export function buildChatGptResearchPrompt(
   context: ResearchHandoffContext,
 ): string {
   return `I have an active hiring process. Please perform deep company research for Hen and write the final report in natural Hebrew.
+Hebrew writing quality is part of the result: write fluent native Israeli Hebrew, not literal translation. Every paragraph, sentence and bullet must be grammatically complete and understandable on its own. Never output dangling fragments copied from sources and never start a standalone sentence or bullet with a dependent "ש..." clause whose preceding text is missing. Before the final answer and APP_IMPORT_JSON, do a fluency pass and rewrite anything that sounds translated, fragmented, mechanically joined or unnatural.
 Company: ${context.companyName}
 Role: ${context.roleTitle ?? 'Unknown'}
 Recruiter: ${context.recruiterName ?? 'Unknown'}
