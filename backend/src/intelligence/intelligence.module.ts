@@ -79,7 +79,7 @@ export function buildIntelligenceDataSourceOptions(config: ConfigService) {
       RecruiterResearchHandoffs1793700000000,
       CandidateProfiles1793800000000,
     ],
-    uuidExtension: 'pgcrypto',
+    uuidExtension: 'pgcrypto' as const,
     installExtensions: false,
     connectTimeoutMS: 10000,
     extra: {
