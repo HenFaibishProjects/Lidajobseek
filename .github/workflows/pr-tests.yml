@@ -2,7 +2,7 @@ name: Pull Request Tests
 
 on:
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main", "private-hen" ]
 
 jobs:
   test-backend:
@@ -13,10 +13,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js v20
+      - name: Setup Node.js v22
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: 'npm'
           cache-dependency-path: package-lock.json
 
@@ -34,10 +34,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js v20
+      - name: Setup Node.js v22
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: 'npm'
           cache-dependency-path: package-lock.json
 
@@ -74,6 +74,14 @@ jobs:
             -e POSTGRES_PASSWORD=jobtracker \
             postgres:16
 
+          docker run -d \
+            --name intelligence-db-test \
+            --network test-net \
+            -e POSTGRES_DB=company_intelligence \
+            -e POSTGRES_USER=company_intelligence_user \
+            -e POSTGRES_PASSWORD=company_intelligence_password \
+            postgres:16
+
       - name: Build Docker image
         run: docker build -t lidajobseek:test .
 
@@ -83,6 +91,18 @@ jobs:
             --name app-check \
             --network test-net \
             -e DATABASE_URL="postgresql://jobtracker:jobtracker@db-test:5432/jobtracker?sslmode=disable" \
+            -e INTELLIGENCE_DB_HOST="intelligence-db-test" \
+            -e INTELLIGENCE_DB_PORT="5432" \
+            -e INTELLIGENCE_DB_USERNAME="company_intelligence_user" \
+            -e INTELLIGENCE_DB_PASSWORD="company_intelligence_password" \
+            -e INTELLIGENCE_DB_DATABASE="company_intelligence" \
+            -e INTELLIGENCE_DB_SCHEMA="public" \
+            -e INTELLIGENCE_DB_SSL="false" \
+            -e INTELLIGENCE_ALLOWED_EMAIL="owner@example.com" \
+            -e RECRUITER_GMAIL_POLLING_ENABLED="false" \
+            -e GOOGLE_CLIENT_ID="test-client-id" \
+            -e GOOGLE_CLIENT_SECRET="test-client-secret" \
+            -e GOOGLE_REFRESH_TOKEN="test-refresh-token" \
             -e JWT_SECRET=${{ secrets.JWT_SECRET || 'test_secret' }} \
             -e REGISTER=${{ secrets.REGISTER || 'LIDA2026' }} \
             -e CI=true \
@@ -105,6 +125,6 @@ jobs:
       - name: Cleanup
         if: always()
         run: |
-          docker stop app-check db-test || true
-          docker rm app-check db-test || true
+          docker stop app-check db-test intelligence-db-test || true
+          docker rm app-check db-test intelligence-db-test || true
           docker network rm test-net || true
