@@ -66,6 +66,6 @@ describe('CompanyIntelligenceComponent', () => {
   it('requires a company name before research', () => {
     component.companyName = '   ';
     component.researchCompany();
-    expect(component.errorMessage).toContain('company name');
+    expect(component.errorMessage).toContain('שם חברה');
   });
 });
