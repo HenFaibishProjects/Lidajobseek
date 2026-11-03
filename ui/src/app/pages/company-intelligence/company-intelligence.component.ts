@@ -261,6 +261,27 @@ export class CompanyIntelligenceComponent {
     this.activeTab = 'research';
   }
 
+  get visibleHandoffs(): ResearchHandoffSummary[] {
+    const visible: ResearchHandoffSummary[] = [];
+    for (const item of this.handoffs) {
+      const existingIndex = visible.findIndex((candidate) =>
+        this.handoffsAreCompatible(candidate, item),
+      );
+      if (existingIndex === -1) {
+        visible.push(item);
+        continue;
+      }
+
+      if (
+        !visible[existingIndex].roleTitle?.trim() &&
+        item.roleTitle?.trim()
+      ) {
+        visible[existingIndex] = item;
+      }
+    }
+    return visible;
+  }
+
   get filteredHistory(): CompanyHistoryItem[] {
     const filter = this.historyFilter.trim().toLowerCase();
     if (!filter) return this.history;
@@ -343,6 +364,21 @@ export class CompanyIntelligenceComponent {
 
   trackByHandoffId(_index: number, item: ResearchHandoffSummary): string {
     return item.id;
+  }
+
+  private handoffsAreCompatible(
+    first: ResearchHandoffSummary,
+    second: ResearchHandoffSummary,
+  ): boolean {
+    if (
+      first.companyName.trim().toLowerCase() !==
+      second.companyName.trim().toLowerCase()
+    )
+      return false;
+
+    const firstRole = first.roleTitle?.trim().toLowerCase() || null;
+    const secondRole = second.roleTitle?.trim().toLowerCase() || null;
+    return !firstRole || !secondRole || firstRole === secondRole;
   }
 
   private refreshHandoffSummary(detail: ResearchHandoffDetail): void {

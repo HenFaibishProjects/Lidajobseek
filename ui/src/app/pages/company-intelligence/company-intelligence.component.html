@@ -24,7 +24,7 @@
     </button>
     <button type="button" [class.active]="activeTab === 'handoffs'" (click)="setTab('handoffs')">
       מחקר ChatGPT
-      <span class="ci-count" *ngIf="handoffs.length">{{ handoffs.length }}</span>
+      <span class="ci-count" *ngIf="visibleHandoffs.length">{{ visibleHandoffs.length }}</span>
     </button>
   </nav>
 
@@ -429,8 +429,8 @@
         <button type="button" class="ci-secondary" (click)="loadHandoffs(true)" [disabled]="loading">רענון</button>
       </header>
 
-      <div class="ci-handoff-list" *ngIf="handoffs.length; else handoffEmpty">
-        <button type="button" class="ci-handoff-card" *ngFor="let item of handoffs; trackBy: trackByHandoffId" (click)="openHandoff(item)">
+      <div class="ci-handoff-list" *ngIf="visibleHandoffs.length; else handoffEmpty">
+        <button type="button" class="ci-handoff-card" *ngFor="let item of visibleHandoffs; trackBy: trackByHandoffId" (click)="openHandoff(item)">
           <div>
             <strong dir="auto">{{ item.companyName }}</strong>
             <span>{{ item.roleTitle || 'התפקיד לא צוין' }}</span>

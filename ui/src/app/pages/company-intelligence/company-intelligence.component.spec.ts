@@ -63,6 +63,34 @@ describe('CompanyIntelligenceComponent', () => {
     expect(service.listPendingHandoffs).toHaveBeenCalledWith(20, 20);
   });
 
+  it('hides legacy duplicate handoffs when one message only adds a role title', () => {
+    component.handoffs = [
+      {
+        id: 'newer',
+        companyName: 'WalkMe',
+        roleTitle: null,
+        eventType: 'INTERVIEW_INVITATION',
+        researchReason: 'Screening call',
+        status: 'PENDING_CHATGPT',
+        createdAt: '2026-11-03T12:30:43.000Z',
+        notificationSentAt: null,
+      },
+      {
+        id: 'older-specific',
+        companyName: 'WalkMe',
+        roleTitle: 'Senior Software Engineer - Big Data Platform',
+        eventType: 'INTERVIEW_SCHEDULING',
+        researchReason: 'Active interview scheduling',
+        status: 'PENDING_CHATGPT',
+        createdAt: '2026-11-03T12:29:39.000Z',
+        notificationSentAt: null,
+      },
+    ];
+
+    expect(component.visibleHandoffs).toHaveSize(1);
+    expect(component.visibleHandoffs[0].id).toBe('older-specific');
+  });
+
   it('shows handoff errors inside the open modal without clearing pasted research', () => {
     component.activeTab = 'handoffs';
     component.handoffImportContent = 'research that needs correction';

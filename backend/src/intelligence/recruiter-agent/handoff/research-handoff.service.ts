@@ -48,19 +48,43 @@ export class ResearchHandoffService {
       );
     let handoff = await this.repository.findByMessage(gmailMessageId);
     if (!handoff) {
+      const compatible = await this.repository.findOpenCompatible(
+        analysis.companyName,
+        analysis.roleTitle?.trim() || null,
+      );
       const report =
         quickReport ?? (await this.findFreshResearch(analysis.companyName));
       if (!report)
         throw new BadRequestException(
           'QUICK company research is required before creating a handoff.',
         );
-      const context = handoffContext(analysis, report);
-      handoff = await this.repository.createOrFind(
-        gmailMessageId,
-        context,
-        [...HANDOFF_RESEARCH_CHECKLIST],
-        buildChatGptResearchPrompt(context),
-      );
+
+      const mergedAnalysis = compatible
+        ? {
+            ...analysis,
+            roleTitle:
+              analysis.roleTitle?.trim() || compatible.roleTitle || null,
+            recruiterName:
+              analysis.recruiterName?.trim() || compatible.recruiterName || null,
+          }
+        : analysis;
+      const context = handoffContext(mergedAnalysis, report);
+      const requestedResearch = [...HANDOFF_RESEARCH_CHECKLIST];
+      const chatGptPrompt = buildChatGptResearchPrompt(context);
+
+      handoff = compatible
+        ? await this.repository.updateContext(
+            compatible.id,
+            context,
+            requestedResearch,
+            chatGptPrompt,
+          )
+        : await this.repository.createOrFind(
+            gmailMessageId,
+            context,
+            requestedResearch,
+            chatGptPrompt,
+          );
     }
     await this.notifySafely(handoff);
     return handoff;
