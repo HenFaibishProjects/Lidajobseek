@@ -144,27 +144,30 @@ function normalizeImportedFindingCitations(
   research: ChatGptResearchImport,
 ): ChatGptResearchImport {
   const knownUrls = new Set(research.sources.map((source) => source.url));
-  let normalized = false;
 
   const normalize = (items: Array<z.infer<typeof finding>>) => {
+    let changed = false;
     for (const item of items) {
       const supportedUrls = item.sourceUrls.filter((url) => knownUrls.has(url));
-      if (supportedUrls.length !== item.sourceUrls.length) normalized = true;
+      if (supportedUrls.length !== item.sourceUrls.length) changed = true;
       item.sourceUrls = supportedUrls;
 
       if (item.status !== 'UNKNOWN' && supportedUrls.length === 0) {
         item.status = 'UNKNOWN';
-        normalized = true;
+        changed = true;
       }
     }
+    return changed;
   };
 
   if (research.interviewInsights) {
-    normalize(research.interviewInsights.stages);
-    normalize(research.interviewInsights.reportedTopics);
-    normalize(research.interviewInsights.candidateExperiences);
+    const interviewNormalized =
+      normalize(research.interviewInsights.stages) ||
+      normalize(research.interviewInsights.reportedTopics) ||
+      normalize(research.interviewInsights.candidateExperiences);
+
     if (
-      normalized &&
+      interviewNormalized &&
       !research.interviewInsights.limitations.includes(
         'חלק מהממצאים יובאו ללא מקור תואם ולכן סומנו כ־UNKNOWN.',
       )
@@ -175,13 +178,14 @@ function normalizeImportedFindingCitations(
     }
   }
 
-  const normalizedBeforeWorkplace = normalized;
   if (research.workplaceSignals) {
-    normalize(research.workplaceSignals.positiveSignals);
-    normalize(research.workplaceSignals.negativeSignals);
-    normalize(research.workplaceSignals.mixedSignals);
+    const workplaceNormalized =
+      normalize(research.workplaceSignals.positiveSignals) ||
+      normalize(research.workplaceSignals.negativeSignals) ||
+      normalize(research.workplaceSignals.mixedSignals);
+
     if (
-      normalized !== normalizedBeforeWorkplace &&
+      workplaceNormalized &&
       !research.workplaceSignals.limitations.includes(
         'חלק מהממצאים יובאו ללא מקור תואם ולכן סומנו כ־UNKNOWN.',
       )
