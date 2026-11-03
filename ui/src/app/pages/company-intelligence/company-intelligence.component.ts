@@ -280,8 +280,61 @@ export class CompanyIntelligenceComponent {
   }
 
   evidenceLabel(level: string | null | undefined): string {
-    if (!level) return 'לא ידוע';
-    return level.charAt(0).toUpperCase() + level.slice(1);
+    const labels: Record<string, string> = {
+      strong: 'חזקה',
+      partial: 'חלקית',
+      limited: 'מוגבלת',
+    };
+    return level ? labels[level] ?? level : 'לא ידוע';
+  }
+
+  confidenceLabel(level: string): string {
+    return ({ high: 'גבוהה', medium: 'בינונית', low: 'נמוכה' } as Record<string, string>)[level] ?? level;
+  }
+
+  matchLevelLabel(level: string): string {
+    return ({ strong: 'חזקה', good: 'טובה', possible: 'אפשרית' } as Record<string, string>)[level] ?? level;
+  }
+
+  jobEvidenceLabel(level: string): string {
+    return ({ 'page-read': 'עמוד המשרה נקרא', 'search-snippet': 'תקציר מתוצאות חיפוש' } as Record<string, string>)[level] ?? level;
+  }
+
+  sourceTypeLabel(type: string): string {
+    return ({
+      'company-site': 'אתר החברה',
+      news: 'חדשות',
+      engineering: 'הנדסה',
+      'employee-review': 'חוות דעת עובדים',
+      'job-posting': 'מודעת דרושים',
+      social: 'רשת חברתית',
+      event: 'אירוע',
+      other: 'מקור אחר',
+    } as Record<string, string>)[type] ?? type;
+  }
+
+  handoffStatusLabel(status: string): string {
+    return ({
+      PENDING_CHATGPT: 'ממתין ל־ChatGPT',
+      IN_PROGRESS: 'בתהליך',
+      COMPLETED: 'הושלם',
+      CANCELLED: 'בוטל',
+    } as Record<string, string>)[status] ?? status;
+  }
+
+  eventTypeLabel(eventType: string): string {
+    return ({
+      RECRUITER_OUTREACH: 'פניית מגייס',
+      INTERVIEW_INVITATION: 'הזמנה לראיון',
+      INTERVIEW_SCHEDULING: 'תיאום ראיון',
+      INTERVIEW_RESCHEDULE: 'שינוי מועד ראיון',
+      INTERVIEW_CANCELLATION: 'ביטול ראיון',
+      INTERVIEW_UPDATE: 'עדכון ראיון',
+      HIRING_PROCESS_UPDATE: 'עדכון בתהליך הגיוס',
+      APPLICATION_CONFIRMATION: 'אישור הגשת מועמדות',
+      OTHER_RELEVANT: 'עדכון רלוונטי אחר',
+      IRRELEVANT: 'לא רלוונטי',
+    } as Record<string, string>)[eventType] ?? eventType.replaceAll('_', ' ');
   }
 
   trackByCompanyId(_index: number, item: CompanyHistoryItem): string {
