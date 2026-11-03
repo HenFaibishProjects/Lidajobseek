@@ -211,6 +211,13 @@ describe('Company intelligence agent (real SDK loop, scripted model)', () => {
     },
   );
 
+  it('requires complete natural Hebrew prose in generated company reports', () => {
+    const rules = require('./company-intelligence.prompt').HEBREW_OUTPUT_RULES;
+    expect(rules).toContain('grammatically complete');
+    expect(rules).toContain('Hebrew fluency pass');
+    expect(rules).toContain('dependent "ש..." clause');
+  });
+
   it('keeps QUICK budgets materially below FULL including follow-ups and office work', () => {
     const quick = RESEARCH_LIMITS.QUICK;
     const full = RESEARCH_LIMITS.DEEP;

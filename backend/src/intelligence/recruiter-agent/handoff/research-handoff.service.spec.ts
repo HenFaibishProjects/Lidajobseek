@@ -99,6 +99,18 @@ function setup() {
     notificationUnconfigured: jest.fn(),
     listNotifications: jest.fn(async () => (saved ? [saved] : [])),
     list: jest.fn(async () => (saved ? [saved] : [])),
+    cancel: jest.fn(async () => {
+      if (
+        !saved ||
+        ![
+          ResearchHandoffStatus.PENDING_CHATGPT,
+          ResearchHandoffStatus.IN_PROGRESS,
+        ].includes(saved.status)
+      )
+        return false;
+      saved.status = ResearchHandoffStatus.CANCELLED;
+      return true;
+    }),
     complete: jest.fn(async (_id, result) => {
       if (!saved || saved.status === ResearchHandoffStatus.COMPLETED)
         return false;
@@ -206,6 +218,16 @@ describe('Durable manual ChatGPT handoff service', () => {
     await s.service.ensure('message', analysis);
     expect(s.notifications.sendHandoff).not.toHaveBeenCalled();
   });
+  it('cancels an open handoff so it leaves the pending queue', async () => {
+    const s = setup();
+    await s.service.ensure('message', analysis);
+
+    await expect(s.service.cancelHandoff('handoff')).resolves.toMatchObject({
+      status: ResearchHandoffStatus.CANCELLED,
+    });
+    expect(s.repository.cancel).toHaveBeenCalledWith('handoff');
+  });
+
   it('stores completed research result and timestamp, then preserves it on repeated completion', async () => {
     const s = setup();
     await s.service.ensure('message', analysis);
@@ -267,6 +289,9 @@ describe('Durable manual ChatGPT handoff service', () => {
       'system design',
       'recruiter',
       'Hebrew',
+      'grammatically complete',
+      'dependent "ש..." clause',
+      'fluency pass',
     ])
       expect(prompt).toContain(topic);
     expect(context.existingResearch).toBeNull();

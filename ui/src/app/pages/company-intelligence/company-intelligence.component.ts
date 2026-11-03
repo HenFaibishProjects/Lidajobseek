@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { forkJoin } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import {
   CompanyHistoryDetail,
@@ -171,6 +172,43 @@ export class CompanyIntelligenceComponent {
         },
         error: (error) =>
           this.handleError(error, 'לא ניתן היה לטעון את מחקרי ChatGPT הממתינים.'),
+      });
+  }
+
+  removePendingHandoff(item: ResearchHandoffSummary): void {
+    if (
+      !window.confirm(
+        `להסיר את ${item.companyName} מרשימת המחקרים הממתינים?`,
+      )
+    ) {
+      return;
+    }
+
+    const compatible = this.handoffs.filter((candidate) =>
+      this.handoffsAreCompatible(candidate, item),
+    );
+    const ids = compatible.map((candidate) => candidate.id);
+
+    this.loading = true;
+    this.errorMessage = '';
+    forkJoin(ids.map((id) => this.intelligence.cancelHandoff(id)))
+      .pipe(finalize(() => (this.loading = false)))
+      .subscribe({
+        next: () => {
+          const removed = new Set(ids);
+          this.handoffs = this.handoffs.filter(
+            (candidate) => !removed.has(candidate.id),
+          );
+          this.handoffOffset = Math.max(
+            0,
+            this.handoffOffset - ids.length,
+          );
+          if (this.handoffDetail && removed.has(this.handoffDetail.id)) {
+            this.closeHandoff();
+          }
+        },
+        error: (error) =>
+          this.handleError(error, 'לא ניתן היה להסיר את המחקר מהממתינים.'),
       });
   }
 

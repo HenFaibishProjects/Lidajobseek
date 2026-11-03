@@ -59,6 +59,12 @@ export class ResearchHandoffController {
     return this.handoffs.detail(id);
   }
 
+  @Post(':id/cancel')
+  async cancel(@Param('id', ParseUUIDPipe) id: string) {
+    await this.handoffs.cancelHandoff(id);
+    return this.handoffs.detail(id);
+  }
+
   @Post(':id/start')
   async start(@Param('id', ParseUUIDPipe) id: string) {
     await this.handoffs.startHandoff(id);

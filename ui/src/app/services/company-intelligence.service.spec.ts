@@ -57,6 +57,17 @@ describe('CompanyIntelligenceService', () => {
     request.flush([]);
   });
 
+  it('cancels a pending research handoff', () => {
+    service.cancelHandoff('handoff-1').subscribe();
+
+    const request = http.expectOne(
+      `${baseUrl}/research-handoffs/handoff-1/cancel`,
+    );
+    expect(request.request.method).toBe('POST');
+    expect(request.request.body).toEqual({});
+    request.flush({});
+  });
+
   it('loads pending research handoffs', () => {
     service.listPendingHandoffs().subscribe();
 

@@ -240,6 +240,13 @@ export class CompanyIntelligenceService {
     );
   }
 
+  cancelHandoff(id: string) {
+    return this.http.post<ResearchHandoffDetail>(
+      `${this.baseUrl}/research-handoffs/${encodeURIComponent(id)}/cancel`,
+      {},
+    );
+  }
+
   startHandoff(id: string) {
     return this.http.post<ResearchHandoffDetail>(
       `${this.baseUrl}/research-handoffs/${encodeURIComponent(id)}/start`,
