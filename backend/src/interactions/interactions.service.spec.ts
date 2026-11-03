@@ -8,6 +8,7 @@ import { EntityManager, EntityRepository } from '@mikro-orm/postgresql';
 import { MailService } from '../mail/mail.service';
 import { WhatsAppReminderService } from './whatsapp-reminder.service';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { AvailabilityService } from '../availability/availability.service';
 
 describe('InteractionsService', () => {
   let service: InteractionsService;
@@ -33,6 +34,7 @@ describe('InteractionsService', () => {
   };
 
   const mockEm = {
+    transactional: jest.fn().mockImplementation(callback => callback()),
     persistAndFlush: jest.fn(),
     persist: jest.fn(),
     flush: jest.fn(),
@@ -56,6 +58,12 @@ describe('InteractionsService', () => {
     sendInterviewReminder: jest.fn(),
   };
 
+  const mockAvailabilityService = {
+    lockUser: jest.fn().mockResolvedValue(undefined),
+    isScheduledInterview: jest.fn().mockReturnValue(true),
+    assertInterviewAvailable: jest.fn().mockResolvedValue(undefined),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -66,6 +74,7 @@ describe('InteractionsService', () => {
         { provide: EntityManager, useValue: mockEm },
         { provide: MailService, useValue: mockMailService },
         { provide: WhatsAppReminderService, useValue: mockWhatsAppReminderService },
+        { provide: AvailabilityService, useValue: mockAvailabilityService },
       ],
     }).compile();
 
@@ -189,12 +198,13 @@ describe('InteractionsService', () => {
     it('should reset reminder flags if date is updated', async () => {
       const existing = {
         id: 1,
+        date: new Date('2026-05-01T10:00:00Z'),
         reminder: { enabled: true, emailSentAt: 'today' },
         process: { user: 1 }
       };
       mockInteractionRepo.findOne.mockResolvedValue(existing);
 
-      const result = await service.update(1, { date: '2026-06-01' }, { userId: 1 });
+      const result = await service.update(1, { date: '2026-06-01T10:00:00Z' }, { userId: 1 });
 
       expect(existing.reminder.emailSentAt).toBeUndefined();
       expect(em.flush).toHaveBeenCalled();
@@ -206,7 +216,7 @@ describe('InteractionsService', () => {
     });
 
     it('should update a valid pass likelihood score', async () => {
-      const existing: any = { id: 1, process: { user: 1 } };
+      const existing: any = { id: 1, date: new Date('2026-05-01T10:00:00Z'), process: { user: 1 } };
       mockInteractionRepo.findOne.mockResolvedValue(existing);
 
       await service.update(1, { passLikelihood: 5 }, { userId: 1 });

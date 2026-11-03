@@ -1,0 +1,48 @@
+blockedSenders:
+  - no-reply@accounts.google.com
+  - shipment-tracking@amazon.com
+  - auto-confirm@amazon.com
+  - noreply@postil.co.il
+
+blockedDomains: []
+
+rejectionPhrases:
+  # English
+  - we decided to move forward with other candidates
+  - we have decided to move forward with other candidates
+  - we regret to inform
+  - not be the right fit
+  - will not be moving forward
+  - decided not to move forward
+  - we've decided not to move forward
+  - proceed with other candidates
+  - moving forward with another candidate
+  - no longer under consideration
+
+  # Hebrew
+  - החלטנו להמשיך עם מועמדים אחרים
+  - החלטנו להתקדם עם מועמדים אחרים
+  - לצערנו החלטנו שלא להמשיך
+  - החלטנו שלא להמשיך בתהליך
+  - לא נמשיך בתהליך
+  - החלטנו שלא להתקדם
+  - לא נמצאה התאמה
+
+advertisingSignals:
+  - unsubscribe
+  - manage email preferences
+  - manage preferences
+  - view in browser
+  - special offer
+  - limited time offer
+  - shop now
+  - promotional email
+
+  - הסרה מרשימת תפוצה
+  - הסר מרשימת התפוצה
+  - ניהול העדפות
+  - לצפייה בדפדפן
+  - מבצע מיוחד
+  - מבצע לזמן מוגבל
+
+advertisingSignalThreshold: 2
