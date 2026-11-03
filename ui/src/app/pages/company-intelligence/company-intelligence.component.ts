@@ -60,7 +60,7 @@ export class CompanyIntelligenceComponent {
   researchCompany(): void {
     const companyName = this.companyName.trim();
     if (!companyName) {
-      this.errorMessage = 'Please enter a company name.';
+      this.errorMessage = 'יש להזין שם חברה.';
       return;
     }
 
@@ -73,14 +73,14 @@ export class CompanyIntelligenceComponent {
       .pipe(finalize(() => (this.loading = false)))
       .subscribe({
         next: (report) => (this.companyReport = report),
-        error: (error) => this.handleError(error, 'Company research failed.'),
+        error: (error) => this.handleError(error, 'מחקר החברה נכשל.'),
       });
   }
 
   matchJobs(): void {
     const companyName = this.companyName.trim();
     if (!companyName) {
-      this.errorMessage = 'Please enter a company name.';
+      this.errorMessage = 'יש להזין שם חברה.';
       return;
     }
 
@@ -93,7 +93,7 @@ export class CompanyIntelligenceComponent {
       .pipe(finalize(() => (this.loading = false)))
       .subscribe({
         next: (result) => (this.jobResult = result),
-        error: (error) => this.handleError(error, 'Job matching failed.'),
+        error: (error) => this.handleError(error, 'התאמת המשרות נכשלה.'),
       });
   }
 
@@ -105,7 +105,7 @@ export class CompanyIntelligenceComponent {
       .pipe(finalize(() => (this.loading = false)))
       .subscribe({
         next: (items) => (this.history = items),
-        error: (error) => this.handleError(error, 'History could not be loaded.'),
+        error: (error) => this.handleError(error, 'לא ניתן היה לטעון את ההיסטוריה.'),
       });
   }
 
@@ -118,7 +118,7 @@ export class CompanyIntelligenceComponent {
       .subscribe({
         next: (detail) => (this.historyDetail = detail),
         error: (error) =>
-          this.handleError(error, 'Saved company details could not be loaded.'),
+          this.handleError(error, 'לא ניתן היה לטעון את פרטי החברה השמורים.'),
       });
   }
 
@@ -129,7 +129,7 @@ export class CompanyIntelligenceComponent {
   deleteHistory(item: CompanyHistoryItem): void {
     if (
       !window.confirm(
-        `Delete all saved Company Intelligence research for ${item.companyName}?`,
+        `למחוק את כל מחקרי החברה השמורים עבור ${item.companyName}?`,
       )
     ) {
       return;
@@ -150,7 +150,7 @@ export class CompanyIntelligenceComponent {
           }
         },
         error: (error) =>
-          this.handleError(error, 'Saved company could not be deleted.'),
+          this.handleError(error, 'לא ניתן היה למחוק את החברה השמורה.'),
       });
   }
 
@@ -170,7 +170,7 @@ export class CompanyIntelligenceComponent {
           this.hasMoreHandoffs = items.length === this.handoffPageSize;
         },
         error: (error) =>
-          this.handleError(error, 'Pending ChatGPT research could not be loaded.'),
+          this.handleError(error, 'לא ניתן היה לטעון את מחקרי ChatGPT הממתינים.'),
       });
   }
 
@@ -185,7 +185,7 @@ export class CompanyIntelligenceComponent {
       .subscribe({
         next: (detail) => (this.handoffDetail = detail),
         error: (error) =>
-          this.handleError(error, 'Research handoff details could not be loaded.'),
+          this.handleError(error, 'לא ניתן היה לטעון את פרטי משימת המחקר.'),
       });
   }
 
@@ -208,13 +208,13 @@ export class CompanyIntelligenceComponent {
           this.refreshHandoffSummary(detail);
         },
         error: (error) =>
-          this.handleError(error, 'Research handoff could not be started.'),
+          this.handleError(error, 'לא ניתן היה להתחיל את משימת המחקר.'),
       });
   }
 
   importHandoff(): void {
     if (!this.handoffDetail || !this.handoffImportContent.trim()) {
-      this.errorMessage = 'Paste the ChatGPT research result before importing.';
+      this.errorMessage = 'יש להדביק את תוצאת המחקר מ־ChatGPT לפני הייבוא.';
       return;
     }
 
@@ -232,7 +232,7 @@ export class CompanyIntelligenceComponent {
           this.loadHistory();
         },
         error: (error) =>
-          this.handleError(error, 'ChatGPT research could not be imported.'),
+          this.handleError(error, 'לא ניתן היה לייבא את מחקר ChatGPT.'),
       });
   }
 
@@ -243,7 +243,7 @@ export class CompanyIntelligenceComponent {
       this.copiedPrompt = true;
       window.setTimeout(() => (this.copiedPrompt = false), 1800);
     } catch {
-      this.errorMessage = 'Could not copy the prompt. Select and copy it manually.';
+      this.errorMessage = 'לא ניתן היה להעתיק את הפרומפט. אפשר לסמן ולהעתיק אותו ידנית.';
     }
   }
 
@@ -272,7 +272,7 @@ export class CompanyIntelligenceComponent {
   }
 
   employeeCount(value: EmployeeCount | null): string {
-    if (!value) return 'Unknown';
+    if (!value) return 'לא ידוע';
     if ('count' in value) {
       return `${value.approximate ? '~' : ''}${value.count.toLocaleString()}`;
     }
@@ -280,8 +280,61 @@ export class CompanyIntelligenceComponent {
   }
 
   evidenceLabel(level: string | null | undefined): string {
-    if (!level) return 'Unknown';
-    return level.charAt(0).toUpperCase() + level.slice(1);
+    const labels: Record<string, string> = {
+      strong: 'חזקה',
+      partial: 'חלקית',
+      limited: 'מוגבלת',
+    };
+    return level ? labels[level] ?? level : 'לא ידוע';
+  }
+
+  confidenceLabel(level: string): string {
+    return ({ high: 'גבוהה', medium: 'בינונית', low: 'נמוכה' } as Record<string, string>)[level] ?? level;
+  }
+
+  matchLevelLabel(level: string): string {
+    return ({ strong: 'חזקה', good: 'טובה', possible: 'אפשרית' } as Record<string, string>)[level] ?? level;
+  }
+
+  jobEvidenceLabel(level: string): string {
+    return ({ 'page-read': 'עמוד המשרה נקרא', 'search-snippet': 'תקציר מתוצאות חיפוש' } as Record<string, string>)[level] ?? level;
+  }
+
+  sourceTypeLabel(type: string): string {
+    return ({
+      'company-site': 'אתר החברה',
+      news: 'חדשות',
+      engineering: 'הנדסה',
+      'employee-review': 'חוות דעת עובדים',
+      'job-posting': 'מודעת דרושים',
+      social: 'רשת חברתית',
+      event: 'אירוע',
+      other: 'מקור אחר',
+    } as Record<string, string>)[type] ?? type;
+  }
+
+  handoffStatusLabel(status: string): string {
+    return ({
+      PENDING_CHATGPT: 'ממתין ל־ChatGPT',
+      IN_PROGRESS: 'בתהליך',
+      COMPLETED: 'הושלם',
+      CANCELLED: 'בוטל',
+    } as Record<string, string>)[status] ?? status;
+  }
+
+  eventTypeLabel(eventType: string): string {
+    return ({
+      RECRUITER_OUTREACH: 'פניית מגייס',
+      INTERVIEW_INVITATION: 'הזמנה לראיון',
+      INTERVIEW_SCHEDULING: 'תיאום ראיון',
+      INTERVIEW_RESCHEDULE: 'שינוי מועד ראיון',
+      INTERVIEW_CANCELLATION: 'ביטול ראיון',
+      INTERVIEW_UPDATE: 'עדכון ראיון',
+      HIRING_PROCESS_UPDATE: 'עדכון בתהליך הגיוס',
+      APPLICATION_CONFIRMATION: 'אישור הגשת מועמדות',
+      OTHER_RELEVANT: 'עדכון רלוונטי אחר',
+      IRRELEVANT: 'לא רלוונטי',
+    } as Record<string, string>)[eventType] ?? eventType.replaceAll('_', ' ');
   }
 
   trackByCompanyId(_index: number, item: CompanyHistoryItem): string {

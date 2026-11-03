@@ -1064,3 +1064,348 @@ body.dark-theme .ci-alert-error {
     box-sizing: border-box;
   }
 }
+
+
+/* Hebrew / RTL readability pass for Company Intelligence */
+:host {
+  display: block;
+  min-height: calc(100vh - 64px);
+  background: #f5f7fb;
+}
+
+.ci-page {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f7f9fc;
+  --bg-tertiary: #eef2f7;
+  --text-primary: #172033;
+  --text-secondary: #44506a;
+  --text-tertiary: #68758f;
+  --border-color: #dbe2ec;
+  --border-dark: #c8d2df;
+  --shadow-xs: 0 1px 2px rgba(15, 23, 42, .05);
+  --shadow-sm: 0 5px 18px rgba(15, 23, 42, .07);
+  direction: rtl;
+  text-align: right;
+  font-size: 16px;
+  line-height: 1.65;
+  background: #f5f7fb;
+}
+
+body.dark-theme .ci-page {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f7f9fc;
+  --bg-tertiary: #eef2f7;
+  --text-primary: #172033;
+  --text-secondary: #44506a;
+  --text-tertiary: #68758f;
+  --border-color: #dbe2ec;
+  --border-dark: #c8d2df;
+  color-scheme: light;
+}
+
+body.dark-theme app-company-intelligence,
+body.dark-theme app-company-intelligence :host {
+  background: #f5f7fb;
+}
+
+.ci-hero {
+  align-items: center;
+  padding: 22px 24px;
+  margin-bottom: 18px;
+  background: linear-gradient(135deg, #ffffff 0%, #f3f6fb 100%);
+  border: 1px solid #dbe2ec;
+  border-radius: 18px;
+  box-shadow: 0 5px 18px rgba(15, 23, 42, .06);
+}
+
+.ci-hero h1 {
+  font-size: clamp(34px, 4vw, 44px);
+}
+
+.ci-hero p,
+.ci-panel-header p,
+.ci-report-subtitle,
+.ci-history-detail-summary {
+  font-size: 16px;
+  line-height: 1.75;
+}
+
+.ci-eyebrow {
+  font-size: 13px;
+}
+
+.ci-hero-status {
+  font-size: 13px;
+  background: #eefbf5;
+  border-color: #c8eadb;
+  color: #25664c;
+}
+
+.ci-tabs {
+  direction: rtl;
+}
+
+.ci-tabs button {
+  min-height: 46px;
+  font-size: 15px;
+}
+
+.ci-count {
+  font-size: 12px;
+}
+
+.ci-search-card,
+.ci-panel,
+.ci-report {
+  padding: 26px;
+}
+
+.ci-field > span,
+.ci-history-search > span,
+.ci-prompt-field > span {
+  font-size: 14px;
+}
+
+.ci-field small {
+  font-size: 12px;
+}
+
+.ci-field input,
+.ci-history-search input,
+.ci-prompt-field textarea {
+  font-size: 16px;
+  line-height: 1.55;
+  text-align: right;
+}
+
+.ci-field input[dir="auto"],
+.ci-history-search input[dir="auto"],
+.ci-prompt-field textarea[dir="auto"] {
+  text-align: start;
+}
+
+.ci-force-refresh strong {
+  font-size: 14px;
+}
+
+.ci-force-refresh small {
+  font-size: 12px;
+}
+
+.ci-primary,
+.ci-secondary {
+  font-size: 14px;
+}
+
+.ci-primary-small {
+  font-size: 13px;
+}
+
+.ci-examples,
+.ci-note,
+.ci-job-topline p,
+.ci-job-footer > span {
+  font-size: 13px;
+}
+
+.ci-alert,
+.ci-loading {
+  font-size: 15px;
+}
+
+.ci-report-header,
+.ci-panel-header {
+  text-align: right;
+}
+
+.ci-report-header h2,
+.ci-panel-header h2 {
+  font-size: 28px;
+}
+
+.ci-badge {
+  font-size: 12px;
+}
+
+.ci-metric span,
+.ci-location-grid span,
+.ci-handoff-context span,
+.ci-detail-grid span {
+  font-size: 12px;
+}
+
+.ci-metric strong,
+.ci-location-grid strong,
+.ci-handoff-context strong {
+  font-size: 16px;
+}
+
+.ci-section h3 {
+  font-size: 19px;
+}
+
+.ci-section-title-row {
+  flex-direction: row;
+}
+
+.ci-section-title-row span {
+  font-size: 13px;
+}
+
+.ci-flags ul,
+.ci-limitations ul,
+.ci-job-columns ul,
+.ci-question-list {
+  padding-right: 22px;
+  padding-left: 0;
+  font-size: 15px;
+  line-height: 1.75;
+}
+
+.ci-role,
+.ci-source-list a {
+  text-align: right;
+}
+
+.ci-role strong {
+  font-size: 16px;
+}
+
+.ci-role div > span {
+  font-size: 14px;
+}
+
+.ci-score {
+  font-size: 17px;
+}
+
+.ci-detail-grid p,
+.ci-signal p,
+.ci-history-main p,
+.ci-handoff-card p,
+.ci-job-summary {
+  font-size: 15px;
+  line-height: 1.75;
+}
+
+.ci-signal-title strong,
+.ci-job-topline h3 {
+  font-size: 17px;
+}
+
+.ci-signal-title span,
+.ci-source-list small,
+.ci-history-main span,
+.ci-handoff-meta time {
+  font-size: 12px;
+}
+
+.ci-source-list a {
+  font-size: 14px;
+}
+
+.ci-disclosure summary {
+  font-size: 15px;
+}
+
+.ci-limitations strong {
+  font-size: 14px;
+}
+
+.ci-jobs-scanned strong {
+  font-size: 32px;
+}
+
+.ci-jobs-scanned span {
+  font-size: 12px;
+}
+
+.ci-job-score strong {
+  font-size: 20px;
+}
+
+.ci-job-score span {
+  font-size: 12px;
+}
+
+.ci-chip {
+  font-size: 12px;
+}
+
+.ci-job-columns strong {
+  font-size: 14px;
+}
+
+.ci-history-main {
+  text-align: right;
+}
+
+.ci-history-main strong,
+.ci-handoff-card strong {
+  font-size: 16px;
+}
+
+.ci-history-actions {
+  direction: rtl;
+}
+
+.ci-history-actions button {
+  font-size: 13px;
+}
+
+.ci-handoff-card {
+  text-align: right;
+}
+
+.ci-handoff-card div > span {
+  font-size: 13px;
+}
+
+.ci-handoff-meta {
+  align-items: flex-start;
+}
+
+.ci-empty strong {
+  font-size: 17px;
+}
+
+.ci-empty span {
+  font-size: 14px;
+}
+
+.ci-page h1,
+.ci-page h2,
+.ci-page h3,
+.ci-page p,
+.ci-page li,
+.ci-page strong,
+.ci-page span,
+.ci-page a {
+  unicode-bidi: plaintext;
+}
+
+.ci-page input,
+.ci-page textarea {
+  direction: rtl;
+}
+
+@media (max-width: 760px) {
+  .ci-hero {
+    padding: 20px;
+  }
+
+  .ci-search-card,
+  .ci-panel,
+  .ci-report {
+    padding: 20px;
+  }
+
+  .ci-hero h1 {
+    font-size: 32px;
+  }
+
+  .ci-report-header h2,
+  .ci-panel-header h2 {
+    font-size: 24px;
+  }
+}
