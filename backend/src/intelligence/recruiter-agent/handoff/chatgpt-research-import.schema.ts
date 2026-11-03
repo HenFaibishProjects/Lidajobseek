@@ -20,14 +20,14 @@ const sourceUrl = z
 const count = z.number().int().min(0).max(100000000);
 const employeeCount = z
   .union([
-    z.strictObject({ count, approximate: z.boolean() }),
+    z.object({ count, approximate: z.boolean() }),
     z
       .strictObject({ min: count, max: count, approximate: z.literal(true) })
       .refine((value) => value.min <= value.max, 'Invalid headcount range.'),
   ])
   .nullable()
   .default(null);
-const finding = z.strictObject({
+const finding = z.object({
   statement: z.string().trim().min(1).max(1500),
   status: z.enum(['FACT', 'DIRECT_REPORT', 'INFERENCE', 'UNKNOWN']),
   sourceUrls: z.array(sourceUrl).max(5),
@@ -105,11 +105,24 @@ export const chatGptResearchImportSchema = z
       .default(null),
     sources: z
       .array(
-        z.strictObject({
+        z.object({
           title: z.string().trim().min(1).max(500),
           url: sourceUrl,
-          sourceType: z
-            .enum([
+          sourceType: z.preprocess(
+            (value) =>
+              [
+                'company-site',
+                'news',
+                'engineering',
+                'employee-review',
+                'job-posting',
+                'social',
+                'event',
+                'other',
+              ].includes(String(value))
+                ? value
+                : 'other',
+            z.enum([
               'company-site',
               'news',
               'engineering',
@@ -118,8 +131,8 @@ export const chatGptResearchImportSchema = z
               'social',
               'event',
               'other',
-            ])
-            .default('other'),
+            ]),
+          ),
         }),
       )
       .max(50)
