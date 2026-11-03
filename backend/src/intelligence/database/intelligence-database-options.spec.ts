@@ -2,8 +2,8 @@ import { ConfigService } from '@nestjs/config';
 import {
   buildIntelligenceDataSourceOptions,
   getIntelligenceSchema,
-} from './intelligence.module';
-import { CandidateProfiles1793800000000 } from './database/candidate-profiles.migration';
+} from './intelligence-database-options';
+import { CandidateProfiles1793800000000 } from './candidate-profiles.migration';
 
 function config(values: Record<string, unknown>): ConfigService {
   return {
