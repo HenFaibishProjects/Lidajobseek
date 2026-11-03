@@ -129,7 +129,7 @@ export class CompanyIntelligenceComponent {
   deleteHistory(item: CompanyHistoryItem): void {
     if (
       !window.confirm(
-        `Delete all saved Company Intelligence research for ${item.companyName}?`,
+        `למחוק את כל מחקרי החברה השמורים עבור ${item.companyName}?`,
       )
     ) {
       return;

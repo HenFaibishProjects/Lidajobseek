@@ -20,7 +20,7 @@
       התאמת משרות
     </button>
     <button type="button" [class.active]="activeTab === 'history'" (click)="setTab('history')">
-      History
+      היסטוריה
     </button>
     <button type="button" [class.active]="activeTab === 'handoffs'" (click)="setTab('handoffs')">
       מחקר ChatGPT
@@ -362,9 +362,9 @@
 
       <p class="ci-history-detail-summary">{{ detail.report.whatTheyDo }}</p>
       <div class="ci-metric-grid">
-        <div class="ci-metric"><span>Israel</span><strong>{{ employeeCount(detail.report.employees.israel) }}</strong></div>
+        <div class="ci-metric"><span>ישראל</span><strong>{{ employeeCount(detail.report.employees.israel) }}</strong></div>
         <div class="ci-metric"><span>הנדסה</span><strong>{{ employeeCount(detail.report.employees.israelEngineering) }}</strong></div>
-        <div class="ci-metric"><span>Global</span><strong>{{ employeeCount(detail.report.employees.global) }}</strong></div>
+        <div class="ci-metric"><span>עולם</span><strong>{{ employeeCount(detail.report.employees.global) }}</strong></div>
         <div class="ci-metric"><span>מודל עבודה</span><strong>{{ detail.report.workModel || 'לא ידוע' }}</strong></div>
       </div>
       <div class="ci-flags-grid" *ngIf="detail.report.greenFlags.length || detail.report.redFlags.length">
@@ -416,7 +416,7 @@
     <section class="ci-panel">
       <header class="ci-panel-header">
         <div>
-          <h2>Pending מחקר ChatGPT</h2>
+          <h2>מחקרי ChatGPT ממתינים</h2>
           <p>משימות מחקר שנוצרו על ידי תהליך המגייסים. סריקת Gmail נשלטת בנפרד בצד השרת.</p>
         </div>
         <button type="button" class="ci-secondary" (click)="loadHandoffs(true)" [disabled]="loading">רענון</button>
@@ -448,7 +448,7 @@
 
       <ng-template #handoffEmpty>
         <div class="ci-empty" *ngIf="!loading">
-          <strong>No pending מחקר ChatGPT</strong>
+          <strong>אין כרגע מחקרי ChatGPT ממתינים</strong>
           <span>אין כרגע משימה שממתינה למחקר עומק ידני.</span>
         </div>
       </ng-template>
@@ -483,7 +483,7 @@
       </button>
 
       <label class="ci-prompt-field">
-        <span>Paste the completed מחקר ChatGPT result</span>
+        <span>הדבק את תוצאת המחקר שהושלמה ב־ChatGPT</span>
         <textarea rows="12" [(ngModel)]="handoffImportContent" placeholder="הדבק כאן את תוצאת המחקר המובנית…" dir="auto"></textarea>
       </label>
       <button type="button" class="ci-primary" (click)="importHandoff()" [disabled]="loading || !handoffImportContent.trim()">
