@@ -524,6 +524,10 @@
       <button type="button" class="ci-primary" (click)="importHandoff()" [disabled]="loading || !handoffImportContent.trim()">
         ייבוא המחקר למערכת
       </button>
+      <div class="ci-alert ci-alert-error ci-import-error" *ngIf="errorMessage" role="alert">
+        <strong>הייבוא נכשל</strong>
+        <span>{{ errorMessage }}</span>
+      </div>
       </section>
     </div>
   </ng-container>

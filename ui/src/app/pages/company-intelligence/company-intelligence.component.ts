@@ -439,13 +439,32 @@ export class CompanyIntelligenceComponent {
   private handleError(error: unknown, fallback: string): void {
     if (error instanceof HttpErrorResponse) {
       const body = error.error;
+      const validationDetails = Array.isArray(body?.errors)
+        ? body.errors
+            .map((item: unknown) => {
+              if (!item || typeof item !== 'object') return null;
+              const field =
+                'field' in item && typeof item.field === 'string'
+                  ? item.field
+                  : '';
+              const detail =
+                'message' in item && typeof item.message === 'string'
+                  ? item.message
+                  : '';
+              return [field, detail].filter(Boolean).join(': ');
+            })
+            .filter(Boolean)
+            .join(' · ')
+        : '';
       const message =
         typeof body?.message === 'string'
           ? body.message
           : Array.isArray(body?.message)
             ? body.message.join(' ')
             : null;
-      this.errorMessage = message || `${fallback} (HTTP ${error.status})`;
+      this.errorMessage = validationDetails
+        ? `${message || fallback} ${validationDetails}`
+        : message || `${fallback} (HTTP ${error.status})`;
       return;
     }
     this.errorMessage = fallback;

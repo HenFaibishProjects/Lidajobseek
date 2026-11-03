@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 import { CompanyIntelligenceService } from '../../services/company-intelligence.service';
@@ -158,6 +159,47 @@ describe('CompanyIntelligenceComponent', () => {
 
     expect(modalError?.textContent).toContain('תוצאת המחקר אינה תקינה');
     expect(component.handoffImportContent).toBe('research that needs correction');
+  });
+
+  it('shows structured import validation details from the backend', () => {
+    component.activeTab = 'handoffs';
+    component.handoffImportContent = '{"companyName":"WalkMe"}';
+    component.handoffDetail = {
+      id: 'handoff-1',
+      companyName: 'WalkMe',
+      roleTitle: null,
+      eventType: 'INTERVIEW_INVITATION',
+      researchReason: 'Prepare for interview',
+      status: 'IN_PROGRESS',
+      createdAt: new Date().toISOString(),
+      notificationSentAt: null,
+      recruiterName: null,
+      existingReportId: null,
+      context: {},
+      requestedResearch: [],
+      chatGptPrompt: 'Research WalkMe',
+      deepResearchResult: null,
+      notificationError: null,
+      notificationAttempts: 0,
+      completedAt: null,
+    };
+
+    const response = new HttpErrorResponse({
+      status: 400,
+      error: {
+        message: 'Research import validation failed.',
+        errors: [
+          { field: 'location.country', message: 'Unrecognized key' },
+        ],
+      },
+    });
+
+    (component as any).handleError(response, 'ייבוא נכשל');
+    fixture.detectChanges();
+
+    expect(component.errorMessage).toContain('location.country');
+    expect(component.errorMessage).toContain('Unrecognized key');
+    expect(component.handoffImportContent).toBe('{"companyName":"WalkMe"}');
   });
 
   it('requires a company name before research', () => {

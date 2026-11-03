@@ -20,14 +20,14 @@ const sourceUrl = z
 const count = z.number().int().min(0).max(100000000);
 const employeeCount = z
   .union([
-    z.strictObject({ count, approximate: z.boolean() }),
+    z.object({ count, approximate: z.boolean() }),
     z
-      .strictObject({ min: count, max: count, approximate: z.literal(true) })
+      .object({ min: count, max: count, approximate: z.literal(true) })
       .refine((value) => value.min <= value.max, 'Invalid headcount range.'),
   ])
   .nullable()
   .default(null);
-const finding = z.strictObject({
+const finding = z.object({
   statement: z.string().trim().min(1).max(1500),
   status: z.enum(['FACT', 'DIRECT_REPORT', 'INFERENCE', 'UNKNOWN']),
   sourceUrls: z.array(sourceUrl).max(5),
@@ -36,7 +36,7 @@ const finding = z.strictObject({
 });
 const findings = z.array(finding).max(12).default([]);
 export const chatGptResearchImportSchema = z
-  .strictObject({
+  .object({
     companyName: z.string().trim().min(1).max(200),
     roleTitle: shortText(300),
     companySummary: optionalText,
@@ -44,7 +44,7 @@ export const chatGptResearchImportSchema = z
     productSummary: optionalText,
     businessModel: optionalText,
     location: z
-      .strictObject({
+      .object({
         city: shortText(200),
         address: shortText(500),
         building: shortText(200),
@@ -70,7 +70,7 @@ export const chatGptResearchImportSchema = z
       }),
     workModel: shortText(500),
     employees: z
-      .strictObject({
+      .object({
         global: employeeCount,
         israel: employeeCount,
         israelEngineering: employeeCount,
@@ -84,7 +84,7 @@ export const chatGptResearchImportSchema = z
     redFlags: list,
     questionsToAskRecruiter: list,
     interviewInsights: z
-      .strictObject({
+      .object({
         summary: optionalText,
         stages: findings,
         reportedTopics: findings,
@@ -94,7 +94,7 @@ export const chatGptResearchImportSchema = z
       .nullable()
       .default(null),
     workplaceSignals: z
-      .strictObject({
+      .object({
         summary: optionalText,
         positiveSignals: findings,
         negativeSignals: findings,
@@ -105,11 +105,24 @@ export const chatGptResearchImportSchema = z
       .default(null),
     sources: z
       .array(
-        z.strictObject({
+        z.object({
           title: z.string().trim().min(1).max(500),
           url: sourceUrl,
-          sourceType: z
-            .enum([
+          sourceType: z.preprocess(
+            (value) =>
+              [
+                'company-site',
+                'news',
+                'engineering',
+                'employee-review',
+                'job-posting',
+                'social',
+                'event',
+                'other',
+              ].includes(String(value))
+                ? value
+                : 'other',
+            z.enum([
               'company-site',
               'news',
               'engineering',
@@ -118,8 +131,8 @@ export const chatGptResearchImportSchema = z
               'social',
               'event',
               'other',
-            ])
-            .default('other'),
+            ]),
+          ),
         }),
       )
       .max(50)
