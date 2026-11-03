@@ -30,8 +30,43 @@ const analysis: RecruiterEmailAnalysis = {
 function setup() {
   let saved: ResearchHandoffEntity | null = null;
   const repository = {
-    findByMessage: jest.fn(async () => saved),
+    findByMessage: jest.fn(async (gmailMessageId: string) =>
+      saved?.gmailMessageId === gmailMessageId ? saved : null,
+    ),
     findById: jest.fn(async () => saved),
+    findOpenCompatible: jest.fn(
+      async (companyName: string, roleTitle: string | null) => {
+        if (
+          !saved ||
+          ![
+            ResearchHandoffStatus.PENDING_CHATGPT,
+            ResearchHandoffStatus.IN_PROGRESS,
+          ].includes(saved.status) ||
+          saved.companyName.trim().toLowerCase() !==
+            companyName.trim().toLowerCase()
+        )
+          return null;
+        const savedRole = saved.roleTitle?.trim().toLowerCase() || null;
+        const requestedRole = roleTitle?.trim().toLowerCase() || null;
+        return !savedRole || !requestedRole || savedRole === requestedRole
+          ? saved
+          : null;
+      },
+    ),
+    updateContext: jest.fn(
+      async (id, context, requestedResearch, chatGptPrompt) => {
+        if (!saved || saved.id !== id) throw new Error('handoff not found');
+        saved = {
+          ...saved,
+          ...context,
+          context,
+          requestedResearch,
+          chatGptPrompt,
+          existingReportId: context.existingResearch?.reportId ?? null,
+        } as ResearchHandoffEntity;
+        return saved;
+      },
+    ),
     createOrFind: jest.fn(
       async (gmailMessageId, context, requestedResearch, chatGptPrompt) => {
         saved ??= {
@@ -113,6 +148,31 @@ describe('Durable manual ChatGPT handoff service', () => {
     expect(s.notifications.sendHandoff).toHaveBeenCalledTimes(1);
     expect(s.history.findCompanyIdByNormalizedName).toHaveBeenCalledTimes(1);
   });
+  it('reuses an open company handoff when a later email adds the role title', async () => {
+    const s = setup();
+    const first = await s.service.ensure('message-1', {
+      ...analysis,
+      companyName: 'WalkMe',
+      roleTitle: null,
+    });
+    const second = await s.service.ensure('message-2', {
+      ...analysis,
+      companyName: 'WalkMe',
+      roleTitle: 'Senior Software Engineer - Big Data Platform',
+      eventType: 'INTERVIEW_SCHEDULING',
+      researchReason: 'Active interview scheduling',
+    });
+
+    expect(second.id).toBe(first.id);
+    expect(second.roleTitle).toBe(
+      'Senior Software Engineer - Big Data Platform',
+    );
+    expect(second.eventType).toBe('INTERVIEW_SCHEDULING');
+    expect(s.repository.createOrFind).toHaveBeenCalledTimes(1);
+    expect(s.repository.updateContext).toHaveBeenCalledTimes(1);
+    expect(s.notifications.sendHandoff).toHaveBeenCalledTimes(1);
+  });
+
   it('retains a handoff when notification fails and retries without recreating it', async () => {
     const s = setup();
     s.notifications.sendHandoff.mockRejectedValueOnce(

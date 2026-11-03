@@ -24,11 +24,11 @@
     </button>
     <button type="button" [class.active]="activeTab === 'handoffs'" (click)="setTab('handoffs')">
       מחקר ChatGPT
-      <span class="ci-count" *ngIf="handoffs.length">{{ handoffs.length }}</span>
+      <span class="ci-count" *ngIf="visibleHandoffs.length">{{ visibleHandoffs.length }}</span>
     </button>
   </nav>
 
-  <div class="ci-alert ci-alert-error" *ngIf="errorMessage" role="alert">
+  <div class="ci-alert ci-alert-error" *ngIf="errorMessage && !handoffDetail" role="alert">
     <strong>לא ניתן היה להשלים את הבקשה.</strong>
     <span>{{ errorMessage }}</span>
   </div>
@@ -350,7 +350,13 @@
       </ng-template>
     </section>
 
-    <section class="ci-panel ci-history-detail" *ngIf="historyDetail as detail">
+    <div class="ci-modal-backdrop" *ngIf="historyDetail as detail" (click)="closeHistoryDetail()">
+      <section
+        class="ci-panel ci-history-detail ci-detail-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-label="פרטי מחקר חברה"
+        (click)="$event.stopPropagation()">
       <header class="ci-panel-header">
         <div>
           <span class="ci-eyebrow">דוח שמור</span>
@@ -407,9 +413,10 @@
 
       <div class="ci-history-detail-actions">
         <button type="button" class="ci-primary" (click)="openSavedReport(detail)">פתיחת הדוח השמור המלא</button>
-        <button type="button" class="ci-secondary" (click)="companyName = detail.report.companyName; setTab('jobs')">התאמת משרות</button>
+        <button type="button" class="ci-secondary" (click)="companyName = detail.report.companyName; closeHistoryDetail(); setTab('jobs')">התאמת משרות</button>
       </div>
-    </section>
+      </section>
+    </div>
   </ng-container>
 
   <ng-container *ngIf="activeTab === 'handoffs'">
@@ -422,8 +429,8 @@
         <button type="button" class="ci-secondary" (click)="loadHandoffs(true)" [disabled]="loading">רענון</button>
       </header>
 
-      <div class="ci-handoff-list" *ngIf="handoffs.length; else handoffEmpty">
-        <button type="button" class="ci-handoff-card" *ngFor="let item of handoffs; trackBy: trackByHandoffId" (click)="openHandoff(item)">
+      <div class="ci-handoff-list" *ngIf="visibleHandoffs.length; else handoffEmpty">
+        <button type="button" class="ci-handoff-card" *ngFor="let item of visibleHandoffs; trackBy: trackByHandoffId" (click)="openHandoff(item)">
           <div>
             <strong dir="auto">{{ item.companyName }}</strong>
             <span>{{ item.roleTitle || 'התפקיד לא צוין' }}</span>
@@ -454,7 +461,13 @@
       </ng-template>
     </section>
 
-    <section class="ci-panel" *ngIf="handoffDetail as handoff">
+    <div class="ci-modal-backdrop" *ngIf="handoffDetail as handoff" (click)="closeHandoff()">
+      <section
+        class="ci-panel ci-detail-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-label="פרטי מחקר ChatGPT"
+        (click)="$event.stopPropagation()">
       <header class="ci-panel-header">
         <div>
           <span class="ci-eyebrow">משימת מחקר</span>
@@ -463,6 +476,11 @@
         </div>
         <button type="button" class="ci-secondary" (click)="closeHandoff()">סגירה</button>
       </header>
+
+      <div class="ci-alert ci-alert-error ci-modal-error" *ngIf="errorMessage" role="alert">
+        <strong>לא ניתן היה להשלים את הפעולה.</strong>
+        <span>{{ errorMessage }}</span>
+      </div>
 
       <div class="ci-handoff-context">
         <div><span>מגייס</span><strong>{{ handoff.recruiterName || 'לא ידוע' }}</strong></div>
@@ -489,6 +507,7 @@
       <button type="button" class="ci-primary" (click)="importHandoff()" [disabled]="loading || !handoffImportContent.trim()">
         ייבוא המחקר למערכת
       </button>
-    </section>
+      </section>
+    </div>
   </ng-container>
 </section>

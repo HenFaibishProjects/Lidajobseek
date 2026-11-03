@@ -30,6 +30,51 @@ export class ResearchHandoffRepository {
     return this.repository.findOneBy({ id });
   }
 
+  findOpenCompatible(companyName: string, roleTitle: string | null) {
+    const normalizedCompany = companyName.trim().toLowerCase();
+    const normalizedRole = roleTitle?.trim().toLowerCase() || null;
+    const query = this.repository
+      .createQueryBuilder('handoff')
+      .where('LOWER(TRIM(handoff.companyName)) = :companyName', {
+        companyName: normalizedCompany,
+      })
+      .andWhere('handoff.status IN (:...statuses)', {
+        statuses: OPEN_STATUSES,
+      });
+
+    if (normalizedRole) {
+      query.andWhere(
+        '(handoff.roleTitle IS NULL OR LOWER(TRIM(handoff.roleTitle)) = :roleTitle)',
+        { roleTitle: normalizedRole },
+      );
+    }
+
+    return query.orderBy('handoff.createdAt', 'DESC').getOne();
+  }
+
+  async updateContext(
+    id: string,
+    context: ResearchHandoffContext,
+    requestedResearch: string[],
+    chatGptPrompt: string,
+  ): Promise<ResearchHandoffEntity> {
+    await this.repository.update(
+      { id },
+      {
+        companyName: context.companyName,
+        roleTitle: context.roleTitle,
+        recruiterName: context.recruiterName,
+        eventType: context.eventType,
+        researchReason: context.researchReason,
+        existingReportId: context.existingResearch?.reportId ?? null,
+        context,
+        requestedResearch,
+        chatGptPrompt,
+      },
+    );
+    return this.repository.findOneByOrFail({ id });
+  }
+
   async createOrFind(
     gmailMessageId: string,
     context: ResearchHandoffContext,

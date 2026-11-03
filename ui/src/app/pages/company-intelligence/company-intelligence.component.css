@@ -1409,3 +1409,42 @@ body.dark-theme app-company-intelligence :host {
     font-size: 24px;
   }
 }
+
+
+/* Keep loaded History / ChatGPT details visible regardless of list length. */
+.ci-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 80px 20px 28px;
+  overflow-y: auto;
+  background: rgba(15, 23, 42, .52);
+  backdrop-filter: blur(3px);
+}
+
+.ci-detail-modal {
+  width: min(980px, 100%);
+  max-height: calc(100vh - 108px);
+  margin: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  box-shadow: 0 24px 70px rgba(15, 23, 42, .26);
+}
+
+body.dark-theme .ci-modal-backdrop {
+  background: rgba(15, 23, 42, .62);
+}
+
+@media (max-width: 760px) {
+  .ci-modal-backdrop {
+    padding: 70px 8px 16px;
+  }
+
+  .ci-detail-modal {
+    max-height: calc(100vh - 86px);
+    border-radius: 14px;
+  }
+}
