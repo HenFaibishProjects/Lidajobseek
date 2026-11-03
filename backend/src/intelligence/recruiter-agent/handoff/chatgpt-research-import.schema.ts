@@ -22,7 +22,7 @@ const employeeCount = z
   .union([
     z.object({ count, approximate: z.boolean() }),
     z
-      .strictObject({ min: count, max: count, approximate: z.literal(true) })
+      .object({ min: count, max: count, approximate: z.literal(true) })
       .refine((value) => value.min <= value.max, 'Invalid headcount range.'),
   ])
   .nullable()
@@ -36,7 +36,7 @@ const finding = z.object({
 });
 const findings = z.array(finding).max(12).default([]);
 export const chatGptResearchImportSchema = z
-  .strictObject({
+  .object({
     companyName: z.string().trim().min(1).max(200),
     roleTitle: shortText(300),
     companySummary: optionalText,
@@ -44,7 +44,7 @@ export const chatGptResearchImportSchema = z
     productSummary: optionalText,
     businessModel: optionalText,
     location: z
-      .strictObject({
+      .object({
         city: shortText(200),
         address: shortText(500),
         building: shortText(200),
@@ -70,7 +70,7 @@ export const chatGptResearchImportSchema = z
       }),
     workModel: shortText(500),
     employees: z
-      .strictObject({
+      .object({
         global: employeeCount,
         israel: employeeCount,
         israelEngineering: employeeCount,
@@ -84,7 +84,7 @@ export const chatGptResearchImportSchema = z
     redFlags: list,
     questionsToAskRecruiter: list,
     interviewInsights: z
-      .strictObject({
+      .object({
         summary: optionalText,
         stages: findings,
         reportedTopics: findings,
@@ -94,7 +94,7 @@ export const chatGptResearchImportSchema = z
       .nullable()
       .default(null),
     workplaceSignals: z
-      .strictObject({
+      .object({
         summary: optionalText,
         positiveSignals: findings,
         negativeSignals: findings,
