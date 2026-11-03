@@ -63,6 +63,40 @@ describe('CompanyIntelligenceComponent', () => {
     expect(service.listPendingHandoffs).toHaveBeenCalledWith(20, 20);
   });
 
+  it('shows handoff errors inside the open modal without clearing pasted research', () => {
+    component.activeTab = 'handoffs';
+    component.handoffImportContent = 'research that needs correction';
+    component.handoffDetail = {
+      id: 'handoff-1',
+      companyName: 'WalkMe',
+      roleTitle: 'Backend Engineer',
+      eventType: 'INTERVIEW_INVITATION',
+      researchReason: 'Prepare for interview',
+      status: 'IN_PROGRESS',
+      createdAt: new Date().toISOString(),
+      notificationSentAt: null,
+      recruiterName: 'Recruiter',
+      existingReportId: null,
+      context: {},
+      requestedResearch: [],
+      chatGptPrompt: 'Research WalkMe',
+      deepResearchResult: null,
+      notificationError: null,
+      notificationAttempts: 0,
+      completedAt: null,
+    };
+    component.errorMessage = 'תוצאת המחקר אינה תקינה';
+
+    fixture.detectChanges();
+
+    const modalError = fixture.nativeElement.querySelector(
+      '.ci-detail-modal .ci-alert-error',
+    ) as HTMLElement | null;
+
+    expect(modalError?.textContent).toContain('תוצאת המחקר אינה תקינה');
+    expect(component.handoffImportContent).toBe('research that needs correction');
+  });
+
   it('requires a company name before research', () => {
     component.companyName = '   ';
     component.researchCompany();

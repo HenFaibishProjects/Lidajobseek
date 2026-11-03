@@ -28,7 +28,7 @@
     </button>
   </nav>
 
-  <div class="ci-alert ci-alert-error" *ngIf="errorMessage" role="alert">
+  <div class="ci-alert ci-alert-error" *ngIf="errorMessage && !handoffDetail" role="alert">
     <strong>לא ניתן היה להשלים את הבקשה.</strong>
     <span>{{ errorMessage }}</span>
   </div>
@@ -476,6 +476,11 @@
         </div>
         <button type="button" class="ci-secondary" (click)="closeHandoff()">סגירה</button>
       </header>
+
+      <div class="ci-alert ci-alert-error ci-modal-error" *ngIf="errorMessage" role="alert">
+        <strong>לא ניתן היה להשלים את הפעולה.</strong>
+        <span>{{ errorMessage }}</span>
+      </div>
 
       <div class="ci-handoff-context">
         <div><span>מגייס</span><strong>{{ handoff.recruiterName || 'לא ידוע' }}</strong></div>
