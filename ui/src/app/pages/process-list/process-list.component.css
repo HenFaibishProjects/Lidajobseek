@@ -1270,6 +1270,7 @@ body:not(.dark-theme) .performance-section {
 
 .kpi-range-selector {
     display: flex;
+    box-sizing: border-box;
     background: var(--bg-primary);
     border: 1px solid var(--border-color);
     padding: 4px;
@@ -1928,6 +1929,7 @@ body:not(.dark-theme) .kpi-card:hover {
 }
 
 .chart-card {
+    min-width: 0;
     background: var(--bg-primary);
     border: 1px solid var(--border-color);
     border-radius: 16px;
@@ -1959,6 +1961,7 @@ body:not(.dark-theme) .kpi-card:hover {
 .chart-canvas-wrapper {
     position: relative;
     height: 180px;
+    overflow: hidden;
 }
 
 /* ─── Insight Panels ────────────────────────────────────── */

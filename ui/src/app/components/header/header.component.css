@@ -66,6 +66,7 @@ body:not(.dark-theme) .logo-tagline {
   z-index: 200;
   height: 64px;
   width: 100%;
+  box-sizing: border-box;
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
