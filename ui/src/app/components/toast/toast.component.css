@@ -91,3 +91,12 @@
   from { width: 100%; }
   to   { width: 0%; }
 }
+
+@media (max-width: 767px) {
+  .toast-container {
+    inset-inline: max(12px, env(safe-area-inset-left, 0px)) max(12px, env(safe-area-inset-right, 0px));
+    top: calc(60px + env(safe-area-inset-top, 0px));
+  }
+
+  .toast { box-sizing: border-box; min-width: 0; max-width: 100%; overflow-wrap: anywhere; }
+}

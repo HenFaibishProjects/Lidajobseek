@@ -664,3 +664,10 @@ body.dark-theme .agency-badge {
     margin: 0;
     line-height: 1.4;
 }
+@media (max-width: 768px) {
+    .charts-grid { grid-template-columns: minmax(0, 1fr); }
+    .chart-card { min-width: 0; padding: 16px; }
+    .card-header { flex-wrap: wrap; gap: 8px; }
+    .chart-select, .toggle-btn { max-width: 100%; min-height: 44px; }
+    .chart-canvas-container { min-width: 0; overflow: hidden; }
+}

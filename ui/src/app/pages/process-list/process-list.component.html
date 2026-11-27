@@ -330,7 +330,11 @@
 
     <!-- Search & Filters -->
     <div class="process-layout">
-        <aside class="filters-panel">
+        <aside class="filters-panel" [class.mobile-filters-open]="mobileFiltersOpen">
+            <button type="button" class="mobile-dashboard-filter-btn" aria-controls="dashboard-filter-body"
+                [attr.aria-expanded]="mobileFiltersOpen" (click)="mobileFiltersOpen = !mobileFiltersOpen">
+                {{ mobileFiltersOpen ? 'Hide filters' : 'Filters' }}
+            </button>
             <div class="filters-header">
                 <div class="filters-heading">
                     <h3>Filter board</h3>
@@ -338,7 +342,7 @@
                 <button class="clear-btn" (click)="clearFilters()" [disabled]="!isFilterActive">Clear</button>
             </div>
 
-            <div class="filters-body">
+            <div class="filters-body" id="dashboard-filter-body">
                 <div class="search-box">
                     <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="2">
@@ -413,6 +417,23 @@
                     <p class="results-hint">
                         Use the filters on the left to focus on active conversations, upcoming interviews, or offers.
                     </p>
+                </div>
+                <div class="mobile-dashboard-sort">
+                    <label for="dashboard-sort">Sort by</label>
+                    <select id="dashboard-sort" #sortChoice (change)="sort(sortChoice.value)" [value]="sortColumn">
+                        <option value="" disabled>Default</option>
+                        <option value="company">Company</option>
+                        <option value="location">City</option>
+                        <option value="stage">Stage</option>
+                        <option value="created">Opened</option>
+                        <option value="updated">Updated</option>
+                        <option value="age">Days idle</option>
+                        <option value="interactions">Sessions</option>
+                    </select>
+                    <button *ngIf="sortColumn" type="button" (click)="sort(sortColumn)"
+                        [attr.aria-label]="sortDirection === 'asc' ? 'Sort descending' : 'Sort ascending'">
+                        {{ sortDirection === 'asc' ? 'Ascending' : 'Descending' }}
+                    </button>
                 </div>
                 <div class="view-toggle" role="group" aria-label="View mode">
                     <button class="view-toggle-btn" [class.view-toggle-btn--active]="viewMode === 'grid'"

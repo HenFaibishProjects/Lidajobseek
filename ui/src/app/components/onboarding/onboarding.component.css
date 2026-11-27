@@ -215,3 +215,21 @@ h2 {
   background: var(--surface-hover);
   color: var(--text-primary);
 }
+
+.onboarding-overlay {
+  box-sizing: border-box;
+  height: 100dvh;
+  padding: 12px;
+  overscroll-behavior: contain;
+}
+
+.onboarding-modal {
+  box-sizing: border-box;
+  min-height: 0;
+  max-height: calc(100dvh - 24px);
+  overflow-y: auto;
+}
+
+@media (max-width: 480px) {
+  .onboarding-modal { padding: 16px; }
+}

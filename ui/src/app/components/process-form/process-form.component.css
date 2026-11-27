@@ -1311,3 +1311,17 @@ textarea.field-input {
 :host-context(body.dark-theme) .copy-prompt-btn:hover {
   background: rgba(16, 185, 129, 0.18);
 }
+
+@media (max-width: 767px) {
+  .form-view { padding-inline: 0; align-items: stretch; }
+  .form-card { width: 100%; box-sizing: border-box; }
+  .progress-steps, .hero-left, .input-action-group { flex-wrap: wrap; }
+  .hero-left { gap: 10px; }
+  .form-hero { min-height: 0; }
+  .form-row, .scores-grid { grid-template-columns: minmax(0, 1fr); }
+  .form-card :is(input, select, textarea) { box-sizing: border-box; max-width: 100%; }
+  .form-card :is(input:not([type="checkbox"], [type="radio"], [type="range"]), select, textarea) {
+    font-size: 16px;
+  }
+  .form-card :is(.action-chip, .btn-submit) { min-height: 44px; }
+}

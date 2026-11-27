@@ -431,3 +431,10 @@
   .tpl-version-row { flex-direction: column; }
   .tpl-ver-label { flex: unset; width: 100%; }
 }
+
+@media (max-width: 640px) {
+  .tpl-header, .tpl-title-block { min-width: 0; }
+  .tpl-header-actions { flex-wrap: wrap; }
+  .tpl-title, .tpl-subtitle { overflow-wrap: anywhere; }
+  .tpl-header-actions button { min-height: 44px; max-width: 100%; white-space: normal; }
+}

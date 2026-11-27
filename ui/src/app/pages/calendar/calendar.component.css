@@ -1422,3 +1422,151 @@
 .header-actions .availability-control:hover { background: var(--bg-hover); border-color: var(--border-dark); }
 .availability-week-block, .availability-block-card { white-space: normal; box-sizing: border-box; }
 .availability-week-block strong, .availability-block-card strong { max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
+
+.calendar-mobile { display: none; }
+.calendar-actions { order: -1; }
+.calendar-action-options { display: flex; flex-wrap: wrap; gap: 8px; }
+.calendar-actions > summary, .calendar-filters > summary { display: none; }
+.search-option { width: 100%; border: 0; color: var(--text-primary); background: var(--bg-primary); text-align: start; }
+
+@media (max-width: 767px) {
+    .dashboard-container { gap: 16px; animation: none; }
+    .calendar-mobile { display: block; }
+    .calendar-desktop, .month-grid, .week-grid, .availability-passive, .calendar-brand .subtitle { display: none; }
+
+    .dashboard-header, .header-actions, .toolbar {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 12px;
+    }
+
+    .dashboard-header { padding-bottom: 12px; }
+    .calendar-brand { gap: 10px; }
+    .calendar-brand h1 { margin: 0; font-size: 1.45rem; }
+    .calendar-brand-icon { width: 44px; height: 44px; }
+    .header-calendar-icon { width: 24px; height: 24px; }
+    .header-actions .btn-primary { justify-content: center; }
+    .calendar-actions { order: 0; }
+    .toolbar { align-items: stretch; padding: 12px; }
+    .view-mode-tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); width: auto; }
+    .search-wrapper, .search-input, .filters-row, .date-range { box-sizing: border-box; width: 100%; min-width: 0; }
+    .search-input { font-size: 16px; }
+    .search-option { min-height: 44px; overflow-wrap: anywhere; }
+    .search-dropdown { z-index: 20; }
+
+    .calendar-actions > summary, .calendar-filters > summary,
+    .agenda-blocks > summary, .mobile-interview-details > summary {
+        display: list-item;
+        cursor: pointer;
+        box-sizing: border-box;
+        padding: 12px;
+        min-height: 44px;
+        color: var(--text-primary);
+        font-weight: 600;
+    }
+
+    .calendar-actions > summary, .calendar-filters > summary, .agenda-blocks > summary {
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        background: var(--bg-primary);
+    }
+
+    .calendar-action-options, .filters-row { padding-block-start: 8px; }
+    .filters-row { display: flex; flex-wrap: wrap; }
+    .date-range { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); }
+    .filter-input { box-sizing: border-box; min-width: 0; width: 100%; font-size: 16px; }
+
+    .dashboard-container :is(.btn-primary, .btn-secondary, .btn-nav, .btn-today-nav, .view-tab, .btn-schedule-shortcut, .btn-icon-only) {
+        min-height: 44px;
+        box-sizing: border-box;
+        white-space: normal;
+    }
+
+    .calendar-nav-header {
+        display: grid;
+        grid-template-columns: 40px minmax(0, 1fr) 40px auto;
+        gap: 4px;
+        padding: 8px;
+    }
+
+    .calendar-nav-header .btn-nav { width: 100%; }
+    .current-period-label { text-align: center; margin: 0; font-size: .9rem; min-width: 0; }
+    .date-picker-grid, .date-weekdays { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; }
+    .date-weekdays { text-align: center; font-size: .75rem; margin-bottom: 4px; }
+    .date-picker { padding: 6px; }
+    .date-picker-day {
+        display: grid;
+        align-content: center;
+        justify-items: center;
+        min-height: 44px;
+        padding: 2px;
+        border: 1px solid transparent;
+        border-radius: 8px;
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        cursor: pointer;
+    }
+
+    .date-picker-day > span { font-size: .7rem; }
+    .date-picker-day.outside-month { color: var(--text-secondary); }
+    .date-picker-day.today { border-color: var(--primary-blue); }
+    .date-picker-day[aria-pressed="true"] { background: var(--primary-blue); color: white; }
+    .date-markers { display: flex; align-items: center; justify-content: center; gap: 3px; min-height: 8px; }
+    .date-markers i { width: 6px; height: 6px; border: 1px solid white; border-radius: 50%; }
+    .date-interview-marker { background: #2563eb; }
+    .date-block-marker { background: #dc2626; }
+
+    .selected-day-details-section { padding: 12px; }
+    .details-section-header { display: flex; flex-wrap: wrap; gap: 8px; }
+    .details-title { order: -1; flex: 1 0 100%; margin: 0; }
+    .availability-status { margin: 0; }
+    .availability-manager { margin-bottom: 0; }
+    .availability-block-list, .recent-interviews-list {
+        grid-template-columns: minmax(0, 1fr);
+        max-height: none;
+        overflow: visible;
+    }
+    .recent-interview a { display: inline-flex; align-items: center; min-height: 44px; }
+
+    .agenda-day { margin-block: 0 18px; }
+    .agenda-day h2 { margin: 0 0 8px; font-size: 1rem; }
+    .agenda-blocks .availability-block-list { padding-top: 8px; }
+
+    .mobile-interview {
+        display: grid;
+        gap: 8px;
+        padding: 14px;
+        margin: 0 0 10px;
+        border: 1px solid var(--border-color);
+        border-inline-start: 4px solid var(--interview-color);
+        border-radius: 14px;
+        color: var(--text-primary);
+        background: var(--bg-primary);
+        overflow-wrap: anywhere;
+    }
+
+    .mobile-interview.next-interview-card { border-color: var(--primary-blue); }
+    .mobile-interview h3, .mobile-interview p, .mobile-interview ul { margin: 0; }
+    .mobile-interview-type, .mobile-interview-company, .mobile-interview-actions {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+    .mobile-interview-type, .mobile-interview-actions { flex-wrap: wrap; }
+    .mobile-interview-type { font-size: .8rem; font-weight: 600; }
+    .mobile-interview-type > span { border-inline-start: 3px solid var(--interview-color); padding-inline-start: 6px; }
+    .mobile-interview-type > strong { color: var(--primary-blue); }
+    .mobile-interview-company h3 { font-size: 1.05rem; }
+    .mobile-interview p { color: var(--text-secondary); }
+    .mobile-interview .mobile-interview-time { color: var(--text-primary); font-weight: 600; }
+    .mobile-interview-company img { width: 36px; height: 36px; object-fit: contain; border-radius: 6px; }
+    .mobile-interview-details { border-top: 1px solid var(--border-color); }
+    .mobile-interview-details > summary { padding-inline: 0; }
+    .mobile-interview-details[open] > :not(summary) { margin-block: 8px; }
+    .interview-notes { white-space: pre-wrap; }
+    .mobile-interview .interview-delete { color: var(--error); }
+}
+
+.search-wrapper { min-width: 0; }
+.search-input { box-sizing: border-box; max-width: 100%; }
+.calendar-filters { min-width: 0; }

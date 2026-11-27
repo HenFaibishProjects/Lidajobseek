@@ -141,7 +141,7 @@
     aria-hidden="true"></div>
 
 <!-- ═══ Slide-over Drawer (tablet + mobile only) ═══ -->
-<aside *ngIf="isAuthenticated" class="nav-drawer" [class.open]="drawerOpen" aria-label="Navigation drawer">
+<aside *ngIf="isAuthenticated" class="nav-drawer" [class.open]="drawerOpen" [attr.inert]="drawerOpen ? null : ''" aria-label="Navigation drawer">
 
     <div class="drawer-header">
         <a class="drawer-logo" routerLink="/" (click)="closeDrawer()">
@@ -235,6 +235,9 @@
     </nav>
 
     <div class="drawer-footer">
+        <button class="drawer-footer-btn mobile-career-chat" type="button" (click)="closeDrawer(); openCareerChat.emit()">
+            AI Career Chat
+        </button>
         <button class="drawer-footer-btn settings" type="button" (click)="toggleSettings.emit(); closeDrawer()">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <circle cx="12" cy="12" r="3"></circle>

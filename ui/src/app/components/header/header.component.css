@@ -828,3 +828,28 @@ body:not(.dark-theme) .tab-item.tab-active {
   outline: 2px solid #60a5fa;
   outline-offset: 2px;
 }
+.mobile-career-chat { display: none; }
+
+.nav-drawer {
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  visibility: hidden;
+}
+
+.nav-drawer.open { visibility: visible; }
+.drawer-logo { min-width: 0; }
+.drawer-logo .logo-text { overflow: hidden; text-overflow: ellipsis; }
+
+@media (max-width: 767px) {
+  .app-navbar {
+    height: calc(56px + env(safe-area-inset-top, 0px));
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-inline: max(12px, env(safe-area-inset-left, 0px)) max(12px, env(safe-area-inset-right, 0px));
+  }
+  .navbar-logo-zone, .tab-item { min-width: 0; }
+  .tab-item { padding-inline: 2px; }
+  .hamburger-btn, .drawer-close, .drawer-footer-btn { min-height: 44px; }
+  .mobile-career-chat { display: flex; }
+  .drawer-footer { flex-wrap: wrap; }
+}

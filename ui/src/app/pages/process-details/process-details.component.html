@@ -36,6 +36,9 @@
                     <lucide-icon name="pencil" [size]="14" strokeWidth="2"></lucide-icon>
                     <span>Edit</span>
                 </button>
+                <button type="button" class="btn-sleek secondary mobile-interview-assistant" (click)="toggleAiPanel()">
+                    AI Assistant
+                </button>
                 <button class="btn-sleek danger" (click)="deleteProcess()" [disabled]="isDeleting">
                     <lucide-icon name="trash-2" [size]="14" strokeWidth="2" *ngIf="!isDeleting"></lucide-icon>
                     <span *ngIf="isDeleting">Deleting...</span>
@@ -1523,7 +1526,7 @@
         display: flex;
         flex-direction: column;
         gap: var(--space-2xl);
-        width: 150%;
+        width: 100%;
     }
 
 
@@ -2838,5 +2841,19 @@
     .glassdoor-search-btn:hover {
         background: #207a5f !important;
         box-shadow: 0 6px 16px rgba(24, 94, 73, 0.3) !important;
+    }
+    .mobile-interview-assistant { display: none; }
+    @media (max-width: 767px) {
+        .dashboard-wrapper { padding-inline: 0; }
+        .dashboard-grid { grid-template-columns: minmax(0, 1fr); }
+        .dashboard-grid > *, .title-block { min-width: 0; max-width: 100%; }
+        .sidebar-column { width: 100%; }
+        .premium-card, .title-block { overflow-wrap: anywhere; }
+        .premium-card .card-header { flex-wrap: wrap; gap: 10px; }
+        .stage-select-wrap, .stage-select { max-width: 100%; }
+        .header-actions { flex-wrap: wrap; }
+        .header-actions button { box-sizing: border-box; min-height: 44px; }
+        .ai-float-btn { display: none; }
+        .mobile-interview-assistant { display: inline-flex; }
     }
 </style>

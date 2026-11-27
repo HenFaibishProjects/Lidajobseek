@@ -128,3 +128,17 @@
   color: var(--text-primary);
   font: inherit;
 }
+
+.overlay { box-sizing: border-box; overscroll-behavior: contain; }
+.dialog {
+  box-sizing: border-box;
+  max-width: 100%;
+  max-height: calc(100dvh - 40px);
+  overflow-y: auto;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 480px) {
+  .dialog { padding: 18px; }
+  .dialog-actions { flex-wrap: wrap; }
+  .dialog button { min-height: 44px; }
+}

@@ -84,6 +84,23 @@ describe('ProcessListComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  it('defaults to cards on phones and exposes a collapsible dashboard filter control', () => {
+    spyOn(window, 'matchMedia').and.returnValue({ matches: true } as MediaQueryList);
+    const mobileFixture = TestBed.createComponent(ProcessListComponent);
+    try {
+      mobileFixture.detectChanges();
+      const mobileDashboard = mobileFixture.componentInstance;
+      expect(mobileDashboard.viewMode).toBe('grid');
+      const button: HTMLButtonElement = mobileFixture.nativeElement.querySelector('.mobile-dashboard-filter-btn');
+      expect(button.getAttribute('aria-expanded')).toBe('false');
+      button.click();
+      mobileFixture.detectChanges();
+      expect(button.getAttribute('aria-expanded')).toBe('true');
+    } finally {
+      mobileFixture.destroy();
+    }
+  });
+
   it('should create unique CSS classes for interview waiting stages', () => {
     expect(component.getStatusClass('Waiting for Interview Feedback')).toBe(
       'status-waiting-for-interview-feedback'

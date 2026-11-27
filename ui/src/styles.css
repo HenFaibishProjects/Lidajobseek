@@ -1907,3 +1907,77 @@ body.dark-theme .dashboard-stage {
     --stage-dark-accent: #94a3b8;
     --stage-dark-text: #cbd5e1;
 }
+
+/* Mobile dashboard layouts */
+app-process-list {
+    .mobile-dashboard-filter-btn, .mobile-dashboard-sort { display: none; }
+
+    @media (max-width: 767px) {
+        .filters-panel:not(.mobile-filters-open) .filter-section { display: none; }
+
+        .mobile-dashboard-filter-btn, .mobile-dashboard-sort {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-primary);
+        }
+
+        .mobile-dashboard-filter-btn, .mobile-dashboard-sort > :is(select, button) {
+            min-height: 44px;
+            padding: 4px 10px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+        }
+
+        .mobile-dashboard-sort { flex-wrap: wrap; }
+        .results-summary { flex-wrap: wrap; }
+        .processes-grid { grid-template-columns: minmax(0, 1fr); }
+        .process-card { min-width: 0; overflow-wrap: anywhere; }
+        .process-card .card-footer, .card-glassdoor-wrap { flex-wrap: wrap; }
+        .process-card .badge-stage { white-space: normal; }
+        .process-card :is(.process-card-history-btn, .process-card-glassdoor-btn) { min-height: 44px; }
+        .view-toggle-btn { min-width: 44px; min-height: 44px; }
+
+        .processes-list .list-header-row { display: none; }
+
+        .processes-list .list-row {
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 6px;
+            padding: 12px;
+        }
+
+        .list-row .list-col { min-width: 0; padding-inline: 0; }
+        .list-row .list-col-company, .list-row .list-col-role { grid-column: 1 / -1; }
+        .list-row .list-company-name { white-space: normal; overflow-wrap: anywhere; }
+        .list-row .list-col-city { display: none; }
+        .list-row .list-location { display: block; }
+        .list-row .list-col-mode, .list-row .list-col-interactions,
+        .list-row .list-col-dates, .list-row .list-col-age, .processes-list .list-row .list-col.list-col-history {
+            display: flex;
+        }
+        .list-row .list-col-dates { grid-column: 1 / -1; }
+        .processes-list .list-row .list-col.list-col-history { justify-content: flex-end; grid-column: 2; max-width: none; }
+        .list-history-btn { min-height: 44px; }
+    }
+}
+
+@media (max-width: 767px) {
+    app-process-list .process-layout { grid-template-columns: minmax(0, 1fr); }
+    app-process-list :is(.filters-panel, .process-content, .hero-text) { min-width: 0; }
+    app-process-list :is(.hero-title, .hero-subtitle) { overflow-wrap: anywhere; }
+    app-process-list .search-box { min-width: 0; }
+    app-process-list .search-input { width: 100%; box-sizing: border-box; font-size: 16px; }
+}
+
+@media (max-width: 767px) {
+    html {
+        scroll-padding-block-start: calc(64px + env(safe-area-inset-top, 0px));
+        scroll-padding-block-end: calc(72px + env(safe-area-inset-bottom, 0px));
+    }
+
+    main :is(input:not([type="checkbox"], [type="radio"], [type="range"]), select, textarea):focus {
+        scroll-margin-block: 12px;
+    }
+}
