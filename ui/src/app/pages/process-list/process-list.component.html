@@ -257,15 +257,15 @@
                 <a class="kpi-modal-process" *ngFor="let process of visibleKpiModalProcesses"
                     [routerLink]="['/process', process.id]" (click)="closeKpiModal()">
                     <div class="kpi-modal-logo">
-                        <img *ngIf="process.companyLogoUrl" [src]="process.companyLogoUrl"
-                            [alt]="process.companyName + ' logo'" (error)="process.companyLogoUrl = null" />
-                        <span *ngIf="!process.companyLogoUrl">{{ process.companyName?.charAt(0)?.toUpperCase() }}</span>
+                        <img *ngIf="hasCompanyLogo(process)" [src]="process.companyLogoUrl" referrerpolicy="no-referrer"
+                            [alt]="process.companyName + ' logo'" (error)="onCompanyLogoError(process, $event)" />
+                        <span *ngIf="!hasCompanyLogo(process)">{{ process.companyName?.charAt(0)?.toUpperCase() }}</span>
                     </div>
 
                     <div class="kpi-modal-process-main">
                         <div class="kpi-modal-process-title-row">
                             <strong>{{ process.companyName }}</strong>
-                            <span class="badge-stage" [ngClass]="getStatusClass(process.currentStage)"
+                            <span class="badge-stage dashboard-stage" [ngClass]="getStatusClass(process.currentStage)"
                                 [attr.title]="process.currentStage">
                                 {{ getCompactStageLabel(process.currentStage) }}
                             </span>
@@ -463,12 +463,12 @@
                     [routerLink]="['/process', p.id]">
                     <div class="card-header">
                         <div class="company-logo">
-                            <img *ngIf="p.companyLogoUrl" [src]="p.companyLogoUrl" class="logo-img"
-                                (error)="p.companyLogoUrl = null">
-                            <span *ngIf="!p.companyLogoUrl">{{ p.companyName.charAt(0).toUpperCase() }}</span>
+                            <img *ngIf="hasCompanyLogo(p)" [src]="p.companyLogoUrl" referrerpolicy="no-referrer" class="logo-img"
+                                (error)="onCompanyLogoError(p, $event)">
+                            <span *ngIf="!hasCompanyLogo(p)">{{ p.companyName.charAt(0).toUpperCase() }}</span>
                         </div>
                         <div class="card-status">
-                            <span class="status-dot" [ngClass]="getStatusClass(p.currentStage)"></span>
+                            <span class="status-dot dashboard-stage" [ngClass]="getStatusClass(p.currentStage)"></span>
                         </div>
                     </div>
 
@@ -510,7 +510,7 @@
 
                     <div class="card-footer">
                         <div class="footer-left">
-                            <span class="badge-stage" [ngClass]="getStatusClass(p.currentStage)">
+                            <span class="badge-stage dashboard-stage" [ngClass]="getStatusClass(p.currentStage)">
                                 {{ p.currentStage }}
                             </span>
                         </div>
@@ -546,6 +546,17 @@
                             </button>
                         </div>
                         <div class="list-col list-col-role">Role</div>
+                        <div class="list-col list-col-city">
+                            <button class="list-sort-btn" (click)="sort('location')">
+                                City
+                                <svg *ngIf="isSorted('location')" width="12" height="12" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <polyline *ngIf="getSortDirection('location') === 'asc'" points="18 15 12 9 6 15" />
+                                    <polyline *ngIf="getSortDirection('location') === 'desc'" points="6 9 12 15 18 9" />
+                                </svg>
+                            </button>
+                        </div>
                         <div class="list-col list-col-stage">
                             <button class="list-sort-btn" (click)="sort('stage')">
                                 Stage
@@ -612,27 +623,24 @@
                         [class.list-row--closed]="p.currentStage === 'Rejected' || p.currentStage === 'Withdrawn'">
                         <div class="list-col list-col-company">
                             <div class="list-avatar">
-                                <img *ngIf="p.companyLogoUrl" [src]="p.companyLogoUrl" class="logo-img"
-                                    (error)="p.companyLogoUrl = null">
-                                <span *ngIf="!p.companyLogoUrl">{{ p.companyName.charAt(0).toUpperCase() }}</span>
+                                <img *ngIf="hasCompanyLogo(p)" [src]="p.companyLogoUrl" referrerpolicy="no-referrer" class="logo-img"
+                                    (error)="onCompanyLogoError(p, $event)">
+                                <span *ngIf="!hasCompanyLogo(p)">{{ p.companyName.charAt(0).toUpperCase() }}</span>
                             </div>
                             <div class="list-company-wrap">
                                 <span class="list-company-name">{{ p.companyName }}</span>
-                                <span class="list-location" *ngIf="p.location">
-                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                                        <circle cx="12" cy="10" r="3" />
-                                    </svg>
-                                    {{ p.location }}
-                                </span>
+                                <span class="list-location" *ngIf="p.location?.trim()">{{ p.location }}</span>
                             </div>
                         </div>
                         <div class="list-col list-col-role">
                             <span class="list-role-text">{{ p.roleTitle }}</span>
                         </div>
+                        <div class="list-col list-col-city">
+                            <span *ngIf="p.location?.trim(); else noCity">{{ p.location }}</span>
+                            <ng-template #noCity><span class="list-empty-cell" aria-label="No city">—</span></ng-template>
+                        </div>
                         <div class="list-col list-col-stage">
-                            <span class="badge-stage" [ngClass]="getStatusClass(p.currentStage)"
+                            <span class="badge-stage dashboard-stage" [ngClass]="getStatusClass(p.currentStage)"
                                 [attr.title]="p.currentStage">{{ getCompactStageLabel(p.currentStage) }}</span>
                         </div>
                         <div class="list-col list-col-mode">
@@ -733,8 +741,8 @@
     <div class="drawer-header">
         <div class="drawer-title-block">
             <div class="drawer-company-avatar">
-                <img *ngIf="drawerProcess?.companyLogoUrl" [src]="drawerProcess.companyLogoUrl" class="drawer-logo-img" (error)="drawerProcess.companyLogoUrl = null">
-                <span *ngIf="!drawerProcess?.companyLogoUrl">{{ drawerProcess?.companyName?.charAt(0)?.toUpperCase() }}</span>
+                <img *ngIf="drawerProcess && hasCompanyLogo(drawerProcess)" [src]="drawerProcess.companyLogoUrl" referrerpolicy="no-referrer" class="drawer-logo-img" (error)="onCompanyLogoError(drawerProcess, $event)">
+                <span *ngIf="!hasCompanyLogo(drawerProcess)">{{ drawerProcess?.companyName?.charAt(0)?.toUpperCase() }}</span>
             </div>
             <div>
                 <h2 class="drawer-title">Interaction History</h2>

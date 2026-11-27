@@ -550,8 +550,14 @@ textarea.field-input {
   }
 }
 
+.logo-success {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
 .logo-fail-popup {
-  display: none;
+  display: flex;
   align-items: flex-start;
   gap: 8px;
   margin-top: 8px;
@@ -563,10 +569,6 @@ textarea.field-input {
   font-weight: 500;
   color: #92400e;
   line-height: 1.5;
-}
-
-.logo-fail-popup.visible {
-  display: flex;
   animation: slideDownFade 0.25s var(--ease) both;
 }
 

@@ -6,6 +6,7 @@ import { PROCESS_STAGES } from '../../shared/process-stages';
 import countriesData from '../../../assets/countries.json';
 import { InitialInteractionFieldsComponent } from '../initial-interaction-fields/initial-interaction-fields.component';
 import { SettingsService } from '../../services/settings.service';
+import { CompanyLogoService } from '../../services/company-logo.service';
 import { ConfirmService } from '../../services/confirm.service';
 import { buildCompanyResearchPrompt } from '../../shared/company-research-prompt';
 
@@ -34,7 +35,12 @@ export class ProcessFormComponent implements OnInit, OnDestroy {
   countries: any[] = [];
   stages = PROCESS_STAGES;
   logoFetchState: 'idle' | 'fetching' | 'success' | 'failed' = 'idle';
-  private logoFailedTimer: any;
+  manualLogoUrl = '';
+  preparingSubmit = false;
+  private failedLogoUrl = '';
+  private logoRequest?: { key: string; controller: AbortController; result: Promise<void> };
+  private lastWebsiteLookup?: string;
+  private destroyed = false;
   private _cachedCities: string[] = [];
   private _lastCountry: string = '';
 
@@ -92,7 +98,8 @@ export class ProcessFormComponent implements OnInit, OnDestroy {
   constructor(
     private cdr: ChangeDetectorRef,
     public settingsService: SettingsService,
-    private confirmService: ConfirmService
+    private confirmService: ConfirmService,
+    private companyLogoService: CompanyLogoService
   ) {
     this.countries = Object.keys(countriesData).map(name => ({ name }));
   }
@@ -123,9 +130,8 @@ export class ProcessFormComponent implements OnInit, OnDestroy {
       };
     }
 
-    // Self-heal: if a website is set but logo was lost, re-fetch silently
     if (this.process?.companyWebsite && !this.process?.companyLogoUrl) {
-      setTimeout(() => this.fetchLogo(), 300);
+      this.onWebsiteBlur();
     }
     // Restore raw textarea if editing an existing process that already has research
     if (this.process?.companyResearch) {
@@ -137,9 +143,8 @@ export class ProcessFormComponent implements OnInit, OnDestroy {
 
 
   ngOnDestroy(): void {
-    if (this.logoFailedTimer) {
-      clearTimeout(this.logoFailedTimer);
-    }
+    this.destroyed = true;
+    this.logoRequest?.controller.abort();
     if (this.promptCopiedTimer) {
       clearTimeout(this.promptCopiedTimer);
     }
@@ -211,52 +216,68 @@ export class ProcessFormComponent implements OnInit, OnDestroy {
   }
 
   // ── Logo ──────────────────────────────────────────────────────────
-  fetchLogo() {
+  fetchLogo(): Promise<void> | undefined {
     if (!this.process.companyWebsite?.trim()) return;
-
-    let domain = this.process.companyWebsite.toLowerCase().trim();
-    domain = domain.replace(/^(https?:\/\/)?(www\.)?/, '');
-    domain = domain.split(/[/?#]/)[0];
-
-    if (!domain.includes('.') || domain.length < 4) {
-      this.showLogoFailed();
+    const website = this.companyLogoService.normalizeWebsite(this.process.companyWebsite);
+    if (!website) {
+      this.logoFetchState = 'failed';
       return;
     }
 
-    this.logoFetchState = 'fetching';
-    const url = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
-
-    // Pre-check the image - Google returns a tiny 16x16 default when no favicon exists
-    const probe = new Image();
-    probe.onload = () => {
-      if (probe.naturalWidth <= 16 && probe.naturalHeight <= 16) {
-        // Generic fallback icon - treat as failure
-        this.process.companyLogoUrl = null;
-        this.showLogoFailed();
-      } else {
-        this.process.companyLogoUrl = url;
-        this.logoFetchState = 'success';
-      }
-      this.cdr.detectChanges();
-    };
-    probe.onerror = () => {
-      this.process.companyLogoUrl = null;
-      this.showLogoFailed();
-      this.cdr.detectChanges();
-    };
-    probe.src = url;
+    this.lastWebsiteLookup = website.href;
+    return this.lookupLogo(website.href, signal => this.companyLogoService.resolve(website, signal));
   }
 
-  private showLogoFailed() {
-    clearTimeout(this.logoFailedTimer);
-    this.logoFetchState = 'failed';
-    this.logoFailedTimer = setTimeout(() => {
+  applyManualLogo(): void {
+    const url = this.manualLogoUrl.trim();
+    if (url) {
+      void this.lookupLogo(`manual:${url}`, signal => this.companyLogoService.validateManualUrl(url, signal));
+    }
+  }
+
+  onWebsiteChange(value: string): void {
+    const previous = this.companyLogoService.normalizeWebsite(this.process.companyWebsite)?.href;
+    this.process.companyWebsite = value;
+    if (previous !== this.companyLogoService.normalizeWebsite(value)?.href) {
+      this.logoRequest?.controller.abort();
+      this.logoRequest = undefined;
+      this.lastWebsiteLookup = undefined;
       this.logoFetchState = 'idle';
-      this.cdr.detectChanges();
-    }, 4000);
+    }
   }
 
-  onWebsiteBlur() { this.fetchLogo(); }
+  onWebsiteBlur(): void {
+    const website = this.companyLogoService.normalizeWebsite(this.process.companyWebsite);
+    if (!this.preparingSubmit && !this.isSubmitting && website && this.lastWebsiteLookup !== website.href) {
+      void this.fetchLogo();
+    }
+  }
+
+  private lookupLogo(key: string, resolve: (signal: AbortSignal) => Promise<string | null>): Promise<void> {
+    if (this.logoRequest?.key === key) return this.logoRequest.result;
+
+    this.logoRequest?.controller.abort();
+    const controller = new AbortController();
+    const process = this.process;
+    const website = this.companyLogoService.normalizeWebsite(process.companyWebsite)?.href;
+    this.logoFetchState = 'fetching';
+
+    const result = resolve(controller.signal).catch(() => null).then(url => {
+      if (controller.signal.aborted || process !== this.process) return;
+      this.logoRequest = undefined;
+      if (website !== this.companyLogoService.normalizeWebsite(process.companyWebsite)?.href) {
+        this.logoFetchState = 'idle';
+        return;
+      }
+      if (url) {
+        this.failedLogoUrl = '';
+        process.companyLogoUrl = url;
+      }
+      this.logoFetchState = url ? 'success' : 'failed';
+    });
+    this.logoRequest = { key, controller, result };
+    return result;
+  }
 
   formatUrl(url: string | undefined): string {
     if (!url) return '';
@@ -299,8 +320,22 @@ export class ProcessFormComponent implements OnInit, OnDestroy {
   }
 
   // ── Submit / Cancel ───────────────────────────────────────────────
-  submit() {
-    if (this.process.companyWebsite && !this.process.companyLogoUrl) this.fetchLogo();
+  async submit(): Promise<void> {
+    if (this.preparingSubmit || this.isSubmitting) return;
+
+    const website = this.companyLogoService.normalizeWebsite(this.process.companyWebsite);
+    const pending = this.logoRequest?.result ??
+      (!this.process.companyLogoUrl && website && this.lastWebsiteLookup !== website.href ? this.fetchLogo() : undefined);
+    if (pending) {
+      this.preparingSubmit = true;
+      try {
+        await pending;
+      } finally {
+        this.preparingSubmit = false;
+      }
+    }
+    if (this.destroyed) return;
+
     if (!this.shouldShowInteractionSection) {
       this.process.initialInviteDate = null;
       this.process.initialInviteMethod = '';
@@ -314,26 +349,19 @@ export class ProcessFormComponent implements OnInit, OnDestroy {
     this.onSubmit.emit();
   }
 
-  /** Returns the logo to display - real logo → default asset, never empty */
+  get hasVisibleLogo(): boolean {
+    return !!this.process.companyLogoUrl && this.process.companyLogoUrl !== this.failedLogoUrl;
+  }
+
   logoSrc(): string {
-    return this.process.companyLogoUrl || this.DEFAULT_LOGO;
+    return this.hasVisibleLogo ? this.process.companyLogoUrl : this.DEFAULT_LOGO;
   }
 
-  onLogoLoaded() {
-    // Called when the displayed img loads successfully (real logo)
-    if (this.logoFetchState === 'fetching') this.logoFetchState = 'success';
-  }
-
-  onLogoError() {
-    // If the failure happened for the real logo, try the default one
-    if (this.process.companyLogoUrl) {
-      this.process.companyLogoUrl = null;
-      if (this.logoFetchState === 'fetching') this.showLogoFailed();
-      else this.logoFetchState = 'idle';
-      this.cdr.detectChanges();
-    } else {
-      // If even the default logo fails, just stop
-      this.logoFetchState = 'idle';
+  onLogoError(event: Event): void {
+    const image = event.target as HTMLImageElement;
+    const url = image.getAttribute('src');
+    if (url && url !== this.DEFAULT_LOGO && url === this.process.companyLogoUrl) {
+      this.failedLogoUrl = url;
     }
   }
 

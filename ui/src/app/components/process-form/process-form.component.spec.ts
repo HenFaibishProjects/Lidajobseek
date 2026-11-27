@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
+import { CompanyLogoService } from '../../services/company-logo.service';
 import { ProcessFormComponent } from './process-form.component';
 import {
   LucideAngularModule, Briefcase, Link, ExternalLink,
@@ -110,26 +111,16 @@ describe('ProcessFormComponent', () => {
     });
   });
 
-  // ── onLogoError() ───────────────────────────────────────────────────
-  describe('onLogoError()', () => {
-    it('clears the companyLogoUrl', () => {
-      component.process.companyLogoUrl = 'https://example.com/logo.png';
-      component.onLogoError();
-      expect(component.process.companyLogoUrl).toBeNull();
-    });
+  it('falls back to the default image while preserving the saved logo URL', () => {
+    const url = 'https://example.com/logo.png';
+    component.process.companyLogoUrl = url;
+    const image = document.createElement('img');
+    image.setAttribute('src', url);
 
-    it('sets logoFetchState to failed when currently fetching', () => {
-      component.process.companyLogoUrl = 'https://example.com/logo.png';
-      component.logoFetchState = 'fetching';
-      component.onLogoError();
-      expect(component.logoFetchState).toBe('failed');
-    });
+    component.onLogoError({ target: image } as unknown as Event);
 
-    it('sets logoFetchState to idle when not fetching', () => {
-      component.logoFetchState = 'idle';
-      component.onLogoError();
-      expect(component.logoFetchState).toBe('idle');
-    });
+    expect(component.process.companyLogoUrl).toBe(url);
+    expect(component.logoSrc()).toBe(DEFAULT_LOGO);
   });
 
   // ── techStackScore ──────────────────────────────────────────────────
@@ -301,44 +292,91 @@ describe('ProcessFormComponent', () => {
     });
   });
 
-  // ── fetchLogo() ─────────────────────────────────────────────────────
-  describe('fetchLogo()', () => {
-    it('does nothing when companyWebsite is empty', () => {
-      component.process.companyWebsite = '';
+  describe('company logo lookup', () => {
+    const website = 'example.com';
+    const logo = 'https://example.com/favicon.ico';
+
+    it('leaves the form idle for an empty website and enables retry after an invalid one', () => {
       component.fetchLogo();
       expect(component.logoFetchState).toBe('idle');
-    });
 
-    it('calls showLogoFailed for invalid domain (no dot)', () => {
       component.process.companyWebsite = 'notadomain';
       component.fetchLogo();
       expect(component.logoFetchState).toBe('failed');
     });
 
-    it('calls showLogoFailed for too-short domain', () => {
-      component.process.companyWebsite = 'a.b';
-      component.fetchLogo();
-      expect(component.logoFetchState).toBe('failed');
-    });
+    it('shares an in-progress lookup and saves only after the logo is available', fakeAsync(() => {
+      const resolve = spyOn(TestBed.inject(CompanyLogoService), 'resolve').and.resolveTo(logo);
+      const emit = spyOn(component.onSubmit, 'emit').and.callFake(() => {
+        expect(component.process.companyLogoUrl).toBe(logo);
+      });
+      component.process.companyWebsite = website;
 
-    it('sets state to fetching for valid domain', () => {
-      spyOn(window as any, 'Image').and.returnValue({ onload: null, onerror: null, src: '' });
-      component.process.companyWebsite = 'google.com';
+      component.onWebsiteBlur();
       component.fetchLogo();
+      void component.submit();
+      void component.submit();
+      expect(resolve).toHaveBeenCalledTimes(1);
       expect(component.logoFetchState).toBe('fetching');
-    });
-  });
+      expect(emit).not.toHaveBeenCalled();
 
-  // ── showLogoFailed auto-dismiss ─────────────────────────────────────
-  describe('logoFetchState auto-dismiss', () => {
-    it('resets failed state to idle after 4 seconds', fakeAsync(() => {
-      component.process.companyWebsite = 'notadomain';
-      component.fetchLogo();
-      expect(component.logoFetchState).toBe('failed');
-
-      tick(4000);
-      expect(component.logoFetchState).toBe('idle');
+      tick();
+      expect(emit).toHaveBeenCalledTimes(1);
+      expect(component.logoFetchState).toBe('success');
     }));
+
+    it('ignores a stale result after the website changes', async () => {
+      let completeOldLookup!: (value: string) => void;
+      const previous = new Promise<string>(resolve => { completeOldLookup = resolve; });
+      const newLogo = 'https://second.example/favicon.ico';
+      const resolve = spyOn(TestBed.inject(CompanyLogoService), 'resolve').and.returnValues(
+        previous, Promise.resolve(newLogo)
+      );
+      component.process.companyWebsite = website;
+
+      const firstLookup = component.fetchLogo();
+      component.onWebsiteChange('second.example');
+      await component.fetchLogo();
+      completeOldLookup(logo);
+      await firstLookup;
+
+      expect(resolve.calls.first().args[1].aborted).toBeTrue();
+      expect(component.process.companyLogoUrl).toBe(newLogo);
+    });
+
+    it('preserves the stored logo when the provider fails', async () => {
+      spyOn(TestBed.inject(CompanyLogoService), 'resolve').and.resolveTo(null);
+      component.process.companyWebsite = website;
+      component.process.companyLogoUrl = logo;
+
+      await component.fetchLogo();
+
+      expect(component.logoFetchState).toBe('failed');
+      expect(component.process.companyLogoUrl).toBe(logo);
+    });
+
+    it('lets the user apply a validated manual logo', fakeAsync(() => {
+      const validate = spyOn(TestBed.inject(CompanyLogoService), 'validateManualUrl').and.resolveTo(logo);
+      component.manualLogoUrl = logo;
+
+      component.applyManualLogo();
+      tick();
+
+      expect(validate).toHaveBeenCalledWith(logo, jasmine.any(AbortSignal));
+      expect(component.process.companyLogoUrl).toBe(logo);
+      expect(component.logoFetchState).toBe('success');
+    }));
+
+    it('submits without a logo when discovery fails', async () => {
+      spyOn(TestBed.inject(CompanyLogoService), 'resolve').and.resolveTo(null);
+      const emit = spyOn(component.onSubmit, 'emit');
+      component.process.companyWebsite = website;
+
+      await component.submit();
+
+      expect(emit).toHaveBeenCalledTimes(1);
+      expect(component.process.companyLogoUrl).toBe('');
+    });
   });
 
   // ── formatUrl() ─────────────────────────────────────────────────────
