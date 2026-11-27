@@ -689,3 +689,9 @@ body.dark-theme .feature-item.not-included .feature-icon {
     display: none;
   }
 }
+
+@media (max-width: 768px) {
+  .pricing-grid { grid-template-columns: minmax(0, 1fr); }
+  .pricing-card { min-width: 0; overflow-wrap: anywhere; }
+  .price-section { flex-wrap: wrap; }
+}

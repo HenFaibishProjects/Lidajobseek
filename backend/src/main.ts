@@ -15,7 +15,9 @@ async function bootstrap() {
           'font-src': ["'self'", 'https://fonts.gstatic.com'],
           'style-src': ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
           'script-src-attr': ["'unsafe-inline'"],
-          'img-src': ["'self'", 'data:', 'blob:', 'https://api.dicebear.com', 'https://www.google.com', 'https://*.gstatic.com'],
+          // Logo discovery runs in the browser for user-provided websites.
+          'connect-src': ["'self'", 'https:'],
+          'img-src': ["'self'", 'data:', 'blob:', 'https:'],
         },
       },
     }),

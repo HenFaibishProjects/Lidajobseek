@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { ElementRef } from '@angular/core';
+import { PROCESS_STAGES } from '../../shared/process-stages';
 import { ProcessListComponent } from './process-list.component';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { FormsModule } from '@angular/forms';
@@ -83,6 +84,23 @@ describe('ProcessListComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  it('defaults to cards on phones and exposes a collapsible dashboard filter control', () => {
+    spyOn(window, 'matchMedia').and.returnValue({ matches: true } as MediaQueryList);
+    const mobileFixture = TestBed.createComponent(ProcessListComponent);
+    try {
+      mobileFixture.detectChanges();
+      const mobileDashboard = mobileFixture.componentInstance;
+      expect(mobileDashboard.viewMode).toBe('grid');
+      const button: HTMLButtonElement = mobileFixture.nativeElement.querySelector('.mobile-dashboard-filter-btn');
+      expect(button.getAttribute('aria-expanded')).toBe('false');
+      button.click();
+      mobileFixture.detectChanges();
+      expect(button.getAttribute('aria-expanded')).toBe('true');
+    } finally {
+      mobileFixture.destroy();
+    }
+  });
+
   it('should create unique CSS classes for interview waiting stages', () => {
     expect(component.getStatusClass('Waiting for Interview Feedback')).toBe(
       'status-waiting-for-interview-feedback'
@@ -93,6 +111,72 @@ describe('ProcessListComponent', () => {
     expect(component.getStatusClass('Awaiting New Interview Date')).toBe(
       'status-awaiting-new-interview-date'
     );
+  });
+
+  it('assigns a styled badge and status dot to every stage in both themes', () => {
+    component.processes = [...PROCESS_STAGES, 'Legacy status'].map((currentStage, id) => ({
+      id, currentStage, companyName: 'Acme', roleTitle: 'Engineer',
+    }));
+    component.showAllProcesses = true;
+    component.viewMode = 'grid';
+    component.applyFilters();
+    fixture.detectChanges();
+    const badges: HTMLElement[] = Array.from(fixture.nativeElement.querySelectorAll('.process-card .badge-stage'));
+    const dots: HTMLElement[] = Array.from(fixture.nativeElement.querySelectorAll('.process-card .status-dot'));
+    expect(badges.length).toBe(PROCESS_STAGES.length + 1);
+    expect(new Set(PROCESS_STAGES.map(stage => component.getStatusClass(stage))).size).toBe(PROCESS_STAGES.length);
+    expect(badges[badges.length - 1].classList).toContain('status-unknown');
+    const wasDark = document.body.classList.contains('dark-theme');
+
+    try {
+      for (const dark of [false, true]) {
+        document.body.classList.toggle('dark-theme', dark);
+        badges.forEach((badge, index) => {
+          expect(getComputedStyle(badge).backgroundImage).toContain('linear-gradient');
+          expect(getComputedStyle(dots[index]).getPropertyValue('--stage-accent').trim()).toBeTruthy();
+        });
+      }
+    } finally {
+      document.body.classList.toggle('dark-theme', wasDark);
+    }
+  });
+
+  it('shows full long labels and a City column with a placeholder for missing cities', () => {
+    component.processes = [
+      { id: 1, companyName: 'Acme', roleTitle: 'Senior Software Platform Engineer',
+        currentStage: 'Home Task Submitted (Under Review)', location: 'Haifa' },
+      { id: 2, companyName: 'Other', roleTitle: 'Engineer', currentStage: PROCESS_STAGES[0] },
+    ];
+    component.viewMode = 'list';
+    component.applyFilters();
+    fixture.detectChanges();
+
+    const list: HTMLElement = fixture.nativeElement.querySelector('.processes-list');
+    expect(list.querySelector('.list-header-row .list-col-city')?.textContent?.trim()).toBe('City');
+    expect(list.querySelector('.list-role-text')?.textContent).toContain('Senior Software Platform Engineer');
+    expect(list.querySelector('.list-row .badge-stage')?.textContent).toContain('Home Task Submitted (Under Review)');
+    expect(list.querySelector('.list-row .list-col-city')?.textContent?.trim()).toBe('Haifa');
+    expect(list.querySelector('.list-row .list-col-city [aria-label="No city"]')).not.toBeNull();
+  });
+
+  it('sorts cities in both directions, keeps missing cities last and preserves filters', () => {
+    component.processes = [
+      { id: 1, location: 'Tel Aviv', currentStage: PROCESS_STAGES[0] },
+      { id: 2, location: 'Haifa', currentStage: PROCESS_STAGES[0] },
+      { id: 3, location: '   ', currentStage: PROCESS_STAGES[0] },
+      { id: 4, location: 'Haifa', currentStage: 'Withdrawn' },
+    ];
+    component.applyFilters();
+    component.sort('location');
+    expect(component.filteredProcesses.map(process => process.id)).toEqual([2, 1, 3]);
+
+    component.sort('location');
+    expect(component.filteredProcesses.map(process => process.id)).toEqual([1, 2, 3]);
+
+    component.searchText = 'haifa';
+    component.applyFilters();
+    expect(component.filteredProcesses.map(process => process.id)).toEqual([2]);
+    expect(component.getSortDirection('location')).toBe('desc');
   });
 
   it('should use compact stage labels in the process table', () => {

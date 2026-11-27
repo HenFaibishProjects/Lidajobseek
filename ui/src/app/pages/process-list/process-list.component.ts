@@ -91,10 +91,12 @@ export class ProcessListComponent implements OnInit, OnDestroy, AfterViewChecked
     processesOnActioin: any[] = [];
     filteredProcesses: any[] = [];
     tasks: any[] = [];
+    private readonly failedCompanyLogos = new WeakMap<object, string>();
     isLoading: boolean = true;
 
     // View mode
-    viewMode: 'grid' | 'list' = 'list';
+    viewMode: 'grid' | 'list' = window.matchMedia('(max-width: 767px)').matches ? 'grid' : 'list';
+    mobileFiltersOpen = false;
 
     // Sorting properties
     sortColumn: string = '';
@@ -719,9 +721,8 @@ export class ProcessListComponent implements OnInit, OnDestroy, AfterViewChecked
             return true;
         });
 
-        // Apply current sorting to filtered results
         if (this.sortColumn) {
-            this.sort(this.sortColumn, true);
+            this.sortFilteredProcesses();
         }
     }
 
@@ -744,13 +745,24 @@ export class ProcessListComponent implements OnInit, OnDestroy, AfterViewChecked
         this.applyFilters();
     }
 
+    hasCompanyLogo(process: any): boolean {
+        return !!process?.companyLogoUrl && this.failedCompanyLogos.get(process) !== process.companyLogoUrl;
+    }
+
+    onCompanyLogoError(process: any, event: Event): void {
+        const image = event.target as HTMLImageElement;
+        if (process?.companyLogoUrl === image.getAttribute('src')) {
+            this.failedCompanyLogos.set(process, process.companyLogoUrl);
+        }
+    }
+
     getStatusClass(stage: string): string {
-        if (!stage) return '';
-        return 'status-' + stage
-            .trim()
-            .toLowerCase()
-            .replace(/[\s/()]+/g, '-')
-            .replace(/-+$/, '');
+        const label = stage?.trim().toLowerCase();
+        if (!PROCESS_STAGES.some(knownStage => knownStage.toLowerCase() === label)) {
+            return 'status-unknown';
+        }
+
+        return 'status-' + label.replace(/[\s/()]+/g, '-').replace(/-+$/, '');
     }
 
     getCompactStageLabel(stage: string): string {
@@ -764,43 +776,27 @@ export class ProcessListComponent implements OnInit, OnDestroy, AfterViewChecked
         }
     }
 
-    // Sorting method
-    sort(column: string, skipFilteredUpdate: boolean = false) {
-        if (this.sortColumn === column) {
-            // Toggle direction if same column
-            this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
-        } else {
-            // New column, default to ascending
-            this.sortColumn = column;
-            this.sortDirection = 'asc';
-        }
+    sort(column: string) {
+        this.sortDirection = this.sortColumn === column && this.sortDirection === 'asc' ? 'desc' : 'asc';
+        this.sortColumn = column;
+        this.applyFilters();
+    }
 
-        const arrayToSort = skipFilteredUpdate ? this.filteredProcesses : this.processes;
+    private sortFilteredProcesses(): void {
+        const direction = this.sortDirection === 'asc' ? 1 : -1;
+        this.filteredProcesses.sort((a, b) => {
+            const aValue = this.getSortValue(a, this.sortColumn);
+            const bValue = this.getSortValue(b, this.sortColumn);
 
-        arrayToSort.sort((a, b) => {
-            let aValue = this.getSortValue(a, column);
-            let bValue = this.getSortValue(b, column);
+            if (aValue === bValue || (aValue == null && bValue == null)) return 0;
+            if (aValue == null) return this.sortColumn === 'location' ? 1 : direction;
+            if (bValue == null) return this.sortColumn === 'location' ? -1 : -direction;
 
-            // Handle null/undefined values
-            if (aValue == null) return this.sortDirection === 'asc' ? 1 : -1;
-            if (bValue == null) return this.sortDirection === 'asc' ? -1 : 1;
-
-            // Compare based on type
             if (typeof aValue === 'string' && typeof bValue === 'string') {
-                return this.sortDirection === 'asc'
-                    ? aValue.localeCompare(bValue)
-                    : bValue.localeCompare(aValue);
-            } else {
-                // Numeric or date comparison
-                return this.sortDirection === 'asc'
-                    ? (aValue > bValue ? 1 : -1)
-                    : (aValue < bValue ? 1 : -1);
+                return direction * aValue.localeCompare(bValue);
             }
+            return direction * (Number(aValue) - Number(bValue));
         });
-
-        if (!skipFilteredUpdate) {
-            this.filteredProcesses = [...arrayToSort];
-        }
     }
 
     // Helper to get sort value based on column
@@ -813,7 +809,7 @@ export class ProcessListComponent implements OnInit, OnDestroy, AfterViewChecked
             case 'interactions':
                 return process._count?.interactions || 0;
             case 'location':
-                return process.location?.toLowerCase();
+                return process.location?.trim().toLowerCase() || undefined;
             case 'created':
                 return new Date(process.createdAt);
             case 'updated':

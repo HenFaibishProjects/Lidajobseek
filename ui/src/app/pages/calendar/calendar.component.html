@@ -16,26 +16,6 @@
             </div>
         </div>
         <div class="header-actions">
-            <button type="button" class="btn-secondary availability-control" (click)="showAvailabilityManager = !showAvailabilityManager">Manage Availability</button>
-            <button type="button" class="btn-secondary availability-control availability-block-action" (click)="openAvailabilityEditor()">Block Time</button>
-            <button class="btn-secondary" (click)="exportData()">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                    <polyline points="7 10 12 15 17 10"></polyline>
-                    <line x1="12" y1="15" x2="12" y2="3"></line>
-                </svg>
-                Export
-            </button>
-            <button class="btn-secondary" (click)="fileInput.click()">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                    <polyline points="17 8 12 3 7 8"></polyline>
-                    <line x1="12" y1="3" x2="12" y2="15"></line>
-                </svg>
-                Import
-            </button>
-            <input #fileInput type="file" (change)="onFileSelected($event)" class="file-input-hidden" accept=".json">
-
             <button class="btn-primary" routerLink="/schedule-interview">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -43,15 +23,39 @@
                 </svg>
                 Schedule Interview
             </button>
+            <details class="calendar-actions" [open]="!mobileViewport">
+                <summary>More</summary>
+                <div class="calendar-action-options">
+                    <button type="button" class="btn-secondary availability-control" (click)="showAvailabilityManager = !showAvailabilityManager">Manage Availability</button>
+                    <button type="button" class="btn-secondary availability-control availability-block-action" (click)="openAvailabilityEditor()">Block Time</button>
+                    <button class="btn-secondary" (click)="exportData()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        Export
+                    </button>
+                    <button class="btn-secondary" (click)="fileInput.click()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                        Import
+                    </button>
+                    <input #fileInput type="file" (change)="onFileSelected($event)" class="file-input-hidden" accept=".json">
+                </div>
+            </details>
         </div>
     </div>
 
     <!-- Toolbar / Filters -->
     <div class="toolbar">
         <div class="view-mode-tabs">
-            <button class="view-tab" [class.active]="viewMode === 'month'" (click)="changeView('month')">Month Grid</button>
-            <button class="view-tab" [class.active]="viewMode === 'week'" (click)="changeView('week')">Week Grid</button>
-            <button class="view-tab" [class.active]="viewMode === 'list'" (click)="changeView('list')">List View</button>
+            <button type="button" class="view-tab" [class.active]="viewMode === 'list'" [attr.aria-pressed]="viewMode === 'list'" (click)="changeView('list')">Agenda</button>
+            <button type="button" class="view-tab" [class.active]="viewMode === 'week'" [attr.aria-pressed]="viewMode === 'week'" (click)="changeView('week')">Week</button>
+            <button type="button" class="view-tab" [class.active]="viewMode === 'month'" [attr.aria-pressed]="viewMode === 'month'" (click)="changeView('month')">Month</button>
         </div>
 
         <div class="search-wrapper">
@@ -64,34 +68,38 @@
                 [(ngModel)]="processSearch"
                 (ngModelChange)="onProcessSearchChange()"
                 placeholder="Filter by company or role..."
+                aria-label="Filter by company or role"
                 class="search-input"
             />
             <!-- Dropdown for process search results -->
             <div *ngIf="filteredProcesses.length > 0 && processSearch" class="search-dropdown">
-                <div *ngFor="let process of filteredProcesses"
+                <button type="button" *ngFor="let process of filteredProcesses"
                      class="search-option"
                      (click)="selectProcess(process)">
-                     {{process.companyName}} - {{process.roleTitle}}
+                     {{process.companyName}} · {{process.roleTitle}}
+                </button>
+            </div>
+        </div>
+
+        <details class="calendar-filters" [open]="!mobileViewport">
+            <summary>Dates and filters</summary>
+            <div class="filters-row">
+                <div class="date-range" *ngIf="!showAllInterviews">
+                    <input type="date" [(ngModel)]="startDate" (ngModelChange)="onFilterChange()" class="filter-input" aria-label="Start date">
+                    <span class="separator">to</span>
+                    <input type="date" [(ngModel)]="endDate" (ngModelChange)="onFilterChange()" class="filter-input" aria-label="End date">
                 </div>
+
+                <label class="checkbox-filter" [class.active]="showAllInterviews">
+                    <input type="checkbox" [(ngModel)]="showAllInterviews" (change)="onFilterChange()">
+                    <span>Show All (Include Past)</span>
+                </label>
+
+                <button class="btn-icon-only" (click)="loadInterviews()" title="Refresh">
+                    <span class="material-icons">refresh</span>
+                </button>
             </div>
-        </div>
-
-        <div class="filters-row">
-            <div class="date-range" *ngIf="!showAllInterviews">
-                <input type="date" [(ngModel)]="startDate" (ngModelChange)="onFilterChange()" class="filter-input">
-                <span class="separator">to</span>
-                <input type="date" [(ngModel)]="endDate" (ngModelChange)="onFilterChange()" class="filter-input">
-            </div>
-
-            <label class="checkbox-filter" [class.active]="showAllInterviews">
-                <input type="checkbox" [(ngModel)]="showAllInterviews" (change)="onFilterChange()">
-                <span>Show All (Include Past)</span>
-            </label>
-
-            <button class="btn-icon-only" (click)="loadInterviews()" title="Refresh">
-                <span class="material-icons">refresh</span>
-            </button>
-        </div>
+        </details>
     </div>
 
     <div class="availability-status" aria-live="polite">
@@ -99,7 +107,7 @@
         <span *ngIf="availabilityError">Availability could not be loaded. Choose a range of up to 366 days. <button type="button" class="btn-secondary" (click)="loadAvailability()">Retry</button></span>
         <span *ngIf="!availabilityLoading && !availabilityError">Calendar timezone: {{ calendarTimeZone }} · Manual blocks stay visible with company filters.</span>
     </div>
-    <section *ngIf="showAvailabilityManager || viewMode === 'list'" class="availability-manager" aria-labelledby="availability-manager-title">
+    <section *ngIf="showAvailabilityManager || viewMode === 'list'" class="availability-manager" [class.availability-passive]="!showAvailabilityManager" aria-labelledby="availability-manager-title">
         <div class="availability-manager-header"><div><h2 id="availability-manager-title">{{ showAvailabilityManager ? 'Manage Availability' : 'Blocked time' }}</h2><p>{{ viewMode === 'list' ? 'Occurrences in the selected range, or the next 90 days when no end date is set.' : 'Occurrences in the displayed calendar range.' }}</p></div><button type="button" class="btn-secondary" (click)="openAvailabilityEditor()">Block Time</button></div>
         <p *ngIf="!availabilityLoading && !availabilityError && !manualIntervals.length" class="availability-empty">No manual blocks in this range.</p>
         <div class="availability-block-list">
@@ -107,31 +115,37 @@
         </div>
     </section>
 
-    <!-- Calendar Color Legend -->
-    <div class="calendar-legend" *ngIf="!loading && viewMode !== 'list'">
-        <div class="legend-item"><span class="legend-dot availability-legend-dot"></span><span class="legend-label">Manually blocked / Entire day</span></div>
-        <div class="legend-item"><span class="legend-dot availability-free-dot"></span><span class="legend-label">Unmarked time: check before scheduling</span></div>
-        <div class="legend-item">
-            <span class="legend-dot" style="background-color: #3b82f6;"></span>
-            <span class="legend-label">Phone Interview</span>
+    <details *ngIf="!loading && viewMode !== 'list'" class="calendar-legend-shell" [open]="!mobileViewport">
+        <summary>Calendar legend</summary>
+        <div class="calendar-mobile mobile-date-legend">
+            <span><i class="date-interview-marker"></i> Interview</span>
+            <span><i class="date-block-marker"></i> Blocked time</span>
         </div>
-        <div class="legend-item">
-            <span class="legend-dot" style="background-color: #8b5cf6;"></span>
-            <span class="legend-label">Video Interview</span>
+        <div class="calendar-legend calendar-desktop">
+            <div class="legend-item"><span class="legend-dot availability-legend-dot"></span><span class="legend-label">Manually blocked / Entire day</span></div>
+            <div class="legend-item"><span class="legend-dot availability-free-dot"></span><span class="legend-label">Unmarked time: check before scheduling</span></div>
+            <div class="legend-item">
+                <span class="legend-dot" style="background-color: #3b82f6;"></span>
+                <span class="legend-label">Phone Interview</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-dot" style="background-color: #8b5cf6;"></span>
+                <span class="legend-label">Video Interview</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-dot" style="background-color: #10b981;"></span>
+                <span class="legend-label">On-Site Interview</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-dot" style="background-color: #ffffff;"></span>
+                <span class="legend-label">Other Interactions</span>
+            </div>
+            <div class="legend-item legend-item--next">
+                <span class="legend-next-marker"></span>
+                <span class="legend-label">Next Upcoming Interview</span>
+            </div>
         </div>
-        <div class="legend-item">
-            <span class="legend-dot" style="background-color: #10b981;"></span>
-            <span class="legend-label">On-Site Interview</span>
-        </div>
-        <div class="legend-item">
-            <span class="legend-dot" style="background-color: #ffffff;"></span>
-            <span class="legend-label">Other Interactions</span>
-        </div>
-        <div class="legend-item legend-item--next">
-            <span class="legend-next-marker"></span>
-            <span class="legend-label">Next Upcoming Interview</span>
-        </div>
-    </div>
+    </details>
 
     <div class="calendar-layout">
     <div class="calendar-content">
@@ -143,13 +157,13 @@
             <!-- Month Calendar Grid View -->
             <div *ngIf="viewMode === 'month'" class="month-calendar-view">
                 <div class="calendar-nav-header">
-                    <button class="btn-nav" (click)="prevMonth()">
+                    <button class="btn-nav" aria-label="Previous month" (click)="prevMonth()">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <polyline points="15 18 9 12 15 6"></polyline>
                         </svg>
                     </button>
                     <h3 class="current-period-label">{{ currentMonthDate | date:'MMMM yyyy' }}</h3>
-                    <button class="btn-nav" (click)="nextMonth()">
+                    <button class="btn-nav" aria-label="Next month" (click)="nextMonth()">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <polyline points="9 18 15 12 9 6"></polyline>
                         </svg>
@@ -157,6 +171,7 @@
                     <button class="btn-today-nav" (click)="todayMonth()">Today</button>
                 </div>
 
+                <ng-container *ngTemplateOutlet="mobileDates; context: { days: calendarDays }"></ng-container>
                 <div class="month-grid">
                     <div class="day-name-header" *ngFor="let dayName of weekDaysHeader">
                         {{ dayName }}
@@ -194,13 +209,13 @@
             <!-- Week Calendar Grid View -->
             <div *ngIf="viewMode === 'week'" class="week-calendar-view">
                 <div class="calendar-nav-header">
-                    <button class="btn-nav" (click)="prevWeek()">
+                    <button class="btn-nav" aria-label="Previous week" (click)="prevWeek()">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <polyline points="15 18 9 12 15 6"></polyline>
                         </svg>
                     </button>
                     <h3 class="current-period-label">Week of {{ weekDays[0]?.date | date:'MMM d, yyyy' }}</h3>
-                    <button class="btn-nav" (click)="nextWeek()">
+                    <button class="btn-nav" aria-label="Next week" (click)="nextWeek()">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <polyline points="9 18 15 12 9 6"></polyline>
                         </svg>
@@ -208,6 +223,7 @@
                     <button class="btn-today-nav" (click)="todayWeek()">Today</button>
                 </div>
 
+                <ng-container *ngTemplateOutlet="mobileDates; context: { days: weekDays }"></ng-container>
                 <div class="week-grid">
                     <div class="week-day-column" [class.availability-all-day]="day.hasAllDayBlock"
                          *ngFor="let day of weekDays"
@@ -271,7 +287,10 @@
                     <p>No interviews scheduled for this day.</p>
                 </div>
 
-                <div class="day-interviews-list" *ngIf="selectedDay.interviews.length > 0">
+                <div class="calendar-mobile" *ngIf="selectedDay.interviews.length">
+                    <ng-container *ngTemplateOutlet="mobileCards; context: { $implicit: orderedInterviews(selectedDay.interviews) }"></ng-container>
+                </div>
+                <div class="day-interviews-list calendar-desktop" *ngIf="selectedDay.interviews.length > 0">
                     <div *ngFor="let interview of selectedDay.interviews" class="interview-card card-grid-layout"
                         [class.next-interview-card]="isNextInterview(interview)">
                         <div class="card-status-strip" [style.background-color]="getInterviewColor(interview.interviewType)"></div>
@@ -389,8 +408,26 @@
                     <button class="btn-primary" routerLink="/schedule-interview">Schedule Interview</button>
                 </div>
 
+                <div class="calendar-mobile">
+                    <section class="agenda-day" *ngFor="let group of agendaGroups">
+                        <h2>{{ group.date | date:'EEEE, MMMM d, yyyy' }}</h2>
+                        <ng-container *ngTemplateOutlet="mobileCards; context: { $implicit: group.interviews }"></ng-container>
+                    </section>
+                    <details class="agenda-blocks" *ngIf="manualIntervals.length && !showAvailabilityManager">
+                        <summary>Blocked time ({{ manualIntervals.length }})</summary>
+                        <div class="availability-block-list">
+                            <button *ngFor="let block of manualIntervals" type="button" class="availability-block-card"
+                                [disabled]="blockDetailsLoading" (click)="editAvailability(block)">
+                                <strong dir="auto">{{ block.title }}</strong>
+                                <span>{{ block.start | date:'EEE, MMM d' }} · {{ blockRange(block) }}</span>
+                                <small *ngIf="block.repeatWeekly">Repeats weekly</small>
+                            </button>
+                        </div>
+                    </details>
+                </div>
+
                 <!-- Featured Next Interview -->
-                <div *ngIf="!showAllInterviews && nextInterview" class="featured-next-section">
+                <div *ngIf="!showAllInterviews && nextInterview" class="featured-next-section calendar-desktop">
                     <div class="section-badge">Next Interview</div>
                     <div class="featured-card card-grid-layout next-interview-card">
                         <div class="featured-status-strip card-status-strip" [style.background-color]="getInterviewColor(nextInterview.interviewType)"></div>
@@ -489,7 +526,7 @@
                     </div>
                 </div>
 
-                <div *ngIf="interviews.length > 0" class="interviews-list-container">
+                <div *ngIf="interviews.length > 0" class="interviews-list-container calendar-desktop">
                     <h2 class="list-section-title" *ngIf="!showAllInterviews && otherInterviews.length > 0">Following Interviews</h2>
                     <h2 class="list-section-title" *ngIf="showAllInterviews">All Interactions</h2>
                     
@@ -628,3 +665,79 @@
 </div>
 
 <app-availability-editor *ngIf="showAvailabilityEditor" [block]="editingAvailabilityBlock" [selectedDate]="availabilityEditorDate" (closed)="showAvailabilityEditor = false" (saved)="availabilitySaved()"></app-availability-editor>
+
+<ng-template #mobileDates let-days="days">
+    <div class="calendar-mobile date-picker">
+        <span *ngIf="viewMode === 'month'">
+            <span class="date-weekdays" aria-hidden="true">
+                <span *ngFor="let name of weekDaysHeader">{{ name }}</span>
+            </span>
+        </span>
+        <div class="date-picker-grid">
+            <button *ngFor="let day of days" type="button" class="date-picker-day"
+                [class.outside-month]="viewMode === 'month' && !day.isCurrentMonth"
+                [class.today]="day.isToday"
+                [attr.aria-current]="day.isToday ? 'date' : null"
+                [attr.aria-pressed]="selectedDay?.date?.toDateString() === day.date.toDateString()"
+                [attr.aria-label]="(day.date | date:'EEEE, MMMM d, yyyy') + ', ' + day.interviews.length + ' interviews, ' + day.blocks.length + ' blocks'"
+                (click)="selectDay(day)">
+                <span *ngIf="viewMode === 'week'">{{ day.date | date:'EEE' }}</span>
+                <strong>{{ day.date | date:'d' }}</strong>
+                <span class="date-markers" aria-hidden="true">
+                    <i *ngIf="day.interviews.length" class="date-interview-marker"></i>
+                    <i *ngIf="day.blocks.length" class="date-block-marker"></i>
+                </span>
+            </button>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #mobileCards let-items>
+    <article class="mobile-interview" *ngFor="let interview of items"
+        [style.--interview-color]="getInterviewColor(interview.interviewType)"
+        [class.next-interview-card]="isNextInterview(interview)">
+        <div class="mobile-interview-type">
+            <span>{{ getInterviewTypeLabel(interview.interviewType) }}</span>
+            <strong *ngIf="isNextInterview(interview)">Next Upcoming</strong>
+        </div>
+        <div class="mobile-interview-company">
+            <img *ngIf="interview.process?.companyLogoUrl && !failedLogos.has(interview.process.companyLogoUrl)"
+                [src]="interview.process.companyLogoUrl" referrerpolicy="no-referrer" alt=""
+                (error)="failedLogos.add(interview.process.companyLogoUrl)">
+            <div>
+                <h3 dir="auto">{{ interview.process?.companyName || interview.agency?.agencyName }}</h3>
+                <p dir="auto">{{ interview.process?.roleTitle || 'Recruiter / Agency Meeting' }}</p>
+            </div>
+        </div>
+        <p class="mobile-interview-time">
+            <time [attr.datetime]="interview.date">{{ interview.date | date:'HH:mm' }}</time>
+            <ng-container *ngIf="interview.durationMinutes">
+                – {{ getEndTime(interview.date, interview.durationMinutes) | date:'HH:mm' }} · {{ formatDuration(interview.durationMinutes) }}
+            </ng-container>
+        </p>
+        <p *ngIf="interview.address || interview.process?.location" dir="auto">{{ interview.address || interview.process.location }}</p>
+        <div class="mobile-interview-actions" *ngIf="interview.videoLink || interviewMapUrl(interview)">
+            <a *ngIf="interview.videoLink" class="btn btn-primary" [href]="interview.videoLink" target="_blank" rel="noopener noreferrer">Join meeting</a>
+            <a *ngIf="interviewMapUrl(interview) as mapUrl" class="btn btn-secondary" [href]="mapUrl" target="_blank" rel="noopener noreferrer">Directions</a>
+        </div>
+        <details class="mobile-interview-details">
+            <summary>Interview details and actions</summary>
+            <div *ngIf="interview.participants?.length">
+                <strong>Participants</strong>
+                <ul><li *ngFor="let person of interview.participants" dir="auto">{{ person.name }}</li></ul>
+            </div>
+            <p *ngIf="interview.headsup" class="interview-notes" dir="auto">{{ interview.headsup }}</p>
+            <p *ngIf="interview.notes" class="interview-notes" dir="auto">{{ interview.notes }}</p>
+            <div class="mobile-interview-actions">
+                <a *ngIf="interview.processId || interview.agencyId" class="btn btn-secondary"
+                    [routerLink]="interview.processId ? ['/process', interview.processId] : ['/recruiters', interview.agencyId]"
+                    [fragment]="'interaction-' + interview.id">View interview</a>
+                <a *ngIf="interview.processId" class="btn btn-secondary"
+                    [routerLink]="['/process', interview.processId, 'interaction', interview.id, 'edit']">Edit</a>
+                <a *ngIf="!interview.processId && interview.agencyId" class="btn btn-secondary"
+                    routerLink="/schedule-interview" [queryParams]="{ editInterviewId: interview.id }">Edit</a>
+                <button type="button" class="btn btn-secondary interview-delete" (click)="deleteInterview(interview.id)">Delete</button>
+            </div>
+        </details>
+    </article>
+</ng-template>

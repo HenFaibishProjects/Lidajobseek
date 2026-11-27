@@ -1,6 +1,6 @@
 import { AvailabilityBlock, OccupiedInterval } from '../../services/availability.service';
 import { AvailabilityEditorComponent } from '../../components/availability-editor/availability-editor.component';
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -54,6 +54,16 @@ export class CalendarComponent implements OnInit {
   calendarDays: any[] = [];
   weekDays: any[] = [];
   selectedDay: any = null;
+  mobileViewport = window.matchMedia('(max-width: 767px)').matches;
+
+  @HostListener('window:resize')
+  updateViewport(): void {
+    this.mobileViewport = window.matchMedia('(max-width: 767px)').matches;
+  }
+
+  agendaGroups: { date: Date; interviews: any[] }[] = [];
+  failedLogos = new Set<string>();
+
   weekDaysHeader = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
   constructor(
@@ -415,6 +425,14 @@ export class CalendarComponent implements OnInit {
   }
 
   generateCalendar() {
+    const groups = new Map<string, { date: Date; interviews: any[] }>();
+    for (const interview of this.orderedInterviews(this.interviews)) {
+      const date = new Date(interview.date);
+      const key = this.formatDateForInput(date);
+      if (!groups.has(key)) groups.set(key, { date, interviews: [] });
+      groups.get(key)!.interviews.push(interview);
+    }
+    this.agendaGroups = [...groups.values()];
     this.generateMonthDays();
     this.generateWeekDays();
     this.updateSelectedDayInterviews();
@@ -490,34 +508,23 @@ export class CalendarComponent implements OnInit {
     this.weekDays = days;
   }
 
+  orderedInterviews(interviews: any[]): any[] {
+    return [...interviews].sort((a, b) => Date.parse(a.date) - Date.parse(b.date));
+  }
+
   updateSelectedDayInterviews() {
-    if (!this.selectedDay) {
-      // Find today in calendarDays
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      this.selectedDay = this.calendarDays.find(d => {
-        const dDate = new Date(d.date);
-        dDate.setHours(0, 0, 0, 0);
-        return dDate.getTime() === today.getTime();
-      }) || this.calendarDays[0];
-    } else {
-      // Refresh the selected day interviews from current list
-      const selDate = new Date(this.selectedDay.date);
-      selDate.setHours(0, 0, 0, 0);
-      
-      const refreshedInterviews = this.interviews.filter(item => {
-        const itemDate = new Date(item.date);
-        itemDate.setHours(0, 0, 0, 0);
-        return itemDate.getTime() === selDate.getTime();
-      });
-      
-      this.selectedDay = {
-        ...this.selectedDay,
-        interviews: refreshedInterviews,
-        blocks: this.blocksForDay(selDate),
-        hasAllDayBlock: this.blocksForDay(selDate).some(interval => interval.allDay)
-      };
-    }
+    const days = this.viewMode === 'week' ? this.weekDays : this.calendarDays;
+    const anchor = this.viewMode === 'week' ? this.currentWeekDate : this.currentMonthDate;
+    const anchorKey = this.formatDateForInput(anchor);
+    const selectedKey = this.selectedDay ? this.formatDateForInput(this.selectedDay.date) : anchorKey;
+    this.selectedDay = days.find(day => this.formatDateForInput(day.date) === selectedKey)
+      ?? days.find(day => this.formatDateForInput(day.date) === anchorKey)
+      ?? days[0];
+  }
+
+  interviewMapUrl(interview: any): string {
+    const address = interview.address?.trim();
+    return address ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}` : '';
   }
 
   selectDay(day: any) {
@@ -531,6 +538,7 @@ export class CalendarComponent implements OnInit {
       this.currentMonthDate.getMonth() - 1,
       1
     );
+    this.selectedDay = null;
     this.generateCalendar();
     this.loadAvailability();
   }
@@ -541,12 +549,14 @@ export class CalendarComponent implements OnInit {
       this.currentMonthDate.getMonth() + 1,
       1
     );
+    this.selectedDay = null;
     this.generateCalendar();
     this.loadAvailability();
   }
 
   todayMonth() {
     this.currentMonthDate = new Date();
+    this.selectedDay = null;
     this.generateCalendar();
     this.loadAvailability();
   }
@@ -556,6 +566,7 @@ export class CalendarComponent implements OnInit {
     const nextDate = new Date(this.currentWeekDate);
     nextDate.setDate(nextDate.getDate() - 7);
     this.currentWeekDate = nextDate;
+    this.selectedDay = null;
     this.generateCalendar();
     this.loadAvailability();
   }
@@ -564,12 +575,14 @@ export class CalendarComponent implements OnInit {
     const nextDate = new Date(this.currentWeekDate);
     nextDate.setDate(nextDate.getDate() + 7);
     this.currentWeekDate = nextDate;
+    this.selectedDay = null;
     this.generateCalendar();
     this.loadAvailability();
   }
 
   todayWeek() {
     this.currentWeekDate = new Date();
+    this.selectedDay = null;
     this.generateCalendar();
     this.loadAvailability();
   }

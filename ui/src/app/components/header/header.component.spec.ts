@@ -49,6 +49,23 @@ describe('HeaderComponent', () => {
     expect(component.drawerOpen).toBeFalse();
   });
 
+  it('keeps the closed navigation drawer inert and closes it when opening Career Chat', () => {
+    component.isAuthenticated = true;
+    fixture.detectChanges();
+    const drawer: HTMLElement = fixture.nativeElement.querySelector('.nav-drawer');
+    expect(drawer.inert).toBeTrue();
+
+    component.toggleDrawer();
+    fixture.detectChanges();
+    expect(drawer.inert).toBeFalse();
+
+    const openChat = spyOn(component.openCareerChat, 'emit');
+    fixture.nativeElement.querySelector('.mobile-career-chat').click();
+    fixture.detectChanges();
+    expect(openChat).toHaveBeenCalledTimes(1);
+    expect(drawer.inert).toBeTrue();
+  });
+
   it('should close drawer on navigation end', fakeAsync(() => {
     component.drawerOpen = true;
     routerEventsSubject.next(new NavigationEnd(1, '/', '/'));

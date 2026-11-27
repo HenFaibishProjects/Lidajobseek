@@ -3,21 +3,20 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  min-height: 100dvh;
   background: var(--bg-secondary);
 }
 
 /* Main Content -sits below the 64px sticky top bar */
 .app-main {
   flex: 1;
-  min-height: 100vh;
+  min-width: 0;
   background: var(--bg-secondary);
-  padding-top: 64px;
-  /* exact top-bar height */
 }
 
 .app-main-no-sidebar {
   flex: 1;
-  min-height: 100vh;
+  min-width: 0;
   background: var(--bg-secondary);
 }
 
@@ -30,18 +29,17 @@
 /* Mobile -smaller top bar + bottom tab bar */
 @media (max-width: 767px) {
   .app-main {
-    padding-top: 56px;
-    padding-bottom: calc(62px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px));
   }
 
   .content-wrapper {
-    padding: 16px;
+    padding: 16px max(16px, env(safe-area-inset-right, 0px)) 16px max(16px, env(safe-area-inset-left, 0px));
   }
 }
 
 @media (max-width: 480px) {
   .content-wrapper {
-    padding: 12px;
+    padding: 12px max(12px, env(safe-area-inset-right, 0px)) 12px max(12px, env(safe-area-inset-left, 0px));
   }
 }
 
@@ -74,9 +72,13 @@
   transform: scale(0.96);
 }
 
-@media (max-width: 480px) {
-  .cc-float-btn {
-    right: 24px;
-    bottom: 80px;
-  }
+@media (max-width: 767px) {
+  .cc-float-btn, app-scroll-to-top { display: none; }
+}
+
+app-header {
+  display: block;
+  position: sticky;
+  top: 0;
+  z-index: 200;
 }

@@ -24,6 +24,7 @@
 .settings-panel {
   width: min(400px, 100vw);
   height: 100vh;
+  height: 100dvh;
   background: var(--bg-primary);
   box-shadow: -10px 0 30px rgba(0, 0, 0, 0.1);
   display: flex;

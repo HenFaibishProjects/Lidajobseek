@@ -13,6 +13,7 @@ import { filter } from 'rxjs/operators';
 export class HeaderComponent {
   @Input() isAuthenticated: boolean = false;
   @Input() showSettings: boolean = false;
+  @Output() openCareerChat = new EventEmitter<void>();
   @Output() toggleSettings = new EventEmitter<void>();
   @Output() logout = new EventEmitter<void>();
 
