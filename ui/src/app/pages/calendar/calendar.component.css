@@ -1489,7 +1489,7 @@
         padding: 8px;
     }
 
-    .calendar-nav-header .btn-nav { width: 100%; }
+    .calendar-nav-header .btn-nav { width: 100%; padding: 0; }
     .current-period-label { text-align: center; margin: 0; font-size: .9rem; min-width: 0; }
     .date-picker-grid, .date-weekdays { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; }
     .date-weekdays { text-align: center; font-size: .75rem; margin-bottom: 4px; }
@@ -1580,7 +1580,15 @@
         box-shadow: none;
     }
 
-    .calendar-brand h1, .current-period-label, .legend-label { color: var(--text-primary); }
+    .selected-day-details-section {
+        background: var(--bg-secondary);
+        border-color: var(--border-color);
+    }
+
+    .calendar-brand h1, .current-period-label, .details-title, .legend-label { color: var(--text-primary); }
+    .details-title { flex-wrap: wrap; }
+    .details-section-header .btn-schedule-shortcut { color: var(--text-primary); }
+    .mobile-interview-actions .btn { padding: 8px 12px; }
     .view-mode-tabs, .search-input, .search-input:focus, .date-range {
         background: var(--bg-secondary);
         border-color: var(--border-color);

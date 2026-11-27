@@ -717,8 +717,8 @@
         </p>
         <p *ngIf="interview.address || interview.process?.location" dir="auto">{{ interview.address || interview.process.location }}</p>
         <div class="mobile-interview-actions" *ngIf="interview.videoLink || interviewMapUrl(interview)">
-            <a *ngIf="interview.videoLink" class="btn-primary" [href]="interview.videoLink" target="_blank" rel="noopener noreferrer">Join meeting</a>
-            <a *ngIf="interviewMapUrl(interview) as mapUrl" class="btn-secondary" [href]="mapUrl" target="_blank" rel="noopener noreferrer">Directions</a>
+            <a *ngIf="interview.videoLink" class="btn btn-primary" [href]="interview.videoLink" target="_blank" rel="noopener noreferrer">Join meeting</a>
+            <a *ngIf="interviewMapUrl(interview) as mapUrl" class="btn btn-secondary" [href]="mapUrl" target="_blank" rel="noopener noreferrer">Directions</a>
         </div>
         <details class="mobile-interview-details">
             <summary>Interview details and actions</summary>
@@ -729,14 +729,14 @@
             <p *ngIf="interview.headsup" class="interview-notes" dir="auto">{{ interview.headsup }}</p>
             <p *ngIf="interview.notes" class="interview-notes" dir="auto">{{ interview.notes }}</p>
             <div class="mobile-interview-actions">
-                <a *ngIf="interview.processId || interview.agencyId" class="btn-secondary"
+                <a *ngIf="interview.processId || interview.agencyId" class="btn btn-secondary"
                     [routerLink]="interview.processId ? ['/process', interview.processId] : ['/recruiters', interview.agencyId]"
                     [fragment]="'interaction-' + interview.id">View interview</a>
-                <a *ngIf="interview.processId" class="btn-secondary"
+                <a *ngIf="interview.processId" class="btn btn-secondary"
                     [routerLink]="['/process', interview.processId, 'interaction', interview.id, 'edit']">Edit</a>
-                <a *ngIf="!interview.processId && interview.agencyId" class="btn-secondary"
+                <a *ngIf="!interview.processId && interview.agencyId" class="btn btn-secondary"
                     routerLink="/schedule-interview" [queryParams]="{ editInterviewId: interview.id }">Edit</a>
-                <button type="button" class="btn-secondary interview-delete" (click)="deleteInterview(interview.id)">Delete</button>
+                <button type="button" class="btn btn-secondary interview-delete" (click)="deleteInterview(interview.id)">Delete</button>
             </div>
         </details>
     </article>
