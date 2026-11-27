@@ -26,25 +26,25 @@
             <details class="calendar-actions" [open]="!mobileViewport">
                 <summary>More</summary>
                 <div class="calendar-action-options">
-            <button type="button" class="btn-secondary availability-control" (click)="showAvailabilityManager = !showAvailabilityManager">Manage Availability</button>
-            <button type="button" class="btn-secondary availability-control availability-block-action" (click)="openAvailabilityEditor()">Block Time</button>
-            <button class="btn-secondary" (click)="exportData()">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                    <polyline points="7 10 12 15 17 10"></polyline>
-                    <line x1="12" y1="15" x2="12" y2="3"></line>
-                </svg>
-                Export
-            </button>
-            <button class="btn-secondary" (click)="fileInput.click()">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                    <polyline points="17 8 12 3 7 8"></polyline>
-                    <line x1="12" y1="3" x2="12" y2="15"></line>
-                </svg>
-                Import
-            </button>
-            <input #fileInput type="file" (change)="onFileSelected($event)" class="file-input-hidden" accept=".json">
+                    <button type="button" class="btn-secondary availability-control" (click)="showAvailabilityManager = !showAvailabilityManager">Manage Availability</button>
+                    <button type="button" class="btn-secondary availability-control availability-block-action" (click)="openAvailabilityEditor()">Block Time</button>
+                    <button class="btn-secondary" (click)="exportData()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        Export
+                    </button>
+                    <button class="btn-secondary" (click)="fileInput.click()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                        Import
+                    </button>
+                    <input #fileInput type="file" (change)="onFileSelected($event)" class="file-input-hidden" accept=".json">
                 </div>
             </details>
         </div>
@@ -83,22 +83,22 @@
 
         <details class="calendar-filters" [open]="!mobileViewport">
             <summary>Dates and filters</summary>
-        <div class="filters-row">
-            <div class="date-range" *ngIf="!showAllInterviews">
-                <input type="date" [(ngModel)]="startDate" (ngModelChange)="onFilterChange()" class="filter-input" aria-label="Start date">
-                <span class="separator">to</span>
-                <input type="date" [(ngModel)]="endDate" (ngModelChange)="onFilterChange()" class="filter-input" aria-label="End date">
+            <div class="filters-row">
+                <div class="date-range" *ngIf="!showAllInterviews">
+                    <input type="date" [(ngModel)]="startDate" (ngModelChange)="onFilterChange()" class="filter-input" aria-label="Start date">
+                    <span class="separator">to</span>
+                    <input type="date" [(ngModel)]="endDate" (ngModelChange)="onFilterChange()" class="filter-input" aria-label="End date">
+                </div>
+
+                <label class="checkbox-filter" [class.active]="showAllInterviews">
+                    <input type="checkbox" [(ngModel)]="showAllInterviews" (change)="onFilterChange()">
+                    <span>Show All (Include Past)</span>
+                </label>
+
+                <button class="btn-icon-only" (click)="loadInterviews()" title="Refresh">
+                    <span class="material-icons">refresh</span>
+                </button>
             </div>
-
-            <label class="checkbox-filter" [class.active]="showAllInterviews">
-                <input type="checkbox" [(ngModel)]="showAllInterviews" (change)="onFilterChange()">
-                <span>Show All (Include Past)</span>
-            </label>
-
-            <button class="btn-icon-only" (click)="loadInterviews()" title="Refresh">
-                <span class="material-icons">refresh</span>
-            </button>
-        </div>
         </details>
     </div>
 
@@ -115,31 +115,37 @@
         </div>
     </section>
 
-    <!-- Calendar Color Legend -->
-    <div class="calendar-legend" *ngIf="!loading && viewMode !== 'list'">
-        <div class="legend-item"><span class="legend-dot availability-legend-dot"></span><span class="legend-label">Manually blocked / Entire day</span></div>
-        <div class="legend-item"><span class="legend-dot availability-free-dot"></span><span class="legend-label">Unmarked time: check before scheduling</span></div>
-        <div class="legend-item">
-            <span class="legend-dot" style="background-color: #3b82f6;"></span>
-            <span class="legend-label">Phone Interview</span>
+    <details *ngIf="!loading && viewMode !== 'list'" class="calendar-legend-shell" [open]="!mobileViewport">
+        <summary>Calendar legend</summary>
+        <div class="calendar-mobile mobile-date-legend">
+            <span><i class="date-interview-marker"></i> Interview</span>
+            <span><i class="date-block-marker"></i> Blocked time</span>
         </div>
-        <div class="legend-item">
-            <span class="legend-dot" style="background-color: #8b5cf6;"></span>
-            <span class="legend-label">Video Interview</span>
+        <div class="calendar-legend calendar-desktop">
+            <div class="legend-item"><span class="legend-dot availability-legend-dot"></span><span class="legend-label">Manually blocked / Entire day</span></div>
+            <div class="legend-item"><span class="legend-dot availability-free-dot"></span><span class="legend-label">Unmarked time: check before scheduling</span></div>
+            <div class="legend-item">
+                <span class="legend-dot" style="background-color: #3b82f6;"></span>
+                <span class="legend-label">Phone Interview</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-dot" style="background-color: #8b5cf6;"></span>
+                <span class="legend-label">Video Interview</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-dot" style="background-color: #10b981;"></span>
+                <span class="legend-label">On-Site Interview</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-dot" style="background-color: #ffffff;"></span>
+                <span class="legend-label">Other Interactions</span>
+            </div>
+            <div class="legend-item legend-item--next">
+                <span class="legend-next-marker"></span>
+                <span class="legend-label">Next Upcoming Interview</span>
+            </div>
         </div>
-        <div class="legend-item">
-            <span class="legend-dot" style="background-color: #10b981;"></span>
-            <span class="legend-label">On-Site Interview</span>
-        </div>
-        <div class="legend-item">
-            <span class="legend-dot" style="background-color: #ffffff;"></span>
-            <span class="legend-label">Other Interactions</span>
-        </div>
-        <div class="legend-item legend-item--next">
-            <span class="legend-next-marker"></span>
-            <span class="legend-label">Next Upcoming Interview</span>
-        </div>
-    </div>
+    </details>
 
     <div class="calendar-layout">
     <div class="calendar-content">

@@ -1570,3 +1570,40 @@
 .search-wrapper { min-width: 0; }
 .search-input { box-sizing: border-box; max-width: 100%; }
 .calendar-filters { min-width: 0; }
+
+.calendar-legend-shell > summary { display: none; }
+
+@media (max-width: 767px) {
+    .toolbar, .calendar-nav-header, .calendar-legend {
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        box-shadow: none;
+    }
+
+    .calendar-brand h1, .current-period-label, .legend-label { color: var(--text-primary); }
+    .view-mode-tabs, .search-input, .search-input:focus, .date-range {
+        background: var(--bg-secondary);
+        border-color: var(--border-color);
+        color: var(--text-primary);
+    }
+    .view-tab:not(.active), .filter-input, .search-input::placeholder { color: var(--text-secondary); }
+    .search-wrapper { max-width: none; }
+    .calendar-nav-header .btn-nav, .calendar-nav-header .btn-today-nav {
+        background: var(--bg-secondary);
+        border-color: var(--border-color);
+        color: var(--text-primary);
+    }
+
+    .calendar-legend-shell > summary {
+        display: list-item;
+        box-sizing: border-box;
+        padding: 10px;
+        min-height: 44px;
+        cursor: pointer;
+        color: var(--text-secondary);
+    }
+
+    .mobile-date-legend { padding-inline: 10px; }
+    .mobile-date-legend span { display: inline-flex; align-items: center; gap: 6px; margin-inline-end: 12px; }
+    .mobile-date-legend i { width: 8px; height: 8px; border-radius: 50%; }
+}
